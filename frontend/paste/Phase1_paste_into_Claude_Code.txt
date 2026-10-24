@@ -1,0 +1,129 @@
+PHASE 1: Build the white "iPhone Duo" device as a reusable, STATIC React component. No animation. (Context, in case you didn't see Phase 0: we're building the static frontend for "Unsaid", a HackTX 2026 concept app; everything is mock; Next.js App Router + TypeScript + Tailwind in ./frontend; a fixed 1920x1080 Stage artboard; all values below are artboard pixels. The Phase 0 global rules still apply: no network, placeholder buttons with data-backend + data-feature-id, ?state= on every screen, concept label "not affiliated with Apple or Meta", screenshot and self-check, ask before deviating, stop at the end; read backend/ but never edit it. Rule 12: append a timestamped entry to frontend/BUILD_LOG.md after EVERY change, then commit and push frontend/ ONLY to MuditUpadhyay04/HackTX main (git pull --rebase first; "frontend: <summary>"; never backend/, never force-push). Rule 13: after the phase and every meaningful change, launch all 10 Haiku reviewer subagents from frontend/.claude/agents/ in parallel; log every finding in frontend/REVIEW_FINDINGS.md, fix it, and re-check until all 10 are CLEAN. If the agents aren't loaded, run each as a general-purpose haiku subagent with its file body as the prompt. Screens are static; the only motion in this build is the Phase 3 navigation shell, and the scripted demo animation is a separate, later prompt.)
+
+WHAT THE iPHONE DUO IS
+A fictional, dual-screen, book-style iPhone: two iPhone-proportioned panels joined by a 360-degree hinge (think two iPhones sharing a spine). It does not exist; it's a concept. FINISH: WHITE (white / light titanium-ceramic). White is the default everywhere in this project.
+- FOLDED: the panels sit back to back. The RIGHT panel's display faces the viewer, so it reads as a normal white iPhone; the LEFT panel is hidden behind it, display facing away. The hinge wraps the folded device's left edge.
+- UNFOLDED: the left panel has swung 180 degrees around the hinge and lies flat to the left. Two displays sit side by side with a white hinge between them.
+- The unfold is a rotation of the LEFT panel around the hinge axis (the left panel's right edge): rotateY goes from -180deg (folded, behind) to 0deg (flat). Phase 1 only builds STATIC SNAPSHOTS of that rotation; the later animation prompt animates it.
+- Use the Apple/iOS skills you installed (apple-hig, apple-design-skill, heyimjames:interaction-primitives) to sanity-check the Dynamic Island, the corner concentricity, and the status-bar safe area. Translate everything to CSS. Do not use Apple's bezel images.
+
+COMPONENT API
+<IPhoneDuo
+  state="folded" | "folded-off" | "folded-angled" | "unfold-30" | "unfold-60" | "unfold-90" | "unfold-120" | "unfold-150" | "unfolded" | "unfolded-off" | "back"
+  openAngle?: number             // 0 = folded, 180 = flat; overrides state (used by the later animation)
+  scale?: number                 // default 1 (geometry below is at scale 1)
+  x?: number; y?: number         // artboard center of the DEVICE GROUP, default 960, 540
+  tilt?: { rotateX?: number; rotateY?: number }  // whole-device tilt, default 0
+  screenOn?: boolean             // false = displays are pure #000 (default true unless state ends in -off)
+  left?: ReactNode; right?: ReactNode   // display contents (each rendered in a 402x874 logical iOS viewport, scaled 0.95)
+  spanning?: ReactNode           // optional content that spans both displays across the hinge (rendered above both, clipped to the two display shapes)
+  shadow?: "auto" | "none"; reflection?: boolean (default false); specular?: number (0..1 position of the specular sweep, static in Phase 1)
+/>
+Also export the geometry constants from components/device/geometry.ts so later phases (home screen, app-close target rects) can compute exact positions.
+
+GEOMETRY (artboard px at scale 1, stage 1920x1080)
+Logical iOS viewport per display: 402 x 874 pt (iPhone 16 Pro class), rendered at s = 0.95 -> display 382 x 830 px. All iOS content in Phases 2-5 is laid out in pt (CSS px) inside a 402x874 box and scaled by 0.95.
+Per PANEL (outer):
+  - Outer size: 414 x 862 px. Aspect ratio 0.480 (W:H about 1 : 2.08). Display aspect 382:830 = 0.460 (19.5:9 class).
+  - Layers from the outside in: white frame band 6 px -> black glass bezel 10 px -> display. (6 + 10 = 16 px inset per side.)
+  - Outer corner radius 68 px on the two OUTER corners; 14 px on the two HINGE-SIDE corners (the panels read as one device).
+  - Bezel (black glass) outer radius 62 px outer corners / 10 px hinge-side; display radius 52 px outer corners / 4 px hinge-side. (Concentric: 68 - 6 = 62, 62 - 10 = 52.)
+  - The display's TOP-LEFT pixel sits 16 px in from the panel's top-left.
+HINGE: 16 px wide, full panel height (862 px), with 8 px end radii, sitting between the panels.
+UNFOLDED DEVICE GROUP: 414 + 16 + 414 = 844 x 862 px, centered at (960, 540): left panel x 538-952, hinge x 952-968, right panel x 968-1382; y 109-971. (Margins: 538 px left/right, 109 px top/bottom.)
+  - Left display: x 554-936, y 125-955. Right display: x 984-1366, y 125-955.
+FOLDED DEVICE: only the right panel is visible face-on, centered at (960, 540): x 753-1167, y 109-971; right display x 769-1151, y 125-955. The hinge spine shows as a 5 px white rounded sliver beyond the left edge (x 748-753), because it wraps the fold.
+  - Internally the device group is translated -215 px in X when folded (so the right panel is centered), 0 px when unfolded. For an intermediate openAngle a: translateX = -215 * (1 - a/180).
+THICKNESS (visible only in angled states): each panel is 7 px thick; folded total 14 px plus the hinge. Render the edge as a 3D side face (transform-style: preserve-3d), with the frame gradient rotated 90deg.
+
+DYNAMIC ISLAND
+- On the RIGHT panel only (the primary, outward-facing screen when folded). Pill 120 x 35 px (126 x 37 pt x 0.95), radius 17.5 px, color #000000, centered horizontally on the right display, top edge 10 px below the display's top (11 pt). Unfolded artboard position: x 1115-1235, y 135-170. Folded: x 900-1020, y 135-170.
+- Inside the pill, right side: a front-camera lens dot 11 px diameter, centered 14 px from the pill's right end: radial-gradient(circle at 35% 35%, #2B3140 0%, #0A0C12 60%, #000 100%) with a 1 px ring rgba(255,255,255,0.05). The island must read as one solid black shape when the screen is off (that's the point of the reveal).
+- LEFT panel: no island; a single front camera pinhole 11 px diameter, centered horizontally, center 27 px below the left display's top (same lens styling), so the left status bar has room.
+
+WHITE FRAME (titanium-ceramic) - exact values
+- frame-base #E9E8E4 · frame-highlight #FFFFFF · frame-mid #D8D7D2 · frame-shadow #B7B6B0 · frame-seam #C4C3BD
+- Fill: linear-gradient(135deg, #FFFFFF 0%, #EDECE8 18%, #D8D7D2 46%, #F4F3EF 68%, #BDBCB6 100%).
+- Brushed edge sheen (overlay on the 6 px band): repeating-linear-gradient(90deg, rgba(255,255,255,0) 0px, rgba(255,255,255,0) 1px, rgba(255,255,255,0.10) 1px, rgba(255,255,255,0.10) 2px), mix-blend-mode: soft-light, plus an inner 1 px highlight line (box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.12)).
+- Edge highlight: a 1 px #FFFFFF line along the top and outer-side edge at 80% opacity. Edge shadow: a 1 px #B7B6B0 line along the bottom and hinge-side inner edge.
+- Antenna bands: 2 px x 6 px strips in #C4C3BD, crossing the frame band on each panel's outer side at y = 88 px and y = 774 px from the panel top (subtle realism).
+- Outer rim: box-shadow 0 0 0 0.5px rgba(0,0,0,0.18) so the white device separates from a white/light background.
+BLACK GLASS BEZEL: #050506, inner edge highlight inset 0 0 0 1px rgba(255,255,255,0.06), and a faint top glare linear-gradient(180deg, rgba(255,255,255,0.05), transparent 30%).
+DISPLAY OFF: pure #000000 (no gradient), so the black display, the bezel, and the island merge. DISPLAY ON: renders the children.
+
+HINGE - segmented white
+- 16 px wide, 862 px tall, radius 8 px at both ends.
+- 5 knuckle segments of equal height (172.4 px), separated by 1 px seams in #BEBFC3 with a 1 px highlight rgba(255,255,255,0.8) directly below each seam.
+- Segment fill: linear-gradient(90deg, #CFCFCB 0%, #FFFFFF 32%, #EDECE8 55%, #C9C8C2 80%, #B2B1AB 100%) (a cylinder highlight).
+- Hinge caps: the top and bottom 10 px are #DCDBD6 with a 1 px #BEBFC3 ring.
+- Unfolded, the hinge sits 0.5 px proud (box-shadow 1px 0 0 rgba(0,0,0,0.08), -1px 0 0 rgba(0,0,0,0.08)).
+CREASE on the inner displays (unfolded): on the left display's right edge and the right display's left edge, an inner shadow linear-gradient(to <hinge side>, rgba(0,0,0,0.16) 0px, rgba(0,0,0,0) 12px) layered OVER the content (pointer-events none), plus a 1 px line rgba(255,255,255,0.05) at the very edge. Subtle: the content must stay readable.
+
+SIDE BUTTONS (artboard px measured from the PANEL's top edge; each protrudes outward from the frame)
+- LEFT panel, outer (left) edge:
+  * Action button: y 176-214 (38 px tall), 4 px wide, protrudes 3 px, radius 2 px, fill linear-gradient(90deg, #BDBCB6, #F4F3EF 60%, #D8D7D2).
+  * Volume up: y 258-318 (60 px), 4 px wide, protrudes 3 px, same fill.
+  * Volume down: y 334-394 (60 px), same.
+- RIGHT panel, outer (right) edge:
+  * Side / power button: y 270-372 (102 px), 4 px wide, protrudes 3 px, same fill, mirrored.
+  * Camera Control: y 560-626 (66 px), 4 px wide, protrudes only 1.5 px, sapphire look: linear-gradient(90deg, #E4E6EA, #C9CDD3 50%, #F2F3F5), with a 1 px #BFC3C9 ring and a 1 px inner highlight.
+- Folded: the right panel's power + Camera Control show on the right edge; the left panel's buttons are hidden behind (correct for a back-to-back fold).
+
+BACK (glossy white) and CAMERA BUMP
+- Each panel has a back face (a separate element rotated 180deg with backface-visibility: hidden on both faces).
+- Back glass: linear-gradient(180deg, #F7F7F4 0%, #EFEFEB 55%, #E6E6E1 100%), inner frame rim as above, gloss overlay linear-gradient(105deg, rgba(255,255,255,0) 35%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0) 65%) with background-size 250% 100%; prop specular (0..1) maps background-position-x from -150% to 150% (the later animation prompt animates it; Phase 1 shows it at 0.35).
+- No Apple logo or any trademark on the back. Optional: a tiny engraved "unsaid · concept" in #D2D1CC, 9 px, 0.2em tracking, centered 120 px from the bottom.
+- CAMERA BUMP (on the LEFT panel's back; that's the outer back when folded, and it becomes visible as the left panel swings out): plateau 156 x 156 px, radius 44 px, top-left 22 px from the back's top and 22 px from its outer edge. Fill frosted white glass linear-gradient(145deg, #FBFBF9, #E9E9E5), rim 1 px #D2D1CC, shadow 0 2px 6px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.08). It is raised 2 px in 3D (translateZ 2px).
+  * 3 lenses in a triangle (like a Pro iPhone): each a 56 px outer ring (titanium ring linear-gradient(135deg, #F2F1ED, #BDBCB6), 3 px) around a 48 px lens: radial-gradient(circle at 38% 32%, #3A4256 0%, #12151D 45%, #050608 100%) + a reflection highlight ellipse rgba(140,120,255,0.35) 14x8 px at top-left + a tiny white specular dot 4 px. Positions (centers, relative to the plateau's top-left): (44,44), (44,112), (112,78).
+  * Flash: 16 px circle at (116,32), fill radial-gradient(#FFF8E7, #E9DFC8). LiDAR: 14 px circle at (116,124), fill #1A1C22. Mic: 4 px hole at (78,140).
+- "back" state: shows the folded device turned around (rotateY 180deg) so the back of the left panel with the camera bump faces the viewer.
+
+SHADOWS AND REFLECTION
+- On black (Stage background "black"): no drop shadow; instead a rim light: box-shadow 0 0 0 1px rgba(255,255,255,0.35), 0 0 60px rgba(255,255,255,0.05).
+- On the wallpaper or light backgrounds: drop shadow on the device group: 0 2px 4px rgba(20,16,30,0.10), 0 24px 48px rgba(20,16,30,0.22), 0 60px 120px rgba(20,16,30,0.28). Contact shadow: an ellipse 70% of the device width x 28 px, rgba(0,0,0,0.35), filter blur(24px), centered 18 px below the device's bottom edge.
+- shadow="auto" picks one by Stage background.
+- Reflection (off by default; on for hero states): a mirrored copy (scaleY(-1)) 14 px below the device, opacity 0.10, filter blur(1.5px), mask-image linear-gradient(to bottom, rgba(0,0,0,0.6), transparent 35%).
+- PERSPECTIVE: the device wrapper has perspective: 2400px; perspective-origin: 50% 50%; transform-style: preserve-3d on the group and panels.
+
+STATIC STATES (each one is a pure function of openAngle; implement openAngle and map the states onto it)
+| state          | openAngle | left panel rotateY | group translateX | group tilt rotateY | screenOn | notes |
+| folded         | 0         | -180deg            | -215 px          | 0                  | true     | looks like a normal white iPhone |
+| folded-off     | 0         | -180deg            | -215 px          | 0                  | false    | THE OPENING FRAME: pure black display |
+| folded-angled  | 0         | -180deg            | -215 px          | -24deg (rotateX 6deg) | false | shows the right-edge buttons, the panel thickness, the hinge spine |
+| unfold-30      | 30        | -150deg            | -179 px          | -4deg              | false    | back of the left panel (camera bump) peeking out from behind |
+| unfold-60      | 60        | -120deg            | -143 px          | -7deg              | false    | camera bump clearly visible, specular at 0.35 |
+| unfold-90      | 90        | -90deg             | -108 px          | -8deg              | false    | left panel edge-on; its thickness is visible |
+| unfold-120     | 120       | -60deg             | -72 px           | -6deg              | false    | left display now facing forward, black |
+| unfold-150     | 150       | -30deg             | -36 px           | -3deg              | false    | almost flat |
+| unfolded       | 180       | 0deg               | 0 px             | 0                  | true     | two displays + hinge, centered |
+| unfolded-off   | 180       | 0deg               | 0 px             | 0                  | false    | both displays black |
+| back           | 0         | -180deg            | -215 px          | 180deg             | -        | rear view, camera bump |
+(The whole-device tilt peaks at -8deg around 90 degrees so the fold reads as 3D; the later animation interpolates between these.)
+Rule: past 90 degrees the left panel shows its DISPLAY face; before 90 it shows its BACK face. Use backface-visibility so this happens automatically.
+
+/device PAGE
+- /device?state=<state>&bg=black|wallpaper|white&scale=1&reflection=1 renders the IPhoneDuo on the Stage.
+- With screenOn, a test pattern for each display: left shows "LEFT 402x874pt", right shows "RIGHT" with a 1 px grid every 50 pt and the display outline, so the geometry can be checked in screenshots.
+- A dev-only "spec overlay" (?debug=1) draws artboard-pixel rulers and the boxes of each part (panel, bezel, display, island, hinge, buttons) labeled with their coordinates.
+- Add every state to lib/scenes.ts so /scenes and npm run shoot cover them.
+- The bg=wallpaper option uses Stage background "wallpaper": a blurred Apple-style gradient (build it now, static): base #0B0B12, then radial blobs radial-gradient(40% 50% at 22% 30%, #F7B27A, transparent), radial-gradient(45% 55% at 78% 25%, #E86A7E, transparent), radial-gradient(50% 60% at 60% 80%, #8E6CF0, transparent), radial-gradient(40% 45% at 15% 85%, #4A90E2, transparent), whole layer filter blur(80px) saturate(1.2), scaled 1.2 so the blur has no edges, plus a 4% noise overlay (SVG feTurbulence) to avoid banding. It should feel like an Apple keynote wallpaper, warm-leaning toward Unsaid's amber/plum.
+
+UNSAID LOGO SLOT (prep for later phases)
+- components/unsaid/UnsaidLogo.tsx tries /unsaid-logo.png (Gurneal will generate it in ChatGPT and drop it in /public); if it fails to load, it renders the SVG UnsaidMark: a single-line speech-bubble outline left slightly open (a gap where the words never got said), white on the logo-gradient (#E8A15A -> #4A1F35) rounded square.
+
+ACCEPTANCE CRITERIA (Phase 1) - verify each in a screenshot at 1920x1080 and LOOK at it
+1. /device?state=folded-off&bg=black: a single white iPhone, centered (panel x 753-1167, y 109-971 within 1 px), pure black display, black Dynamic Island invisible against the black display, white frame and rim clearly visible on black. Right-edge buttons (power, Camera Control) visible. A 5 px hinge sliver on the left edge.
+2. /device?state=folded&bg=wallpaper: same device on the blurred wallpaper, with the drop + contact shadow; test pattern on screen; Dynamic Island at x 900-1020, y 135-170.
+3. /device?state=folded-angled: the panel thickness, hinge spine, and right-edge buttons read as 3D; no z-fighting; the frame sheen is visible.
+4. /device?state=unfold-60: the glossy white back of the left panel with the full camera bump (3 lenses, flash, LiDAR) visible, swinging out from behind; the specular band is visible.
+5. /device?state=unfold-90: the left panel is edge-on (a thin white sliver at its thickness), with no flicker or disappearing faces.
+6. /device?state=unfold-120: the left panel now shows its (black) display face, never its back.
+7. /device?state=unfolded&bg=wallpaper: total 844 x 862 centered (x 538-1382, y 109-971); the hinge has 5 segments with grey seams; the crease shading shows on both inner display edges; outer corners 68 px, hinge-side 14 px; Action + volume on the far-left edge; power + Camera Control on the far-right edge.
+8. /device?state=back: glossy white back, camera bump top-left, no Apple logo.
+9. ?debug=1 overlays confirm every coordinate in GEOMETRY within 1 px.
+10. White is the default finish; there is no other color option yet (add a finish prop typed "white" only, so it can grow later).
+11. The screen content slots (left/right/spanning) accept arbitrary React and clip to the display shapes (outer 52 px / hinge-side 4 px radii).
+12. npm run build, lint, and shoot pass; check-contract still passes. Commit "frontend: phase 1: white iPhone Duo device, static states" and push per rule 12.
+13. All 10 reviewers report CLEAN in the same final round (rule 13); every finding is logged in REVIEW_FINDINGS.md and VERIFIED; BUILD_LOG.md is complete.
+
+STOP AND LET ME REVIEW. Send me the list of screenshots (folded-off, folded, folded-angled, unfold-60, unfold-90, unfold-120, unfolded, back, plus the debug overlays) and note any value you had to change and why. Do not start Phase 2.
