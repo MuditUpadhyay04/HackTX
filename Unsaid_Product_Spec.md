@@ -11,6 +11,8 @@ Status: Working draft · Working name (see [Appendix E](#appendix-e--a-note-on-t
 
 ---
 
+**Spec version: v2** · see [Version History](#version-history) to revert to any earlier version.
+
 ## Table of Contents
 
 1. [Executive Summary](#executive-summary)
@@ -26,12 +28,13 @@ Status: Working draft · Working name (see [Appendix E](#appendix-e--a-note-on-t
 11. [Past Unsends Resurface](#10-past-unsends-resurface)
 12. [Powered by Meta: The AI & API Stack](#11-powered-by-meta-the-ai-api-stack)
 13. [Inside Meta's Apps: The Unsaid Logo Overlay](#12-inside-metas-apps-the-unsaid-logo-overlay)
-14. [Why It Wins](#why-it-wins)
-15. [Weekend MVP Scope](#weekend-mvp-scope)
-16. [The Demo Moment](#the-demo-moment)
-17. [Animated Demo Plan](#animated-demo-plan)
-18. [Animation Production](#animation-production)
-19. [Appendix](#appendix)
+14. [Making It Felt: An Emotional Deep Dive](#13-making-it-felt-an-emotional-deep-dive-v2)
+15. [Why It Wins](#why-it-wins)
+16. [Weekend MVP Scope](#weekend-mvp-scope)
+17. [The Demo Moment](#the-demo-moment)
+18. [Animated Demo Plan](#animated-demo-plan)
+19. [Animation Production](#animation-production)
+20. [Appendix](#appendix)
 
 ---
 
@@ -418,6 +421,33 @@ A real overlay inside Instagram, Facebook, or WhatsApp would need **a partnershi
 
 ---
 
+## 13. Making It Felt: An Emotional Deep Dive *(v2)*
+
+Judges see dozens of demos in a day. They remember the one that made them feel something. Every idea below comes from a feature Unsaid already has, and each one notes **why it works emotionally** and **where it fits in the demo** (see `Demo_Script.md` for timings).
+
+| # | Idea | Why it works emotionally | Where it fits in the demo |
+|---|---|---|---|
+| 1 | **The "k" cold open.** Black screen and silence for a few seconds before any interface appears. Then a single bubble: "k." Then the line: *"The last thing my kid ever texted me was 'k.'"* | Silence makes the room lean in. No logo or interface means nothing distracts from the feeling. Everyone has sent a "k" to someone they love. | Scene 1, the first 12 seconds. No music until the line has landed. |
+| 2 | **Emptiness as the pitch.** The brain graph starts sparse, with labeled gaps on faded links: *"last talked: 2019,"* *"4 months,"* *"never replied."* Then it fills in. | People feel loss before they see the fix. The labels turn vague guilt into a specific person and date, and the filling-in feels like relief. | Scene 3. Hold on the empty graph a moment before the first hub lights up. |
+| 3 | **The exact future date.** Posthumous release shows a specific date on screen: *June 12, 2034, Graduation Day*, after "Proxy confirmation 3 of 3 received." | A specific date makes it real. Judges picture their own kid's graduation. A vague "someday" doesn't. | Scene 5. The date card turns forward slowly; hold it for a full second. |
+| 4 | **The resurfacing interrupt.** Mid-argument, an old unsend slides in and interrupts the fight: *"Remember this?"* with photos and *"Everything will be okay."* | The interruption mirrors what a good memory does in real life. The tension makes the release land harder. | Scene 6. Let the sharp messages build first, then a beat of stillness before the card. |
+| 5 | **Mom and the Instagram story.** Ten missed calls, a voice unsend, then the kid's study story, and Mom's message appears inside Instagram with **Call Mom**. | It answers the "k" from the cold open. The whole pitch comes full circle, from a dismissive text to a phone call. | Scene 4. End on the call connecting, with the timer counting 0:01, 0:02. |
+| 6 | **Swipeable reminisce mode.** A full-screen story layout (name and profile picture at the top, progress bars) that plays a person's unsends and memories: Mom's unsends, photos from Instagram, the camera roll, and WhatsApp. Tap right to go forward, left to go back. | Everyone already knows how to use stories, so reminiscing feels effortless. Swiping through someone's love for you, one moment at a time, feels like opening a box of old letters. | A short beat after scene 4 or in the close: the kid opens "Mom" and taps through three or four moments. |
+| 7 | **Muse quietly listening.** Muse transcribes and categorizes every unsend in the background (missing someone, gratitude, apology, pride) and keeps them hidden. When the user says they miss someone ("I miss Mom"), Muse surfaces the right ones. | It feels like the app knows you without showing you a dashboard. Nothing is pushed on you; it shows up when you need it. It's also the clearest proof that the AI is essential. | Voiceover during scene 3 or 6: *"Muse heard every unsend. It waited until you needed this one."* |
+| 8 | **Sensory details.** A soft chime when an unsend lands, ambient room tone under the quiet moments, a gentle haptic pulse when the phone-activity trigger delivers, and the warm amber and plum palette throughout. | Sound and touch reach people faster than words. A consistent chime becomes the sound of someone thinking of you. Warm colors feel like a lamp, not a screen. | Through the whole video. Use the chime on every delivery (scenes 4, 5, 6) and show the haptic as a small ripple ring. |
+| 9 | **Human micro-copy.** Short, plain, slightly imperfect sentences: *"Mom left you something."* *"you haven't talked in a while."* *"no emergency. just miss you."* Never "Strengthen your relationships today!" | Polished marketing lines sound like an ad; imperfect ones sound like a person. Lowercase and short sentences feel like a real text. | Every notification, card, and caption. Check them all against a "would a person say this?" test. |
+| 10 | **The "this too shall pass" motif.** A subtle repeating visual, a slow tide line or a softly turning clock hand, that appears in the argument-support flow and the posthumous flow. | Repeating it ties moments together, so the audience feels a theme without being told one. A tide always comes back, the way a hard moment always passes. | Scenes 5 and 6 in the background, and in the closing card under the wordmark. |
+
+### Principles behind all ten
+
+- **Stillness beats motion.** The most powerful frames hold still.
+- **Specific beats general.** Use a name, a date, a "k." Real details make people feel.
+- **Show loss before the fix.** Emptiness, missed calls, and an argument come before the relief.
+- **The AI stays in the background.** Muse is felt through good timing, not shown off with charts, and the user always writes the words.
+- **End on connection, not the app.** The strongest moment is Mom picking up, not a feature list.
+
+---
+
 ## Why It Wins
 
 Mapped directly to the Meta track's judging criteria:
@@ -683,6 +713,17 @@ This spec is the team's **live, shared source of truth** for Unsaid.
   Any new idea, correction, or decision goes into whichever file it belongs to right away, and every affected file is pushed together in one commit. No file should lag behind the others.
 - **Push method:** git from a local clone of the HackTX repo, using Gurneal's `gornil` terminal alias, once that clone and alias are reachable.
 
+### Version History
+
+Every edit after v1 gets a new version number. Each entry says exactly what changed, so any version can be restored from git history (`git log -- Unsaid_Product_Spec.md`, then `git checkout <commit> -- Unsaid_Product_Spec.md`).
+
+| Version | Date (CT) | What changed | Git commit |
+|---|---|---|---|
+| **v1** | Oct 24, 2026 | Baseline: Sections 1–12, the Meta stack, Inside Meta's Apps, the animated demo plan, Animation Production with the Claude prompt and recommended skills, and the sync rules. | `7a7d2a5` (first push) plus the follow-up skills-table commit |
+| **v2** | Oct 24, 2026 | Added Section 13, Making It Felt: ten emotional ideas (the cold open, the sparse graph with labeled gaps, the exact future date, the resurfacing interrupt, the Mom and story trigger, swipeable reminisce mode, Muse quietly categorizing unsends, sensory details, human micro-copy, the "this too shall pass" motif), each with why it works and where it fits. Added the versioning system. | see the git log for the v2 commit |
+
+- **Versioning rule:** every future edit bumps the version (v3, v4, …), updates the version line at the top, and adds a row here. The detailed changelog below stays as well.
+
 ### Changelog
 
 | Date (CT) | Change |
@@ -699,3 +740,4 @@ This spec is the team's **live, shared source of truth** for Unsaid.
 | Oct 24, 2026 | Section 12: added Contextual triggers: a waiting unsend shows up inside Instagram when the recipient is active (for example, Mom's missed-call unsend after the kid posts a study story), with Reply and Call options. Animated in the demo; the real version would need a Meta partnership. |
 | Oct 24, 2026 | Added the four-file live-sync rule (spec .md, spec .pdf, `Unsaid_Presentation.md`, `Demo_Script.md`) and the git/gornil push method. Claude prompt extended to a ~2:00 cut with the in-app logo/generational scene and the contextual-trigger scene. |
 | Oct 24, 2026 | Added the verified Claude skills and plugins for the animation (Remotion plugin, GSAP, Motion, snapcn phone frame, claudeclip, pptx). |
+| Oct 24, 2026 | **v2:** added Section 13 (emotional deep dive, ten ideas) and the versioning system with Version History. |

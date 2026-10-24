@@ -37,6 +37,21 @@
 
 ---
 
+## Emotional direction (spec v2, Section 13)
+
+- **Cold open:** 3+ seconds of black and silence before the "k."
+- **Sparse graph:** faded links labeled *"last talked: 2019"*, *"4 months"*; hold on emptiness before anything fills in.
+- **Exact date:** hold "June 12, 2034, Graduation Day" for a full second.
+- **Interrupt:** a beat of stillness before the "Remember this?" card cuts into the argument.
+- **Call Mom:** end scene 4 on the call timer counting up.
+- **Reminisce mode** (optional beat after scene 4): a story-style full screen for "Mom" with her name and photo, progress bars, and taps through 3–4 unsends and photos.
+- **Muse voiceover:** *"Muse heard every unsend. It waited until you needed this one."*
+- **Sound and touch:** a soft chime on every delivery, room tone in the quiet parts, the haptic shown as a ripple ring.
+- **Micro-copy:** short, lowercase, human ("Mom left you something." "no emergency. just miss you.").
+- **Motif:** a slow tide line or clock hand behind scenes 5, 6, and the close.
+
+---
+
 ## Ready-to-paste prompt for Claude
 
 ```text
@@ -112,3 +127,4 @@ No dual-screen or foldable phone mockup tool exists (and there's no real "iPhone
 |---|---|
 | Oct 24, 2026 | Created: timed ~2:00 storyboard (the four pitch beats plus the in-app logo/generational scene and the contextual-trigger scene), talking points, Claude prompt, tool checklist. |
 | Oct 24, 2026 | Added the verified Claude skills and plugins for the animation (Remotion plugin, GSAP, Motion, snapcn phone frame, claudeclip, pptx). |
+| Oct 24, 2026 | Added emotional direction notes from spec v2 (Section 13). |
