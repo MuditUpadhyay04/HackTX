@@ -1,0 +1,20 @@
+[project]
+name = "unsaid-backend"
+version = "0.1.0"
+description = "Unsaid backend: Muse Voice Transcribe relay, Muse Spark sorting, and delivery at her morning."
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "websockets>=13",
+    "httpx>=0.27",
+    "python-multipart>=0.0.12",
+    "tzdata>=2024.1",
+]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

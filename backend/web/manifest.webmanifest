@@ -1,0 +1,10 @@
+{
+  "name": "Unsaid",
+  "short_name": "unsaid",
+  "start_url": "/app/",
+  "scope": "/app/",
+  "display": "standalone",
+  "background_color": "#FBF5EC",
+  "theme_color": "#FBF5EC",
+  "icons": [{ "src": "/app/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

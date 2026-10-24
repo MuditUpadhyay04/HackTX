@@ -1,0 +1,39 @@
+# Render Blueprint for the Unsaid backend (backend/). Dashboard: New > Blueprint > this repo.
+# Free plan sleeps after 15 idle minutes and wipes its disk, which loses uploaded photos and
+# Mom's voice note. Before recording, switch to a paid plan and uncomment the disk.
+services:
+  - type: web
+    name: unsaid
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /api/health
+    # disk:
+    #   name: unsaid-data
+    #   mountPath: /data
+    #   sizeGB: 1
+    envVars:
+      - key: APP_KEY
+        generateValue: true
+      - key: MODEL_API_KEY
+        sync: false
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_TEMPLATE
+        value: unsaid_left_you_something
+      - key: SEED_ME_NAME
+        value: Arjun
+      - key: SEED_ME_PHONE
+        sync: false
+      - key: SEED_MOM_PHONE
+        sync: false
+      - key: SEED_JORDAN_PHONE
+        sync: false
+      - key: SEED_PRIYA_INSTAGRAM
+        sync: false
+      - key: SEED_HOME_LANGUAGE
+        value: Hindi
