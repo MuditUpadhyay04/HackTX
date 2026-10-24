@@ -719,8 +719,8 @@ Every edit after v1 gets a new version number. Each entry says exactly what chan
 
 | Version | Date (CT) | What changed | Git commit |
 |---|---|---|---|
-| **v1** | Oct 24, 2026 | Baseline: Sections 1–12, the Meta stack, Inside Meta's Apps, the animated demo plan, Animation Production with the Claude prompt and recommended skills, and the sync rules. | `7a7d2a5` (first push) plus the follow-up skills-table commit |
-| **v2** | Oct 24, 2026 | Added Section 13, Making It Felt: ten emotional ideas (the cold open, the sparse graph with labeled gaps, the exact future date, the resurfacing interrupt, the Mom and story trigger, swipeable reminisce mode, Muse quietly categorizing unsends, sensory details, human micro-copy, the "this too shall pass" motif), each with why it works and where it fits. Added the versioning system. | see the git log for the v2 commit |
+| **v1** | Oct 24, 2026 | Baseline: Sections 1–12, the Meta stack, Inside Meta's Apps, the animated demo plan, Animation Production with the Claude prompt and recommended skills, and the sync rules. | `baabed7` (includes the first push `7a7d2a5` and the skills table) |
+| **v2** | Oct 24, 2026 | Added Section 13, Making It Felt: ten emotional ideas (the cold open, the sparse graph with labeled gaps, the exact future date, the resurfacing interrupt, the Mom and story trigger, swipeable reminisce mode, Muse quietly categorizing unsends, sensory details, human micro-copy, the "this too shall pass" motif), each with why it works and where it fits. Added the versioning system. | `2fc29f4` |
 
 - **Versioning rule:** every future edit bumps the version (v3, v4, …), updates the version line at the top, and adds a row here. The detailed changelog below stays as well.
 
