@@ -9,7 +9,8 @@
 
 > **"The last thing my kid ever texted me was 'k.'"**
 
-- Black screen, one message bubble, the timestamp ages. Hold the silence.
+- Black screen and silence; the line appears. Pull back: the black was a folded **white iPhone Duo** (a fictional device). It wakes to the Messages thread where Mom's warm texts get one reply, "k," and the timestamp ages to last year. Hold the silence.
+- The Duo unfolds: *"Some things go unsaid."* Swipe home (Meta apps up front), then tap Unsaid.
 - *Speaker note:* Don't rush it. Let the room feel it.
 
 ---
@@ -119,3 +120,4 @@
 | Date (CT) | Change |
 |---|---|
 | Oct 24, 2026 | Created: 11-slide deck covering the four pitch beats, the generational line, the contextual trigger, the Meta stack, and safety. |
+| Oct 24, 2026 | Slide 1 now matches the new 24-second opening: the folded white iPhone Duo, the Messages "k" thread, the unfold, "Some things go unsaid.", home, then Unsaid. (Frontend build prompt added: `Claude_Code_Frontend_Prompt.md`.) |

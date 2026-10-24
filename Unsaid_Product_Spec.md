@@ -11,7 +11,7 @@ Status: Working draft · Working name (see [Appendix E](#appendix-e--a-note-on-t
 
 ---
 
-**Spec version: v3** · see [Version History](#version-history) to revert to any earlier version.
+**Spec version: v4** · see [Version History](#version-history) to revert to any earlier version.
 
 ## Table of Contents
 
@@ -535,7 +535,7 @@ The pitch video opens cold on this line, before any product shows. It names the 
 
 | Beat | Animated sequence | Emotional goal |
 |---|---|---|
-| **1. The "k" opening** | Black screen. A single message bubble fades in from a contact named "Mom": the user's last reply, **"k."** A timestamp ages by itself: *2 weeks ago, 3 months ago, 1 year ago*. Voiceover or on-screen text: **"The last thing my kid ever texted me was 'k.'"** Hold in silence. | Gut punch. Every judge has sent a "k." |
+| **1. The "k" opening** (0:00–0:24) | Black and silence, then the line **"The last thing my kid ever texted me was 'k.'"** The camera pulls back: the black was the screen of a folded **white iPhone Duo** (fictional). It wakes to the kid's Messages thread with "Mom": her warm messages, and his only reply, **"k"**, while the timestamp ages to last year. The Duo unfolds on its hinge and zooms out to a blurred wallpaper with *"Some things go unsaid."* A swipe up closes Messages into its icon (Apple-style). The home screen settles with the Meta apps prominent, and a tap on Unsaid zooms it open. Full beat table in `Demo_Script.md` → Animation Production Notes. | Gut punch. Every judge has sent a "k." |
 | **2. The sparse brain graph fills in** | Near-empty dark-cream canvas with a few faint, disconnected nodes. Group-chat hubs light up one by one ("Fam," "Roommates," "Marfa Trip"), people nodes drift into orbit, and memory leaves bloom with tiny photo thumbnails. Drifting links glow faintly and pulse, as if waiting. | "Your people were always there; you just couldn't see them." |
 | **3. Posthumous release with a future date** | A calm confirmation screen: *"Proxy confirmation 3 of 3 received."* A date card turns forward to **a date years in the future** (for example a graduation day). A sealed, illustrated letter opens with handwritten text and a voice waveform. | Love that outlives you. The quietest, most moving beat. |
 | **4. A past unsend resurfaces mid-argument** | A tense chat between partners, with sharp, short messages. A soft card slides up: *"Remember this?"* An earlier unsend reappears with photos from a good day and the handwritten words *"Everything will be okay."* The chat's tone softens, and the next message is "I'm sorry. Dinner Friday?" | "This too shall pass." It turns the fight around. |
@@ -553,7 +553,7 @@ The pitch video opens cold on this line, before any product shows. It names the 
 *Identical copy in `Demo_Script.md`, which also has the timed storyboard. The two are kept in sync.*
 
 ```text
-You are a senior motion designer and front-end engineer. Build a ~2-minute animated product demo for "Unsaid", an AI app (powered by Meta AI) that helps people say the words they never said to the people they love. The demo is pure animation: no real device, no live data.
+You are a senior motion designer and front-end engineer. Build a ~2:12 animated product demo for "Unsaid", an AI app (powered by Meta AI) that helps people say the words they never said to the people they love. The demo is pure animation: no real device, no live data.
 
 STYLE
 - Warm, minimal, emotional. Soft gradients (dusk rose -> peach -> warm cream), generous whitespace, rounded phone-style UI frames floating on the gradient.
@@ -561,17 +561,18 @@ STYLE
 - UI type: clean sans-serif (Inter). The user's own messages ("unsends"): handwritten-style font (Caveat).
 - Palette: cream backgrounds, deep plum text (#4A1F35), one warm amber accent (#E8A15A) for key moments.
 - Unsaid logo: a single-line speech-bubble outline left slightly open (a gap where the words went unsaid), white on a frosted semi-transparent circle when overlaid on photos.
-- Social app screens are generic LOOK-ALIKES (photo feed, story viewer, chat). Do NOT use Instagram, Facebook, or WhatsApp logos or exact UI assets.
-- 1920x1080, 30fps.
+- Device: the fictional WHITE iPhone Duo (book-style dual panels on a hinge; folded = one white iPhone). Built as a component in the frontend (Claude_Code_Frontend_Prompt.md Phase 1); reuse it.
+- Meta apps (Instagram, WhatsApp, Facebook, Messenger, Threads, Meta AI, Edits) appear as LOOK-ALIKES: icons and screens recreated in SVG/CSS from brand colors and simple glyphs, with the real app names as plain text. Never download or embed official logo files, icons, wordmarks, screenshots, or fonts. Keep a small "concept mock · not affiliated with Apple or Meta" credit at the end.
+- 1920x1080, 60fps.
 
 SCENES
-1. THE "k" OPENING (0:00-0:12): Black screen. One message bubble in "Mom"'s thread shows the user's last reply: "k." Timestamp below ages: "2 weeks ago" -> "3 months ago" -> "1 year ago". Centered text fades in: "The last thing my kid ever texted me was 'k.'" Hold 3 seconds of stillness, no music.
-2. UNSAID LIVES INSIDE THE APPS YOU USE (0:12-0:27): A photo feed scrolls gently. On Mom's post, a small Unsaid logo in the top-right corner of the image pulses once, like a heartbeat. A finger tap ripples on it and the screen softly morphs into Unsaid. Then a quick three-panel row: photo-feed look-alike labeled "Gen Z", chat-app look-alike labeled "Your parents", social-feed look-alike labeled "The grandparents", each showing the logo on a post. Text: "Unsaid meets you where you already are."
-3. THE BRAIN GRAPH FILLS IN (0:27-0:50): Near-empty cream canvas with a few faint, disconnected dots. Group-chat hub nodes light up one at a time, labeled "Fam", "Roommates", "Marfa Trip". Person nodes drift into orbit around their hubs with soft physics. Small memory nodes bloom off people with tiny rounded photo thumbnails (soft illustrated placeholders). A few links glow faintly and pulse slowly, as if waiting.
-4. THE RIGHT MOMENT (0:50-1:10): Mom's phone shows "10 missed calls" to her kid. She records a voice unsend (waveform): "No emergency. I just wanted to hear your voice." Cut to the kid's story: a cozy library study scene. A soft Unsaid notification slides down from the top of the story: "Mom left you something." with two buttons: "Reply with an unsend" and "Call Mom". The finger taps "Call Mom"; the screen warms and shows "Mom" connected, 0:01... 0:02...
-5. POSTHUMOUS RELEASE (1:10-1:35): Calm confirmation card: "Proxy confirmation 3 of 3 received." A date card turns forward several years to "June 12, 2034 - Graduation Day". An illustrated sealed envelope opens; a handwritten letter unfolds ("I'm so proud of you. I always was.") with a gentle voice waveform beneath.
-6. RESURFACING UNSEND MID-ARGUMENT (1:35-1:55): A tense chat between partners: short, sharp bubbles ("whatever." / "you always do this."). A soft card slides up from the bottom: "Remember this?" It reveals a past unsend: 2-3 warm photo cards from a good day plus handwritten text "Everything will be okay." The chat calms; the next bubble types in: "I'm sorry. Dinner Friday?"
-7. CLOSE (1:55-2:00): Unsaid wordmark on the gradient. Tagline: "For the words we never got to say." Small line: "Powered by Meta AI".
+1. THE "k" OPENING (0:00-0:24): One second of black and silence. Centered text fades in: "The last thing my kid ever texted me was 'k.'" ('k.' in amber), then fades out. The camera pulls back: the black was the OFF screen of a folded white iPhone Duo. The screen wakes into the kid's iOS Messages thread with "Mom": her warm messages ("hi sweetheart 💛 tried calling you a few times today" / "no emergency. just miss you." / "I made your favorite this weekend and saved you some. call me when you can? love you") and his reply "k"; the timestamp ages Today -> Yesterday -> last week -> last month -> last year. The screen sleeps. The Duo unfolds on its hinge (3D, a specular sweep across the white back, a soft hinge click). Zoom out to a blurred wallpaper. "Some things go unsaid." appears across both panels ("unsaid." in amber). Swipe up: the Apple-style app-close shrinks it into the Messages dock icon; the home screen settles with the Meta apps prominent. The Unsaid icon glows; a tap zooms it open to the Unsaid splash and Home. Exact beat timings: see "Animation Production Notes" below.
+2. UNSAID LIVES INSIDE THE APPS YOU USE (0:24-0:39): A photo feed scrolls gently. On Mom's post, a small Unsaid logo in the top-right corner of the image pulses once, like a heartbeat. A finger tap ripples on it and the screen softly morphs into Unsaid. Then a quick three-panel row: photo-feed look-alike labeled "Gen Z", chat-app look-alike labeled "Your parents", social-feed look-alike labeled "The grandparents", each showing the logo on a post. Text: "Unsaid meets you where you already are."
+3. THE BRAIN GRAPH FILLS IN (0:39-1:02): Near-empty cream canvas with a few faint, disconnected dots. Group-chat hub nodes light up one at a time, labeled "Fam", "Roommates", "Marfa Trip". Person nodes drift into orbit around their hubs with soft physics. Small memory nodes bloom off people with tiny rounded photo thumbnails (soft illustrated placeholders). A few links glow faintly and pulse slowly, as if waiting.
+4. THE RIGHT MOMENT (1:02-1:22): Mom's phone shows "10 missed calls" to her kid. She records a voice unsend (waveform): "No emergency. I just wanted to hear your voice." Cut to the kid's story: a cozy library study scene. A soft Unsaid notification slides down from the top of the story: "Mom left you something." with two buttons: "Reply with an unsend" and "Call Mom". The finger taps "Call Mom"; the screen warms and shows "Mom" connected, 0:01... 0:02...
+5. POSTHUMOUS RELEASE (1:22-1:47): Calm confirmation card: "Proxy confirmation 3 of 3 received." A date card turns forward several years to "June 12, 2034 - Graduation Day". An illustrated sealed envelope opens; a handwritten letter unfolds ("I'm so proud of you. I always was.") with a gentle voice waveform beneath.
+6. RESURFACING UNSEND MID-ARGUMENT (1:47-2:07): A tense chat between partners: short, sharp bubbles ("whatever." / "you always do this."). A soft card slides up from the bottom: "Remember this?" It reveals a past unsend: 2-3 warm photo cards from a good day plus handwritten text "Everything will be okay." The chat calms; the next bubble types in: "I'm sorry. Dinner Friday?"
+7. CLOSE (2:07-2:12): Unsaid wordmark on the gradient. Tagline: "For the words we never got to say." Small line: "Powered by Meta AI".
 
 TECH
 - Build it with Remotion (React) so it renders to an MP4. Put each scene in its own component, use spring/interpolate for easing, and keep all timings in one config object so they're easy to retime.
@@ -607,7 +608,7 @@ TECH
 | **claudeclip** (community FFmpeg) | [gulkoa/claudeclip](https://github.com/gulkoa/claudeclip) | Trimming, adding audio, GIF export |
 | **Anthropic pptx skill** (official) | [anthropics/skills](https://github.com/anthropics/skills/tree/main/skills/pptx) | Turning `Unsaid_Presentation.md` into slides |
 
-No dual-screen or foldable phone mockup tool exists (and there's no real "iPhone Duo"). For a two-screen look, place two phone frames side by side.
+No off-the-shelf dual-screen mockup exists, so the device is a custom **white "iPhone Duo"** component (fictional, book-style dual panels on a hinge; built in `Claude_Code_Frontend_Prompt.md` Phase 1). It is the default device everywhere.
 
 ### Production notes
 
@@ -708,13 +709,14 @@ This spec is the team's **live, shared source of truth** for Unsaid.
 - **Standing instruction (Gurneal):** after every exchange during planning, this markdown file gets updated with whatever new was discussed, as an amendment to this same file. No separate docs.
 - Every update is **pushed to the team's GitHub HackTx repository** ([MuditUpadhyay04/HackTX](https://github.com/MuditUpadhyay04/HackTX)), so everyone always builds from the latest version.
 - **Dual-format rule:** every update produces **two files kept in sync** from the same content: `Unsaid_Product_Spec.md` (this file) and a detailed PDF, `Unsaid_Product_Spec.pdf`. Both are pushed together on every change.
-- **Six-file live-sync rule (project rule):** the HackTX repo holds six Unsaid files, and **all six stay updated live after every exchange**:
+- **Seven-file live-sync rule (project rule):** the HackTX repo holds seven Unsaid files, and **all seven stay updated live after every exchange**:
   1. `Unsaid_Product_Spec.md`: the product spec (this file).
   2. `Unsaid_Product_Spec.pdf`: the PDF of this spec, regenerated from the markdown every time.
   3. `Unsaid_Presentation.md`: the pitch deck, slide by slide.
   4. `Demo_Script.md`: the timed animation storyboard, talking points, and the ready-to-paste Claude prompt.
   5. `Unsaid_Frontend_Build_Spec.md`: the frontend-only UI build spec (15 screens and the button-to-backend contract for Mudit).
   6. `Unsaid_Frontend_Build_Spec.pdf`: the PDF of the frontend build spec, regenerated with `build_frontend_pdf.sh`.
+  7. `Claude_Code_Frontend_Prompt.md`: the phased, ready-to-paste Claude Code prompt that builds the frontend (Phases 0–5, each with a review stop).
 
   Any new idea, correction, or decision goes into whichever file it belongs to right away, and every affected file is pushed together in one commit. No file should lag behind the others.
 - **Push method:** git from a local clone of the HackTX repo, using Gurneal's `gornil` terminal alias, once that clone and alias are reachable.
@@ -727,9 +729,10 @@ Every edit after v1 gets a new version number. Each entry says exactly what chan
 |---|---|---|---|
 | **v1** | Oct 24, 2026 | Baseline: Sections 1–12, the Meta stack, Inside Meta's Apps, the animated demo plan, Animation Production with the Claude prompt and recommended skills, and the sync rules. | `baabed7` (includes the first push `7a7d2a5` and the skills table) |
 | **v2** | Oct 24, 2026 | Added Section 13, Making It Felt: ten emotional ideas (the cold open, the sparse graph with labeled gaps, the exact future date, the resurfacing interrupt, the Mom and story trigger, swipeable reminisce mode, Muse quietly categorizing unsends, sensory details, human micro-copy, the "this too shall pass" motif), each with why it works and where it fits. Added the versioning system. | `2fc29f4` |
-| **v3** | Oct 24, 2026 | Added the companion `Unsaid_Frontend_Build_Spec.md` / `.pdf`: a frontend-only UI spec covering its 15 screens and the button-to-backend contract table for Mudit. | see git log |
+| **v3** | Oct 24, 2026 | Added the companion `Unsaid_Frontend_Build_Spec.md` / `.pdf`: a frontend-only UI spec covering its 15 screens and the button-to-backend contract table for Mudit. | `bb501a0` |
+| **v4** | Oct 24, 2026 | Added `Claude_Code_Frontend_Prompt.md`, a phased Claude Code prompt:<br>• Phase 0: setup, with verified Apple HIG / motion skills to install first.<br>• Phase 1: the white iPhone Duo.<br>• Phase 2: the Messages "k" thread.<br>• Phase 3: the home screen and an interactive iOS navigation shell.<br>• Phase 4: the 15 Unsaid screens, with backend sync.<br>• Phase 5: heavy-Meta-styled look-alike apps and the final unconnected-buttons report.<br>The scripted animation moves to a later, separate prompt, and its timings are saved in `Demo_Script.md`. The new 0:00–0:24 opening is the folded white Duo → Messages "k" → unfold → "Some things go unsaid." → home → Unsaid. The device is now the fictional white iPhone Duo. Look-alike SVG/CSS Meta icons with real names as text (never official files). Live sync is now seven files. Frontend spec v2. | see git log |
 
-- **Versioning rule:** every future edit bumps the version (v3, v4, …), updates the version line at the top, and adds a row here. The detailed changelog below stays as well.
+- **Versioning rule:** every future edit bumps the version (v5, v6, …), updates the version line at the top, and adds a row here. The detailed changelog below stays as well.
 
 ### Changelog
 
@@ -749,3 +752,4 @@ Every edit after v1 gets a new version number. Each entry says exactly what chan
 | Oct 24, 2026 | Added the verified Claude skills and plugins for the animation (Remotion plugin, GSAP, Motion, snapcn phone frame, claudeclip, pptx). |
 | Oct 24, 2026 | **v2:** added Section 13 (emotional deep dive, ten ideas) and the versioning system with Version History. |
 | Oct 24, 2026 | **v3:** added the companion frontend build spec (`Unsaid_Frontend_Build_Spec.md` / `.pdf`), linked from Weekend MVP Scope, and made the live-sync rule six files. |
+| Oct 24, 2026 | **v4:** added `Claude_Code_Frontend_Prompt.md` (phased Claude Code build prompt). Key changes:<br>• The verified Apple HIG skills (apple-hig, apple-design-skill, ios-design-skills, human-interface-guidelines) and the Motion / GSAP skills are installed first.<br>• Heavy Meta styling is a set of non-negotiable acceptance criteria (M1–M10).<br>• Icons are look-alikes only: recreated in SVG/CSS with real names as text, never official files.<br>• The device is the white fictional iPhone Duo.<br>• An interactive iOS navigation shell (open from icon, swipe-up close, app switcher, swipe between apps).<br>• Contract rows 95–110.<br>• Backend-sync rule plus an end-of-build report of every button without a backend.<br>• The scripted demo animation is out of scope for now and will come in a separate prompt later.<br>• New 24 s opening: the folded white Duo → Messages "k" → unfold → home → Unsaid. Storyboard beat 1 and the Claude prompt were updated to match `Demo_Script.md` (retimed to ~2:12, 60 fps).<br>• Seven-file live-sync rule. |

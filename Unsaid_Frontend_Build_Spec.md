@@ -3,11 +3,11 @@
 ### *A clickable UI shell for every screen, with nothing wired up yet.*
 
 **HackTX 2026 · Meta track: "Bringing People Closer Together with AI"**
-Companion to `Unsaid_Product_Spec.md` (v3) and `Demo_Script.md`.
+Companion to `Unsaid_Product_Spec.md` (v4), `Demo_Script.md`, and **`Claude_Code_Frontend_Prompt.md`** (the phased, ready-to-paste Claude Code prompt that builds this spec).
 
 **Purpose:** tell Claude (Claude Code) exactly how to build the Unsaid frontend as a clickable, mock-data-only UI shell, and give Mudit (backend owner) one table of every button he will wire up later.
 
-**Spec version: v1** · Oct 24, 2026
+**Spec version: v2** · Oct 24, 2026
 
 > ## "The last thing my kid ever texted me was 'k.'"
 >
@@ -41,8 +41,11 @@ This build is a **UI shell**. It looks and moves like the real app, but **no fea
     3. **A toast-only click handler:** `onClick` does one thing: it shows a soft toast, **"Not connected yet"**, with the feature ID in small text underneath. No fetch, no state change, no navigation, no `tel:` or `sms:` links.
 - **All data is hard-coded mock data** in `frontend/lib/mock/`. No API calls, no environment keys, no auth, no camera, microphone, or photo access.
 - **Navigation is the only thing that works.** The tab bar, back chevrons, the screen switcher, and swipe/tap gestures that only move between mock screens or mock story cards are plain frontend routing. They are listed separately in [Section 9.2](#92-navigation-only-controls-not-backend) and carry no badge.
+- **Two attributes.** From v2, every placeholder carries both `data-backend` and an identical alias, `data-feature-id`. Tests and the later animation may use either one.
 - **Badges can be hidden for recording.** A single flag (`?badges=off` in the URL, or `NEXT_PUBLIC_SHOW_BADGES=false`) hides the pills so the same screens can be recorded or rendered in Remotion. The `data-backend` attribute and the toast stay either way.
-- **Honesty about Meta surfaces.** Screens 11 and 15 (an Unsaid notification inside a story, and the logo on social posts) are **concept screens**. A real version would need a partnership with Meta and access beyond its public APIs. Every social-app screen is a **generic look-alike**: no Instagram, Facebook, WhatsApp, or Meta logos, icons, fonts, or copied UI assets. Each one carries a small "concept · look-alike" label.
+- **Honesty about Meta surfaces (v2).** Screens 11 and 15 and the fake Meta apps (Section 4.1) are **concept screens**. A real version would need a partnership with Meta and access beyond its public APIs. Every Apple and Meta app icon and screen is a **look-alike recreated in SVG/CSS** (brand-colored gradient plus a simple drawn glyph), and real app names (Instagram, WhatsApp, Facebook, Messenger, Threads, Meta AI, Edits) may appear **as plain text**. **Never** download or embed official logo files, app icons, wordmarks, glyph files, screenshots, or proprietary fonts (SF Pro, Optimistic). Each such page carries a small "concept · look-alike" label, plus "concept mock · not affiliated with Apple or Meta" outside the device. *Risk note:* recognizable look-alikes of trademarked icons are still a trademark gray area. Fine for a labeled hackathon concept; never ship them.
+- **Navigation is real, the scripted animation is not part of this build.** App-to-app navigation runs through an interactive **iOS navigation shell** (Section 4.1). The scripted demo animation is out of scope here and will come in a separate prompt later (timings are saved in `Demo_Script.md`).
+- **Features follow the backend.** Read (never edit) `backend/` as Mudit builds it. Backend features missing from the frontend are added to the app and to Section 9 with a new ID; anything not built on the backend stays a placeholder. The build ends with a report of every button that still has no backend (feature ID, screen, label).
 
 **Placeholder button reference (copy this pattern):**
 
@@ -172,13 +175,36 @@ A single-line speech-bubble outline **left slightly open** (the gap where the wo
 | UI motion | **Framer Motion** (with the **Motion AI Kit**, `npx motion-ai`, [docs](https://motion.dev/docs/ai-kit)) and/or **GSAP** ([gsap-skills](https://github.com/greensock/gsap-skills)) | Framer Motion for enters, sheets, and story transitions; GSAP only if a timeline gets complex |
 | Brain graph | **react-force-graph** (2D) | Soft physics; custom canvas painting for photo leaves and gap labels |
 | Toasts | `sonner` (or a small custom toast) | Only for "Not connected yet" |
-| Demo video | **Remotion** | Renders the demo MP4 from the **same screen components** (see `remotion/`) |
-| Phone frames | **snapcn Phone Frame** ([docs](https://snapcn.dev/docs/screens/phone-frame)), `npx shadcn@latest add @snapcn/phone-frame` | See the note below |
+| Demo video | **Remotion** (later, separate prompt) | Will render the demo MP4 from the **same screen components**; not installed in this build |
+| Device | **Custom `IPhoneDuo`** component (white, fictional) | See the note below; snapcn Phone Frame is optional now |
 | Fonts | Inter + Caveat via `next/font/google` | |
 
-**Phone frames and the "Duo" look, honestly:**
-- snapcn's Phone Frame is a **Remotion** component (an iPhone-style frame with a dynamic island, base size 320 × 656, 53px radius; `variant="flat"` faces the camera). It is driven by Remotion's current frame, so it drops straight into the `remotion/` compositions. In the Next.js app, either embed it through `@remotion/player`, or use a plain CSS `PhoneFrame` with the same size and radius so the app and the video look identical. Recommended: the CSS version in the app, the snapcn one in the video.
-- **There is no real "iPhone Duo"**, and no dual-screen or foldable phone mockup tool exists. The "Duo" look is just **two phone frames side by side** (`DuoFrame`), 48px apart, on the dusk gradient. Use it where two people or two sides of a moment help tell the story (sender and recipient, recorder and transcript). Single-frame screens center one phone.
+**The device: a white "iPhone Duo" (v2).**
+- The **iPhone Duo is fictional**: a book-style, dual-screen iPhone with two iPhone-proportioned panels on a 360° hinge. **White is the default finish everywhere.** Folded, it reads as one white iPhone; unfolded, it shows two displays side by side with a white hinge between them. It is a custom React component drawn in CSS (`components/device/IPhoneDuo.tsx`) with full hardware detail: frame, bezel, Dynamic Island, hinge, buttons, Camera Control, a camera bump on the back, and specular gloss. The geometry is in `Claude_Code_Frontend_Prompt.md` Phase 1. No Apple bezel images are used.
+- **`PhoneFrame` and `DuoFrame` now wrap `IPhoneDuo`.** `PhoneFrame` = one **folded** white Duo; `DuoFrame` = one **unfolded** white Duo, with its left/right display slots (plus a spanning slot across the hinge) replacing v1's "two frames side by side".
+- **New layout `TwoPhones`:** two **folded** white Duos side by side (scale 0.86, 96px apart, captions underneath). Use it when a screen shows **two different people's phones** (Screens 4, 7, 11, 12, 14). Screen 15 uses three folded Duos.
+- snapcn Phone Frame (v1) is no longer needed.
+
+### 4.1 Opening, home screen, and the iOS navigation shell (v2)
+
+- **Messages scene** (`/scene/messages?state=`): the kid's iOS Messages thread with "Mom": her messages "hi sweetheart 💛 tried calling you a few times today" / "no emergency. just miss you." / "I made your favorite this weekend and saved you some. call me when you can? love you", and his reply "k". States age the timestamp from today to last year.
+- **Home screen** (`/scene/home?state=`), spread across both panels of the unfolded white Duo:
+  - Left panel: Apple apps and widgets (Weather, Calendar, Photos).
+  - Right panel: the **Meta apps, most prominent**: Instagram, WhatsApp, Facebook and Messenger, then Meta AI (the Ray-Ban Meta glasses companion app), Threads, Edits and **Unsaid**. Below them, a Batteries widget with the Ray-Ban Meta glasses.
+  - Dock: Phone, Messages, Safari, Calendar.
+  - No "Muse" app.
+- **iOS navigation shell (interactive, real in the built app):** this is how the Duo moves between apps.
+  - **Open:** tapping an icon zooms the app open from the icon's exact rect. The corner radius morphs from the icon to the screen, the icon crossfades into the app, and the home screen dims and recedes.
+  - **Close:** swipe up on the home indicator. The app follows the finger, rubber-bands, and springs back into its icon.
+  - **App switcher:** swipe up and hold. Swipe a card up to kill it; tap a card to resume it.
+  - **Switch apps:** swipe sideways along the home indicator to move between recent apps.
+  - **Keyboard and dev bar:** shortcuts and a dev control bar do the same, for recording.
+  - **Panels:** an app opens on one panel or spans both.
+  - **Springs:** about 300–400 stiffness and 30–35 damping. Reduced motion is supported.
+  - **One registry:** every app (Messages, Unsaid, Instagram, Meta AI, Facebook, WhatsApp, Messenger, Threads, Edits, and Apple-app stubs) registers with the shell, so every transition is identical.
+- **Fake Meta apps** (`/apps/instagram`, `/apps/meta-ai`, `/apps/facebook`, `/apps/whatsapp`, plus Messenger and Threads stubs): SVG/CSS look-alikes with Unsaid touchpoints. Their buttons are rows 95–110 in [Section 9.4](#94-v2-additions-fake-meta-apps-rows-95110).
+- **The scripted opening** (black cold-open card → the black is the folded Duo's screen → Messages "k" → unfold → wallpaper and "Some things go unsaid." → app-close to home → tap Unsaid) is **not built here**. It comes in a later, separate animation prompt, which will drive the navigation shell programmatically. Its beat table lives in `Demo_Script.md` under "Animation Production Notes".
+- **Every screen takes `?state=`** for an exact static frame. `?badges=off`, `?labels=off`, and `?frame=bare` give clean recording.
 
 ---
 
@@ -449,7 +475,7 @@ Every screen sits in a `PhoneFrame` (or a `DuoFrame`) centered on the `bg-dusk` 
 - **Layout, right (top to bottom):** the `NotificationSheet` slides down from the top over the story: `UnsaidMark`, "**Mom left you something.**", a one-line preview "no emergency. just miss you.", and two buttons, **"Reply with an unsend"** and **"Call Mom"**; a small drag handle to dismiss. A second state (shown in the Remotion version after "Call Mom") is a warm call screen: "Mom", "0:01… 0:02…", and "end".
 - **Components:** `DuoFrame`, `StoryViewer` (look-alike), `NotificationSheet`, `UnsaidMark`, `Waveform`, `RippleRing`, `ConceptLabel`.
 - **Placeholder buttons (NOT YET CONNECTED):** left "record" [`mom-voice-unsend-record`] · "Reply with an unsend" [`contextual-reply-unsend`] · "Call Mom" [`contextual-call`] · swipe-up dismiss handle [`contextual-dismiss`] · "end" on the call screen [`call-end`].
-- **No real Meta logos, icons, gradients, or story chrome.** Use neutral greys and the Unsaid palette.
+- **Look-alike only (v2):** Meta-style story chrome is drawn in SVG/CSS with the app name as plain text; no official logos, icons, glyph files, or screenshots.
 - **Motion:** the story plays for 2s; the notification slides in with `spring-soft` and a ripple ring; hold. The call screen warms from cream to peach over 1.2s.
 
 ### 8.12 Screen 12 — Plans picker
@@ -502,7 +528,7 @@ Every screen sits in a `PhoneFrame` (or a `DuoFrame`) centered on the `bg-dusk` 
     - A line under the row: "unsaid meets you where you already are."
 - **Components:** `PhoneFrame` ×3, `PhotoFeedPost`, `ChatAppBubble`, `SocialFeedPost`, `UnsaidMark`, `PulseOnce`, `RippleRing`, `ConceptLabel`.
 - **Placeholder buttons (NOT YET CONNECTED):** the mark on the photo-feed post [`overlay-open-memory`] · the mark on the chat-app photo [`overlay-open-unsend-draft`] · the mark on the social-feed card [`overlay-open-graph-node`]. In the real concept a tap opens Unsaid to that person; in the shell each one only toasts.
-- **No real Meta logos, wordmarks, icons, or exact layouts.** Use neutral greys, generic shapes, and placeholder friends.
+- **Look-alike only (v2):** from Phase 5 of the prompt, the three frames reuse the Instagram / WhatsApp / Facebook look-alike components (drawn SVG/CSS, real names as text); no official logos, wordmarks, glyph files, or screenshots.
 - **Motion:** each mark does `pulse-once` (the heartbeat), 600ms apart from frame 1 to 3; a tap shows a ripple ring before the toast.
 
 ---
@@ -511,7 +537,7 @@ Every screen sits in a `PhoneFrame` (or a `DuoFrame`) centered on the `bg-dusk` 
 
 ### 9.1 Every button, and what it will connect to
 
-This is the full list of action buttons across all 15 screens: **94 buttons, using 87 unique feature IDs.** Every one renders with `data-backend="<Feature ID>"`, shows the NOT YET CONNECTED badge, and only toasts "Not connected yet". A feature ID appears on more than one screen only when it is the same backend action; 7 IDs are shared this way (`pending-unsend-review`, `plan-attach`, `delivery-channel-pick`, `recipient-block`, `recipient-report`, `plan-accept`, `plan-reject`). The three proxy slots on screen 6 are one row because they share one button type and ID.
+This is the full list of action buttons across all 15 screens: **94 buttons, using 87 unique feature IDs.** *(v2: with the fake Meta apps in [Section 9.4](#94-v2-additions-fake-meta-apps-rows-95110), the total is **110 buttons, 94 unique feature IDs, 16 shared IDs**.)* Every one renders with `data-backend="<Feature ID>"`, shows the NOT YET CONNECTED badge, and only toasts "Not connected yet". A feature ID appears on more than one screen only when it is the same backend action; 7 IDs are shared this way (`pending-unsend-review`, `plan-attach`, `delivery-channel-pick`, `recipient-block`, `recipient-report`, `plan-accept`, `plan-reject`). The three proxy slots on screen 6 are one row because they share one button type and ID.
 
 **Mudit fills in the "Expected request/response" column.** Each cell starts as "TBD by Mudit" with a one-line hint. The `backend/` folder implements each feature ID; when one is done, its status here changes to CONNECTED and the button's placeholder handler is swapped for the real one.
 
@@ -635,29 +661,56 @@ These are the only controls that actually do something in the shell. They change
 - `grep -r 'data-backend' frontend/` lists every placeholder still in the UI.
 - Left **TBD** for you: every request/response shape, the API style (REST routes vs. server actions), auth, where media is stored, the restaurant data source for `plan-restaurant-pick`, and how the unlock signal for the phone-activity trigger is collected on a real device.
 - Rows 53–56 (the safety hotlines) need no server call. They become plain `tel:`/`sms:` links in the real app; they are placeholders in the shell only so nothing dials by accident during a demo.
-- Rows 67–71 and 92–94 are concept features. A real version needs a Meta partnership; for the hackathon they stay mock.
+- Rows 67–71, 92–94, and 95–110 are concept features. A real version needs a Meta partnership; for the hackathon they stay mock.
+- **Backend sync (v2):** the frontend reads `backend/` (read-only) every build phase and keeps `docs/backend-sync.md`. A backend feature with no frontend control gets a new ID and row here (after row 110). The build ends with `docs/unconnected-buttons.md`: every button with no backend behind it (feature ID, screen, label), so Gurneal can delete it or keep it as a blank button the animation won't use.
+
+### 9.4 v2 additions: fake Meta apps (rows 95–110)
+
+These buttons live in the look-alike Meta apps (`Claude_Code_Frontend_Prompt.md` Phase 5). That adds **7 new unique IDs**; 9 rows reuse existing IDs. **Totals: 110 buttons, 94 unique feature IDs, 16 shared IDs:** the 7 shared in v1, plus `overlay-open-memory`, `contextual-reply-unsend`, `contextual-call`, `contextual-dismiss`, `overlay-open-graph-node`, `unsend-reply`, `call-start`, `call-end`, and `unsend-play`.
+
+| # | Button label | Screen | Feature ID | Backend feature it will connect to | Expected request/response | Status |
+|---|---|---|---|---|---|---|
+| 95 | Unsaid mark on Mom's birthday-dinner post | Instagram look-alike · feed | `overlay-open-memory` | Same as row 92 (shared) | Same as row 92 | NOT YET CONNECTED |
+| 96 | send an unsaid (DM composer chip) | Instagram look-alike · DM with Mom | `ig-dm-unsend-compose` | Compose an unsend from inside a DM thread (concept; needs a Meta partnership) | TBD by Mudit. Hint: thread/person ref in, draft ID out | NOT YET CONNECTED |
+| 97 | Reply with an unsend | Instagram look-alike · story notification | `contextual-reply-unsend` | Same as row 68 (shared) | Same as row 68 | NOT YET CONNECTED |
+| 98 | Call Mom | Instagram look-alike · story notification | `contextual-call` | Same as row 69 (shared) | Same as row 69 | NOT YET CONNECTED |
+| 99 | dismiss grabber | Instagram look-alike · story notification | `contextual-dismiss` | Same as row 70 (shared) | Same as row 70 | NOT YET CONNECTED |
+| 100 | send ("help me say sorry to Jordan") | Meta AI look-alike · chat | `meta-ai-chat-ask` | Meta AI / Muse Spark chat request that can return an unsend suggestion | TBD by Mudit. Hint: prompt in, reply + optional draft out | NOT YET CONNECTED |
+| 101 | open in Unsaid | Meta AI look-alike · chat | `meta-ai-unsaid-handoff` | Hand off a Meta AI suggestion into an Unsaid draft | TBD by Mudit. Hint: suggestion ref in, draft ID out | NOT YET CONNECTED |
+| 102 | import to Unsaid (glasses captures) | Meta AI look-alike · glasses tab | `glasses-media-import` | Import Ray-Ban Meta captures as memories (concept) | TBD by Mudit. Hint: media refs in, memory IDs out | NOT YET CONNECTED |
+| 103 | record an unsend hands-free | Meta AI look-alike · glasses tab | `glasses-voice-unsend` | Voice unsend recorded through the glasses ("Hey Meta, tell Mom I miss her"; concept) | TBD by Mudit. Hint: audio in, draft ID out | NOT YET CONNECTED |
+| 104 | Unsaid mark on Nana Ruth's memories photo | Facebook look-alike · feed | `overlay-open-graph-node` | Same as row 94 (shared) | Same as row 94 | NOT YET CONNECTED |
+| 105 | send to Messenger | Facebook look-alike · post | `messenger-handoff` | Deliver an unsend through Messenger (concept) | TBD by Mudit. Hint: unsend ID + recipient in, ok out | NOT YET CONNECTED |
+| 106 | open in Unsaid (group unsend card) | WhatsApp look-alike · Marfa Trip | `wa-group-unsend-open` | Open a group unsend from a WhatsApp group (concept) | TBD by Mudit. Hint: group/unsend ref in, unsend out | NOT YET CONNECTED |
+| 107 | reply with an unsend | WhatsApp look-alike · Marfa Trip | `unsend-reply` | Same as row 58 (shared) | Same as row 58 | NOT YET CONNECTED |
+| 108 | header call icon | WhatsApp look-alike · Marfa Trip | `call-start` | Same as row 65 (shared) | Same as row 65 | NOT YET CONNECTED |
+| 109 | end (call screen) | WhatsApp look-alike · call | `call-end` | Same as row 71 (shared) | Same as row 71 | NOT YET CONNECTED |
+| 110 | listen (Mom's voice-unsend bubble) | Messenger look-alike stub | `unsend-play` | Same as row 57 (shared) | Same as row 57 | NOT YET CONNECTED |
 
 ---
 
 ## 10. Ready-to-Paste Prompt for Claude
 
 ```text
+(v2 note: for the full build, use the phased prompt in Claude_Code_Frontend_Prompt.md; it supersedes this one-shot prompt. This version is kept as a short summary and is consistent with v2.)
 You are a senior front-end engineer and motion designer. Build the FRONTEND-ONLY UI shell for "Unsaid", an AI app (powered by Meta AI; HackTX 2026, Meta track) that helps people say the words they never said to the people they love. Follow Unsaid_Frontend_Build_Spec.md exactly; it is the source of truth for every screen, string, button, and feature ID. Build everything in the frontend/ folder of this repo. Do not touch backend/.
 
 HARD RULES
 - Frontend only. No feature works. No API calls, no env keys, no auth, no camera/mic/photo access, no tel: or sms: links.
-- Every action button is a PlaceholderButton: it shows a small "NOT YET CONNECTED" pill badge and a hover tooltip, carries data-backend="<feature-id>" using the exact IDs in Section 9.1 of the spec, and its onClick ONLY shows a toast "Not connected yet" with the feature ID underneath. Toggles, segmented controls, and sliders follow the same rule (they may animate locally).
+- Every action button is a PlaceholderButton: it shows a small "NOT YET CONNECTED" pill badge and a hover tooltip, carries data-backend="<feature-id>" and data-feature-id="<feature-id>" using the exact IDs in Sections 9.1 and 9.4 of the spec, and its onClick ONLY shows a toast "Not connected yet" with the feature ID underneath. Toggles, segmented controls, and sliders follow the same rule (they may animate locally).
 - Only navigation works: the tab bar, back, a floating ScreenSwitcher listing all 15 screens, "next" dev links, story tap-left/right, and inbox swipes (Section 9.2).
 - All data is hard-coded mock data in frontend/lib/mock/: people Mom, Dad, Priya, Jordan; group chats Fam, Roommates, Marfa Trip; plus the memories, unsends, plan, and posthumous date in Section 2.
 - Badges can be hidden with ?badges=off or NEXT_PUBLIC_SHOW_BADGES=false (for recording); data-backend and the toasts stay.
-- Social-app screens (11 and 15) are generic LOOK-ALIKES labeled "concept · look-alike". Never use Instagram, Facebook, WhatsApp, or Meta logos, icons, or UI assets.
+- Meta app screens and icons are LOOK-ALIKES recreated in SVG/CSS, labeled "concept · look-alike"; real app names may appear as plain text. Never download or embed official logo files, icons, wordmarks, screenshots, or fonts.
+- App-to-app navigation runs through the interactive iOS navigation shell (Section 4.1). The scripted demo animation is out of scope; it comes in a later prompt.
+- Read backend/ (never edit it). Add backend features the frontend lacks (new IDs in Section 9); leave unbuilt ones as placeholders; end with a report of every button that has no backend.
 - Screen 12 (Plans) is a restaurant + date + time picker with Accept/Reject, exactly as in the spec. Do not add pricing tiers or prices.
 - Screen 14 has no time/date scheduling controls. Everyday delivery is only the phone-activity trigger (2nd or 3rd unlock, weighted later in the day).
 
 STACK
 - Next.js (App Router) + React + TypeScript + Tailwind. Framer Motion (use the Motion AI Kit: npx motion-ai) for motion; GSAP only if a timeline needs it. react-force-graph-2d for the brain graph. sonner for toasts. Inter + Caveat via next/font/google.
-- Phone frames: a CSS PhoneFrame (320x656, 53px radius, dynamic island) in the app. In the Remotion project, use snapcn Phone Frame (npx shadcn@latest add @snapcn/phone-frame). The "Duo" look is just two frames side by side (DuoFrame); there is no real iPhone Duo or foldable mockup.
-- Remotion in frontend/remotion/, reusing components/screens/* so the video and the app match. Keep scene timings in one config object that follows Demo_Script.md. The first scene is the cold open: "The last thing my kid ever texted me was 'k.'"
+- Device: the fictional WHITE iPhone Duo (IPhoneDuo, Section 4; geometry in Claude_Code_Frontend_Prompt.md Phase 1). PhoneFrame = one folded Duo, DuoFrame = one unfolded Duo, TwoPhones = two folded Duos for two people's phones.
+- Every screen takes ?state= for exact static frames. No Remotion in this build (the later animation prompt adds it).
 
 DESIGN
 - Tokens from Section 3: amber #E8A15A accent, deep plum #4A1F35 text, warm cream #FBF5EC background, a dusk rose -> peach -> cream gradient behind the phones, rounded cards, generous whitespace.
@@ -670,7 +723,7 @@ STEPS
 2. Build the shared components in Section 6 first (PlaceholderButton, NotConnectedBadge, PhoneFrame, DuoFrame, motion primitives, UnsaidMark).
 3. Create lib/contract.ts from table 9.1: a typed union of every feature ID with its screen and backend feature.
 4. Build all 15 screens in Section 8 as pure, prop-driven components in components/screens/, each with its own route. Match the layout, copy, buttons, feature IDs, and Duo left/right split exactly.
-5. Verify: write a small script that collects every data-backend value from the rendered pages and checks it against lib/contract.ts (all 94 buttons, 87 unique IDs), confirm every click toasts, and confirm the app makes no network requests.
+5. Verify: write a small script that collects every data-backend value from the rendered pages and checks it against lib/contract.ts (all 110 buttons, 94 unique IDs), confirm every click toasts, and confirm the app makes no network requests.
 6. Tell me the exact commands to install, run the dev server, and render the Remotion video.
 ```
 
@@ -680,6 +733,7 @@ STEPS
 
 | Version | Date (CT) | Change |
 |---|---|---|
+| **v2** | Oct 24, 2026 | The device is now the fictional **white iPhone Duo**: `PhoneFrame`/`DuoFrame` wrap `IPhoneDuo`, and a new `TwoPhones` layout replaces "two frames side by side". New Section 4.1 covers the Messages "k" scene, the home screen with Meta apps prominent, the interactive **iOS navigation shell** (open from icon, swipe-up close, app switcher, swipe between apps), and the fake Meta apps. The honesty rule now allows SVG/CSS look-alike icons and real app names as text, but never official files, plus a trademark risk note. Added the `data-feature-id` alias. New **Section 9.4** (rows 95–110: 7 new IDs; totals 110 buttons / 94 unique / 16 shared). Backend-sync rule and final unconnected-button report. The scripted animation is out of scope (later prompt; timings in `Demo_Script.md`). The Section 10 prompt was updated and points to the new `Claude_Code_Frontend_Prompt.md`; heavy Meta styling is required there (M1–M10). Companion to product spec v4. |
 | **v1** | Oct 24, 2026 | Created: the frontend-only rule (NOT YET CONNECTED badge, `data-backend`, toast-only buttons), mock data, design tokens, tech stack, folder structure, component list, navigation map, 15 screen specs, the 94-button frontend-backend contract for Mudit, and the ready-to-paste Claude prompt. Companion to product spec v3. |
 
 ---
