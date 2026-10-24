@@ -562,6 +562,19 @@ TECH
 | **Google Drive connector** (or GitHub) | Saves the rendered MP4 and project files somewhere the whole team can grab them, including the HackTX repo. |
 | **A screen recorder** (QuickTime or OBS) | Backup export: record the HTML preview if the MP4 render fails. |
 
+### Recommended Claude skills and plugins (verified Oct 24, 2026)
+
+| Skill or tool | Where to get it | Use for Unsaid |
+|---|---|---|
+| **Remotion Claude Code plugin** (official) | `claude plugin marketplace add remotion-dev/claude-code-plugin`, then `claude plugin install remotion@remotion` ([repo](https://github.com/remotion-dev/claude-code-plugin)) | Remotion skills for creating, rendering, and adding captions to the demo |
+| **GSAP AI Skills** (official) | [greensock/gsap-skills](https://github.com/greensock/gsap-skills) | Correct GSAP timelines for the scenes |
+| **Motion AI Kit** (official, Framer Motion team) | `npx motion-ai` ([docs](https://motion.dev/docs/ai-kit)) | Interface micro-animations |
+| **snapcn Phone Frame** (community, Remotion) | [snapcn.dev](https://snapcn.dev/docs/screens/phone-frame) | Wraps each screen in a realistic iPhone frame |
+| **claudeclip** (community FFmpeg) | [gulkoa/claudeclip](https://github.com/gulkoa/claudeclip) | Trimming, adding audio, GIF export |
+| **Anthropic pptx skill** (official) | [anthropics/skills](https://github.com/anthropics/skills/tree/main/skills/pptx) | Turning `Unsaid_Presentation.md` into slides |
+
+No dual-screen or foldable phone mockup tool exists (and there's no real "iPhone Duo"). For a two-screen look, place two phone frames side by side.
+
 ### Production notes
 
 - Render early and keep an MP4 on two devices plus the cloud; never rely on Wi-Fi for the demo.
@@ -685,3 +698,4 @@ This spec is the team's **live, shared source of truth** for Unsaid.
 | Oct 24, 2026 | Section 12: added the generational talking point, "Unsaid meets you where you already are: Instagram for Gen Z, WhatsApp for your parents, Facebook for the grandparents." |
 | Oct 24, 2026 | Section 12: added Contextual triggers: a waiting unsend shows up inside Instagram when the recipient is active (for example, Mom's missed-call unsend after the kid posts a study story), with Reply and Call options. Animated in the demo; the real version would need a Meta partnership. |
 | Oct 24, 2026 | Added the four-file live-sync rule (spec .md, spec .pdf, `Unsaid_Presentation.md`, `Demo_Script.md`) and the git/gornil push method. Claude prompt extended to a ~2:00 cut with the in-app logo/generational scene and the contextual-trigger scene. |
+| Oct 24, 2026 | Added the verified Claude skills and plugins for the animation (Remotion plugin, GSAP, Motion, snapcn phone frame, claudeclip, pptx). |

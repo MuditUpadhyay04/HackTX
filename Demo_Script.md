@@ -85,6 +85,19 @@ TECH
 | **Google Drive connector** (or GitHub) | Saves the MP4 and project files where the team can get them. |
 | **Screen recorder** (QuickTime or OBS) | Backup: record the HTML preview if rendering fails. |
 
+### Recommended Claude skills and plugins (verified Oct 24, 2026)
+
+| Skill or tool | Where to get it | Use for Unsaid |
+|---|---|---|
+| **Remotion Claude Code plugin** (official) | `claude plugin marketplace add remotion-dev/claude-code-plugin`, then `claude plugin install remotion@remotion` ([repo](https://github.com/remotion-dev/claude-code-plugin)) | Remotion skills for creating, rendering, and adding captions to the demo |
+| **GSAP AI Skills** (official) | [greensock/gsap-skills](https://github.com/greensock/gsap-skills) | Correct GSAP timelines for the scenes |
+| **Motion AI Kit** (official, Framer Motion team) | `npx motion-ai` ([docs](https://motion.dev/docs/ai-kit)) | Interface micro-animations |
+| **snapcn Phone Frame** (community, Remotion) | [snapcn.dev](https://snapcn.dev/docs/screens/phone-frame) | Wraps each screen in a realistic iPhone frame |
+| **claudeclip** (community FFmpeg) | [gulkoa/claudeclip](https://github.com/gulkoa/claudeclip) | Trimming, adding audio, GIF export |
+| **Anthropic pptx skill** (official) | [anthropics/skills](https://github.com/anthropics/skills/tree/main/skills/pptx) | Turning `Unsaid_Presentation.md` into slides |
+
+No dual-screen or foldable phone mockup tool exists (and there's no real "iPhone Duo"). For a two-screen look, place two phone frames side by side.
+
 ## Production checklist
 
 - [ ] Generate illustrated assets (photos, envelope, library story, avatars)
@@ -98,3 +111,4 @@ TECH
 | Date (CT) | Change |
 |---|---|
 | Oct 24, 2026 | Created: timed ~2:00 storyboard (the four pitch beats plus the in-app logo/generational scene and the contextual-trigger scene), talking points, Claude prompt, tool checklist. |
+| Oct 24, 2026 | Added the verified Claude skills and plugins for the animation (Remotion plugin, GSAP, Motion, snapcn phone frame, claudeclip, pptx). |
