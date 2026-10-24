@@ -11,7 +11,7 @@ Status: Working draft · Working name (see [Appendix E](#appendix-e--a-note-on-t
 
 ---
 
-**Spec version: v2** · see [Version History](#version-history) to revert to any earlier version.
+**Spec version: v3** · see [Version History](#version-history) to revert to any earlier version.
 
 ## Table of Contents
 
@@ -490,6 +490,10 @@ Mapped directly to the Meta track's judging criteria:
 | Brain graph | High-impact visual; stretch goal if the core flow is solid (Appendix B). |
 | Real Android call-log integration | Platform permission work. |
 
+### Frontend build spec
+
+The clickable UI shell for this scope is specified in `Unsaid_Frontend_Build_Spec.md` (and its PDF): 15 frontend-only screens with mock data, where every button is marked NOT YET CONNECTED and mapped to a backend feature ID in a contract table that Mudit fills in.
+
 ---
 
 ## The Demo Moment
@@ -704,11 +708,13 @@ This spec is the team's **live, shared source of truth** for Unsaid.
 - **Standing instruction (Gurneal):** after every exchange during planning, this markdown file gets updated with whatever new was discussed, as an amendment to this same file. No separate docs.
 - Every update is **pushed to the team's GitHub HackTx repository** ([MuditUpadhyay04/HackTX](https://github.com/MuditUpadhyay04/HackTX)), so everyone always builds from the latest version.
 - **Dual-format rule:** every update produces **two files kept in sync** from the same content: `Unsaid_Product_Spec.md` (this file) and a detailed PDF, `Unsaid_Product_Spec.pdf`. Both are pushed together on every change.
-- **Four-file live-sync rule (project rule):** the HackTX repo holds four Unsaid files, and **all four stay updated live after every exchange**:
+- **Six-file live-sync rule (project rule):** the HackTX repo holds six Unsaid files, and **all six stay updated live after every exchange**:
   1. `Unsaid_Product_Spec.md`: the product spec (this file).
   2. `Unsaid_Product_Spec.pdf`: the PDF of this spec, regenerated from the markdown every time.
   3. `Unsaid_Presentation.md`: the pitch deck, slide by slide.
   4. `Demo_Script.md`: the timed animation storyboard, talking points, and the ready-to-paste Claude prompt.
+  5. `Unsaid_Frontend_Build_Spec.md`: the frontend-only UI build spec (15 screens and the button-to-backend contract for Mudit).
+  6. `Unsaid_Frontend_Build_Spec.pdf`: the PDF of the frontend build spec, regenerated with `build_frontend_pdf.sh`.
 
   Any new idea, correction, or decision goes into whichever file it belongs to right away, and every affected file is pushed together in one commit. No file should lag behind the others.
 - **Push method:** git from a local clone of the HackTX repo, using Gurneal's `gornil` terminal alias, once that clone and alias are reachable.
@@ -721,6 +727,7 @@ Every edit after v1 gets a new version number. Each entry says exactly what chan
 |---|---|---|---|
 | **v1** | Oct 24, 2026 | Baseline: Sections 1–12, the Meta stack, Inside Meta's Apps, the animated demo plan, Animation Production with the Claude prompt and recommended skills, and the sync rules. | `baabed7` (includes the first push `7a7d2a5` and the skills table) |
 | **v2** | Oct 24, 2026 | Added Section 13, Making It Felt: ten emotional ideas (the cold open, the sparse graph with labeled gaps, the exact future date, the resurfacing interrupt, the Mom and story trigger, swipeable reminisce mode, Muse quietly categorizing unsends, sensory details, human micro-copy, the "this too shall pass" motif), each with why it works and where it fits. Added the versioning system. | `2fc29f4` |
+| **v3** | Oct 24, 2026 | Added the companion `Unsaid_Frontend_Build_Spec.md` / `.pdf`: a frontend-only UI spec covering its 15 screens and the button-to-backend contract table for Mudit. | see git log |
 
 - **Versioning rule:** every future edit bumps the version (v3, v4, …), updates the version line at the top, and adds a row here. The detailed changelog below stays as well.
 
@@ -741,3 +748,4 @@ Every edit after v1 gets a new version number. Each entry says exactly what chan
 | Oct 24, 2026 | Added the four-file live-sync rule (spec .md, spec .pdf, `Unsaid_Presentation.md`, `Demo_Script.md`) and the git/gornil push method. Claude prompt extended to a ~2:00 cut with the in-app logo/generational scene and the contextual-trigger scene. |
 | Oct 24, 2026 | Added the verified Claude skills and plugins for the animation (Remotion plugin, GSAP, Motion, snapcn phone frame, claudeclip, pptx). |
 | Oct 24, 2026 | **v2:** added Section 13 (emotional deep dive, ten ideas) and the versioning system with Version History. |
+| Oct 24, 2026 | **v3:** added the companion frontend build spec (`Unsaid_Frontend_Build_Spec.md` / `.pdf`), linked from Weekend MVP Scope, and made the live-sync rule six files. |
