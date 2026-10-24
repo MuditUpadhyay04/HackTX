@@ -11,7 +11,7 @@ Status: Working draft · Working name (see [Appendix E](#appendix-e--a-note-on-t
 
 ---
 
-**Spec version: v4** · see [Version History](#version-history) to revert to any earlier version.
+**Spec version: v5** · see [Version History](#version-history) to revert to any earlier version.
 
 ## Table of Contents
 
@@ -332,6 +332,7 @@ Meta's AI and APIs aren't add-ons here. They are the reason the app works. Every
 |---|---|
 | **Voice rant → emotion → unsend** | Muse Voice Transcribe turns the rant into text; Muse Spark reads emotion and sentiment and decides whether to comfort, surface memories, or switch to safety mode. |
 | **"Everything will be okay" photo surfacing** | Muse Spark picks the right good-time photos from Facebook/Instagram memories and the camera roll, and writes the caption. |
+| **Photo connectors + face grouping (v5)** | Connect Photos (on-device), Instagram and Facebook photos. Faces are clustered **on the device** (Apple Vision face detection plus an on-device embedding model). A popup, "We found 4 people in your photos", suggests a name for each group ("Mom?"), using Facebook/Instagram photo tags and Muse Spark relationship guesses. You confirm or name each person, fix stray photos, and link the group to that person in the brain graph. Honest limits: Meta has no face-recognition API; the Instagram API no longer serves personal accounts (Basic Display ended Dec 4, 2024); Facebook `user_photos` needs App Review; face grouping needs explicit biometric consent (Texas CUBI, Illinois BIPA). See `BACKEND_REQUESTS.md`. |
 | **Gallery face matching** | Faces are grouped on the device. Facebook and Instagram photo tags and metadata (who was tagged, when, where) attach a name to each face group. Meta has no face recognition API, so the faces themselves stay on the phone. |
 | **Brain graph** | Group-chat hubs, people nodes, and memory leaves are built from Facebook, Instagram, and Messenger data (Graph API plus the data export). Muse Spark extracts the memories and guesses relationships. |
 | **Unsend delivery** | Delivered through Messenger, WhatsApp, or Instagram DMs using each app's share flow, triggered by the phone-activity rule (Section 8). |
@@ -472,6 +473,7 @@ Mapped directly to the Meta track's judging criteria:
 | **Person + tone detection** | Muse Spark identifies who the rant is about and the emotional tone. |
 | **Safety gate** | Keyword + LLM classification for control/threat/self-harm signals; resource screen with real hotline info. |
 | **Good-memory surfacing** | Pre-tagged demo photo set (or on-device clustering if time allows); "everything will be okay" message. |
+| **Photo connectors + face grouping (mock UI)** | Connector screen plus the "We found 4 people in your photos" popup and cluster grids in the frontend shell (contract rows 111–122). Backend shapes are requested in `BACKEND_REQUESTS.md`; real clustering is on the roadmap. |
 | **Unsend composer** | AI-drafted heartfelt message + selected photos; send via iOS message composer / `sms:` / `wa.me` link. |
 | **Plans** | Attach restaurant/date/time; recipient accept/reject screen (mocked recipient). |
 | **Phone-activity delivery** | Hold an unsend until the recipient's 2nd or 3rd unlock of the day (demo by simulating unlock events). |
@@ -492,7 +494,7 @@ Mapped directly to the Meta track's judging criteria:
 
 ### Frontend build spec
 
-The clickable UI shell for this scope is specified in `Unsaid_Frontend_Build_Spec.md` (and its PDF): 15 frontend-only screens with mock data, where every button is marked NOT YET CONNECTED and mapped to a backend feature ID in a contract table that Mudit fills in.
+The clickable UI shell for this scope is specified in `Unsaid_Frontend_Build_Spec.md` (and its PDF): 15 frontend-only screens (plus the v5 photo-connector and face-grouping add-on to Screen 3) with mock data, where every button is marked NOT YET CONNECTED and mapped to a backend feature ID in a contract table that Mudit fills in.
 
 ---
 
@@ -709,7 +711,7 @@ This spec is the team's **live, shared source of truth** for Unsaid.
 - **Standing instruction (Gurneal):** after every exchange during planning, this markdown file gets updated with whatever new was discussed, as an amendment to this same file. No separate docs.
 - Every update is **pushed to the team's GitHub HackTx repository** ([MuditUpadhyay04/HackTX](https://github.com/MuditUpadhyay04/HackTX)), so everyone always builds from the latest version.
 - **Dual-format rule:** every update produces **two files kept in sync** from the same content: `Unsaid_Product_Spec.md` (this file) and a detailed PDF, `Unsaid_Product_Spec.pdf`. Both are pushed together on every change.
-- **Seven-file live-sync rule (project rule):** the HackTX repo holds seven Unsaid files, and **all seven stay updated live after every exchange**:
+- **Eight-file live-sync rule (project rule):** the HackTX repo holds eight Unsaid files, and **all eight stay updated live after every exchange**:
   1. `Unsaid_Product_Spec.md`: the product spec (this file).
   2. `Unsaid_Product_Spec.pdf`: the PDF of this spec, regenerated from the markdown every time.
   3. `Unsaid_Presentation.md`: the pitch deck, slide by slide.
@@ -717,6 +719,7 @@ This spec is the team's **live, shared source of truth** for Unsaid.
   5. `Unsaid_Frontend_Build_Spec.md`: the frontend-only UI build spec (15 screens and the button-to-backend contract for Mudit).
   6. `Unsaid_Frontend_Build_Spec.pdf`: the PDF of the frontend build spec, regenerated with `build_frontend_pdf.sh`.
   7. `Claude_Code_Frontend_Prompt.md`: the phased, ready-to-paste Claude Code prompt that builds the frontend (Phases 0–5, each with a review stop).
+  8. `BACKEND_REQUESTS.md`: frontend → backend feature requests for Mudit (lives in `frontend/BACKEND_REQUESTS.md`).
 
   Any new idea, correction, or decision goes into whichever file it belongs to right away, and every affected file is pushed together in one commit. No file should lag behind the others.
 - **Push method:** git from a local clone of the HackTX repo, using Gurneal's `gornil` terminal alias, once that clone and alias are reachable.
@@ -730,9 +733,10 @@ Every edit after v1 gets a new version number. Each entry says exactly what chan
 | **v1** | Oct 24, 2026 | Baseline: Sections 1–12, the Meta stack, Inside Meta's Apps, the animated demo plan, Animation Production with the Claude prompt and recommended skills, and the sync rules. | `baabed7` (includes the first push `7a7d2a5` and the skills table) |
 | **v2** | Oct 24, 2026 | Added Section 13, Making It Felt: ten emotional ideas (the cold open, the sparse graph with labeled gaps, the exact future date, the resurfacing interrupt, the Mom and story trigger, swipeable reminisce mode, Muse quietly categorizing unsends, sensory details, human micro-copy, the "this too shall pass" motif), each with why it works and where it fits. Added the versioning system. | `2fc29f4` |
 | **v3** | Oct 24, 2026 | Added the companion `Unsaid_Frontend_Build_Spec.md` / `.pdf`: a frontend-only UI spec covering its 15 screens and the button-to-backend contract table for Mudit. | `bb501a0` |
-| **v4** | Oct 24, 2026 | Added `Claude_Code_Frontend_Prompt.md`, a phased Claude Code prompt:<br>• Phase 0: setup, with verified Apple HIG / motion skills to install first.<br>• Phase 1: the white iPhone Duo.<br>• Phase 2: the Messages "k" thread.<br>• Phase 3: the home screen and an interactive iOS navigation shell.<br>• Phase 4: the 15 Unsaid screens, with backend sync.<br>• Phase 5: heavy-Meta-styled look-alike apps and the final unconnected-buttons report.<br>The scripted animation moves to a later, separate prompt, and its timings are saved in `Demo_Script.md`. The new 0:00–0:24 opening is the folded white Duo → Messages "k" → unfold → "Some things go unsaid." → home → Unsaid. The device is now the fictional white iPhone Duo. Look-alike SVG/CSS Meta icons with real names as text (never official files). Live sync is now seven files. Frontend spec v2. | see git log |
+| **v4** | Oct 24, 2026 | Added `Claude_Code_Frontend_Prompt.md`, a phased Claude Code prompt:<br>• Phase 0: setup, with verified Apple HIG / motion skills to install first.<br>• Phase 1: the white iPhone Duo.<br>• Phase 2: the Messages "k" thread.<br>• Phase 3: the home screen and an interactive iOS navigation shell.<br>• Phase 4: the 15 Unsaid screens, with backend sync.<br>• Phase 5: heavy-Meta-styled look-alike apps and the final unconnected-buttons report.<br>The scripted animation moves to a later, separate prompt, and its timings are saved in `Demo_Script.md`. The new 0:00–0:24 opening is the folded white Duo → Messages "k" → unfold → "Some things go unsaid." → home → Unsaid. The device is now the fictional white iPhone Duo. Look-alike SVG/CSS Meta icons with real names as text (never official files). Live sync is now seven files. Frontend spec v2. | `c960301` |
+| **v5** | Oct 24, 2026 | **Build prompt v2 and frontend spec v3:**<br>• Claude Code keeps `frontend/BUILD_LOG.md` (a timestamped entry after every change) and commits and pushes `frontend/` only to the HackTX repo after each change.<br>• **10 Haiku reviewer subagents** (`frontend/.claude/agents/`) check everything in parallel after every phase and change. Issues are logged in `frontend/REVIEW_FINDINGS.md`, fixed and re-checked until clean.<br>• **New feature, photo connectors and face grouping:** connect Photos / Instagram / Facebook, faces are grouped on the device, and the "We found 4 people in your photos" popup suggests names ("Mom?").<br>• Frontend contract rows 111–122.<br>• New `BACKEND_REQUESTS.md` handoff to Mudit. Live sync is now eight files. | see git log |
 
-- **Versioning rule:** every future edit bumps the version (v5, v6, …), updates the version line at the top, and adds a row here. The detailed changelog below stays as well.
+- **Versioning rule:** every future edit bumps the version (v6, v7, …), updates the version line at the top, and adds a row here. The detailed changelog below stays as well.
 
 ### Changelog
 
@@ -753,3 +757,4 @@ Every edit after v1 gets a new version number. Each entry says exactly what chan
 | Oct 24, 2026 | **v2:** added Section 13 (emotional deep dive, ten ideas) and the versioning system with Version History. |
 | Oct 24, 2026 | **v3:** added the companion frontend build spec (`Unsaid_Frontend_Build_Spec.md` / `.pdf`), linked from Weekend MVP Scope, and made the live-sync rule six files. |
 | Oct 24, 2026 | **v4:** added `Claude_Code_Frontend_Prompt.md` (phased Claude Code build prompt). Key changes:<br>• The verified Apple HIG skills (apple-hig, apple-design-skill, ios-design-skills, human-interface-guidelines) and the Motion / GSAP skills are installed first.<br>• Heavy Meta styling is a set of non-negotiable acceptance criteria (M1–M10).<br>• Icons are look-alikes only: recreated in SVG/CSS with real names as text, never official files.<br>• The device is the white fictional iPhone Duo.<br>• An interactive iOS navigation shell (open from icon, swipe-up close, app switcher, swipe between apps).<br>• Contract rows 95–110.<br>• Backend-sync rule plus an end-of-build report of every button without a backend.<br>• The scripted demo animation is out of scope for now and will come in a separate prompt later.<br>• New 24 s opening: the folded white Duo → Messages "k" → unfold → home → Unsaid. Storyboard beat 1 and the Claude prompt were updated to match `Demo_Script.md` (retimed to ~2:12, 60 fps).<br>• Seven-file live-sync rule. |
+| Oct 24, 2026 | **v5:**<br>• Build prompt v2 adds the build log, a push of `frontend/` only after each change, and the 10 parallel Haiku reviewer subagents with a fix-until-clean loop.<br>• New photo connectors + face grouping feature (Section 11 table, Weekend MVP Scope; frontend spec v3 Sections 8.3a and 9.5, rows 111–122).<br>• Added `BACKEND_REQUESTS.md` for Mudit.<br>• Recorded the v4 commit `c960301` in Version History. |

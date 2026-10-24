@@ -1,13 +1,16 @@
 # Unsaid: Claude Code Frontend Prompt (phased)
 
 **HackTX 2026 · Meta track: "Bringing People Closer Together with AI"**
-Owner: Gurneal Chandi (frontend) · Backend: Mudit Upadhyay · **Prompt version: v1** · Oct 24, 2026
+Owner: Gurneal Chandi (frontend) · Backend: Mudit Upadhyay · **Prompt version: v2** · Oct 24, 2026
 
-Companion to `Unsaid_Frontend_Build_Spec.md` (v2, the source of truth for screens, strings, feature IDs, and the 110-button contract table), `Unsaid_Product_Spec.md` (v4), and `Demo_Script.md`.
+Companion to `Unsaid_Frontend_Build_Spec.md` (v3, the source of truth for screens, strings, feature IDs, and the 122-row contract table), `Unsaid_Product_Spec.md` (v5), `BACKEND_REQUESTS.md` (frontend → backend requests for Mudit), and `Demo_Script.md`.
 
 > **Cold open:** "The last thing my kid ever texted me was 'k.'"
 
-**How to use this file.** Each phase below is one self-contained block. Paste one block into Claude Code, let it finish, review the screenshots it produces, then paste the next. **Phase 0 + Phase 1 are fully standalone; paste them first.** Every phase ends with a **STOP AND LET ME REVIEW** point. Do not let Claude run ahead.
+**How to use this file.** Each phase below is one self-contained block. Paste one block into Claude Code, let it finish, review the screenshots it produces, then paste the next. **Phase 0 + Phase 1 are fully standalone; paste them first.** Every phase ends with a **STOP AND LET ME REVIEW** point. Do not let Claude run ahead. **v2 workflow:**
+- Claude keeps `frontend/BUILD_LOG.md` and commits and pushes `frontend/` (only) after every change (global rule 12).
+- **10 Haiku reviewer subagents** check everything in parallel after every phase and every meaningful change (global rule 13). Their full file bodies are in Phase 0.
+- Run Phase 0 from the repo root. After Phase 0, restart Claude Code from inside `frontend/` (`cd frontend && claude --add-dir ..`) so the reviewers in `frontend/.claude/agents/` load.
 
 ## Claude Project goal statement (paste into the project instructions)
 
@@ -25,6 +28,8 @@ Rules:
 - iOS chrome must be pixel-accurate to Apple's Human Interface Guidelines.
 - The scripted demo animation is out of scope for now and will come in a separate prompt later.
 - Work phase by phase, screenshot-check each phase against its acceptance criteria, commit after each one, and ask before deviating from the spec.
+- Keep frontend/BUILD_LOG.md updated with every little change you make, and commit and push it to GitHub (frontend/ only) after each change.
+- Use 10 Haiku reviewer subagents (defined in .claude/agents/) that check everything in parallel after every phase and change; every issue, however small, gets logged, fixed and re-checked before Gurneal sees it.
 
 North star: a judge should feel the gut punch of Mom's text and the "k," and believe Unsaid could ship inside Meta's apps tomorrow.
 
@@ -68,11 +73,11 @@ Install these **before Phase 0**. All were checked on Oct 24, 2026 (the repos ex
 
 | Phase | Builds | Motion? | Standalone? |
 |---|---|---|---|
-| **0** | Project setup, tokens, routes, the placeholder-button system, the `?state=` system, the screenshot script, a read of `backend/` | No | **Yes** |
+| **0** | Project setup, tokens, routes, the placeholder-button system, the `?state=` system, the screenshot script, a read of `backend/`, **`BUILD_LOG.md` + push workflow, the 10 Haiku reviewer agents** | No | **Yes** |
 | **1** | The **white iPhone Duo** device component: folded, unfolded, back, and the unfold snapshots, with every hardware detail | No (static snapshots only) | **Yes** (with Phase 0) |
 | **2** | iOS Messages thread on the son's phone: Mom's sad text, his "k." | No | Needs 0–1 |
 | **3** | iOS home screen across both panels (Meta apps prominent, Apple apps, widgets) **+ the interactive iOS navigation shell** | **Interactive navigation only** (open, close, switcher, swipe between apps) | Needs 0–2 |
-| **4** | The Unsaid app: all 15 screens and placeholder buttons, heavily Meta-styled, synced with `backend/`, registered with the shell | Shell transitions only | Needs 0–3 |
+| **4** | The Unsaid app: all 15 screens and placeholder buttons (**plus photo connectors and face grouping**), heavily Meta-styled, synced with `backend/`, registered with the shell | Shell transitions only | Needs 0–3 |
 | **5 (last build phase)** | Fake Meta apps with Unsaid integrated: Instagram, Meta AI, Facebook, WhatsApp (+ Messenger and Threads stubs), all registered with the shell; **final report** of unconnected buttons | Shell transitions only | Needs 0–4 |
 | *later* | Scripted demo animation: separate prompt, coming later. Don't build it yet. | n/a | n/a |
 
@@ -98,10 +103,45 @@ GLOBAL RULES (apply in every phase)
 5. Mock data uses realistic names and messages: Mom, Dad, Priya (best friend), Jordan (partner); group chats Fam, Roommates, Marfa Trip; the user's own display name is Riley. Never use real people's photos; use soft illustrated or gradient placeholders.
 6. Concept-mock honesty: this is NOT affiliated with Apple or Meta. The "iPhone Duo" is fictional. Apple and Meta app icons are recreated look-alikes in SVG/CSS (brand-colored gradient + simple glyph). Never download or embed official logo files, icons, screenshots, or proprietary fonts (no SF Pro files, no Optimistic files). Show a small label "concept mock · not affiliated with Apple or Meta" outside the device on every page; hide it with ?labels=off.
 7. Accessibility basics: semantic buttons, aria-labels on icon buttons, visible focus rings, alt text on images, 4.5:1 contrast for body text, prefers-reduced-motion respected (the navigation shell, Phase 3).
-8. After each phase: run npm run dev, take screenshots of every new route/state with the screenshot script, LOOK at them yourself and fix what's off, then git commit with a clear message. Do NOT push to any remote.
+8. After each phase: run npm run dev, take screenshots of every new route/state with the screenshot script, LOOK at them yourself and fix what's off, then run the review loop (rule 13) and commit and push frontend/ per rule 12. Never push anything outside frontend/.
 9. Ask me before deviating from this prompt or from Unsaid_Frontend_Build_Spec.md (new dependencies, renamed IDs, changed copy, changed layout). If something is ambiguous, ask; don't guess.
-10. Stop at the end of the phase and wait for my review.
+10. Stop at the end of the phase and wait for my review. When you stop, show me this phase's BUILD_LOG.md entries and the REVIEW_FINDINGS.md summary (found / fixed / verified, per reviewer).
 11. Backend sync: Unsaid's features follow Mudit's backend as it progresses. At the start of every phase, read (never edit) the repo's backend/ folder (routes, handlers, schemas, README). If the backend has a feature the frontend doesn't list, tell me and propose adding it to the Unsaid app and to the contract table (lib/contract.ts + Unsaid_Frontend_Build_Spec.md Section 9) with a new kebab-case feature ID. If a feature isn't built on the backend yet, it stays a placeholder button. Placeholders stay placeholders in this build either way: no fetch calls (rule 1). If backend/ doesn't exist yet, say so and continue.
+12. BUILD LOG + PUSH, after EVERY change, however small. Keep frontend/BUILD_LOG.md (created in Phase 0).
+   a. Log it. After every change (a file created or edited, a decision, a deviation I approved, a bug, a fix, a reviewer finding), append an entry at the bottom. Get the time with: date "+%Y-%m-%d %H:%M %Z".
+      ## YYYY-MM-DD HH:MM CT · <short title>
+      - Changed: <what changed>
+      - Files: <paths touched>
+      - Why: <reason>
+      - Feature IDs: <IDs affected, or "none">
+      - Open issues: <or "none">
+   b. Then commit and push to GitHub: repo MuditUpadhyay04/HackTX, branch main, frontend/ ONLY. Run these from the repo root (cd "$(git rev-parse --show-toplevel)"):
+      git add frontend/        (never git add -A or git add . from the root)
+      git diff --cached --name-only        (every path must start with frontend/; unstage anything else)
+      git commit -m "frontend: <short summary>"
+      git pull --rebase origin main        (so you never clobber Mudit's work)
+      git push origin main
+   c. Phase-end commits use the same style: "frontend: phase N: <summary>".
+   d. Hard limits:
+      - Never touch, stage or commit backend/ or anything outside frontend/; Mudit owns backend/.
+      - Never force-push, and never rewrite pushed history.
+      - If the rebase conflicts outside frontend/, run git rebase --abort and ask me.
+      - If a push is rejected or authentication fails, log it in BUILD_LOG.md and ask me. Don't work around it.
+13. REVIEWERS: 10 Haiku subagents, all launched in parallel.
+   a. Phase 0 creates the 10 reviewer subagents in frontend/.claude/agents/ (full file bodies are in the REVIEWER AGENTS section of Phase 0).
+   b. When to run: after every phase AND after any meaningful change. A meaningful change is anything that changes what a route renders, the contract, the shell, the tokens, or more than a trivial edit.
+   c. How to run: launch ALL 10 in parallel, in one message with 10 Agent tool calls (the tool was formerly named Task), one per reviewer. Give each one the phase, the files changed since the last round (git diff --name-only) and the routes/states to check. All 10 run at the same time.
+   d. The review loop:
+      - Log EVERY finding, however small, in frontend/REVIEW_FINDINGS.md. Use one table per round under "## Phase N · round M · <time> CT", with columns: ID (R<reviewer#>-P<phase>-<n>) · reviewer · severity · file:line · issue · suggested fix · status (OPEN / FIXED / VERIFIED / DISPUTED) · fix commit.
+      - Summarize the round in BUILD_LOG.md (found / fixed / verified per reviewer).
+      - Fix every finding yourself (the reviewers are read-only). Log and push each fix per rule 12.
+      - Re-launch the reviewer(s) that raised findings to re-check the fixes. Repeat until each returns RESULT: CLEAN, then mark the findings VERIFIED.
+      - If you disagree with a finding, don't drop it: mark it DISPUTED with your reason and ask me.
+   e. A phase is NOT done until all 10 reviewers report CLEAN in the same final round.
+   f. Loading the agents:
+      - Project subagents are found by walking up from the folder Claude Code was started in, and a newly created .claude/agents/ folder only loads after a restart.
+      - From Phase 1 on, I'll run Claude Code from inside frontend/ (cd frontend && claude --add-dir ..). That way frontend/.claude/agents/ loads, and the repo root (backend/ and the spec files) stays readable.
+      - Check the agents with /agents. If they aren't loaded in a session (always the case in Phase 0), launch each reviewer as a general-purpose subagent with model "haiku", passing that agent file's full body as its prompt. Same output format, and still all 10 in parallel.
 
 STACK
 - Next.js (App Router) + React + TypeScript (strict) + Tailwind CSS. Create it in ./frontend:
@@ -145,12 +185,16 @@ frontend/
     contract.ts  FEATURE_IDS typed union + metadata (label, screen, backend feature) from build spec Section 9 (fill in Phase 4; stub now)
     state.ts     useSceneState<T extends string>(allowed: readonly T[], fallback: T): reads ?state= safely (useSearchParams), plus flags badges/labels
     toast.ts     notConnected(featureId)
-    mock/        people.ts groups.ts memories.ts unsends.ts plans.ts calls.ts messages.ts graph.ts (stubs now)
+    mock/        people.ts groups.ts memories.ts unsends.ts plans.ts calls.ts messages.ts graph.ts faces.ts (stubs now; faces.ts = Phase 4 face clusters)
   public/
     unsaid-logo.png             (Gurneal drops this in later; until then UnsaidLogo renders the SVG fallback)
     mock/                       illustrated placeholder images
   scripts/shoot.ts              Playwright screenshot script (below)
   screenshots/                  output (gitignored)
+  BUILD_LOG.md                  every change, timestamped (rule 12)
+  REVIEW_FINDINGS.md            every reviewer finding and its status (rule 13)
+  BACKEND_REQUESTS.md           frontend -> backend requests for Mudit (keep it if it already exists)
+  .claude/agents/               the 10 reviewer subagents (REVIEWER AGENTS, below)
 
 DESIGN TOKENS (put in lib/tokens.ts, globals.css variables, and tailwind.config.ts)
 Unsaid core:
@@ -198,6 +242,319 @@ Also add scripts/check-contract.ts: crawls every route+state, collects all data-
 BACKEND READ (do this now)
 - Look for backend/ at the repo root. If it exists, list its features (endpoints/handlers and what they do) in docs/backend-sync.md with columns: backend feature, endpoint/file, matching feature ID in Unsaid_Frontend_Build_Spec.md Section 9 (or "NONE: proposed new ID"). Do not edit backend/. If it doesn't exist, write "backend/ not present yet" in that file.
 
+LOGBOOKS (create now)
+- frontend/BUILD_LOG.md:
+  - Title "# Unsaid frontend build log" and one line pointing to rule 12.
+  - Backfill one entry per Phase 0 step you've done so far, then keep appending (rule 12).
+- frontend/REVIEW_FINDINGS.md: title "# Unsaid review findings", one line pointing to rule 13, and the table format from rule 13d.
+- frontend/BACKEND_REQUESTS.md: Gurneal's requests to Mudit for features the frontend needs from the backend (the first one is "Photo connectors and face grouping").
+  - If the file already exists in the repo, keep it as it is.
+  - If it doesn't, create it with the title "# Unsaid: Backend Requests (frontend → backend)", the line "To: Mudit (backend) · From: Gurneal (frontend)", and the note "Statuses: REQUESTED · ACCEPTED · IN PROGRESS · BUILT · DECLINED/CHANGED". Then tell me, so I can paste the face-grouping request in.
+  - Whenever backend sync (rule 11) or an approved new feature needs something from Mudit, append a request using that file's template: feature, status, priority, screen, feature IDs, suggested shapes, notes.
+  - Never edit backend/.
+
+REVIEWER AGENTS (create now: exactly these 10 files, word for word, in frontend/.claude/agents/)
+- Each is a Markdown file with YAML frontmatter: name, description, tools, model: haiku.
+- They are read-only reviewers (no Edit/Write tools). Bash is there only to run builds, checks and screenshots.
+- Rule 13 says how and when to run them: all 10 in parallel. Each file's text is everything between its --- FILE and --- END FILE markers, starting at its opening --- frontmatter line.
+
+--- FILE 1/10: frontend/.claude/agents/ios-hig-reviewer.md ---
+---
+name: ios-hig-reviewer
+description: Reviews iOS chrome against Apple's Human Interface Guidelines: status bar, Dynamic Island, home indicator, safe areas, touch targets, typography and the spacing/grid. Use after every phase and meaningful change.
+tools: Read, Grep, Glob, Bash
+model: haiku
+---
+You are the iOS HIG reviewer for the Unsaid frontend (Next.js + TypeScript + Tailwind in frontend/, a fixed 1920x1080 Stage, the fictional white iPhone Duo).
+YOUR LENS: iOS chrome, typography and spacing/grid.
+CHECK
+- Status bar, Dynamic Island, home indicator and safe areas sit where Phase 1/3 put them and match Apple's iOS proportions (use the apple-hig / apple-design-skill / heyimjames skills if installed; Apple Design Resources for eyeballing).
+- Touch targets are at least 44x44 pt. Hit areas aren't clipped.
+- Type: the iOS chrome uses font-ios (system stack, never bundled SF files). Sizes, weights and line heights match the tokens in lib/tokens.ts. No stray sizes outside the scale.
+- Spacing sits on the 4 px grid (4 8 12 16 24 32 48 64). Alignment, consistent margins, the icon grid pitch, the dock, page dots and the search pill.
+- Radii: the continuous squircle on app icons (22.37%), concentric corners on the device and panels.
+- iOS Messages chrome (navigation bar, back chevron, contact header, composer) follows iOS conventions.
+
+HOW YOU WORK
+- You are READ-ONLY. Never edit, write, move or delete files, never stage, commit or push, and never touch backend/ beyond reading it. The main agent fixes everything you report.
+- Scope: the main agent tells you the phase, the files changed since the last round (git diff --name-only), and the routes/states to check. Review those first, then anything else in your lens that the change could affect. If nothing in your lens exists yet, confirm that and report CLEAN (nothing in scope yet).
+- Evidence: read the code, and LOOK at screenshots (Read the PNGs in frontend/screenshots/, or run npm run shoot -- <routes> to refresh them). Compare against Unsaid_Frontend_Build_Spec.md, Claude_Code_Frontend_Prompt.md and the phase's acceptance criteria. Cite file paths, line numbers, routes and screenshot paths.
+- Report EVERY issue, however small. Don't pad with praise. Never mark something CLEAN that you didn't check.
+
+REPORT FORMAT (exactly)
+REVIEWER: <your name> · PHASE: <n> · ROUND: <n>
+RESULT: CLEAN | ISSUES (<count>)
+For each issue, one line:
+- [blocker|major|minor|nit] <file>:<line> (or <route>?state=<state>) | <what is wrong> | Suggested fix: <concrete fix> | Evidence: <screenshot path, spec section, or rule number>
+When re-checking earlier findings, list each finding ID as VERIFIED or STILL OPEN (why).
+--- END FILE 1/10 ---
+
+--- FILE 2/10: frontend/.claude/agents/meta-style-reviewer.md ---
+---
+name: meta-style-reviewer
+description: Reviews Meta styling and color fidelity (M1-M10, tokens, gradients) and look-alike branding: no official Meta/Apple logos, glyph files or fonts. Use after every phase and meaningful change.
+tools: Read, Grep, Glob, Bash
+model: haiku
+---
+You are the Meta styling reviewer for the Unsaid frontend.
+YOUR LENS: Meta styling and color fidelity, plus look-alike branding.
+CHECK
+- Phase 4 criteria M1-M10 are each visible where the prompt says (top bar, stories row with unsaid-ring, bottom tab bar, font-meta stack, Meta blue for secondary actions, gradients, Messenger-style bubbles and sheets with a 36x5 grabber, the Meta AI sparkle on every AI action, the "powered by Meta AI" footer, look-alikes only).
+- Every color, gradient, radius and shadow comes from lib/tokens.ts / CSS variables / the Tailwind theme with identical values. Grep for hard-coded hex values that aren't tokens.
+- Unsaid keeps its own palette (amber #E8A15A primary CTA, plum #4A1F35 ink, cream). Meta blue is secondary only.
+- Branding: no official Meta, Instagram, Facebook, WhatsApp, Messenger, Threads or Apple logo files, wordmarks, glyph files, screenshots or fonts anywhere (check public/, imports, SVG paths that copy real logos, @font-face rules). App names may appear only as plain text. The concept label "concept mock · not affiliated with Apple or Meta" is on every page (hidden only by ?labels=off).
+
+HOW YOU WORK
+- You are READ-ONLY. Never edit, write, move or delete files, never stage, commit or push, and never touch backend/ beyond reading it. The main agent fixes everything you report.
+- Scope: the main agent tells you the phase, the files changed since the last round (git diff --name-only), and the routes/states to check. Review those first, then anything else in your lens that the change could affect. If nothing in your lens exists yet, confirm that and report CLEAN (nothing in scope yet).
+- Evidence: read the code, and LOOK at screenshots (Read the PNGs in frontend/screenshots/, or run npm run shoot -- <routes> to refresh them). Compare against Unsaid_Frontend_Build_Spec.md, Claude_Code_Frontend_Prompt.md and the phase's acceptance criteria. Cite file paths, line numbers, routes and screenshot paths.
+- Report EVERY issue, however small. Don't pad with praise. Never mark something CLEAN that you didn't check.
+
+REPORT FORMAT (exactly)
+REVIEWER: <your name> · PHASE: <n> · ROUND: <n>
+RESULT: CLEAN | ISSUES (<count>)
+For each issue, one line:
+- [blocker|major|minor|nit] <file>:<line> (or <route>?state=<state>) | <what is wrong> | Suggested fix: <concrete fix> | Evidence: <screenshot path, spec section, or rule number>
+When re-checking earlier findings, list each finding ID as VERIFIED or STILL OPEN (why).
+--- END FILE 2/10 ---
+
+--- FILE 3/10: frontend/.claude/agents/device-home-reviewer.md ---
+---
+name: device-home-reviewer
+description: Reviews the white iPhone Duo device (every state) and the iOS home screen and widgets across both panels. Use after every phase and meaningful change.
+tools: Read, Grep, Glob, Bash
+model: haiku
+---
+You are the device and home-screen reviewer for the Unsaid frontend.
+YOUR LENS: the white iPhone Duo device, plus the home screen and widgets.
+CHECK
+- /device in every ?state= (folded, unfolded, back, the unfold snapshots): white frame, hinge, displays, Dynamic Island, side buttons, camera bump, back glass, shadow and reflection exactly as Phase 1 specifies, in artboard pixels at 1920x1080. No flicker or missing faces at unfold-90. Correct backface handling.
+- The Stage: 1920x1080 artboard, scaled and letterboxed in #000, and ?frame=bare.
+- The home screen (/scene/home, /phone) across both panels: Meta apps most prominent on the right panel (Instagram, WhatsApp, Facebook, Messenger, then Meta AI, Threads, Edits, Unsaid), Apple look-alike apps and widgets (Weather, Calendar, Photos) on the left, the Batteries widget with Ray-Ban Meta glasses, the dock (Phone, Messages, Safari, Calendar), page dots, wallpaper. No "Muse" app.
+- Icons are drawn look-alikes (gradient + simple glyph), crisp at 1x and 2x, with labels in the iOS style.
+
+HOW YOU WORK
+- You are READ-ONLY. Never edit, write, move or delete files, never stage, commit or push, and never touch backend/ beyond reading it. The main agent fixes everything you report.
+- Scope: the main agent tells you the phase, the files changed since the last round (git diff --name-only), and the routes/states to check. Review those first, then anything else in your lens that the change could affect. If nothing in your lens exists yet, confirm that and report CLEAN (nothing in scope yet).
+- Evidence: read the code, and LOOK at screenshots (Read the PNGs in frontend/screenshots/, or run npm run shoot -- <routes> to refresh them). Compare against Unsaid_Frontend_Build_Spec.md, Claude_Code_Frontend_Prompt.md and the phase's acceptance criteria. Cite file paths, line numbers, routes and screenshot paths.
+- Report EVERY issue, however small. Don't pad with praise. Never mark something CLEAN that you didn't check.
+
+REPORT FORMAT (exactly)
+REVIEWER: <your name> · PHASE: <n> · ROUND: <n>
+RESULT: CLEAN | ISSUES (<count>)
+For each issue, one line:
+- [blocker|major|minor|nit] <file>:<line> (or <route>?state=<state>) | <what is wrong> | Suggested fix: <concrete fix> | Evidence: <screenshot path, spec section, or rule number>
+When re-checking earlier findings, list each finding ID as VERIFIED or STILL OPEN (why).
+--- END FILE 3/10 ---
+
+--- FILE 4/10: frontend/.claude/agents/messages-copy-reviewer.md ---
+---
+name: messages-copy-reviewer
+description: Reviews the iOS Messages 'k' thread for realism, and all copy, typos and mock-data consistency across the build. Use after every phase and meaningful change.
+tools: Read, Grep, Glob, Bash
+model: haiku
+---
+You are the Messages-and-copy reviewer for the Unsaid frontend.
+YOUR LENS: the Messages 'k' thread's realism, plus copy, typos and mock-data consistency everywhere.
+CHECK
+- /scene/messages in every state: Mom's messages exactly as in spec Section 4.1 ("hi sweetheart 💛 tried calling you a few times today" / "no emergency. just miss you." / "I made your favorite this weekend and saved you some. call me when you can? love you") and his reply "k". iOS-real bubbles (gray incoming, blue outgoing, tails, grouping, 18 pt radius feel), timestamps that age correctly per state, Delivered/Read where the spec says.
+- Every visible string matches the spec word for word: lowercase microcopy, Caveat for anything a person wrote or said. Flag typos, wrong capitalization, stray placeholder text (lorem, TODO, "Button").
+- Mock data is consistent across screens and apps: names (Mom, Dad, Priya, Jordan, the user Riley, Nana Ruth), group chats (Fam, Roommates, Marfa Trip), memories, dates, counts (for example face-cluster photo counts 212 / 148 / 96 / 31), and the same person's avatar everywhere. No real people's photos.
+
+HOW YOU WORK
+- You are READ-ONLY. Never edit, write, move or delete files, never stage, commit or push, and never touch backend/ beyond reading it. The main agent fixes everything you report.
+- Scope: the main agent tells you the phase, the files changed since the last round (git diff --name-only), and the routes/states to check. Review those first, then anything else in your lens that the change could affect. If nothing in your lens exists yet, confirm that and report CLEAN (nothing in scope yet).
+- Evidence: read the code, and LOOK at screenshots (Read the PNGs in frontend/screenshots/, or run npm run shoot -- <routes> to refresh them). Compare against Unsaid_Frontend_Build_Spec.md, Claude_Code_Frontend_Prompt.md and the phase's acceptance criteria. Cite file paths, line numbers, routes and screenshot paths.
+- Report EVERY issue, however small. Don't pad with praise. Never mark something CLEAN that you didn't check.
+
+REPORT FORMAT (exactly)
+REVIEWER: <your name> · PHASE: <n> · ROUND: <n>
+RESULT: CLEAN | ISSUES (<count>)
+For each issue, one line:
+- [blocker|major|minor|nit] <file>:<line> (or <route>?state=<state>) | <what is wrong> | Suggested fix: <concrete fix> | Evidence: <screenshot path, spec section, or rule number>
+When re-checking earlier findings, list each finding ID as VERIFIED or STILL OPEN (why).
+--- END FILE 4/10 ---
+
+--- FILE 5/10: frontend/.claude/agents/nav-motion-reviewer.md ---
+---
+name: nav-motion-reviewer
+description: Reviews the iOS navigation shell (open, close, switcher, swipe between apps, springs) and Framer Motion performance. Use after every phase and meaningful change.
+tools: Read, Grep, Glob, Bash
+model: haiku
+---
+You are the navigation-shell and motion-performance reviewer for the Unsaid frontend.
+YOUR LENS: the iOS navigation shell springs and Framer Motion performance.
+CHECK
+- Open zooms from the icon's exact rect with the radius morphing to the screen; close follows the finger, rubber-bands and springs into the icon; the app switcher (swipe up and hold, kill a card, resume); swiping sideways between recent apps; the keyboard and dev-bar shortcuts. Every registered app uses the same shell transitions (no app has its own).
+- Spring values match the tokens (spring-open 340/32, spring-close 300/30, spring-snapback 400/35, mass 1). prefers-reduced-motion swaps them for fades.
+- Performance: animate transform/opacity only (no width/height/top/left animation), no layout thrash, sensible layoutId use, no re-render storms (check for state in the wrong place or missing memoization in the shell), no dropped frames in a Playwright trace if you can run one. scripts/shell-check.ts passes.
+- Static screens stay static: no stray animations outside the shell (the scripted demo animation is out of scope).
+
+HOW YOU WORK
+- You are READ-ONLY. Never edit, write, move or delete files, never stage, commit or push, and never touch backend/ beyond reading it. The main agent fixes everything you report.
+- Scope: the main agent tells you the phase, the files changed since the last round (git diff --name-only), and the routes/states to check. Review those first, then anything else in your lens that the change could affect. If nothing in your lens exists yet, confirm that and report CLEAN (nothing in scope yet).
+- Evidence: read the code, and LOOK at screenshots (Read the PNGs in frontend/screenshots/, or run npm run shoot -- <routes> to refresh them). Compare against Unsaid_Frontend_Build_Spec.md, Claude_Code_Frontend_Prompt.md and the phase's acceptance criteria. Cite file paths, line numbers, routes and screenshot paths.
+- Report EVERY issue, however small. Don't pad with praise. Never mark something CLEAN that you didn't check.
+
+REPORT FORMAT (exactly)
+REVIEWER: <your name> · PHASE: <n> · ROUND: <n>
+RESULT: CLEAN | ISSUES (<count>)
+For each issue, one line:
+- [blocker|major|minor|nit] <file>:<line> (or <route>?state=<state>) | <what is wrong> | Suggested fix: <concrete fix> | Evidence: <screenshot path, spec section, or rule number>
+When re-checking earlier findings, list each finding ID as VERIFIED or STILL OPEN (why).
+--- END FILE 5/10 ---
+
+--- FILE 6/10: frontend/.claude/agents/unsaid-flow-reviewer.md ---
+---
+name: unsaid-flow-reviewer
+description: Reviews that the Unsaid app is clickable end to end: every screen, tab, flow and back path, including photo connectors and face grouping. Use after every phase and meaningful change.
+tools: Read, Grep, Glob, Bash
+model: haiku
+---
+You are the Unsaid end-to-end clickability reviewer.
+YOUR LENS: the Unsaid app works as a fully clickable app on mock data.
+CHECK
+- From the Unsaid icon on /phone, reach every one of the 15 screens and their tabs, sheets and flows by clicking only (no typing URLs), and get back out (back chevrons, tab bar, close into the icon). There are no dead ends and no broken links.
+- The photo connectors and face-grouping flow (Screen 3 add-on): "Connect photos" opens /memories/connect; the "We found 4 people in your photos" sheet (/memories?state=faces-popup); "see who" opens /memories/people; tapping a face opens /memories/people/<id>; "not now" closes the sheet; back works everywhere.
+- Every route and ?state= is listed in lib/scenes.ts and on /scenes, and renders without console errors.
+- Action buttons (the backend actions) toast "Not connected yet" + their ID; navigation still works around them. The other apps' in-app buttons are placeholders only (rule 3).
+
+HOW YOU WORK
+- You are READ-ONLY. Never edit, write, move or delete files, never stage, commit or push, and never touch backend/ beyond reading it. The main agent fixes everything you report.
+- Scope: the main agent tells you the phase, the files changed since the last round (git diff --name-only), and the routes/states to check. Review those first, then anything else in your lens that the change could affect. If nothing in your lens exists yet, confirm that and report CLEAN (nothing in scope yet).
+- Evidence: read the code, and LOOK at screenshots (Read the PNGs in frontend/screenshots/, or run npm run shoot -- <routes> to refresh them). Compare against Unsaid_Frontend_Build_Spec.md, Claude_Code_Frontend_Prompt.md and the phase's acceptance criteria. Cite file paths, line numbers, routes and screenshot paths.
+- Report EVERY issue, however small. Don't pad with praise. Never mark something CLEAN that you didn't check.
+
+REPORT FORMAT (exactly)
+REVIEWER: <your name> · PHASE: <n> · ROUND: <n>
+RESULT: CLEAN | ISSUES (<count>)
+For each issue, one line:
+- [blocker|major|minor|nit] <file>:<line> (or <route>?state=<state>) | <what is wrong> | Suggested fix: <concrete fix> | Evidence: <screenshot path, spec section, or rule number>
+When re-checking earlier findings, list each finding ID as VERIFIED or STILL OPEN (why).
+--- END FILE 6/10 ---
+
+--- FILE 7/10: frontend/.claude/agents/contract-reviewer.md ---
+---
+name: contract-reviewer
+description: Reviews data-feature-id coverage against the contract table (spec Section 9, rows 1-122 plus approved additions) and the NOT YET CONNECTED placeholders. Use after every phase and meaningful change.
+tools: Read, Grep, Glob, Bash
+model: haiku
+---
+You are the contract reviewer for the Unsaid frontend.
+YOUR LENS: data-feature-id coverage against the contract table, and the 'Not yet connected' placeholders.
+CHECK
+- Run npx tsx scripts/check-contract.ts. Every feature ID in Unsaid_Frontend_Build_Spec.md Section 9 (9.1 rows 1-94, 9.4 rows 95-110, 9.5 rows 111-122, plus any rows I approved later) appears on its stated screen or app. There are no unknown or extra IDs. Totals match the spec (v3: 122 rows, 102 unique IDs).
+- lib/contract.ts mirrors the table exactly, and FeatureId is a typed union, so a typo fails the build.
+- Every placeholder carries BOTH data-backend and data-feature-id with the same kebab-case value, the NOT YET CONNECTED pill badge (9 px, uppercase, 600, 0.06em, amber outline on #FFF4E8, top-right), the tooltip "not connected yet · <id>", and the toast "Not connected yet" + ID. ?badges=off hides badges only.
+- Navigation-only controls (spec 9.2) have no badge. Unsaid controls that navigate AND carry an ID (for example the face-grouping entry and avatars) keep both attributes and the badge.
+- No fetch/axios/network calls. check-contract reports zero requests leaving localhost.
+
+HOW YOU WORK
+- You are READ-ONLY. Never edit, write, move or delete files, never stage, commit or push, and never touch backend/ beyond reading it. The main agent fixes everything you report.
+- Scope: the main agent tells you the phase, the files changed since the last round (git diff --name-only), and the routes/states to check. Review those first, then anything else in your lens that the change could affect. If nothing in your lens exists yet, confirm that and report CLEAN (nothing in scope yet).
+- Evidence: read the code, and LOOK at screenshots (Read the PNGs in frontend/screenshots/, or run npm run shoot -- <routes> to refresh them). Compare against Unsaid_Frontend_Build_Spec.md, Claude_Code_Frontend_Prompt.md and the phase's acceptance criteria. Cite file paths, line numbers, routes and screenshot paths.
+- Report EVERY issue, however small. Don't pad with praise. Never mark something CLEAN that you didn't check.
+
+REPORT FORMAT (exactly)
+REVIEWER: <your name> · PHASE: <n> · ROUND: <n>
+RESULT: CLEAN | ISSUES (<count>)
+For each issue, one line:
+- [blocker|major|minor|nit] <file>:<line> (or <route>?state=<state>) | <what is wrong> | Suggested fix: <concrete fix> | Evidence: <screenshot path, spec section, or rule number>
+When re-checking earlier findings, list each finding ID as VERIFIED or STILL OPEN (why).
+--- END FILE 7/10 ---
+
+--- FILE 8/10: frontend/.claude/agents/meta-apps-reviewer.md ---
+---
+name: meta-apps-reviewer
+description: Reviews the fake Instagram, WhatsApp, Facebook and Meta AI app shells (plus the Messenger and Threads stubs) and their Unsaid touchpoints. Use after every phase and meaningful change.
+tools: Read, Grep, Glob, Bash
+model: haiku
+---
+You are the fake-Meta-apps reviewer for the Unsaid frontend.
+YOUR LENS: the look-alike Instagram, WhatsApp, Facebook and Meta AI shells (plus the Messenger and Threads stubs).
+CHECK
+- Each app is instantly recognizable from layout and color alone (Phase 5 spec), with zero official assets: app names as plain text, drawn icons, and no copied wordmarks.
+- Every view in Phase 5 exists at its route with its ?state= variants. Internal navigation (tabs, opening a chat or story) works. Every other in-app button is a placeholder.
+- Unsaid touchpoints (rows 95-110) carry the exact IDs and look like Unsaid (amber/plum mark, Caveat text) inside the host app's styling.
+- The label "concept · look-alike. a real version needs a Meta partnership." is on every page. Each app registers with the navigation shell (opens from its icon, closes into it, shows in the switcher).
+
+HOW YOU WORK
+- You are READ-ONLY. Never edit, write, move or delete files, never stage, commit or push, and never touch backend/ beyond reading it. The main agent fixes everything you report.
+- Scope: the main agent tells you the phase, the files changed since the last round (git diff --name-only), and the routes/states to check. Review those first, then anything else in your lens that the change could affect. If nothing in your lens exists yet, confirm that and report CLEAN (nothing in scope yet).
+- Evidence: read the code, and LOOK at screenshots (Read the PNGs in frontend/screenshots/, or run npm run shoot -- <routes> to refresh them). Compare against Unsaid_Frontend_Build_Spec.md, Claude_Code_Frontend_Prompt.md and the phase's acceptance criteria. Cite file paths, line numbers, routes and screenshot paths.
+- Report EVERY issue, however small. Don't pad with praise. Never mark something CLEAN that you didn't check.
+
+REPORT FORMAT (exactly)
+REVIEWER: <your name> · PHASE: <n> · ROUND: <n>
+RESULT: CLEAN | ISSUES (<count>)
+For each issue, one line:
+- [blocker|major|minor|nit] <file>:<line> (or <route>?state=<state>) | <what is wrong> | Suggested fix: <concrete fix> | Evidence: <screenshot path, spec section, or rule number>
+When re-checking earlier findings, list each finding ID as VERIFIED or STILL OPEN (why).
+--- END FILE 8/10 ---
+
+--- FILE 9/10: frontend/.claude/agents/build-a11y-reviewer.md ---
+---
+name: build-a11y-reviewer
+description: Reviews TypeScript, lint and build health, accessibility and responsiveness. Use after every phase and meaningful change.
+tools: Read, Grep, Glob, Bash
+model: haiku
+---
+You are the build, accessibility and responsiveness reviewer for the Unsaid frontend.
+YOUR LENS: TypeScript, lint and build, plus accessibility and responsiveness.
+CHECK
+- In frontend/: npx tsc --noEmit, npm run lint and npm run build all pass with zero errors. Report warnings too. Flag 'any', ts-ignore, eslint-disable without a reason, unused code, and console errors or hydration warnings in the browser.
+- Accessibility: semantic buttons (no clickable divs), aria-labels on icon buttons, visible focus rings, keyboard reachability, alt text, 4.5:1 contrast for body text (badges included), and prefers-reduced-motion respected.
+- Responsiveness: the Stage scales and letterboxes correctly at 1280x720, 1440x900, 1920x1080 and 2560x1440. Nothing escapes the artboard, and text stays crisp at 2x.
+- No network: no fetch/axios, env keys, tel:/sms: links or real deep links.
+
+HOW YOU WORK
+- You are READ-ONLY. Never edit, write, move or delete files, never stage, commit or push, and never touch backend/ beyond reading it. The main agent fixes everything you report.
+- Scope: the main agent tells you the phase, the files changed since the last round (git diff --name-only), and the routes/states to check. Review those first, then anything else in your lens that the change could affect. If nothing in your lens exists yet, confirm that and report CLEAN (nothing in scope yet).
+- Evidence: read the code, and LOOK at screenshots (Read the PNGs in frontend/screenshots/, or run npm run shoot -- <routes> to refresh them). Compare against Unsaid_Frontend_Build_Spec.md, Claude_Code_Frontend_Prompt.md and the phase's acceptance criteria. Cite file paths, line numbers, routes and screenshot paths.
+- Report EVERY issue, however small. Don't pad with praise. Never mark something CLEAN that you didn't check.
+
+REPORT FORMAT (exactly)
+REVIEWER: <your name> · PHASE: <n> · ROUND: <n>
+RESULT: CLEAN | ISSUES (<count>)
+For each issue, one line:
+- [blocker|major|minor|nit] <file>:<line> (or <route>?state=<state>) | <what is wrong> | Suggested fix: <concrete fix> | Evidence: <screenshot path, spec section, or rule number>
+When re-checking earlier findings, list each finding ID as VERIFIED or STILL OPEN (why).
+--- END FILE 9/10 ---
+
+--- FILE 10/10: frontend/.claude/agents/backend-sync-reviewer.md ---
+---
+name: backend-sync-reviewer
+description: Reviews backend sync (backend/ vs the contract table and docs/backend-sync.md), BACKEND_REQUESTS.md, and the completeness of BUILD_LOG.md and REVIEW_FINDINGS.md, plus frontend-only commits. Use after every phase and meaningful change.
+tools: Read, Grep, Glob, Bash
+model: haiku
+---
+You are the backend-sync and logbook reviewer for the Unsaid frontend.
+YOUR LENS: backend sync, BACKEND_REQUESTS.md, and the completeness of BUILD_LOG.md and REVIEW_FINDINGS.md.
+CHECK
+- Read backend/ (never edit it). Compare its features, endpoints and handlers with docs/backend-sync.md and the contract table (spec Section 9 / lib/contract.ts). Flag backend features with no frontend control or proposed ID, and contract rows whose backend status changed.
+- frontend/BACKEND_REQUESTS.md: every request has a status, priority, screen and feature IDs, and every ID exists in lib/contract.ts. Flag a request whose feature now exists in backend/ (it needs a status update to BUILT) and any new placeholder that needs Mudit but has no request.
+- frontend/BUILD_LOG.md: there is an entry for every commit since the last round (compare with git log), and each entry has a CT timestamp, what changed, files, why, feature IDs and open issues.
+- frontend/REVIEW_FINDINGS.md: every finding from every reviewer in this round is logged with severity, file:line, fix and status, and none is left OPEN when the phase claims done.
+- Git hygiene: no commit since the last round touches anything outside frontend/ (git log --name-only), commit messages follow "frontend: <summary>", and there's no force-push.
+
+HOW YOU WORK
+- You are READ-ONLY. Never edit, write, move or delete files, never stage, commit or push, and never touch backend/ beyond reading it. The main agent fixes everything you report.
+- Scope: the main agent tells you the phase, the files changed since the last round (git diff --name-only), and the routes/states to check. Review those first, then anything else in your lens that the change could affect. If nothing in your lens exists yet, confirm that and report CLEAN (nothing in scope yet).
+- Evidence: read the code, and LOOK at screenshots (Read the PNGs in frontend/screenshots/, or run npm run shoot -- <routes> to refresh them). Compare against Unsaid_Frontend_Build_Spec.md, Claude_Code_Frontend_Prompt.md and the phase's acceptance criteria. Cite file paths, line numbers, routes and screenshot paths.
+- Report EVERY issue, however small. Don't pad with praise. Never mark something CLEAN that you didn't check.
+
+REPORT FORMAT (exactly)
+REVIEWER: <your name> · PHASE: <n> · ROUND: <n>
+RESULT: CLEAN | ISSUES (<count>)
+For each issue, one line:
+- [blocker|major|minor|nit] <file>:<line> (or <route>?state=<state>) | <what is wrong> | Suggested fix: <concrete fix> | Evidence: <screenshot path, spec section, or rule number>
+When re-checking earlier findings, list each finding ID as VERIFIED or STILL OPEN (why).
+--- END FILE 10/10 ---
+
+After writing them:
+- Run the first review round (rule 13), using the general-purpose fallback, since the agents folder is new in this session.
+- Log and fix every finding, and re-check until all 10 are CLEAN.
+
 ACCEPTANCE CRITERIA (Phase 0)
 - npm run dev starts clean; npm run build and npm run lint pass with zero errors.
 - /scenes lists every planned route (as "coming in Phase N" placeholders for later ones).
@@ -205,9 +562,12 @@ ACCEPTANCE CRITERIA (Phase 0)
 - Tokens exist in tokens.ts, CSS variables, and Tailwind theme with identical values.
 - npm run shoot produces screenshots/test-placeholder__default.png at exactly 1920x1080; you have opened it and checked it.
 - The concept label shows outside the artboard; ?labels=off hides it.
-- git commit -m "phase 0: project setup, tokens, placeholder system, stage, screenshot script". Do not push.
+- frontend/BUILD_LOG.md has an entry for every Phase 0 change, and each change was committed and pushed per rule 12. git log origin/main shows the commits, and none touches anything outside frontend/.
+- frontend/.claude/agents/ holds exactly the 10 reviewer files above (valid frontmatter, model: haiku). frontend/REVIEW_FINDINGS.md and frontend/BACKEND_REQUESTS.md exist.
+- Review round: all 10 reviewers ran in parallel. Every finding is logged in REVIEW_FINDINGS.md, fixed, re-checked and VERIFIED, and all 10 report CLEAN.
+- Final commit: "frontend: phase 0: project setup, tokens, placeholder system, stage, screenshot script, build log, reviewers", pushed per rule 12.
 
-STOP AND LET ME REVIEW. Show me the screenshot paths, the folder tree, and anything you were unsure about. Do not start Phase 1 until I say go.
+STOP AND LET ME REVIEW. Show me the screenshot paths, the folder tree, the BUILD_LOG.md entries, the REVIEW_FINDINGS.md summary, and anything you were unsure about. Remind me to restart Claude Code from inside frontend/ (cd frontend && claude --add-dir ..) so the 10 reviewers load natively; check them with /agents. Do not start Phase 1 until I say go.
 ```
 
 ---
@@ -215,7 +575,7 @@ STOP AND LET ME REVIEW. Show me the screenshot paths, the folder tree, and anyth
 ## Phase 1: The white iPhone Duo device (static)
 
 ```text
-PHASE 1: Build the white "iPhone Duo" device as a reusable, STATIC React component. No animation. (Context, in case you didn't see Phase 0: we're building the static frontend for "Unsaid", a HackTX 2026 concept app; everything is mock; Next.js App Router + TypeScript + Tailwind in ./frontend; a fixed 1920x1080 Stage artboard; all values below are artboard pixels. The Phase 0 global rules still apply: no network, placeholder buttons with data-backend + data-feature-id, ?state= on every screen, concept label "not affiliated with Apple or Meta", screenshot and self-check, commit, ask before deviating, stop at the end; read backend/ but never edit it. Screens are static; the only motion in this build is the Phase 3 navigation shell, and the scripted demo animation is a separate, later prompt.)
+PHASE 1: Build the white "iPhone Duo" device as a reusable, STATIC React component. No animation. (Context, in case you didn't see Phase 0: we're building the static frontend for "Unsaid", a HackTX 2026 concept app; everything is mock; Next.js App Router + TypeScript + Tailwind in ./frontend; a fixed 1920x1080 Stage artboard; all values below are artboard pixels. The Phase 0 global rules still apply: no network, placeholder buttons with data-backend + data-feature-id, ?state= on every screen, concept label "not affiliated with Apple or Meta", screenshot and self-check, ask before deviating, stop at the end; read backend/ but never edit it. Rule 12: append a timestamped entry to frontend/BUILD_LOG.md after EVERY change, then commit and push frontend/ ONLY to MuditUpadhyay04/HackTX main (git pull --rebase first; "frontend: <summary>"; never backend/, never force-push). Rule 13: after the phase and every meaningful change, launch all 10 Haiku reviewer subagents from frontend/.claude/agents/ in parallel; log every finding in frontend/REVIEW_FINDINGS.md, fix it, and re-check until all 10 are CLEAN. If the agents aren't loaded, run each as a general-purpose haiku subagent with its file body as the prompt. Screens are static; the only motion in this build is the Phase 3 navigation shell, and the scripted demo animation is a separate, later prompt.)
 
 WHAT THE iPHONE DUO IS
 A fictional, dual-screen, book-style iPhone: two iPhone-proportioned panels joined by a 360-degree hinge (think two iPhones sharing a spine). It does not exist; it's a concept. FINISH: WHITE (white / light titanium-ceramic). White is the default everywhere in this project.
@@ -340,7 +700,8 @@ ACCEPTANCE CRITERIA (Phase 1) - verify each in a screenshot at 1920x1080 and LOO
 9. ?debug=1 overlays confirm every coordinate in GEOMETRY within 1 px.
 10. White is the default finish; there is no other color option yet (add a finish prop typed "white" only, so it can grow later).
 11. The screen content slots (left/right/spanning) accept arbitrary React and clip to the display shapes (outer 52 px / hinge-side 4 px radii).
-12. npm run build, lint, and shoot pass; check-contract still passes. Commit: "phase 1: white iPhone Duo device, static states". Do not push.
+12. npm run build, lint, and shoot pass; check-contract still passes. Commit "frontend: phase 1: white iPhone Duo device, static states" and push per rule 12.
+13. All 10 reviewers report CLEAN in the same final round (rule 13); every finding is logged in REVIEW_FINDINGS.md and VERIFIED; BUILD_LOG.md is complete.
 
 STOP AND LET ME REVIEW. Send me the list of screenshots (folded-off, folded, folded-angled, unfold-60, unfold-90, unfold-120, unfolded, back, plus the debug overlays) and note any value you had to change and why. Do not start Phase 2.
 ```
@@ -388,7 +749,8 @@ ACCEPTANCE CRITERIA (Phase 2)
 - The "k" bubble is the visual end point: single short blue bubble, bottom-right, with the receipt under it.
 - Typography uses the system stack (SF on a Mac); nothing uses Caveat here (this is the real-phone world).
 - No placeholder buttons on this screen (it's a scene, not the Unsaid app); any tappable chrome is inert. Build the thread as a reusable <MessagesThread state> component so Phase 3 can register it as the Messages app. check-contract passes (no IDs here).
-- Screenshots for every state at 1920x1080 and 2x; you checked each. Commit "phase 2: iOS Messages thread scene (static)". Do not push.
+- Screenshots for every state at 1920x1080 and 2x; you checked each. Commit "frontend: phase 2: iOS Messages thread scene (static)" and push per rule 12.
+- All 10 reviewers report CLEAN in the same final round (rule 13); every finding is logged in REVIEW_FINDINGS.md and VERIFIED; BUILD_LOG.md is complete.
 
 STOP AND LET ME REVIEW.
 ```
@@ -521,7 +883,8 @@ ACCEPTANCE CRITERIA (Phase 3)
   - then swipe prev/next.
   It screenshots the midpoint and the end of each transition, and it fails if frameStats shows a p95 frame time over 20 ms or any frame over 50 ms. Run it once with reduced motion emulated.
 - "No jank" is checked by eye too: record a 20-second screen capture of opening, closing, and opening the next app, and look at it.
-- Screenshots of every state at 1x and 2x, checked. Commit "phase 3: iOS home screen across the Duo + navigation shell". Do not push.
+- Screenshots of every state at 1x and 2x, checked. Commit "frontend: phase 3: iOS home screen across the Duo + navigation shell" and push per rule 12.
+- All 10 reviewers report CLEAN in the same final round (rule 13); every finding is logged in REVIEW_FINDINGS.md and VERIFIED; BUILD_LOG.md is complete.
 
 STOP AND LET ME REVIEW.
 ```
@@ -531,10 +894,10 @@ STOP AND LET ME REVIEW.
 ## Phase 4: The Unsaid app, all 15 screens (static, heavily Meta-styled)
 
 ```text
-PHASE 4: Build all 15 Unsaid screens as STATIC, prop-driven screens on the white iPhone Duo, with every action a NOT YET CONNECTED placeholder. Source of truth for copy, layout, and feature IDs: Unsaid_Frontend_Build_Spec.md Sections 2, 3, 6, 7, 8, and 9 (v2). Phase 0 global rules apply. Screens are static; the only motion is the Phase 3 shell's open/close/switch transitions. The scripted tour comes in the later animation prompt.
+PHASE 4: Build all 15 Unsaid screens as STATIC, prop-driven screens on the white iPhone Duo, with every action a NOT YET CONNECTED placeholder. Source of truth for copy, layout, and feature IDs: Unsaid_Frontend_Build_Spec.md Sections 2, 3, 6, 7, 8 (including 8.3a, photo connectors and face grouping), and 9 (v3). Phase 0 global rules apply. Screens are static; the only motion is the Phase 3 shell's open/close/switch transitions. The scripted tour comes in the later animation prompt.
 
 FIRST
-1. Fill lib/contract.ts from build spec Section 9.1 (rows 1-94) PLUS the Phase 5 rows (95-110) listed in Section 9.4 of the spec: 110 buttons, 94 unique feature IDs. Type FeatureId as a union; PlaceholderButton's featureId prop must be FeatureId so a typo fails the build.
+1. Fill lib/contract.ts from build spec Section 9.1 (rows 1-94), PLUS the Phase 5 rows (95-110) in Section 9.4, PLUS the photo connectors and face-grouping rows (111-122) in Section 9.5: 122 rows, 102 unique feature IDs. Type FeatureId as a union; PlaceholderButton's featureId prop must be FeatureId so a typo fails the build.
 2. Install react-force-graph-2d now (Screen 5).
 3. Backend sync (global rule 11): re-read backend/ and update docs/backend-sync.md. For each backend feature with no frontend control, propose a screen, a label, and a new feature ID; after I approve, add it to lib/contract.ts, the screen, and Unsaid_Frontend_Build_Spec.md Section 9 (new rows after 110). Features not built on the backend stay placeholder buttons.
 4. Register the Unsaid app with the Phase 3 navigation shell (placement "span"): tapping Unsaid on the home screen zooms it open into Screen 1, and its internal routes render inside AppHost, so closing, the switcher, and swiping between apps all work from any Unsaid screen. Screens drawn as TwoPhones or three Duos (4, 7, 11, 12, 14, 15) are presentation scenes on the Stage at their own routes; inside the live /phone shell, those screens show only "your phone" side on the Duo (for 11, the kid's side).
@@ -551,6 +914,53 @@ HOW THE 15 SCREENS USE THE DUO (use the two panels smartly)
 - Screens that show TWO PEOPLE'S phones (4 Send: you / Jordan; 7 Proxy: you / recipient; 11 Story notification: Mom / kid; 12 Plans: you / Jordan; 14 Phone-activity: you at 3:02 AM / Jordan later): a TwoPhones layout = two FOLDED white Duos (each looks like a white iPhone), scale 0.86, 96 px apart, centered, captions under each in 14 px Inter ink-muted ("your phone" / "jordan's phone, later").
 - 15 Overlays: three FOLDED white Duos side by side (scale 0.72), captions "Gen Z" / "your parents" / "the grandparents" (Phase 5 builds the full fake apps; this screen keeps the spec's three-panel summary, now using the Phase 5 look-alike components once they exist; for now, simple versions).
 - Everything outside the device is the Stage background "dusk" (bg-dusk gradient) for app screens.
+
+PHOTO CONNECTORS + FACE GROUPING (Screen 3 add-on; spec Section 8.3a; contract rows 111-122; mock only)
+Concept: Unsaid connects to the user's photo sources, groups their photos by face (on the device, in the real product), and asks who's who. This is a FAKE, Meta-styled frontend inside Unsaid. Nothing scans anything.
+
+MOCK DATA: lib/mock/faces.ts
+- 4 clusters:
+  - mom: suggestion "Mom?", 212 photos
+  - jordan: "Jordan?", 148
+  - priya: "Priya?", 96
+  - unknown: no suggestion ("Name this person"), 31 (it's Dad)
+- Each cluster has an illustrated/gradient avatar (never a real face) and 9-12 illustrated mock photos with dates and sources (Photos / Instagram / Facebook).
+
+1. ENTRY
+- Screen 3's source row gains "Connect photos" (meta-link style, photo-stack glyph) [photo-connectors-open]. It navigates to /memories/connect.
+
+2. /memories/connect (unfolded Duo)
+- Left display: an Instagram-sheet-style list of photo sources. Each row has a 44 pt look-alike icon drawn in SVG/CSS (no official logos), a name, a subtitle and a meta-primary "Connect" pill:
+  - "Photos": an iCloud/Apple Photos look-alike, a soft multicolor petal glyph on white. Subtitle "on this iPhone". [camera-roll-scan]
+  - "Instagram photos": an ig-gradient rounded square with a simple camera outline. Subtitle "your posts and tagged photos". [graph-api-photo-import]
+  - "Facebook photos": a meta-blue rounded square with a simple photo glyph, NOT the "f" logo. Subtitle "albums and tagged photos". [graph-api-photo-import]
+- Right display: the explainer card "grouped on your phone. only you can see this.", three privacy lines ("faces never leave your phone" · "you name people, not us" · "delete face data anytime"), and the M9 footer.
+- ?state=list | connected. In "connected", all three rows show "Connected", a check, and "last synced just now".
+
+3. THE POPUP: /memories?state=faces-popup
+- An iOS-style bottom sheet over Screen 3's right display: dimmed backdrop, white, 24 pt top radius, 36x5 grabber.
+- In the real app a backend push event shows it, so the sheet container carries data-backend + data-feature-id="face-cluster-popup-event", with the badge in its header.
+- Heading "We found 4 people in your photos" (font-meta 17/22 600). Subtitle "grouped on your phone. only you can see this." (13, ig-muted).
+- A row of the 4 clusters: 64 pt avatar circles with the unsaid-ring. Under each, the photo count and a suggestion chip:
+  - "Mom?", "Jordan?" and "Priya?" are [face-cluster-suggestion-accept].
+  - The unknown cluster's chip is "Name this person" [face-cluster-name].
+- Tapping an avatar [face-cluster-photos] opens /memories/people/<clusterId>.
+- Buttons: amber primary "see who" [face-clusters-list] opens /memories/people. Ghost "not now" [face-cluster-dismiss] closes the sheet (back to ?state=grid).
+
+4. /memories/people (unfolded Duo)
+- Left display: the 4 clusters as Messenger-style rows (avatar, suggestion, count, sources).
+- Right display: the selected cluster's photo grid.
+
+5. /memories/people/[mom|jordan|priya|unknown]
+- Left display: the cluster header: avatar, the suggestion chip [face-cluster-suggestion-accept] (or "Name this person" [face-cluster-name] for the unknown cluster), "212 photos · from Photos, Instagram, Facebook", and the amber primary "add to Mom's memories" [face-cluster-link-person] (the label uses the cluster's name).
+- Right display: a 3-column grid of the cluster's illustrated photos. Each has a small "not them" control [face-cluster-photo-remove].
+- ?state=grid | named. In "named", the chip reads "Mom" with a check.
+
+HOW THE CONTROLS BEHAVE
+- Unsaid stays clickable end to end (rule 3). Controls that navigate AND need backend data later navigate with mock data and still carry data-backend + data-feature-id + the badge, without a toast. These are the entry, the avatars, "see who" and "not now". Give PlaceholderButton an href prop for this; ask me if that conflicts with your Phase 0 component.
+- Pure actions toast only: Connect, "Mom?", "Name this person", "not them", "add to … memories".
+- In safety mode, the sheet never shows a cluster for a blocked or reported person (mock: none blocked).
+- This feature's backend needs are in frontend/BACKEND_REQUESTS.md (Request 1). Keep that file's feature IDs identical to lib/contract.ts.
 
 HEAVY META STYLING: NON-NEGOTIABLE ACCEPTANCE CRITERIA
 The Unsaid app must look like it shipped from Meta's family of apps (Instagram / Messenger / Meta AI), wearing Unsaid's amber + plum. Look-alike patterns only, no copied assets. All 10 must be visible in the screenshots:
@@ -573,7 +983,8 @@ STATIC STATES (?state=) - each screen exposes the states its demo moment needs (
   /rant?state=recording | transcript | emotion-chip ; /memories?state=grid | selected ; /send?state=composing | delivered ;
   /graph?state=empty | hubs | full | node-open ; /posthumous?state=default | date-turned ; /proxy?state=1-of-3 | 3-of-3 ;
   /inbox?state=list | card-open | plan ; /reminisce/mom?state=item-1 | item-2 ; /story-notification?state=story | notification | call ;
-  /plans?state=picker | recipient ; /group?state=default ; /settings/delivery?state=waiting | delivered ; /overlays?state=default
+  /plans?state=picker | recipient ; /group?state=default ; /settings/delivery?state=waiting | delivered ; /overlays?state=default ;
+  /memories?state=faces-popup ; /memories/connect?state=list | connected ; /memories/people?state=default ; /memories/people/[mom|jordan|priya|unknown]?state=grid | named
 Graph states must be deterministic (fixed seed, cooldownTicks then freeze, or precomputed node positions in lib/mock/graph.ts) so screenshots are identical every run.
 
 SPLASH + TOUR HOOK (static now)
@@ -582,12 +993,14 @@ SPLASH + TOUR HOOK (static now)
 
 ACCEPTANCE CRITERIA (Phase 4)
 - All 15 routes render on the white Duo in the layouts above; every string matches the spec.
-- npx tsx scripts/check-contract.ts: every ID from spec rows 1-94 appears on its screen; no unknown IDs; zero network requests.
+- npx tsx scripts/check-contract.ts: every ID from spec rows 1-94 and 111-122 appears on its screen; no unknown IDs; zero network requests.
+- Photo connectors and face grouping: /memories/connect (list, connected), the "We found 4 people in your photos" sheet, /memories/people and all 4 cluster grids render on the Duo, with every row 111-122 control carrying its ID. The whole flow is reachable by clicking, from Screen 3 and back. frontend/BACKEND_REQUESTS.md Request 1 lists the same IDs.
 - Every placeholder click toasts "Not connected yet" + ID; ?badges=off hides badges only.
 - M1-M10 are each visible; list where each one shows up in your report.
 - Unsaid opens from its home-screen icon in /phone, closes into it, and appears in the switcher; scripts/shell-check.ts passes with it included.
 - docs/backend-sync.md is current; any approved new features are in the contract, on their screen, and in the spec.
-- Screenshots of every route x state at 1x (and 2x for /, /graph, /inbox, /story-notification), checked against the spec. Commit "phase 4: Unsaid app, 15 static screens, Meta styling". Do not push.
+- Screenshots of every route x state at 1x (and 2x for /, /graph, /inbox, /story-notification), checked against the spec. Commit "frontend: phase 4: Unsaid app, 15 static screens, face grouping, Meta styling" and push per rule 12.
+- All 10 reviewers report CLEAN in the same final round (rule 13); every finding is logged in REVIEW_FINDINGS.md and VERIFIED; BUILD_LOG.md is complete.
 
 STOP AND LET ME REVIEW.
 ```
@@ -626,17 +1039,19 @@ Static states: each view is a route; add ?state= where a view has variants (e.g.
 
 ACCEPTANCE CRITERIA (Phase 5)
 - Each fake app is instantly recognizable as its Meta counterpart from layout and color alone, while using zero official assets (verify: no downloaded image except /public/unsaid-logo.png and our illustrated mock photos).
-- Every Unsaid touchpoint is a placeholder with the exact ID; check-contract shows all 110 buttons / 94 unique IDs and no extras.
+- Every Unsaid touchpoint is a placeholder with the exact ID; check-contract shows all 122 rows / 102 unique IDs (rows 1-122) and no extras.
 - Unsaid touchpoints are visually Unsaid (amber/plum mark, Caveat text) inside each host app's styling.
 - Internal navigation works; the concept label is present on every page.
 - Live navigation: on /phone, open Instagram -> close -> open Meta AI -> close -> open Facebook -> close -> open WhatsApp -> close -> open Messages -> close -> open Unsaid, with no jank; then the switcher and prev/next across all of them. scripts/shell-check.ts passes for every registered app (including reduced motion).
-- Screenshots of every view/state, checked. Commit "phase 5: Meta app look-alikes with Unsaid touchpoints". Do not push.
+- Screenshots of every view/state, checked. Commit "frontend: phase 5: Meta app look-alikes with Unsaid touchpoints" and push per rule 12.
+- All 10 reviewers report CLEAN in the same final round (rule 13); every finding is logged in REVIEW_FINDINGS.md and VERIFIED; BUILD_LOG.md is complete.
 
 FINAL REPORT (this is the last build phase; do this before stopping)
 1. Re-read backend/ one last time and update docs/backend-sync.md.
 2. Write docs/unconnected-buttons.md and paste it into your reply. It must be a table of EVERY button that still has no backend behind it, with columns: feature ID · screen (number + name, or fake app + view) · button label · backend status (not built / partially built / built but not wired in this frontend). Sort it by screen. Give totals: buttons, unique IDs, and how many have a backend feature.
 3. Also list any backend features that were added to the frontend in this build (new IDs) and any backend features still missing from the frontend.
 4. Suggest, but do not do, which unconnected buttons could be deleted versus kept as blank buttons that won't appear in the animation. Gurneal decides.
+5. Update frontend/BACKEND_REQUESTS.md (statuses and any new requests) and list its open requests in your reply. Then confirm that BUILD_LOG.md covers every change, REVIEW_FINDINGS.md has no OPEN or DISPUTED findings, and the final review round was CLEAN from all 10 reviewers.
 
 STOP AND LET ME REVIEW.
 ```
@@ -685,12 +1100,40 @@ Added to `Unsaid_Frontend_Build_Spec.md` Section 9.4 (rows 95–110). There are 
 | 109 | "end" on the call screen | WhatsApp (call) | `call-end` | shared (row 71) |
 | 110 | "listen" on Mom's voice-unsend bubble | Messenger stub | `unsend-play` | shared (row 57) |
 
+### Appendix B (v2 continuation): photo connectors and face grouping (Phase 4, Screen 3 add-on)
+
+These are added to `Unsaid_Frontend_Build_Spec.md` Section 9.5 (rows 111–122). Row 115 is the event-driven popup sheet, not a button; its container carries the ID.
+- **New:** 8 unique IDs.
+- **Reused:** 4 rows reuse existing IDs (`camera-roll-scan`, `graph-api-photo-import` ×2, `face-cluster-name`).
+- **Totals are now 122 rows, 102 unique feature IDs, and 19 shared IDs.**
+- Backend asks for Mudit are in `BACKEND_REQUESTS.md` (Request 1).
+
+| # | Button | Where | Feature ID | New? |
+|---|---|---|---|---|
+| 111 | "Connect photos" entry | Screen 3 source row | `photo-connectors-open` | **new** |
+| 112 | "Connect" on Photos (iCloud / Apple Photos look-alike) | /memories/connect | `camera-roll-scan` | shared (row 17) |
+| 113 | "Connect" on Instagram photos | /memories/connect | `graph-api-photo-import` | shared (row 16) |
+| 114 | "Connect" on Facebook photos | /memories/connect | `graph-api-photo-import` | shared (row 16) |
+| 115 | "We found 4 people in your photos" sheet (shown on a backend push event) | /memories?state=faces-popup | `face-cluster-popup-event` | **new** |
+| 116 | "see who" | faces popup | `face-clusters-list` | **new** |
+| 117 | tap a face cluster | faces popup · /memories/people | `face-cluster-photos` | **new** |
+| 118 | "Mom?" suggestion chip (confirm) | faces popup · cluster page | `face-cluster-suggestion-accept` | **new** |
+| 119 | "Name this person" | faces popup · cluster page | `face-cluster-name` | shared (row 14) |
+| 120 | "not now" | faces popup | `face-cluster-dismiss` | **new** |
+| 121 | "add to Mom's memories" | /memories/people/[id] | `face-cluster-link-person` | **new** |
+| 122 | "not them" on a photo | /memories/people/[id] | `face-cluster-photo-remove` | **new** |
+
 ## Appendix C: Verification notes
 
 - **The iPhone Duo is fictional.** Its dimensions come from iPhone 16 Pro–class proportions (a 402×874pt viewport, a Dynamic Island of about 126×37pt, concentric corners) scaled to 1920×1080. They are not measurements of a real device.
 - **iOS chrome numbers are approximations** (icon grid pitch, widget sizes, dock size). Check them against the Apple Design Resources iOS kit and the installed skills; Phases 1 and 3 tell Claude to do this.
 - **Meta brand colors are eyeballed look-alike values**, not official brand specs. "Optimistic" is Meta's proprietary typeface and is not available, so a fallback stack is used.
 - **Meta AI app:** the Meta View → Meta AI rename (Apr 29, 2025), the App Store title "Meta AI - Assistant & Glasses", and "built with Muse Spark" were verified. Edits is by Instagram, but its real icon was not copied; the look-alike is approximate.
+- **Claude Code subagents (v2):** checked against the official docs (docs.claude.com/en/docs/claude-code/sub-agents) on Oct 24, 2026.
+  - Subagents are Markdown files with YAML frontmatter: `name` and `description` are required, and `tools` and `model` are optional (`model: haiku` is valid).
+  - Project subagents are discovered by walking up from the directory Claude Code starts in, and a newly created agents folder needs a session restart. That's why rule 13f says to run Claude Code from inside `frontend/`.
+  - They are launched with the Agent tool (formerly Task). Up to 20 subagents run concurrently by default, so all 10 reviewers fit in one parallel round.
+- **Photo APIs (v2):** Meta shut down the Instagram Basic Display API on Dec 4, 2024, and the Instagram API now only serves professional accounts. Facebook `user_photos` needs App Review. Meta has no face-recognition API. That's why face grouping is mock and on-device in concept. Details are in `BACKEND_REQUESTS.md`.
 - **Skills:** all repos returned 200 and their install commands were taken from their READMEs or `marketplace.json`. The Remotion plugin repo's README is a stub, but its `marketplace.json` confirms `remotion@remotion`. For pproenca `ios-design`, only the repo and the marketplace listing were verified, not the skill folder.
 
 ---
@@ -703,4 +1146,5 @@ Added to `Unsaid_Frontend_Build_Spec.md` Section 9.4 (rows 95–110). There are 
 
 | Date (CT) | Change |
 |---|---|
+| Oct 24, 2026 | **v2:**<br>• **Build log + push (rule 12):** Claude Code keeps `frontend/BUILD_LOG.md` with a timestamped entry after every change. It then commits and pushes `frontend/` only to MuditUpadhyay04/HackTX `main` (`git pull --rebase` first, `frontend: <summary>`, never `backend/`, never force-push). This replaces "Do not push" in every phase.<br>• **10 Haiku reviewer subagents (rule 13):** full file bodies are in Phase 0, written to `frontend/.claude/agents/`. All 10 launch in parallel after every phase and meaningful change. Findings go to `frontend/REVIEW_FINDINGS.md` and are fixed and re-checked until clean, and a phase isn't done until all 10 report CLEAN.<br>• The goal statement gains two Rules bullets. Phase 1's context line, every phase's acceptance criteria, and Phase 5's final report are updated.<br>• **New Phase 4 feature, photo connectors and face grouping:** look-alike Photos / Instagram / Facebook connectors, the "We found 4 people in your photos" sheet, and cluster photo grids. It adds contract rows 111–122 (8 new IDs; totals 122 rows / 102 unique IDs) and Appendix B rows.<br>• New `BACKEND_REQUESTS.md` handoff to Mudit.<br>• Appendix C gains notes on subagents and photo APIs. Companion specs are now frontend v3 and product v5. |
 | Oct 24, 2026 | **v1:** created. Phases 0–5, each with acceptance criteria and a review stop:<br>• 0: setup, verified skills, global rules and backend sync.<br>• 1: the white iPhone Duo.<br>• 2: the Messages "k" thread.<br>• 3: the home screen and the interactive iOS navigation shell.<br>• 4: 15 Unsaid screens with backend sync.<br>• 5: the Meta look-alike apps and the final unconnected-buttons report.<br>Heavy Meta styling (M1–M10), look-alike icons only, contract rows 95–110. The scripted demo animation was removed and deferred to a later prompt; its beat table and motion specs moved to `Demo_Script.md` → Animation Production Notes. |

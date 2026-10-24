@@ -166,6 +166,13 @@ FEATURE TOUR (follows Demo_Script.md scene order; the new opening above is prepe
 | 7 Close | 127.0-132.0 | Unsaid wordmark on bg-dusk; tagline; "powered by Meta AI" | Fade + 2% scale settle, ease-soft 1.2 s |
 Total ~2:12. If we need exactly 2:00, trim Scene 3 by 6 s and Scene 5 by 6 s (ask me first).
 
+**Optional face-grouping beat (v2 prompt / frontend spec v3; adds no time):** if we use it, it goes **inside Scene 3's existing 39.0–62.0 window, replacing the "faint dots" lead-in rather than adding to it**.
+- 39.0–42.5: the `/memories?state=faces-popup` sheet slides up ("We found 4 people in your photos": Mom? 212 · Jordan? 148 · Priya? 96 · Name this person 31). The sheet uses spring {stiffness:220, damping:26, mass:1}, and the avatars scale in with 120 ms stagger.
+- ~41.5: a tap ripple lands on "Mom?".
+- 42.5–43.5: the Mom avatar flies into her node as the graph hubs start lighting up.
+- The graph beats then continue as written, compressed by 3.5 s. Scene 3 stays 23 s and the cut stays ~2:12.
+- VO stays the same ("Your people were always there"). Skip the beat entirely if it makes Scene 3 feel rushed.
+
 TAGLINES (use the defaults unless I pick another)
 - Cold open (fixed): "The last thing my kid ever texted me was 'k.'"
 - Duo phrase, B08 (default): "Some things go unsaid." Alternatives: "Say it while you still can." / "For everything we never said."
@@ -228,3 +235,4 @@ STOP AND LET ME REVIEW: send me the MP4 path, the checklist with pass/fail, and 
 | Oct 24, 2026 | Added the verified Claude skills and plugins for the animation (Remotion plugin, GSAP, Motion, snapcn phone frame, claudeclip, pptx). |
 | Oct 24, 2026 | Added emotional direction notes from spec v2 (Section 13). |
 | Oct 24, 2026 | New 24-second opening: cold-open card → reveal that the black is the folded **white iPhone Duo**'s screen → Messages "k" thread with the aging timestamp → unfold → blurred wallpaper + "Some things go unsaid." → Apple-style app-close to a home screen with Meta apps → tap Unsaid. Storyboard retimed (~2:12), 60 fps, the white Duo replaces "two phone frames side by side", and Meta apps are now SVG/CSS look-alikes with real names (never official assets). Added "Animation Production Notes" (the beat table with start/end times, properties, springs, text styling, and sound cues; the feature tour timing; taglines; Remotion render; the frame-by-frame screenshot checklist). These were moved out of the frontend prompt, which now only builds the static screens and the interactive iOS navigation shell; the later animation drives that shell programmatically. |
+| Oct 24, 2026 | Prompt v2 / frontend spec v3 / product spec v5: the frontend build now keeps a build log, pushes `frontend/` only after each change, and runs 10 parallel Haiku reviewers. Added an **optional face-grouping beat** (the "We found 4 people in your photos" sheet, then a tap on "Mom?" that flies into her graph node) inside Scene 3's existing window; it adds no time and the total stays ~2:12. |

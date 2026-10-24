@@ -3,11 +3,11 @@
 ### *A clickable UI shell for every screen, with nothing wired up yet.*
 
 **HackTX 2026 · Meta track: "Bringing People Closer Together with AI"**
-Companion to `Unsaid_Product_Spec.md` (v4), `Demo_Script.md`, and **`Claude_Code_Frontend_Prompt.md`** (the phased, ready-to-paste Claude Code prompt that builds this spec).
+Companion to `Unsaid_Product_Spec.md` (v5), `Demo_Script.md`, and **`Claude_Code_Frontend_Prompt.md`** (v2: the phased, ready-to-paste Claude Code prompt that builds this spec) and **`BACKEND_REQUESTS.md`** (frontend → backend requests for Mudit).
 
 **Purpose:** tell Claude (Claude Code) exactly how to build the Unsaid frontend as a clickable, mock-data-only UI shell, and give Mudit (backend owner) one table of every button he will wire up later.
 
-**Spec version: v2** · Oct 24, 2026
+**Spec version: v3** · Oct 24, 2026
 
 > ## "The last thing my kid ever texted me was 'k.'"
 >
@@ -206,6 +206,44 @@ A single-line speech-bubble outline **left slightly open** (the gap where the wo
 - **The scripted opening** (black cold-open card → the black is the folded Duo's screen → Messages "k" → unfold → wallpaper and "Some things go unsaid." → app-close to home → tap Unsaid) is **not built here**. It comes in a later, separate animation prompt, which will drive the navigation shell programmatically. Its beat table lives in `Demo_Script.md` under "Animation Production Notes".
 - **Every screen takes `?state=`** for an exact static frame. `?badges=off`, `?labels=off`, and `?frame=bare` give clean recording.
 
+### 4.2 Build workflow: build log, push, and 10 reviewer agents (v3)
+
+This is how Claude Code works through every phase (`Claude_Code_Frontend_Prompt.md` v2, global rules 12–13).
+
+- **Build log, after every change however small:**
+  - Claude appends a timestamped (CT) entry to `frontend/BUILD_LOG.md`: what changed, files touched, why, feature IDs affected, and open issues.
+  - Then it commits and pushes **`frontend/` only** to `MuditUpadhyay04/HackTX`, branch `main`:
+    - `git add frontend/`
+    - `git commit -m "frontend: <short summary>"`
+    - `git pull --rebase origin main` (so Mudit's work is never clobbered)
+    - `git push origin main`
+  - It never stages `backend/` or anything outside `frontend/`, and never force-pushes. A rebase conflict outside `frontend/` means abort and ask Gurneal.
+- **10 Haiku reviewer subagents:**
+  - Phase 0 writes 10 read-only reviewers to `frontend/.claude/agents/`. Each is Markdown with YAML frontmatter `name`, `description`, `tools: Read, Grep, Glob, Bash` and `model: haiku`; the full bodies are in the prompt's Phase 0.
+  - After every phase **and** every meaningful change, Claude launches **all 10 in parallel** (one message, 10 Agent tool calls).
+
+| # | Reviewer | Lens |
+|---|---|---|
+| 1 | `ios-hig-reviewer` | iOS HIG chrome, typography, spacing/grid |
+| 2 | `meta-style-reviewer` | Meta styling and color fidelity (M1–M10, tokens), look-alike branding with no official logos |
+| 3 | `device-home-reviewer` | The white iPhone Duo in every state, the home screen and widgets |
+| 4 | `messages-copy-reviewer` | Messages "k" thread realism, copy/typos, mock-data consistency |
+| 5 | `nav-motion-reviewer` | iOS navigation shell springs, Framer Motion performance |
+| 6 | `unsaid-flow-reviewer` | Unsaid end-to-end clickability (including face grouping) |
+| 7 | `contract-reviewer` | `data-feature-id` coverage vs this spec's Section 9, NOT YET CONNECTED placeholders |
+| 8 | `meta-apps-reviewer` | Fake Instagram, WhatsApp, Facebook and Meta AI shells |
+| 9 | `build-a11y-reviewer` | TypeScript, lint, build, accessibility, responsiveness |
+| 10 | `backend-sync-reviewer` | `backend/` vs the contract table, `BACKEND_REQUESTS.md`, and the completeness of `BUILD_LOG.md` / `REVIEW_FINDINGS.md` |
+
+- **Review loop:**
+  - Each reviewer reports issues with file, line, severity and a suggested fix.
+  - Claude logs every finding in `frontend/REVIEW_FINDINGS.md` (and summarizes it in `BUILD_LOG.md`), fixes it, and re-runs that reviewer until it reports CLEAN.
+  - **A phase isn't done until all 10 report CLEAN in the same round.**
+- **Loading:**
+  - Claude Code finds project subagents in the `.claude/agents/` folders between the directory it starts in and the repo root, and a new agents folder loads only after a restart.
+  - So Phase 0 runs from the repo root (the reviewers run as general-purpose haiku subagents for that first round), and later phases run from inside `frontend/` (`cd frontend && claude --add-dir ..`).
+- **Backend requests:** features the frontend needs from Mudit go in `frontend/BACKEND_REQUESTS.md` (Request 1: photo connectors and face grouping). Reviewer 10 checks it every round.
+
 ---
 
 ## 5. Folder Structure
@@ -216,7 +254,9 @@ frontend/
 │   ├── layout.tsx                  # fonts, Toaster, gradient backdrop, ScreenSwitcher
 │   ├── page.tsx                    # 1  Home
 │   ├── rant/page.tsx               # 2  Rant journal
-│   ├── memories/page.tsx           # 3  Camera-roll memory surfacing
+│   ├── memories/page.tsx           # 3  Camera-roll memory surfacing (?state=faces-popup = the face-grouping sheet)
+│   ├── memories/connect/page.tsx   # 3a Photo connectors (v3)
+│   ├── memories/people/[[...cluster]]/page.tsx  # 3a Face clusters + cluster photo grid (v3)
 │   ├── send/page.tsx               # 4  Send to partner
 │   ├── graph/page.tsx              # 5  Brain graph
 │   ├── posthumous/page.tsx         # 6  Posthumous setup
@@ -238,7 +278,7 @@ frontend/
 │   ├── lookalike/   # PhotoFeedPost, ChatAppBubble, SocialFeedPost, StoryViewer (generic, no Meta assets)
 │   └── screens/     # HomeScreen, RantScreen, ... one per screen; pure and prop-driven, reused by Remotion
 ├── lib/
-│   ├── mock/        # people.ts, groups.ts, memories.ts, unsends.ts, plans.ts, calls.ts, graph.ts
+│   ├── mock/        # people.ts, groups.ts, memories.ts, unsends.ts, plans.ts, calls.ts, graph.ts, faces.ts (v3)
 │   ├── contract.ts  # FEATURE_IDS: every data-backend ID as a typed union, with screen + backend feature
 │   ├── tokens.ts    # colors, type, radii, spacing, motion
 │   └── toast.ts     # notConnected(featureId)
@@ -298,6 +338,7 @@ flowchart TD
   RANT --> MEM[3 Memory surfacing]
   RANT -. mock safety signal .-> EX[8 Ex / breakup + safety resources]
   MEM --> SEND[4 Send to partner]
+  MEM --> FACES[3a Photo connectors + face grouping]
   SEND --> PLANS[12 Plans picker]
   SEND --> DELIV[14 Phone-activity settings]
   HOME --> GROUP[13 Group-chat unsend]
@@ -367,6 +408,36 @@ Every screen sits in a `PhoneFrame` (or a `DuoFrame`) centered on the `bg-dusk` 
 - **Placeholder buttons (NOT YET CONNECTED):** "keep" heart [`memory-select`] · "who's this?" [`face-cluster-name`] · "open" on Remember this [`past-unsend-resurface`] · "add from instagram or facebook" [`graph-api-photo-import`] · "use camera roll" [`camera-roll-scan`] · "I'm ready" [`unsend-draft-generate`] · "save for later" [`memory-save-later`].
 - **Motion:** the message fades in first and holds alone for 1.2s; then photos scale in one by one (900ms each, 300ms stagger). Let it sit.
 - **Note:** in the real app this screen only appears after the safety check passes (product spec Section 7). The shell just shows it.
+
+### 8.3a Screen 3 add-on — Photo connectors and face grouping (v3)
+
+- **Purpose:** Unsaid connects to the user's photo sources, groups their photos by face, and asks who's who, so the right memories surface for the right person. Mock only: nothing scans anything in this build. In the real product, clustering runs on the device (see `BACKEND_REQUESTS.md`).
+- **Mock data** (`lib/mock/faces.ts`): 4 clusters, each with an illustrated/gradient avatar (never a real face) and 9–12 illustrated photos:
+    - "Mom?": 212 photos
+    - "Jordan?": 148 photos
+    - "Priya?": 96 photos
+    - "Name this person": 31 photos (it's Dad)
+- **Entry:** Screen 3's source row gains "Connect photos" [`photo-connectors-open`], which opens `/memories/connect`.
+- **`/memories/connect`** (unfolded Duo, `?state=list | connected`):
+    - **Left display:** look-alike connector rows, each a 44 pt icon drawn in SVG/CSS (no official logos) with a meta-primary "Connect" pill:
+        - **Photos** (iCloud / Apple Photos look-alike, a petal glyph), "on this iPhone" [`camera-roll-scan`]
+        - **Instagram photos** (ig-gradient square, camera outline), "your posts and tagged photos" [`graph-api-photo-import`]
+        - **Facebook photos** (meta-blue square, photo glyph, not the "f" logo), "albums and tagged photos" [`graph-api-photo-import`]
+    - **Right display:** "grouped on your phone. only you can see this." plus three privacy lines: "faces never leave your phone" · "you name people, not us" · "delete face data anytime".
+- **Popup** (`/memories?state=faces-popup`): an iOS-style bottom sheet over the right display (dimmed backdrop, 24 pt top radius, 36×5 grabber).
+    - Its container carries `face-cluster-popup-event`, because a backend push event shows it in the real app.
+    - Heading **"We found 4 people in your photos"**, subtitle "grouped on your phone. only you can see this."
+    - 4 avatar circles with the unsaid-ring, counts, and suggestion chips: "Mom?" / "Jordan?" / "Priya?" [`face-cluster-suggestion-accept`] and "Name this person" [`face-cluster-name`].
+    - Tapping an avatar [`face-cluster-photos`] opens that cluster.
+    - "see who" [`face-clusters-list`] opens `/memories/people`, and "not now" [`face-cluster-dismiss`] closes the sheet.
+- **`/memories/people`:** cluster list on the left, the selected cluster's grid on the right.
+- **`/memories/people/[mom|jordan|priya|unknown]`** (`?state=grid | named`):
+    - **Left display:** the cluster header (avatar, suggestion chip, "212 photos · from Photos, Instagram, Facebook") and "add to Mom's memories" [`face-cluster-link-person`].
+    - **Right display:** a 3-column photo grid, each photo with "not them" [`face-cluster-photo-remove`].
+- **Behavior:**
+    - Controls that navigate (entry, avatars, "see who", "not now") navigate on mock data and keep their ID and badge.
+    - Pure actions (Connect, suggestion chips, Name this person, not them, add to … memories) only toast.
+    - In safety mode, no cluster is shown for a blocked or reported person.
 
 ### 8.4 Screen 4 — Send to partner
 
@@ -537,7 +608,7 @@ Every screen sits in a `PhoneFrame` (or a `DuoFrame`) centered on the `bg-dusk` 
 
 ### 9.1 Every button, and what it will connect to
 
-This is the full list of action buttons across all 15 screens: **94 buttons, using 87 unique feature IDs.** *(v2: with the fake Meta apps in [Section 9.4](#94-v2-additions-fake-meta-apps-rows-95110), the total is **110 buttons, 94 unique feature IDs, 16 shared IDs**.)* Every one renders with `data-backend="<Feature ID>"`, shows the NOT YET CONNECTED badge, and only toasts "Not connected yet". A feature ID appears on more than one screen only when it is the same backend action; 7 IDs are shared this way (`pending-unsend-review`, `plan-attach`, `delivery-channel-pick`, `recipient-block`, `recipient-report`, `plan-accept`, `plan-reject`). The three proxy slots on screen 6 are one row because they share one button type and ID.
+This is the full list of action buttons across all 15 screens: **94 buttons, using 87 unique feature IDs.** *(v2: with the fake Meta apps in [Section 9.4](#94-v2-additions-fake-meta-apps-rows-95110), the total is **110 buttons, 94 unique feature IDs, 16 shared IDs**. v3: with photo connectors and face grouping in [Section 9.5](#95-v3-additions-photo-connectors-and-face-grouping-rows-111122), the total is **122 rows, 102 unique feature IDs, 19 shared IDs**.)* Every one renders with `data-backend="<Feature ID>"`, shows the NOT YET CONNECTED badge, and only toasts "Not connected yet". A feature ID appears on more than one screen only when it is the same backend action; 7 IDs are shared this way (`pending-unsend-review`, `plan-attach`, `delivery-channel-pick`, `recipient-block`, `recipient-report`, `plan-accept`, `plan-reject`). The three proxy slots on screen 6 are one row because they share one button type and ID.
 
 **Mudit fills in the "Expected request/response" column.** Each cell starts as "TBD by Mudit" with a one-line hint. The `backend/` folder implements each feature ID; when one is done, its status here changes to CONNECTED and the button's placeholder handler is swapped for the real one.
 
@@ -661,8 +732,9 @@ These are the only controls that actually do something in the shell. They change
 - `grep -r 'data-backend' frontend/` lists every placeholder still in the UI.
 - Left **TBD** for you: every request/response shape, the API style (REST routes vs. server actions), auth, where media is stored, the restaurant data source for `plan-restaurant-pick`, and how the unlock signal for the phone-activity trigger is collected on a real device.
 - Rows 53–56 (the safety hotlines) need no server call. They become plain `tel:`/`sms:` links in the real app; they are placeholders in the shell only so nothing dials by accident during a demo.
-- Rows 67–71, 92–94, and 95–110 are concept features. A real version needs a Meta partnership; for the hackathon they stay mock.
-- **Backend sync (v2):** the frontend reads `backend/` (read-only) every build phase and keeps `docs/backend-sync.md`. A backend feature with no frontend control gets a new ID and row here (after row 110). The build ends with `docs/unconnected-buttons.md`: every button with no backend behind it (feature ID, screen, label), so Gurneal can delete it or keep it as a blank button the animation won't use.
+- Rows 67–71, 92–94, 95–110, and the Instagram/Facebook connectors in 111–122 are concept features. A real version needs a Meta partnership; for the hackathon they stay mock.
+- **Backend sync (v2):** the frontend reads `backend/` (read-only) every build phase and keeps `docs/backend-sync.md`. A backend feature with no frontend control gets a new ID and row here (after row 122). The build ends with `docs/unconnected-buttons.md`: every button with no backend behind it (feature ID, screen, label), so Gurneal can delete it or keep it as a blank button the animation won't use.
+- **Backend requests (v3):** `frontend/BACKEND_REQUESTS.md` is where the frontend asks Mudit for features. Request 1 covers photo connectors and face grouping: suggested endpoints, data shapes (`{clusterId, coverFaceUrl, photoCount, suggestedName}`), the push event, priority, and honest notes on Meta photo-API limits, on-device clustering, and biometric consent. Reply there or change the shapes freely; then update rows 111–122 here.
 
 ### 9.4 v2 additions: fake Meta apps (rows 95–110)
 
@@ -687,17 +759,41 @@ These buttons live in the look-alike Meta apps (`Claude_Code_Frontend_Prompt.md`
 | 109 | end (call screen) | WhatsApp look-alike · call | `call-end` | Same as row 71 (shared) | Same as row 71 | NOT YET CONNECTED |
 | 110 | listen (Mom's voice-unsend bubble) | Messenger look-alike stub | `unsend-play` | Same as row 57 (shared) | Same as row 57 | NOT YET CONNECTED |
 
+### 9.5 v3 additions: photo connectors and face grouping (rows 111–122)
+
+These controls are the Screen 3 add-on (Section 8.3a; `Claude_Code_Frontend_Prompt.md` Phase 4).
+- **New:** 8 unique IDs.
+- **Reused:** 4 rows reuse existing IDs (`camera-roll-scan`, `graph-api-photo-import` ×2, `face-cluster-name`).
+- **Totals: 122 rows, 102 unique feature IDs, 19 shared IDs:** the 16 from v2, plus `camera-roll-scan`, `graph-api-photo-import`, and `face-cluster-name`.
+- Row 115 is the event-driven popup sheet, not a button; its container carries the ID.
+- Request/response suggestions for Mudit are in `BACKEND_REQUESTS.md` (Request 1).
+
+| # | Button label | Screen | Feature ID | Backend feature it will connect to | Expected request/response | Status |
+|---|---|---|---|---|---|---|
+| 111 | Connect photos (entry) | 3a Photo connectors | `photo-connectors-open` | List photo sources and their connection state | TBD by Mudit. Hint: `GET /photos/sources` → sources + connected flags | NOT YET CONNECTED |
+| 112 | Connect (Photos / iCloud look-alike) | 3a Photo connectors | `camera-roll-scan` | Same as row 17 (shared): on-device camera-roll scan + face clustering | Same as row 17 | NOT YET CONNECTED |
+| 113 | Connect (Instagram photos) | 3a Photo connectors | `graph-api-photo-import` | Same as row 16 (shared). Note: no personal-account Instagram photo API since Dec 4, 2024 | Same as row 16 | NOT YET CONNECTED |
+| 114 | Connect (Facebook photos) | 3a Photo connectors | `graph-api-photo-import` | Same as row 16 (shared). `user_photos` needs App Review | Same as row 16 | NOT YET CONNECTED |
+| 115 | "We found 4 people in your photos" sheet (event-driven) | 3a Faces popup | `face-cluster-popup-event` | Push event when clustering finishes | TBD by Mudit. Hint: event `faces.clusters_ready` {clusterCount, previewClusterIds} | NOT YET CONNECTED |
+| 116 | see who | 3a Faces popup | `face-clusters-list` | List face clusters | TBD by Mudit. Hint: → [{clusterId, coverFaceUrl, photoCount, suggestedName}] | NOT YET CONNECTED |
+| 117 | tap a face cluster | 3a Faces popup · people list | `face-cluster-photos` | Get a cluster's photos | TBD by Mudit. Hint: clusterId in, paged photos out | NOT YET CONNECTED |
+| 118 | "Mom?" suggestion chip | 3a Faces popup · cluster page | `face-cluster-suggestion-accept` | Confirm a suggested name for a cluster | TBD by Mudit. Hint: clusterId + name in, cluster out | NOT YET CONNECTED |
+| 119 | Name this person | 3a Faces popup · cluster page | `face-cluster-name` | Same as row 14 (shared) | Same as row 14 | NOT YET CONNECTED |
+| 120 | not now | 3a Faces popup | `face-cluster-dismiss` | Dismiss/snooze the popup (cooldown) | TBD by Mudit. Hint: snoozeDays in, ok out | NOT YET CONNECTED |
+| 121 | add to Mom's memories | 3a Cluster page | `face-cluster-link-person` | Link a cluster to a person node in the brain graph | TBD by Mudit. Hint: clusterId + personId in, memories added out | NOT YET CONNECTED |
+| 122 | not them (on a photo) | 3a Cluster page | `face-cluster-photo-remove` | Remove a wrongly grouped photo from a cluster | TBD by Mudit. Hint: clusterId + photoId in, new count out | NOT YET CONNECTED |
+
 ---
 
 ## 10. Ready-to-Paste Prompt for Claude
 
 ```text
-(v2 note: for the full build, use the phased prompt in Claude_Code_Frontend_Prompt.md; it supersedes this one-shot prompt. This version is kept as a short summary and is consistent with v2.)
+(v3 note: for the full build, use the phased prompt in Claude_Code_Frontend_Prompt.md (v2); it supersedes this one-shot prompt. This version is kept as a short summary and is consistent with spec v3, including the build log, the 10 reviewers, and face grouping.)
 You are a senior front-end engineer and motion designer. Build the FRONTEND-ONLY UI shell for "Unsaid", an AI app (powered by Meta AI; HackTX 2026, Meta track) that helps people say the words they never said to the people they love. Follow Unsaid_Frontend_Build_Spec.md exactly; it is the source of truth for every screen, string, button, and feature ID. Build everything in the frontend/ folder of this repo. Do not touch backend/.
 
 HARD RULES
 - Frontend only. No feature works. No API calls, no env keys, no auth, no camera/mic/photo access, no tel: or sms: links.
-- Every action button is a PlaceholderButton: it shows a small "NOT YET CONNECTED" pill badge and a hover tooltip, carries data-backend="<feature-id>" and data-feature-id="<feature-id>" using the exact IDs in Sections 9.1 and 9.4 of the spec, and its onClick ONLY shows a toast "Not connected yet" with the feature ID underneath. Toggles, segmented controls, and sliders follow the same rule (they may animate locally).
+- Every action button is a PlaceholderButton: it shows a small "NOT YET CONNECTED" pill badge and a hover tooltip, carries data-backend="<feature-id>" and data-feature-id="<feature-id>" using the exact IDs in Sections 9.1, 9.4 and 9.5 of the spec, and its onClick ONLY shows a toast "Not connected yet" with the feature ID underneath. Toggles, segmented controls, and sliders follow the same rule (they may animate locally).
 - Only navigation works: the tab bar, back, a floating ScreenSwitcher listing all 15 screens, "next" dev links, story tap-left/right, and inbox swipes (Section 9.2).
 - All data is hard-coded mock data in frontend/lib/mock/: people Mom, Dad, Priya, Jordan; group chats Fam, Roommates, Marfa Trip; plus the memories, unsends, plan, and posthumous date in Section 2.
 - Badges can be hidden with ?badges=off or NEXT_PUBLIC_SHOW_BADGES=false (for recording); data-backend and the toasts stay.
@@ -705,6 +801,9 @@ HARD RULES
 - App-to-app navigation runs through the interactive iOS navigation shell (Section 4.1). The scripted demo animation is out of scope; it comes in a later prompt.
 - Read backend/ (never edit it). Add backend features the frontend lacks (new IDs in Section 9); leave unbuilt ones as placeholders; end with a report of every button that has no backend.
 - Screen 12 (Plans) is a restaurant + date + time picker with Accept/Reject, exactly as in the spec. Do not add pricing tiers or prices.
+- Keep frontend/BUILD_LOG.md: after every change, append a timestamped entry, then commit and push frontend/ only to MuditUpadhyay04/HackTX main ("frontend: <summary>", git pull --rebase first, never backend/, never force-push).
+- Use the 10 Haiku reviewer subagents in frontend/.claude/agents/ (Section 4.2). Launch all 10 in parallel after every phase and meaningful change. Log every finding in frontend/REVIEW_FINDINGS.md, fix it, and re-check until all 10 are clean.
+- Screen 3 includes the photo connectors and face-grouping add-on (Section 8.3a, rows 111-122), mock only. Backend needs go in frontend/BACKEND_REQUESTS.md.
 - Screen 14 has no time/date scheduling controls. Everyday delivery is only the phone-activity trigger (2nd or 3rd unlock, weighted later in the day).
 
 STACK
@@ -723,7 +822,7 @@ STEPS
 2. Build the shared components in Section 6 first (PlaceholderButton, NotConnectedBadge, PhoneFrame, DuoFrame, motion primitives, UnsaidMark).
 3. Create lib/contract.ts from table 9.1: a typed union of every feature ID with its screen and backend feature.
 4. Build all 15 screens in Section 8 as pure, prop-driven components in components/screens/, each with its own route. Match the layout, copy, buttons, feature IDs, and Duo left/right split exactly.
-5. Verify: write a small script that collects every data-backend value from the rendered pages and checks it against lib/contract.ts (all 110 buttons, 94 unique IDs), confirm every click toasts, and confirm the app makes no network requests.
+5. Verify: write a small script that collects every data-backend value from the rendered pages and checks it against lib/contract.ts (all 122 rows, 102 unique IDs), confirm every click toasts, and confirm the app makes no network requests.
 6. Tell me the exact commands to install, run the dev server, and render the Remotion video.
 ```
 
@@ -733,6 +832,7 @@ STEPS
 
 | Version | Date (CT) | Change |
 |---|---|---|
+| **v3** | Oct 24, 2026 | **New Section 4.2, build workflow:**<br>• `frontend/BUILD_LOG.md` gets a timestamped entry after every change, followed by a commit and push of `frontend/` only to `MuditUpadhyay04/HackTX` `main` (`frontend: <summary>`, pull --rebase first, never `backend/`).<br>• **10 Haiku reviewer subagents** in `frontend/.claude/agents/` run in parallel after every phase and meaningful change. Findings are logged in `frontend/REVIEW_FINDINGS.md`, fixed, and re-checked until all 10 are clean.<br>**New Section 8.3a, photo connectors and face grouping** (Screen 3 add-on, mock):<br>• look-alike Photos / Instagram / Facebook connectors;<br>• the "We found 4 people in your photos" sheet;<br>• cluster photo grids.<br>**New Section 9.5** (rows 111–122, 8 new IDs). Totals are now 122 rows, 102 unique IDs and 19 shared.<br>Also: a backend-requests note in 9.3, plus the `BACKEND_REQUESTS.md` handoff to Mudit; folder structure, navigation map and the Section 10 summary prompt updated. Companion to product spec v5 and prompt v2. |
 | **v2** | Oct 24, 2026 | The device is now the fictional **white iPhone Duo**: `PhoneFrame`/`DuoFrame` wrap `IPhoneDuo`, and a new `TwoPhones` layout replaces "two frames side by side". New Section 4.1 covers the Messages "k" scene, the home screen with Meta apps prominent, the interactive **iOS navigation shell** (open from icon, swipe-up close, app switcher, swipe between apps), and the fake Meta apps. The honesty rule now allows SVG/CSS look-alike icons and real app names as text, but never official files, plus a trademark risk note. Added the `data-feature-id` alias. New **Section 9.4** (rows 95–110: 7 new IDs; totals 110 buttons / 94 unique / 16 shared). Backend-sync rule and final unconnected-button report. The scripted animation is out of scope (later prompt; timings in `Demo_Script.md`). The Section 10 prompt was updated and points to the new `Claude_Code_Frontend_Prompt.md`; heavy Meta styling is required there (M1–M10). Companion to product spec v4. |
 | **v1** | Oct 24, 2026 | Created: the frontend-only rule (NOT YET CONNECTED badge, `data-backend`, toast-only buttons), mock data, design tokens, tech stack, folder structure, component list, navigation map, 15 screen specs, the 94-button frontend-backend contract for Mudit, and the ready-to-paste Claude prompt. Companion to product spec v3. |
 

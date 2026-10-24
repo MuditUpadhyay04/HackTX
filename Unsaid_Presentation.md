@@ -40,6 +40,7 @@
 - Group chats are hubs, people orbit them, and memories bloom off each person.
 - Built from your Facebook, Instagram, and Messenger memories.
 - Links you've let drift glow faintly, waiting for you to reach out.
+- Optional line: "Connect your photos and Unsaid quietly groups faces on your phone, then asks: is this Mom?" (face grouping, product spec v5).
 
 ---
 
@@ -121,3 +122,4 @@
 |---|---|
 | Oct 24, 2026 | Created: 11-slide deck covering the four pitch beats, the generational line, the contextual trigger, the Meta stack, and safety. |
 | Oct 24, 2026 | Slide 1 now matches the new 24-second opening: the folded white iPhone Duo, the Messages "k" thread, the unfold, "Some things go unsaid.", home, then Unsaid. (Frontend build prompt added: `Claude_Code_Frontend_Prompt.md`.) |
+| Oct 24, 2026 | Synced with product spec v5 / frontend spec v3 / build prompt v2: an optional Slide 4 line on photo connectors and on-device face grouping ("is this Mom?"). The build workflow now has a build log, a push of `frontend/` only, and 10 Haiku reviewers. |
