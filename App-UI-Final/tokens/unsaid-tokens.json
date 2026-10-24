@@ -1,0 +1,200 @@
+{
+  "name": "Un-Said design tokens",
+  "owner": "Gurneal Chandi (all design, names and copy)",
+  "source": "sampled from assets/brand/unsaid-app-icon.png and assets/ui-reference/unsaid-ui-reference.png (1 px of the reference = about 1.5 pt)",
+  "units": "pt (iOS points = CSS px at 1x)",
+  "color": {
+    "un-stage": "#0B0B10",
+    "un-bg": "#0F0D15",
+    "un-surface": "#191622",
+    "un-surface-raised": "#211E39",
+    "un-hairline": "#322E3E",
+    "un-text": "#FFFFFF",
+    "un-text-2": "#DDDBE4",
+    "un-text-3": "#9C99AA",
+    "un-text-4": "#6F6A80",
+    "un-violet": "#A890F6",
+    "un-blue": "#4F62F4",
+    "un-indigo": "#4046EE",
+    "un-indigo-deep": "#3949EA",
+    "un-periwinkle": "#728CF4",
+    "un-lilac": "#B9ABF6",
+    "un-violet-soft": "#9885F4",
+    "un-caret": "#5B59F2",
+    "un-letter": "#EEEAFB",
+    "un-letter-ink": "#1D1742",
+    "un-letter-label": "#3B3570",
+    "un-letter-accent": "#504FF3",
+    "un-icon-blue": "#677FEF",
+    "un-icon-periwinkle": "#607CF2",
+    "un-icon-violet": "#8776DF",
+    "un-icon-orchid": "#A166B7",
+    "un-icon-lavender": "#AD8FED",
+    "un-icon-lilac": "#C6A9F4",
+    "un-icon-plum": "#AD78D4"
+  },
+  "gradient": {
+    "un-card-gradient": "radial-gradient(60% 70% at 100% 0%, #B9ABF6 0%, rgba(185,171,246,0) 100%), radial-gradient(60% 60% at 0% 100%, #728CF4 0%, rgba(114,140,244,0) 100%), linear-gradient(135deg, #3949EA 0%, #4755F0 45%, #6E6CF2 100%)",
+    "un-pill-gradient": "linear-gradient(90deg, #4F62F4 0%, #4046EE 45%, #9885F4 100%)",
+    "un-icon-gradient": "radial-gradient(45% 45% at 50% 52%, #A166B7 0%, rgba(161,102,183,0) 100%), linear-gradient(135deg, #677FEF 0%, #8776DF 35%, #AD8FED 60%, #C6A9F4 80%, #AD78D4 100%)"
+  },
+  "font": {
+    "un-sans": "\"SF Pro Display\", -apple-system, BlinkMacSystemFont, system-ui, Inter, sans-serif (800 = SF Heavy-ish; compare against ui-rounded / \"SF Pro Rounded\" on the Mac and keep whichever matches the reference)"
+  },
+  "type": {
+    "un-wordmark": {
+      "size": 24,
+      "lineHeight": 28,
+      "weight": 800,
+      "tracking": "-0.01em"
+    },
+    "un-display": {
+      "size": 36,
+      "lineHeight": 42,
+      "weight": 800,
+      "tracking": "-0.02em"
+    },
+    "un-card-title": {
+      "size": 32,
+      "lineHeight": 40,
+      "weight": 800,
+      "tracking": "-0.02em"
+    },
+    "un-compose": {
+      "size": 34,
+      "lineHeight": 42,
+      "weight": 700,
+      "tracking": "-0.02em"
+    },
+    "un-letter-hero": {
+      "size": 64,
+      "lineHeight": 72,
+      "weight": 800,
+      "tracking": "-0.03em"
+    },
+    "un-letter-body": {
+      "size": 22,
+      "lineHeight": 28,
+      "weight": 500,
+      "tracking": "0"
+    },
+    "un-signature": {
+      "size": 17,
+      "lineHeight": 22,
+      "weight": 700,
+      "tracking": "0"
+    },
+    "un-nav-title": {
+      "size": 17,
+      "lineHeight": 22,
+      "weight": 600,
+      "tracking": "-0.01em"
+    },
+    "un-section": {
+      "size": 18,
+      "lineHeight": 24,
+      "weight": 700,
+      "tracking": "-0.01em"
+    },
+    "un-button": {
+      "size": 17,
+      "lineHeight": 22,
+      "weight": 600,
+      "tracking": "0"
+    },
+    "un-row-name": {
+      "size": 15,
+      "lineHeight": 20,
+      "weight": 700,
+      "tracking": "0"
+    },
+    "un-row-preview": {
+      "size": 13,
+      "lineHeight": 18,
+      "weight": 400,
+      "tracking": "0"
+    },
+    "un-caption": {
+      "size": 13,
+      "lineHeight": 18,
+      "weight": 400,
+      "tracking": "0"
+    },
+    "un-meta": {
+      "size": 12,
+      "lineHeight": 16,
+      "weight": 500,
+      "tracking": "0"
+    },
+    "un-overline": {
+      "size": 11,
+      "lineHeight": 14,
+      "weight": 700,
+      "tracking": "0.10em"
+    },
+    "un-tab": {
+      "size": 11,
+      "lineHeight": 13,
+      "weight": 600,
+      "tracking": "0"
+    }
+  },
+  "radius": {
+    "un-r-hero": 28,
+    "un-r-row": 16,
+    "un-r-square": 16,
+    "un-r-pill": 999,
+    "un-r-icon": "22.37%"
+  },
+  "spacing": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48,
+    64
+  ],
+  "sizes": {
+    "screen side inset (text)": 24,
+    "card/row side inset": 16,
+    "hero card padding": 24,
+    "hero card size": "370 x 288",
+    "'+' button": "56 x 56, inset 16 from the card's right and bottom",
+    "row height": 76,
+    "row gap": 8,
+    "row avatar": 44,
+    "header avatar": 44,
+    "section gap": 24,
+    "primary pill": "366 x 56",
+    "outline pill": "348 x 52, 1.5 pt white stroke",
+    "letter card": "370 x 520, padding 24",
+    "quote glyph": "40 pt",
+    "underline stroke": "4 pt, round caps, slight upward arc",
+    "tab bar": "49 pt + 34 pt home-indicator area, 0.5 pt un-hairline top",
+    "tab icon": 24
+  },
+  "shadow": {
+    "un-shadow-hero": "0 24px 48px -16px rgba(57,73,234,0.45)",
+    "un-shadow-pill": "0 12px 28px -10px rgba(64,70,238,0.55)",
+    "un-shadow-letter": "0 32px 64px -24px rgba(0,0,0,0.60)",
+    "un-shadow-none": "none"
+  },
+  "motion": {
+    "spring-app-open": "stiffness 380 · damping 34 · mass 1",
+    "spring-app-close": "stiffness 420 · damping 36 · mass 1",
+    "spring-banner": "stiffness 300 · damping 30 · mass 1",
+    "spring-sheet": "stiffness 320 · damping 32 · mass 1",
+    "spring-press": "stiffness 600 · damping 40 · mass 0.6",
+    "spring-card-in": "stiffness 260 · damping 28 · mass 1",
+    "spring-bloom": "stiffness 180 · damping 26 · mass 1",
+    "dur-press": "90 ms",
+    "dur-fade": "200 ms, ease cubic-bezier(0.32,0.72,0,1)",
+    "dur-hold": "600 ms",
+    "stagger": "120 ms",
+    "transcript-rate": "~6 words/s (166 ms per word)",
+    "typing-dots": "1.4 s loop, 3 dots, 0.2 s offset",
+    "caret-blink": "1.06 s, steps(1)"
+  }
+}

@@ -1,0 +1,102 @@
+:root {
+  /* Un-Said tokens (Gurneal). Generated from unsaid-tokens.json. 1 pt = 1 CSS px. */
+  --un-stage: #0B0B10;
+  --un-bg: #0F0D15;
+  --un-surface: #191622;
+  --un-surface-raised: #211E39;
+  --un-hairline: #322E3E;
+  --un-text: #FFFFFF;
+  --un-text-2: #DDDBE4;
+  --un-text-3: #9C99AA;
+  --un-text-4: #6F6A80;
+  --un-violet: #A890F6;
+  --un-blue: #4F62F4;
+  --un-indigo: #4046EE;
+  --un-indigo-deep: #3949EA;
+  --un-periwinkle: #728CF4;
+  --un-lilac: #B9ABF6;
+  --un-violet-soft: #9885F4;
+  --un-caret: #5B59F2;
+  --un-letter: #EEEAFB;
+  --un-letter-ink: #1D1742;
+  --un-letter-label: #3B3570;
+  --un-letter-accent: #504FF3;
+  --un-icon-blue: #677FEF;
+  --un-icon-periwinkle: #607CF2;
+  --un-icon-violet: #8776DF;
+  --un-icon-orchid: #A166B7;
+  --un-icon-lavender: #AD8FED;
+  --un-icon-lilac: #C6A9F4;
+  --un-icon-plum: #AD78D4;
+  --un-card-gradient: radial-gradient(60% 70% at 100% 0%, #B9ABF6 0%, rgba(185,171,246,0) 100%), radial-gradient(60% 60% at 0% 100%, #728CF4 0%, rgba(114,140,244,0) 100%), linear-gradient(135deg, #3949EA 0%, #4755F0 45%, #6E6CF2 100%);
+  --un-pill-gradient: linear-gradient(90deg, #4F62F4 0%, #4046EE 45%, #9885F4 100%);
+  --un-icon-gradient: radial-gradient(45% 45% at 50% 52%, #A166B7 0%, rgba(161,102,183,0) 100%), linear-gradient(135deg, #677FEF 0%, #8776DF 35%, #AD8FED 60%, #C6A9F4 80%, #AD78D4 100%);
+  --un-sans: "SF Pro Display", -apple-system, BlinkMacSystemFont, system-ui, Inter, sans-serif;
+  --un-wordmark: 800 24px/28px var(--un-sans);
+  --un-wordmark-tracking: -0.01em;
+  --un-display: 800 36px/42px var(--un-sans);
+  --un-display-tracking: -0.02em;
+  --un-card-title: 800 32px/40px var(--un-sans);
+  --un-card-title-tracking: -0.02em;
+  --un-compose: 700 34px/42px var(--un-sans);
+  --un-compose-tracking: -0.02em;
+  --un-letter-hero: 800 64px/72px var(--un-sans);
+  --un-letter-hero-tracking: -0.03em;
+  --un-letter-body: 500 22px/28px var(--un-sans);
+  --un-letter-body-tracking: 0;
+  --un-signature: 700 17px/22px var(--un-sans);
+  --un-signature-tracking: 0;
+  --un-nav-title: 600 17px/22px var(--un-sans);
+  --un-nav-title-tracking: -0.01em;
+  --un-section: 700 18px/24px var(--un-sans);
+  --un-section-tracking: -0.01em;
+  --un-button: 600 17px/22px var(--un-sans);
+  --un-button-tracking: 0;
+  --un-row-name: 700 15px/20px var(--un-sans);
+  --un-row-name-tracking: 0;
+  --un-row-preview: 400 13px/18px var(--un-sans);
+  --un-row-preview-tracking: 0;
+  --un-caption: 400 13px/18px var(--un-sans);
+  --un-caption-tracking: 0;
+  --un-meta: 500 12px/16px var(--un-sans);
+  --un-meta-tracking: 0;
+  --un-overline: 700 11px/14px var(--un-sans);
+  --un-overline-tracking: 0.10em;
+  --un-tab: 600 11px/13px var(--un-sans);
+  --un-tab-tracking: 0;
+  --un-r-hero: 28px;
+  --un-r-row: 16px;
+  --un-r-square: 16px;
+  --un-r-pill: 999px;
+  --un-r-icon: 22.37%;
+  --un-space-4: 4px;
+  --un-space-8: 8px;
+  --un-space-12: 12px;
+  --un-space-16: 16px;
+  --un-space-24: 24px;
+  --un-space-32: 32px;
+  --un-space-48: 48px;
+  --un-space-64: 64px;
+  --un-shadow-hero: 0 24px 48px -16px rgba(57,73,234,0.45);
+  --un-shadow-pill: 0 12px 28px -10px rgba(64,70,238,0.55);
+  --un-shadow-letter: 0 32px 64px -24px rgba(0,0,0,0.60);
+  --un-shadow-none: none;
+  --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-press: 90ms;
+  --dur-fade: 200ms;
+  --dur-hold: 600ms;
+  --stagger: 120ms;
+}
+
+/* Springs (use in JS, e.g. Motion/Framer: {type:'spring', stiffness, damping, mass}) */
+/* spring-app-open: stiffness 380 · damping 34 · mass 1 */
+/* spring-app-close: stiffness 420 · damping 36 · mass 1 */
+/* spring-banner: stiffness 300 · damping 30 · mass 1 */
+/* spring-sheet: stiffness 320 · damping 32 · mass 1 */
+/* spring-press: stiffness 600 · damping 40 · mass 0.6 */
+/* spring-card-in: stiffness 260 · damping 28 · mass 1 */
+/* spring-bloom: stiffness 180 · damping 26 · mass 1 */
+
+@media (prefers-reduced-motion: reduce) {
+  /* every spring falls back to a 200 ms opacity cross-fade */
+}
