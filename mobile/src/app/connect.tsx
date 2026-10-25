@@ -51,9 +51,11 @@ export default function Connect() {
             </View>
           ))}
         </View>
-        <View style={{ marginHorizontal: inset.text, marginTop: space.s24, gap: space.s4 }}>
+        <View style={{ marginHorizontal: inset.text, marginTop: space.s24, gap: space.s8 }}>
           <T v="caption">grouped on your phone. only you can see this.</T>
-          <T v="caption">faces never leave your phone · you name people, not us · delete face data anytime</T>
+          <T v="caption">faces never leave your phone</T>
+          <T v="caption">you name people, not us</T>
+          <T v="caption">delete face data anytime</T>
         </View>
       </ScrollView>
     </View>

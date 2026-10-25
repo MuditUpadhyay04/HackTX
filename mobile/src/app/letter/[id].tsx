@@ -6,10 +6,10 @@ import { useEffect } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { LetterCard, NavBar, OutlinePill, styles as ui, T } from "../../components/ui";
+import { LetterCard, NavBar, OutlinePill, Overline, styles as ui, T } from "../../components/ui";
 import { api, mediaUrl } from "../../lib/api";
 import { useHome } from "../../lib/useHome";
-import { color, space } from "../../theme/tokens";
+import { color, inset, space } from "../../theme/tokens";
 
 export default function Letter() {
   const insets = useSafeAreaInsets();
@@ -40,7 +40,20 @@ export default function Letter() {
       <ScrollView contentContainerStyle={{ paddingTop: space.s16, paddingBottom: insets.bottom + space.s48, gap: space.s16 }}>
         <LetterCard lines={reply.audio_url ? [] : [reply.transcript]} signature={reply.from_name} footer={reply.audio_url ? listen : null} minHeight={360} />
         <T v="caption" style={{ textAlign: "center" }}>Take your time.</T>
-        <OutlinePill featureId="letter-write-back" label="Write back" onPress={() => router.push("/talk")} />
+        <OutlinePill
+          featureId="letter-write-back"
+          label="Write back"
+          onPress={() => {
+            const person = home?.people.find((p) => p.id === reply.from_person_id);
+            router.push({ pathname: "/talk", params: { toName: reply.from_name, channel: person?.channel ?? "" } });
+          }}
+        />
+        {reply.translation ? (
+          <View style={{ marginHorizontal: inset.text, gap: space.s8 }}>
+            <Overline>{home?.people.find((p) => p.id === reply.from_person_id)?.language ?? ""}</Overline>
+            <T v="caption">{reply.translation}</T>
+          </View>
+        ) : null}
         <T v="caption" style={{ textAlign: "center", color: color.text4 }}>{`about this letter · ${reply.day}`}</T>
       </ScrollView>
     </View>

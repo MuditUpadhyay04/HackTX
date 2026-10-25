@@ -2,17 +2,19 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
+import { haptics } from "../../lib/haptics";
 import { color } from "../../theme/tokens";
 
 const ICONS = {
   home: ["home", "home-outline"],
-  letters: ["document-text", "document-text-outline"],
+  letters: ["mail", "mail-outline"],
   you: ["person", "person-outline"],
 } as const;
 
 export default function TabsLayout() {
   return (
     <Tabs
+      screenListeners={{ tabPress: () => haptics.select() }}
       screenOptions={({ route }) => ({
         headerShown: false,
         sceneStyle: { backgroundColor: color.bg },

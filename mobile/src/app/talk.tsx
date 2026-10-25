@@ -6,9 +6,11 @@ import { ActionSheetIOS, Alert, Animated, Platform, ScrollView, StyleSheet, Text
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppRail } from "../components/AppRail";
+import { Skeleton } from "../components/motion";
 import { Avatar, Chip, NavBar, Overline, PillGradientFill, Press, PrimaryPill, styles as ui, T, TextButton } from "../components/ui";
 import { Ionicons } from "@expo/vector-icons";
-import { api, type SortResult } from "../lib/api";
+import { api, type Channel, type SortResult } from "../lib/api";
+import { APP_LABEL, CHANNEL_APP } from "../lib/handoff";
 import { usePhotoMemory, useVoiceBack } from "../lib/memory";
 import { toast } from "../lib/toast";
 import { useLiveRant } from "../lib/useLiveRant";
@@ -16,7 +18,15 @@ import { color, inset, radius, shadow, space, spring, type } from "../theme/toke
 
 export default function Talk() {
   const insets = useSafeAreaInsets();
-  const { photo } = useLocalSearchParams<{ photo?: string }>();
+  const { photo, toName, channel } = useLocalSearchParams<{ photo?: string; toName?: string; channel?: string }>();
+  const title = toName ? `To ${toName}` : "Say it out loud";
+  const channelLine = (() => {
+    if (!toName || !channel || channel === "self") return null;
+    const app = CHANNEL_APP[channel as Exclude<Channel, "self">];
+    if (!app) return null;
+    const prep = channel === "whatsapp" ? "on" : "in";
+    return `Goes to ${toName} ${prep} ${APP_LABEL[app]}`;
+  })();
   const live = useLiveRant();
   // Data wiring (mobile/src/lib/memory.ts): what he said on this photo before, and his voice back.
   const { memory } = usePhotoMemory(photo);
@@ -94,7 +104,7 @@ export default function Talk() {
   if (result) {
     return (
       <View style={ui.screen}>
-        <NavBar title="Say it out loud" />
+        <NavBar title={title} />
         <ScrollView contentContainerStyle={{ padding: inset.card, paddingBottom: insets.bottom + space.s48, gap: space.s8 }}>
           {result.self_note ? <SelfNoteCard /> : null}
           <T v="section" style={{ marginHorizontal: space.s8, marginBottom: space.s16 }}>{"Here's who that was for."}</T>
@@ -147,7 +157,7 @@ export default function Talk() {
 
   return (
     <View style={ui.screen}>
-      <NavBar title="Say it out loud" />
+      <NavBar title={title} />
       <ScrollView contentContainerStyle={{ paddingBottom: 280 }} keyboardShouldPersistTaps="handled">
         {photo && !recording && !spoken ? (
           <Image source={{ uri: photo }} style={styles.photo} contentFit="cover" transition={150} />
@@ -175,6 +185,7 @@ export default function Talk() {
             </View>
           ) : null}
           <Overline>Only you can hear this</Overline>
+          {channelLine ? <T v="rowPreview" style={{ marginTop: space.s8 }}>{channelLine}</T> : null}
           {typing ? (
             <TextInput
               testID="rant-type"
@@ -191,7 +202,12 @@ export default function Talk() {
               {recording ? <T v="compose" style={{ color: color.caret }}>|</T> : null}
             </T>
           )}
-          {sorting ? <T v="caption" style={{ marginTop: space.s16 }}>…</T> : null}
+          {sorting ? (
+            <View style={{ marginTop: space.s24, gap: space.s8 }}>
+              <Skeleton height={112} />
+              <Skeleton height={112} />
+            </View>
+          ) : null}
           <T v="caption" style={{ marginTop: space.s16 }}>Nothing leaves without you.</T>
           {live.provider === "mock" ? <T v="meta" style={{ marginTop: space.s8, color: color.text4 }}>mock transcription (no Muse key on the server)</T> : null}
         </View>
@@ -208,11 +224,13 @@ export default function Talk() {
         ) : (
           <>
             <Waveform levels={live.levels} live={recording} />
-            <Press featureId={recording ? "rant-stop" : "rant-record"} onPress={toggleMic} disabled={live.state === "finishing" || sorting} style={[styles.mic, shadow.pill]}>
-              <PillGradientFill />
-              <Ionicons name={recording ? "stop" : "mic"} size={32} color="#fff" />
-            </Press>
-            <T v="caption">{live.state === "finishing" || sorting ? "Sorting…" : recording ? "Tap to stop" : "Tap to talk"}</T>
+            <View style={[styles.micRing, recording && styles.micRingOn]}>
+              <Press featureId={recording ? "rant-stop" : "rant-record"} onPress={toggleMic} disabled={live.state === "finishing" || sorting} style={[styles.mic, shadow.pill]}>
+                <PillGradientFill />
+                <Ionicons name={recording ? "stop" : "mic"} size={32} color="#fff" />
+              </Press>
+            </View>
+            <T v="caption">{live.state === "finishing" || sorting ? "sorting it by person…" : recording ? "Tap to stop" : "Tap to talk"}</T>
           </>
         )}
         <View style={{ flexDirection: "row", gap: space.s24 }}>
@@ -260,5 +278,7 @@ const styles = StyleSheet.create({
   photo: { marginHorizontal: inset.card, marginTop: space.s8, height: 224, borderRadius: radius.hero },
   personCard: { backgroundColor: color.surface, borderRadius: radius.row, padding: space.s16 },
   dock: { position: "absolute", left: 0, right: 0, bottom: 0, alignItems: "center", gap: space.s12, paddingTop: space.s16, backgroundColor: color.bg },
+  micRing: { width: 104, height: 104, borderRadius: 52, alignItems: "center", justifyContent: "center" },
+  micRingOn: { borderWidth: 2, borderColor: "rgba(168,144,246,0.4)" },
   mic: { width: 88, height: 88, borderRadius: 44, overflow: "hidden", alignItems: "center", justifyContent: "center" },
 });

@@ -17,6 +17,7 @@ export type Person = {
   is_asleep: boolean;
   time_label: string;
   morning: string;
+  language?: string;
 };
 
 export type Piece = {
@@ -104,6 +105,8 @@ export type Card = {
   /** /api/home, held letters that will need his tap: when the app may remind him, and what it says. */
   remind_at?: string;
   remind_body?: string;
+  release_at?: string | null;
+  created_at?: string;
 };
 
 export type Reply = {
@@ -120,13 +123,21 @@ export type Reply = {
 
 export type Reminder = { id: string; person_id: string; person_name: string; channel: Channel; text: string; handoff: string | null };
 
+export type LanePhoto = { id: string; person_id: string; url: string; caption: string; taken_at: string | null };
+
+export type Nudge = { kind: "reply" | "ready"; id: string; person_id: string; title: string; body: string };
+
+export type SelfNote = { id: string; url: string; created_at: string; mime?: string; label?: string };
+
 export type Home = {
   me: Person;
   people: Person[];
   cards: Card[];
   replies: Reply[];
   reminders: Reminder[];
-  self_notes: { id: string; url: string; created_at: string }[];
+  self_notes: SelfNote[];
+  photos?: LanePhoto[];
+  nudges?: Nudge[];
   providers: { spark: string; transcribe: string; whatsapp: string };
   clock: { now: string };
 };
@@ -167,6 +178,13 @@ const file = (uri: string, name: string, type: string) => ({ uri, name, type }) 
 
 export const api = {
   home: () => call<Home>("/api/home"),
+  safetyResources: () => call<Resource[]>("/api/safety/resources"),
+  patchPerson: (personId: string, changes: { timezone?: string; morning?: string; language?: string }) =>
+    call<Person>(`/api/people/${personId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(changes),
+    }),
 
   // assetId: the gallery photo he was looking at, so the photo remembers what he said.
   uploadRant: (wavUri: string, assetId?: string | null) => {

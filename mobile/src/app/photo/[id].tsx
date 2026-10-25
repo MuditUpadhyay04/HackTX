@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppIcon } from "../../components/ui";
 import { useKnock } from "../../lib/attention";
+import { haptics } from "../../lib/haptics";
 import { photoDate } from "../../lib/photos";
 import { color, space, spring, type } from "../../theme/tokens";
 
@@ -32,7 +33,10 @@ export default function PhotoViewer() {
   }, [pulse]);
 
   useEffect(() => {
-    if (knock) Animated.spring(knockY, { toValue: 0, ...spring.banner, useNativeDriver: true }).start();
+    if (knock) {
+      haptics.tap();
+      Animated.spring(knockY, { toValue: 0, ...spring.banner, useNativeDriver: true }).start();
+    }
   }, [knock, knockY]);
 
   const hideKnock = () => Animated.spring(knockY, { toValue: -220, ...spring.banner, useNativeDriver: true }).start();

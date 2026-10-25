@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Chip, LetterCard, NavBar, PrimaryPill, styles as ui, T, TextButton } from "../components/ui";
 import { api, type Piece } from "../lib/api";
+import { haptics } from "../lib/haptics";
 import { type App, handOff } from "../lib/handoff";
 import { uploadGalleryPhoto } from "../lib/photos";
 import { needsHisTap, useHeadsUpAsk } from "../lib/push";
@@ -56,6 +57,7 @@ export default function Preview() {
       }
       const card = await api.createCard(person.id, ids, holding ? "her_morning" : "now", photoId);
       if (card.status === "held") {
+        haptics.success();
         setHeld(card.release_label);
         if (!headsUp.question) setTimeout(() => router.dismissTo("/home"), 1800); // else wait for his answer
         return;

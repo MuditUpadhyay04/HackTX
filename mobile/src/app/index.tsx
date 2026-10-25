@@ -1,111 +1,61 @@
-// The phone's gallery, as a Photos look-alike (no Apple assets). Un-Said lives on top of it:
-// its icon sits in the corner, and on any photo it can open the place to say something.
-import { Image } from "expo-image";
-import { usePermissions } from "expo-media-library";
+// Launch (DESIGN_SPEC 3.0). The icon settles, then Home.
 import { router } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Dimensions, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect, useState } from "react";
+import { AccessibilityInfo, Animated, StyleSheet, Text, View } from "react-native";
 
-import { AppIcon, PrimaryPill } from "../components/ui";
-import { type GalleryPhoto, loadPhotos } from "../lib/photos";
-import { space } from "../theme/tokens";
+import { AppIcon } from "../components/ui";
+import { color } from "../theme/tokens";
 
-const COLUMNS = 3;
-const GAP = 2;
-const PAGE = 90;
-const TILE = (Dimensions.get("window").width - GAP * (COLUMNS - 1)) / COLUMNS;
-
-const dedupe = (list: GalleryPhoto[]) => [...new Map(list.map((p) => [p.id, p])).values()];
-
-export default function Gallery() {
-  const insets = useSafeAreaInsets();
-  const [permission, requestPermission] = usePermissions();
-  const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
-  const [done, setDone] = useState(false);
-  const loading = useRef(false);
-
-  // One page at a time: onEndReached can fire again before the last page lands,
-  // and it fires on the empty list while the first page is still loading.
-  const more = useCallback(async () => {
-    if (done || loading.current || photos.length === 0) return;
-    loading.current = true;
-    try {
-      const next = await loadPhotos(photos.length, PAGE);
-      setPhotos((p) => dedupe([...p, ...next]));
-      if (next.length < PAGE) setDone(true);
-    } finally {
-      loading.current = false;
-    }
-  }, [photos.length, done]);
+export default function Launch() {
+  const [opacity] = useState(() => new Animated.Value(0));
+  const [scale] = useState(() => new Animated.Value(0.92));
+  const [word] = useState(() => new Animated.Value(8));
 
   useEffect(() => {
-    if (!permission?.granted) return;
-    let alive = true;
-    loadPhotos(0, PAGE).then((first) => {
-      if (!alive) return;
-      setPhotos(dedupe(first));
-      setDone(first.length < PAGE);
-    });
-    return () => {
-      alive = false;
+    SplashScreen.hideAsync().catch(() => {});
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const go = (delay: number) => {
+      timer = setTimeout(() => {
+        if (!cancelled) router.replace("/home");
+      }, delay);
     };
-  }, [permission?.granted]);
-
-  const header = (
-    <View style={[styles.header, { paddingTop: insets.top + space.s8 }]}>
-      <View>
-        <Text style={styles.title}>Library</Text>
-        <Text style={styles.sub}>{photos.length ? `${photos.length}${done ? "" : "+"} photos` : " "}</Text>
-      </View>
-      <Pressable testID="overlay-open-home" hitSlop={12} onPress={() => router.push("/home")}>
-        <AppIcon size={36} />
-      </Pressable>
-    </View>
-  );
-
-  if (!permission) return <View style={styles.black} />;
-
-  if (!permission.granted) {
-    return (
-      <View style={styles.black}>
-        {header}
-        <View style={{ flex: 1, justifyContent: "center", gap: space.s24 }}>
-          <Text style={[styles.sub, { textAlign: "center", paddingHorizontal: space.s32 }]}>
-            Un-Said looks through your photos with you, on this phone.
-          </Text>
-          <PrimaryPill label="Allow photo access" featureId="camera-roll-scan" onPress={requestPermission} />
-        </View>
-      </View>
-    );
-  }
+    AccessibilityInfo.isReduceMotionEnabled()
+      .catch(() => false)
+      .then((reduce) => {
+        if (cancelled) return;
+        if (reduce) {
+          Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }).start();
+          go(280);
+          return;
+        }
+        Animated.parallel([
+          Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }),
+          Animated.spring(scale, { toValue: 1, stiffness: 180, damping: 26, mass: 1, useNativeDriver: true }),
+          Animated.spring(word, { toValue: 0, stiffness: 180, damping: 26, mass: 1, useNativeDriver: true }),
+        ]).start();
+        go(680);
+      });
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, [opacity, scale, word]);
 
   return (
-    <View style={styles.black}>
-      <FlatList
-        data={photos}
-        keyExtractor={(p) => p.id}
-        numColumns={COLUMNS}
-        ListHeaderComponent={header}
-        columnWrapperStyle={{ gap: GAP }}
-        contentContainerStyle={{ gap: GAP, paddingBottom: insets.bottom + space.s32 }}
-        onEndReached={more}
-        onEndReachedThreshold={1.5}
-        renderItem={({ item }) => (
-          <Pressable
-            onPress={() => router.push({ pathname: "/photo/[id]", params: { id: item.id, w: item.width ?? 0, h: item.height ?? 0, t: item.creationTime ?? 0 } })}
-          >
-            <Image source={{ uri: item.id }} style={{ width: TILE, height: TILE }} contentFit="cover" recyclingKey={item.id} transition={120} />
-          </Pressable>
-        )}
-      />
+    <View style={styles.screen}>
+      <Animated.View style={{ alignItems: "center", opacity, transform: [{ scale }] }}>
+        <AppIcon size={120} />
+        <Animated.View style={{ transform: [{ translateY: word }] }}>
+          <Text style={styles.word}>Un-Said</Text>
+        </Animated.View>
+      </Animated.View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  black: { flex: 1, backgroundColor: "#000" },
-  header: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", paddingHorizontal: space.s16, paddingBottom: space.s12 },
-  title: { color: "#fff", fontSize: 34, lineHeight: 41, fontWeight: "700", letterSpacing: 0.4 },
-  sub: { color: "#9C99AA", fontSize: 15, lineHeight: 20 },
+  screen: { flex: 1, backgroundColor: color.bg, alignItems: "center", justifyContent: "center" },
+  word: { color: color.text, fontSize: 24, lineHeight: 28, fontWeight: "800", letterSpacing: -0.24, marginTop: 20 },
 });

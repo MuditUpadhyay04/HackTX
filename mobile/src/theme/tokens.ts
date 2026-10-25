@@ -1,5 +1,5 @@
 // Gurneal's Un-Said tokens (design/tokens/unsaid-tokens.json). Fixed: don't edit values here.
-import type { TextStyle } from "react-native";
+import { Platform, type TextStyle } from "react-native";
 
 export const color = {
   stage: "#0B0B10",
@@ -36,12 +36,16 @@ export const space = { s4: 4, s8: 8, s12: 12, s16: 16, s24: 24, s32: 32, s48: 48
 export const inset = { text: 24, card: 16 } as const;
 export const radius = { hero: 28, row: 16, square: 16, pill: 999 } as const;
 
+// System stack only. iOS keeps SF; web uses system-ui. No downloaded font.
+const sans = Platform.select<string | undefined>({ web: "system-ui", android: "sans-serif", default: undefined });
+
 const t = (size: number, lineHeight: number, weight: TextStyle["fontWeight"], trackingEm = 0): TextStyle => ({
   fontSize: size,
   lineHeight,
   fontWeight: weight,
   letterSpacing: trackingEm * size,
   color: color.text,
+  ...(sans ? { fontFamily: sans } : {}),
 });
 
 export const type = {

@@ -1,30 +1,66 @@
-// Letters (DESIGN_SPEC 3.6): what came back. Gradient ring = unread.
+// Letters (DESIGN_SPEC 3.6). A gradient ring means unread.
 import { router } from "expo-router";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Avatar, Row, styles as ui, T } from "../../components/ui";
+import { Skeleton } from "../../components/motion";
+import { Avatar, Press, Row, styles as ui, T } from "../../components/ui";
+import { haptics } from "../../lib/haptics";
 import { useHome } from "../../lib/useHome";
-import { inset, space } from "../../theme/tokens";
+import { color, inset, space } from "../../theme/tokens";
 
 export default function Letters() {
   const insets = useSafeAreaInsets();
-  const { home } = useHome();
+  const { home, error, refresh } = useHome();
   const replies = home?.replies ?? [];
   const senders = [...new Map(replies.map((r) => [r.from_person_id, r])).values()];
+  const unread = new Set(replies.filter((r) => !r.heard_at).map((r) => r.from_person_id));
+  const loading = !home && !error;
+
+  const openFrom = (personId: string, fallbackId: string) => {
+    const unheard = replies.find((r) => r.from_person_id === personId && !r.heard_at);
+    haptics.tap();
+    router.push({ pathname: "/letter/[id]", params: { id: unheard?.id ?? fallbackId } });
+  };
 
   return (
     <View style={ui.screen}>
       <ScrollView contentContainerStyle={{ paddingTop: insets.top + space.s8, paddingBottom: space.s48 }}>
-        <T v="display" style={{ marginHorizontal: inset.text }}>Letters</T>
+        <T v="display" style={{ marginHorizontal: inset.text }}>
+          Letters
+        </T>
+
+        {loading ? (
+          <View style={{ marginHorizontal: inset.card, marginTop: space.s24, gap: space.s8 }}>
+            <Skeleton height={76} />
+            <Skeleton height={76} />
+          </View>
+        ) : null}
+
+        {error && !home ? (
+          <View style={{ marginTop: space.s24, gap: space.s16 }}>
+            <T v="rowPreview" style={{ marginHorizontal: inset.text }}>{`Can't reach Un-Said's server. ${error}`}</T>
+            <Press onPress={() => refresh()} style={[ui.pill, { backgroundColor: color.surfaceRaised }]}>
+              <T v="button">Try again</T>
+            </Press>
+          </View>
+        ) : null}
+
+        {home && senders.length === 0 ? (
+          <T v="rowPreview" style={{ marginHorizontal: inset.text, marginTop: space.s24 }}>
+            When someone writes back, it lands here.
+          </T>
+        ) : null}
 
         {senders.length ? (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.rings}>
             {senders.map((r) => (
-              <View key={r.from_person_id} style={{ alignItems: "center", gap: space.s4 }}>
-                <Avatar name={r.from_name} size={56} ring={!r.heard_at} />
-                <T v="meta">{r.from_name}</T>
-              </View>
+              <Pressable key={r.from_person_id} onPress={() => openFrom(r.from_person_id, r.id)} style={{ alignItems: "center", gap: space.s8, width: 72 }}>
+                <Avatar name={r.from_name} size={56} ring={unread.has(r.from_person_id)} />
+                <T v="meta" lines={1}>
+                  {r.from_name}
+                </T>
+              </Pressable>
             ))}
           </ScrollView>
         ) : null}
@@ -35,7 +71,9 @@ export default function Letters() {
               <Avatar name={r.from_name} ring={!r.heard_at} />
               <View style={{ flex: 1 }}>
                 <T v="rowName">{r.from_name}</T>
-                <T v="rowPreview" lines={1}>{r.audio_url ? "voice reply" : r.transcript}</T>
+                <T v="rowPreview" lines={1}>
+                  {r.audio_url ? "voice reply" : r.transcript}
+                </T>
               </View>
               <T v="meta">{r.day}</T>
             </Row>
