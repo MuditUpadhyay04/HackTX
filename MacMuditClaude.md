@@ -6,8 +6,12 @@ Running log of every change Claude Code makes on the `branched-frontend` workstr
 
 - **Device (Phase 1):** the iPhone Fold, drawn in CSS 3D, opens and closes with the Fold/Unfold pill or the F key (Shift+F jumps). The inner screen has no punch-hole and no crease (D11). The cover screen keeps its camera top-right. The stage is a studio off-white (D12). fold-check passes 26/26 at 60 fps. Not committed yet.
 - **In progress:** the iOS home screen (wallpaper, status bar, widgets, iPhone layout on the cover and iPad-style layout on the inner screen per D8) and the smooth unfold (screen content visible on both halves while folding, with motion blur), plus the fake apps (WhatsApp thread + chat list, Messages, Instagram DMs, keyboard; then Photos, calls, Reels).
-- **Meta icons:** official packs are being downloaded from Meta's Brand Resource Center into `Branched-Frontend/assets/brand/meta/` (D9: used 1:1, never redrawn). Until they land, Meta apps show plain grey tiles.
+- **Meta icons:** official logo files for Facebook, Messenger, Instagram, WhatsApp and Threads are in `Branched-Frontend/assets/brand/meta/` (sources in its README; D9: used 1:1, never redrawn). Meta AI, Edits, Meta Horizon, WhatsApp Business, Meta Business Suite, Meta Ads Manager and Messenger Kids have no official file on the Brand Resource Center, so they stay plain grey tiles.
 - **Open questions for Gurneal:** the fold spring (spec 120/22/1.3) settles in about 0.8 s, not "about 2 s", and its overshoot is about 0.5°, so the detent reads from the ripple only.
+
+## Oct 24, 2026, 11:14 PM CDT
+
+Downloaded the official Meta packs after accepting each page's terms: Facebook (337 KB), Messenger (1.4 MB), Instagram (35 MB), WhatsApp (10.6 MB), Threads (1.5 MB). The screen-ready SVG/PNG files (14 files) were copied unmodified into `assets/brand/meta/`, with 512 px copies in `public/brand/meta/`. The home-screen builder is composing them into iOS-style app icons.
 
 ## Oct 24, 2026, 11:08 PM CDT
 
