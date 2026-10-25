@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <!-- Branched-Frontend: Sarah, illustrated avatar (our own art; no real person). -->
+  <defs>
+    <radialGradient id="bg" cx="0.3" cy="0.25" r="0.95"><stop offset="0" stop-color="#E8E2FA"/><stop offset="1" stop-color="#CBC2EE"/></radialGradient>
+    <linearGradient id="hair" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7A4A2E"/><stop offset="1" stop-color="#5C3520"/></linearGradient>
+  </defs>
+  <rect width="240" height="240" fill="url(#bg)"/>
+  <!-- hair back -->
+  <path d="M70 120c-6-50 18-78 50-78s56 28 50 78c-2 30 6 50 14 70H56c8-20 16-40 14-70z" fill="url(#hair)"/>
+  <!-- sweater -->
+  <path d="M40 240c4-42 36-66 80-66s76 24 80 66z" fill="#F2EADC"/>
+  <path d="M96 176c6 10 14 14 24 14s18-4 24-14" fill="none" stroke="#E0D4C0" stroke-width="5" stroke-linecap="round"/>
+  <!-- neck -->
+  <path d="M106 150h28v24c0 8-6 13-14 13s-14-5-14-13z" fill="#E7B796"/>
+  <path d="M108 182c4 6 8 8 12 8s8-2 12-8" fill="none" stroke="#D8B26A" stroke-width="1.6"/>
+  <!-- face -->
+  <ellipse cx="120" cy="114" rx="38" ry="44" fill="#F2C9AA"/>
+  <!-- bangs / front hair -->
+  <path d="M82 112c0-34 16-54 40-54 22 0 38 18 38 46-10-14-22-24-36-28-12 12-26 22-42 36z" fill="url(#hair)"/>
+  <path d="M82 104c-6 22-4 46 4 64-14-10-20-30-16-52z" fill="url(#hair)"/>
+  <path d="M158 104c6 22 4 46-4 64 14-10 20-30 16-52z" fill="url(#hair)"/>
+  <!-- features -->
+  <ellipse cx="105" cy="118" rx="3.4" ry="4.2" fill="#3A2418"/>
+  <ellipse cx="135" cy="118" rx="3.4" ry="4.2" fill="#3A2418"/>
+  <path d="M98 108c4-3 10-3 13-1M129 107c4-2 9-2 13 1" fill="none" stroke="#5C3520" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M120 122c-1 5-2 8-5 10 2 1 5 1 7 0" fill="none" stroke="#D49A78" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M111 141c6 4 12 4 18 0" fill="none" stroke="#B35C55" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="100" cy="132" rx="7" ry="4" fill="#EE9C91" opacity="0.45"/>
+  <ellipse cx="140" cy="132" rx="7" ry="4" fill="#EE9C91" opacity="0.45"/>
+</svg>

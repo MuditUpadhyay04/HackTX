@@ -27,3 +27,18 @@ button {
   -webkit-user-select: none;
   user-select: none;
 }
+
+/* The fold pill: the browser ring is replaced by an iOS-blue ring that shows for keyboard focus only. */
+[data-fold-control] {
+  outline: none;
+}
+[data-fold-control]:focus-visible {
+  outline: var(--size-focus-ring) solid var(--ios-blue);
+  outline-offset: var(--size-focus-ring);
+}
+
+/* Reduced-motion fold (lib/device/fold.ts crossfade): the old pose fades out over the new one. */
+@keyframes device-crossfade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}

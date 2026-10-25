@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <!-- Branched-Frontend: Dad, illustrated avatar (our own art; no real person). -->
+  <defs>
+    <radialGradient id="bg" cx="0.3" cy="0.25" r="1"><stop offset="0" stop-color="#ECE5C8"/><stop offset="1" stop-color="#D3C89E"/></radialGradient>
+  </defs>
+  <rect width="240" height="240" fill="url(#bg)"/>
+  <path d="M36 240c4-46 38-72 84-72s80 26 84 72z" fill="#5C7EA8"/>
+  <path d="M100 172l20 22 20-22" fill="#F4F1EA"/>
+  <path d="M100 172l20 22 20-22" fill="none" stroke="#4A6890" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M104 148h32v24c0 9-7 14-16 14s-16-5-16-14z" fill="#9C6849"/>
+  <ellipse cx="120" cy="112" rx="40" ry="46" fill="#AC7452"/>
+  <ellipse cx="80" cy="116" rx="6" ry="9" fill="#9C6849"/>
+  <ellipse cx="160" cy="116" rx="6" ry="9" fill="#9C6849"/>
+  <path d="M80 104c-2-30 16-46 40-46s42 16 40 46c-4-12-10-20-18-24-8 4-18 6-26 6-10 0-20-2-26-6-6 4-8 12-10 24z" fill="#4A4440"/>
+  <path d="M82 96c2-8 6-14 10-18M158 96c-2-8-6-14-10-18" stroke="#9A948C" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <rect x="94" y="106" width="22" height="16" rx="5" fill="none" stroke="#2E2A27" stroke-width="2.6"/>
+  <rect x="124" y="106" width="22" height="16" rx="5" fill="none" stroke="#2E2A27" stroke-width="2.6"/>
+  <path d="M116 113h8" stroke="#2E2A27" stroke-width="2.6"/>
+  <circle cx="105" cy="114" r="3" fill="#2E2A27"/>
+  <circle cx="135" cy="114" r="3" fill="#2E2A27"/>
+  <path d="M120 122c-1 5-2 8-5 10 2 1 5 1 7 0" fill="none" stroke="#86553A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M102 138c6-5 12-6 18-4 6-2 12-1 18 4-6 3-12 4-18 2-6 2-12 1-18-2z" fill="#3A3330"/>
+</svg>

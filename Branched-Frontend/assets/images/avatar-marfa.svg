@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <!-- Branched-Frontend: "Marfa Trip" group avatar: West Texas desert road at dusk (our own art). -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4B4A86"/><stop offset="0.55" stop-color="#D9787A"/><stop offset="1" stop-color="#F6B97C"/></linearGradient>
+  </defs>
+  <rect width="240" height="240" fill="url(#sky)"/>
+  <circle cx="60" cy="40" r="1.6" fill="#FFF"/><circle cx="150" cy="30" r="1.2" fill="#FFF"/><circle cx="196" cy="52" r="1.6" fill="#FFF"/><circle cx="104" cy="62" r="1" fill="#FFF"/>
+  <path d="M0 150l30-14h34l12 10 40-26h40l18 14 26-8 40 14v20H0z" fill="#7E4A5A"/>
+  <path d="M0 160h240v80H0z" fill="#C9875E"/>
+  <path d="M112 160h16l40 80H72z" fill="#4E4446"/>
+  <path d="M120 168v10M120 190v14M120 216v20" stroke="#F3D27C" stroke-width="3"/>
+  <path d="M40 176v-18M40 166h-6v-6M40 170h6v-6" stroke="#5C6B48" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <path d="M198 186v-22M198 174h7v-8" stroke="#5C6B48" stroke-width="5" stroke-linecap="round" fill="none"/>
+</svg>

@@ -77,8 +77,10 @@ export const caretBlink = { on: 500, off: 500 } as const;
 export const durations = {
   /** keyboard rise, easeIos */
   keyboardRise: 300,
-  /** press feedback, easeIos */
+  /** press feedback, easeIos (release eases back over this) */
   press: 120,
+  /** press-in: lands in under 100 ms (spec fold control), easeIos */
+  pressIn: 60,
   /** display wake, easeIos */
   displayWake: 400,
   /** reduced motion: crossfade between key states in the opening */
@@ -96,6 +98,12 @@ export const durations = {
   /** "concept only" toast on screen (section 8.1: 1.6 s) */
   conceptOnly: 1600,
 } as const;
+
+/** iOS press feedback (spec fold control): scale 0.97 + 15% darken. */
+export const press = { scale: 0.97, brightness: 0.85 } as const;
+
+/** The hinge ripple ring grows from 60% to full size while it fades. */
+export const hingeRippleStartScale = 0.6;
 
 /** Seconds, for Framer Motion `duration`. */
 export const ms = (value: number): number => value / 1000;

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <!-- Branched-Frontend: @rec.league.legends poster avatar: a basketball (our own art). -->
+  <rect width="240" height="240" fill="#283A63"/>
+  <circle cx="120" cy="120" r="62" fill="#E7793A"/>
+  <g fill="none" stroke="#3A1E10" stroke-width="5">
+    <path d="M58 120h124M120 58v124"/>
+    <path d="M78 76c20 18 20 70 0 88M162 76c-20 18-20 70 0 88"/>
+  </g>
+  <circle cx="98" cy="96" r="12" fill="#F49A60" opacity="0.6"/>
+</svg>

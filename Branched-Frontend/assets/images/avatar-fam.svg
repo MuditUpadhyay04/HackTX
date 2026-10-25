@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <!-- Branched-Frontend: "Fam" group avatar: home at dusk (our own art). -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F5B98A"/><stop offset="1" stop-color="#F8D9B4"/></linearGradient>
+  </defs>
+  <rect width="240" height="240" fill="url(#sky)"/>
+  <circle cx="176" cy="70" r="20" fill="#FFF0D6"/>
+  <path d="M0 186c40-12 80-14 120-10s80 2 120-8v72H0z" fill="#9DB27D"/>
+  <path d="M62 116l58-48 58 48v74H62z" fill="#F7EEE2"/>
+  <path d="M50 122l70-60 70 60" fill="none" stroke="#A44A3B" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="106" y="146" width="28" height="44" rx="3" fill="#7E5A44"/>
+  <rect x="76" y="132" width="22" height="20" rx="2" fill="#FFD27A"/>
+  <rect x="142" y="132" width="22" height="20" rx="2" fill="#FFD27A"/>
+  <path d="M87 132v20M76 142h22M153 132v20M142 142h22" stroke="#E0A84A" stroke-width="2"/>
+  <rect x="146" y="78" width="14" height="24" fill="#A44A3B"/>
+</svg>

@@ -45,6 +45,8 @@ const extraColors = {
   // 4.3 stage (black behind the opening; white for light stages, Stage bg "white")
   "stage-black": "#000000",
   "stage-white": "#FFFFFF",
+  // D12: the Apple product-page studio backdrop behind the device (warm off-white)
+  "stage-studio": "#F5F5F1",
   // Phase 1 wallpaper base (the ios-wallpaper gradient sits on it)
   "ios-wallpaper-base": "#0B0B12",
   // iOS system label + separator colors (Apple HIG), light and dark, for iOS chrome text and hairlines
@@ -75,9 +77,33 @@ const extraColors = {
   "device-lens-reflection": "rgba(140,120,255,0.35)",
   "device-edge-highlight": "rgba(255,255,255,0.8)",
   "device-seam-highlight": "rgba(255,255,255,0.8)",
-  "device-crease-edge": "rgba(255,255,255,0.05)",
   "device-contact-shadow": "rgba(0,0,0,0.35)",
   "device-hinge-ripple": "rgba(255,255,255,0.25)",
+  "device-test-grid": "rgba(255,255,255,0.22)",
+  "device-test-outline": "rgba(255,255,255,0.7)",
+  "device-test-label": "#FFFFFF",
+  "device-debug-ruler": "rgba(255,255,255,0.55)",
+  "device-debug-box": "#FF3B30",
+  "device-debug-box-alt": "#0A84FF",
+  "device-debug-label-bg": "rgba(0,0,0,0.72)",
+  // Phase 2 look-alike apps (apps builder): CLAUDE_PROMPT.md Phase 2 CHROME SPECS, or the iOS system
+  // colors (HIG) where the spec gives none
+  "wa-wallpaper": "#EFE7DE",
+  "wa-nav-material": "rgba(255,255,255,0.96)",
+  "wa-pill": "rgba(255,255,255,0.92)",
+  "wa-pill-text": "#54656F",
+  "wa-missed-glyph": "#EA0038",
+  "wa-missed-glyph-bg": "rgba(234,0,56,0.10)",
+  "wa-caret": "#00A884",
+  "wa-chip": "#F0F2F5",
+  "wa-chip-active-text": "#15603E",
+  "imsg-nav-material": "rgba(249,249,249,0.94)",
+  "ios-fill-tertiary": "rgba(118,118,128,0.12)",
+  "ios-scrim": "rgba(0,0,0,0.4)",
+  "banner-stroke": "rgba(0,0,0,0.06)",
+  "kb-label": "#000000",
+  "kb-special-label": "#000000",
+  "icon-photos-fill": "#FFFFFF",
 } as const;
 
 export const color = { ...lookalikeColors, ...deviceColors, ...extraColors };
@@ -92,12 +118,29 @@ export type ColorToken = keyof typeof color;
  * The base is a flat linear-gradient so the whole value is a valid background-image list.
  * Render it on a layer with `wallpaper.filter` and `wallpaper.scale` (see below).
  */
+const c = unTheme.color;
 const iosWallpaper = [
-  `radial-gradient(40% 50% at 22% 30%, ${unTheme.color["un-icon-blue"]}, transparent)`,
-  `radial-gradient(45% 55% at 78% 25%, ${unTheme.color["un-icon-orchid"]}, transparent)`,
-  `radial-gradient(50% 60% at 60% 80%, ${unTheme.color["un-icon-violet"]}, transparent)`,
-  `radial-gradient(40% 45% at 15% 85%, ${unTheme.color["un-icon-periwinkle"]}, transparent)`,
-  "linear-gradient(#0B0B12, #0B0B12)",
+  // Apple keynote look (D12): a dark vignette holding luminous blue -> violet -> orchid fields with
+  // one bright lilac core, all blurred together so the colors bleed like light, not like blobs
+  `radial-gradient(125% 100% at 50% 56%, transparent 52%, #05050B 100%)`,
+  `radial-gradient(26% 32% at 57% 50%, ${c["un-icon-lilac"]}, transparent 70%)`,
+  `radial-gradient(52% 66% at 82% 40%, ${c["un-icon-orchid"]}, transparent 72%)`,
+  `radial-gradient(56% 76% at 20% 72%, ${c["un-icon-blue"]}, transparent 72%)`,
+  `radial-gradient(62% 72% at 50% 62%, ${c["un-icon-violet"]}, transparent 72%)`,
+  `radial-gradient(40% 48% at 86% 88%, ${c["un-icon-plum"]}, transparent 70%)`,
+  `radial-gradient(36% 44% at 16% 22%, ${c["un-icon-periwinkle"]}, transparent 70%)`,
+  `linear-gradient(#05050B, #05050B)`,
+].join(", ");
+
+/** The lit device display (iPhone Fold, Phase 1): the same synced un-icon-* colors, unblurred. */
+const screenWallpaper = [
+  // same keynote family as the stage (D12): luminous fields on a deep base, crisp (no blur on glass)
+  `radial-gradient(42% 46% at 62% 40%, ${c["un-icon-lilac"]} 0%, transparent 72%)`,
+  `radial-gradient(62% 72% at 88% 12%, ${c["un-icon-orchid"]} 0%, transparent 72%)`,
+  `radial-gradient(75% 85% at 18% 92%, ${c["un-icon-blue"]} 0%, transparent 74%)`,
+  `radial-gradient(85% 95% at 48% 58%, ${c["un-icon-violet"]} 0%, transparent 76%)`,
+  `radial-gradient(50% 60% at 8% 12%, ${c["un-icon-periwinkle"]} 0%, transparent 72%)`,
+  `linear-gradient(160deg, #120E2A 0%, #07060F 100%)`,
 ].join(", ");
 
 export const gradient = {
@@ -112,8 +155,8 @@ export type GradientToken = keyof typeof gradient;
 /** How the ios-wallpaper layer is rendered (Phase 1): blurred, scaled past its edges, 4% noise. */
 export const wallpaper = {
   gradient: iosWallpaper,
-  base: "#0B0B12",
-  filter: "blur(80px) saturate(1.2)",
+  base: "#05050B",
+  filter: "blur(80px) saturate(1.35)",
   scale: 1.2,
   noiseOpacity: 0.04,
 } as const;
@@ -149,25 +192,22 @@ export const material = {
   "device-lens": "radial-gradient(circle at 38% 32%, #3A4256 0%, #12151D 45%, #050608 100%)",
   "device-front-camera": "radial-gradient(circle at 35% 35%, #2B3140 0%, #0A0C12 60%, #000000 100%)",
   "device-flash": "radial-gradient(#FFF8E7, #E9DFC8)",
-  // crease on the inner displays: dark at the hinge edge, fading out over 12 px
-  "device-crease-left-display": "linear-gradient(to left, rgba(0,0,0,0.16) 0px, rgba(0,0,0,0) 12px)",
-  "device-crease-right-display": "linear-gradient(to right, rgba(0,0,0,0.16) 0px, rgba(0,0,0,0) 12px)",
   // reflection fade (mask-image)
   "device-reflection-mask": "linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0) 35%)",
   "device-reflection-filter": "blur(1.5px)",
   // iPhone Fold, natural titanium (RULES.md D10)
-  "device-ti-band": "linear-gradient(135deg, #F6F4F0 0%, #C3BEB5 18%, #E6E2DC 38%, #A39E95 60%, #DEDAD3 80%, #77736C 100%)",
+  "device-ti-band": "linear-gradient(135deg, #ECE9E3 0%, #A9A49B 16%, #D9D5CE 34%, #8E8A82 58%, #CFCBC4 78%, #6E6A63 100%)",
   "device-ti-side": "linear-gradient(180deg, #46443F 0%, #A39E95 10%, #F6F4F0 28%, #C3BEB5 50%, #DEDAD3 68%, #77736C 90%, #46443F 100%)",
-  "device-ti-spine": "linear-gradient(180deg, #DEDAD3 0%, #C3BEB5 30%, #E6E2DC 55%, #A39E95 100%)",
+  "device-ti-spine": "linear-gradient(180deg, #D9D5CE 0%, #B3AEA5 30%, #D2CEC7 55%, #8E8A82 100%)",
   "device-ti-brush": "repeating-linear-gradient(90deg, rgba(255,255,255,0) 0px, rgba(255,255,255,0) 2px, rgba(255,255,255,0.07) 2px, rgba(255,255,255,0.07) 3px)",
   "device-back-glass-ti-fill": "linear-gradient(165deg, #E5E1DA 0%, #D5D1C9 45%, #C5C0B7 100%)",
   "device-back-glass-ti-gloss": "linear-gradient(110deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.32) 48%, rgba(255,255,255,0) 62%)",
   "device-plateau-fill": "linear-gradient(170deg, #DCD8D1 0%, #C9C4BB 55%, #B9B4AA 100%)",
   "device-lens-ring-ti": "linear-gradient(135deg, #E6E2DC 0%, #A39E95 55%, #46443F 100%)",
-  "device-screen-wallpaper": "radial-gradient(55% 65% at 16% 18%, #8FA3FF 0%, transparent 70%), radial-gradient(50% 60% at 86% 14%, #C08AD6 0%, transparent 70%), radial-gradient(70% 75% at 62% 96%, #8776DF 0%, transparent 72%), radial-gradient(45% 55% at 6% 92%, #607CF2 0%, transparent 70%), linear-gradient(160deg, #3D439A 0%, #2B2670 52%, #1A1642 100%)",
+  // lit display wallpaper: the synced un-icon-* colors (Gurneal's app icon), deepened toward the bottom
+  "device-screen-wallpaper": screenWallpaper,
   "device-screen-off": "linear-gradient(160deg, #17181C 0%, #060607 36%, #000000 100%)",
   "device-glass-sheen": "linear-gradient(118deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.04) 22%, rgba(255,255,255,0) 40%)",
-  "device-crease": "linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.09) 30%, rgba(255,255,255,0.16) 50%, rgba(0,0,0,0.09) 70%, rgba(0,0,0,0) 100%)",
   // iOS light notification material (banners, Phase 2): fill + backdrop filter
   "material-light": "rgba(245,245,245,0.78)",
   "material-light-filter": "blur(30px) saturate(180%)",
@@ -179,6 +219,8 @@ export const material = {
   "material-pill-dark": "rgba(255,255,255,0.14)",
   "material-pill-light": "rgba(0,0,0,0.06)",
   "material-pill-filter": "blur(20px)",
+  // Messages look-alike app icon tile (Phase 2 banners; drawn, never an Apple file)
+  "icon-messages-fill": "linear-gradient(180deg, #5CF777 0%, #0EBE2C 100%)",
 } as const;
 export type MaterialToken = keyof typeof material;
 
@@ -283,12 +325,110 @@ export const shadow = {
   "device-bezel-inner": "inset 0 0 0 1px rgba(255,255,255,0.06)",
   "device-hinge-proud": "1px 0 0 rgba(0,0,0,0.08), -1px 0 0 rgba(0,0,0,0.08)",
   "device-camera-bump": "0 2px 6px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.08)",
+  "device-plateau": "0 1px 0 rgba(255,255,255,0.55) inset, 0 -1px 0 rgba(0,0,0,0.10) inset, 0 0 0 0.75px rgba(0,0,0,0.16), 0 3px 8px rgba(0,0,0,0.16)",
+  "device-lens-ring": "0 0 0 1px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.25)",
+  "device-lens-glass": "inset 0 2px 6px rgba(0,0,0,0.8), inset 0 0 0 2px rgba(0,0,0,0.6)",
+  "device-button": "inset 0 1px 0 rgba(255,255,255,0.6), 0 0 0 0.5px rgba(0,0,0,0.25)",
+  // Phase 2 look-alike apps
+  "wa-bubble": "0 1px 0.5px rgba(11,20,26,0.13)",
+  "key-pop": "0 1px 1px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.12)",
+  "photo-time": "0 1px 2px rgba(0,0,0,0.45)",
 } as const;
 export type ShadowToken = keyof typeof shadow;
 
 /** Backdrop / layer blur radii (px). 24 = device contact shadow. */
 export const blur = { 20: 20, 24: 24, 30: 30, 60: 60, 80: 80 } as const;
 export type BlurToken = keyof typeof blur;
+
+// ---------------------------------------------------------------------------
+// Phase 3 home screen (D8, D9, D12; home-screen builder). Mirrored in app/tokens.css as --home-* /
+// --icon-* / --widget-* custom properties.
+// ---------------------------------------------------------------------------
+
+/**
+ * The home-screen wallpaper (components/home/HomeWallpaper.tsx): the iOS 26 neutral silk "swoosh"
+ * family, sampled from Gurneal's reference (https://iphone-duo-tawny.vercel.app, Launcher theme):
+ * a deep ink / slate field on the left, silver-lilac and pearl ribbons, an espresso band and a gold
+ * glow on the right. Drawn as SVG paths + gradients (no image file).
+ */
+export const homeWallpaper = {
+  ink: "#141219",
+  slate: "#2B3142",
+  steel: "#5A6179",
+  lilac: "#B7B6C4",
+  pearl: "#DDD6D2",
+  white: "#F4F1ED",
+  mauve: "#8C8087",
+  gold: "#CFA56C",
+  amber: "#8A633D",
+  espresso: "#2A1E18",
+  taupe: "#7A6352",
+  cream: "#E9DFD3",
+  /** cast shadows and edge highlights inside the art */
+  shade: "#000000",
+  light: "#FFFFFF",
+} as const;
+
+/** Home-screen colors: icon tiles, widgets, page dots. */
+export const homeColor = {
+  // D9 official Meta icons: the tile each official file sits on, sampled from the file itself
+  "icon-facebook-tile": "#0866FF", // Facebook_Logo_Primary.png circle fill (8, 102, 255)
+  "icon-messenger-tile": "#FFFFFF", // the iOS Messenger icon: the blue bubble (Messenger_Icon_Primary_Blue.svg) on white
+  "icon-whatsapp-tile": "#25D366", // Digital_Glyph_Green_RGB_2026.svg .cls-1 fill
+  "icon-threads-tile": "#000000", // the iOS Threads icon: threads-logo-white.svg on black
+  // D9: a Meta app with no official file yet shows a plain tile (no logo drawn)
+  "icon-meta-pending": "#D1D1D6",
+  // drawn Apple look-alikes (D8/D9: Messages, Phone, Photos)
+  "icon-glyph": "#FFFFFF",
+  "icon-green-top": "#5CF777",
+  "icon-green-bottom": "#0EBE2C",
+  "photos-petal-orange": "#F8A12C",
+  "photos-petal-yellow": "#FAD02C",
+  "photos-petal-lime": "#A6D23C",
+  "photos-petal-green": "#4DBE6A",
+  "photos-petal-teal": "#38B6D8",
+  "photos-petal-blue": "#4F7BE0",
+  "photos-petal-purple": "#9A5BD0",
+  "photos-petal-pink": "#EE4C7A",
+  // widgets (spec Phase 3 LAYOUT: Weather on a blue sky #3C8CE7 -> #7EC3F8; Calendar white with iOS red)
+  "widget-weather-top": "#3C8CE7",
+  "widget-weather-bottom": "#7EC3F8",
+  "widget-weather-sun": "#FFD60A",
+  "widget-calendar-bg": "#FFFFFF",
+  "widget-event-blue": "#007AFF",
+  "widget-event-purple": "#AF52DE",
+  // page dots (spec: active white, inactive rgba(255,255,255,0.4))
+  "home-dot-inactive": "rgba(255,255,255,0.4)",
+  // Liquid Glass dock / search button edge highlight
+  "home-glass-edge": "rgba(255,255,255,0.55)",
+} as const;
+export type HomeColorToken = keyof typeof homeColor;
+
+/** Home-screen gradients (CSS values). */
+export const homeGradient = {
+  "icon-green-fill": `linear-gradient(180deg, ${homeColor["icon-green-top"]} 0%, ${homeColor["icon-green-bottom"]} 100%)`,
+  "widget-weather-fill": `linear-gradient(180deg, ${homeColor["widget-weather-top"]} 0%, ${homeColor["widget-weather-bottom"]} 100%)`,
+  // iOS 26 Liquid Glass sheen on the dock and the search button: lit top edge, clear body
+  "home-glass-sheen": "linear-gradient(160deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.10) 40%, rgba(255,255,255,0.16) 100%)",
+} as const;
+
+/**
+ * D12 smooth unfold: the moving half's content softens with a motion blur that is a pure function of
+ * openAngle (0 at 0 and 180, peak mid-fold) and dims as it turns away from the viewer.
+ * blurPeak / blurFloor in display px; dims are opacities of the content over the dark glass.
+ */
+export const foldMotion = {
+  /** blur radius (px) at the middle of the fold */
+  blurPeak: 9,
+  /** below this radius the blur is dropped (lands sharp, no filter at rest) */
+  blurFloor: 0.35,
+  /** the curve of the blur over the fold: (sin(pi a / 180)) ^ blurCurve */
+  blurCurve: 0.8,
+  /** the cover home fades to this opacity as it swings edge-on (90 degrees) */
+  coverDimTo: 0.3,
+  /** the inner display's moving half starts from this opacity at 90 degrees */
+  innerDimFrom: 0.4,
+} as const;
 
 // ---------------------------------------------------------------------------
 // Type

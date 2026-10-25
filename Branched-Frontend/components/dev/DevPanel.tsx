@@ -14,6 +14,7 @@ import { useFlags } from "@/lib/flags";
 import { durations, easeSoft, ms, springSnapback, usePrefersReducedMotion } from "@/lib/motion";
 import { size } from "@/lib/tokens";
 import { sceneUrl, scenesByGroup } from "@/lib/scenes";
+import type { UnsaidDeviceApi } from "@/lib/device/fold";
 
 /**
  * The device hook Phase 1 registers on window (IPhoneDuo). Optional: the
@@ -21,7 +22,7 @@ import { sceneUrl, scenesByGroup } from "@/lib/scenes";
  */
 declare global {
   interface Window {
-    __unsaidDevice?: { fold: () => void; unfold: () => void };
+    __unsaidDevice?: UnsaidDeviceApi;
   }
 }
 

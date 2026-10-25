@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <!-- Branched-Frontend: Riley, illustrated avatar (our own art; no real person). -->
+  <defs>
+    <radialGradient id="bg" cx="0.3" cy="0.2" r="1"><stop offset="0" stop-color="#DCE7FA"/><stop offset="1" stop-color="#B5CBF1"/></radialGradient>
+  </defs>
+  <rect width="240" height="240" fill="url(#bg)"/>
+  <path d="M36 240c4-46 38-72 84-72s80 26 84 72z" fill="#8B9099"/>
+  <path d="M80 176c10 12 24 18 40 18s30-6 40-18c-8-6-17-8-25-8h-30c-8 0-17 2-25 8z" fill="#9EA3AC"/>
+  <path d="M104 148h32v24c0 9-7 14-16 14s-16-5-16-14z" fill="#9B6646"/>
+  <ellipse cx="120" cy="112" rx="39" ry="45" fill="#AE7655"/>
+  <ellipse cx="81" cy="116" rx="6" ry="9" fill="#9B6646"/>
+  <ellipse cx="159" cy="116" rx="6" ry="9" fill="#9B6646"/>
+  <path d="M80 104c-4-30 14-50 42-50 26 0 42 18 40 46-8-10-16-16-26-18 2 6 0 10-4 12-6-8-18-12-30-10 2 4 2 8 0 10-10 0-16 4-22 10z" fill="#141010"/>
+  <ellipse cx="105" cy="117" rx="3.4" ry="3.8" fill="#141010"/>
+  <ellipse cx="135" cy="117" rx="3.4" ry="3.8" fill="#141010"/>
+  <path d="M98 107c4-2 10-2 14 0M128 107c4-2 10-2 14 0" fill="none" stroke="#141010" stroke-width="3" stroke-linecap="round"/>
+  <path d="M120 121c-1 6-3 9-6 11 3 1 6 1 8 0" fill="none" stroke="#8A5536" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M110 141h20" fill="none" stroke="#6A3528" stroke-width="3" stroke-linecap="round"/>
+</svg>

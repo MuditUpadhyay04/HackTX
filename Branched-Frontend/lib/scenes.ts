@@ -10,6 +10,7 @@
  * Later phases APPEND scenes to `scenes`; keep the `Scene` shape stable.
  * `id` must be unique and is what `npm run shoot -- --only <id,id>` takes.
  */
+import { appScenes } from "./scenes-apps";
 
 export type Scene = {
   /** Unique, kebab-case. Used by `shoot --only`. */
@@ -44,7 +45,65 @@ export const scenes: Scene[] = [
     group: "Test",
     phase: 0,
   },
+  ...deviceScenes(),
+  ...homeScenes(),
+  ...appScenes,
 ];
+
+/** Phase 1: every /device state the acceptance list checks, plus the ?debug=1 overlays. */
+function deviceScenes(): Scene[] {
+  const rows: [state: string, bg: string, label: string, extra?: Record<string, string>][] = [
+    ["folded-off", "black", "Folded, screen off"],
+    ["folded", "black", "Folded"],
+    ["folded", "studio", "Folded on wallpaper"],
+    ["folded", "white", "Folded on white"],
+    ["folded-angled", "black", "Folded, angled"],
+    ["unfold-30", "studio", "Unfold 30°"],
+    ["unfold-60", "studio", "Unfold 60°"],
+    ["unfold-90", "studio", "Unfold 90°"],
+    ["unfold-120", "studio", "Unfold 120°"],
+    ["unfold-150", "studio", "Unfold 150°"],
+    ["unfolded", "studio", "Unfolded"],
+    ["unfolded", "black", "Unfolded on black"],
+    ["unfolded-off", "black", "Unfolded, screen off"],
+    ["back", "studio", "Back"],
+    ["folded", "black", "Folded, spec overlay", { debug: "1", pattern: "on" }],
+    ["unfolded", "black", "Unfolded, spec overlay", { debug: "1", pattern: "on" }],
+    ["back", "black", "Back, spec overlay", { debug: "1", pattern: "on" }],
+  ];
+  return rows.map(([state, bg, label, extra]) => ({
+    id: `device-${state}-${bg}${extra?.debug ? "-debug" : ""}`,
+    route: "/device",
+    query: { state, bg, ...extra },
+    label,
+    group: "Device",
+    phase: 1,
+  }));
+}
+
+/**
+ * Phase 3 (D8, D12): the iOS home screens on the iPhone Fold, clean (no fold pill): the cover home
+ * folded, the inner home unfolded, and the fold in between (content visible, motion blur mid-fold).
+ */
+function homeScenes(): Scene[] {
+  const rows: [id: string, state: string, label: string][] = [
+    ["home-cover", "folded", "Home, folded (cover)"],
+    ["home-unfold-30", "unfold-30", "Home, unfolding 30°"],
+    ["home-unfold-60", "unfold-60", "Home, unfolding 60°"],
+    ["home-unfold-90", "unfold-90", "Home, unfolding 90°"],
+    ["home-unfold-120", "unfold-120", "Home, unfolding 120°"],
+    ["home-unfold-150", "unfold-150", "Home, unfolding 150°"],
+    ["home-inner", "unfolded", "Home, unfolded (inner)"],
+  ];
+  return rows.map(([id, state, label]) => ({
+    id,
+    route: "/device",
+    query: { state, bg: "studio", frame: "bare" },
+    label,
+    group: "Home",
+    phase: 3,
+  }));
+}
 
 /** Scenes grouped by `group`, in first-appearance order. */
 export function scenesByGroup(list: Scene[] = scenes): { group: string; scenes: Scene[] }[] {

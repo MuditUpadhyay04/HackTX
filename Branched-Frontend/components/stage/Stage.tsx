@@ -14,7 +14,7 @@ import {
 export const STAGE_WIDTH = 1920;
 export const STAGE_HEIGHT = 1080;
 
-export type StageBackground = "black" | "un-stage" | "wallpaper" | "white";
+export type StageBackground = "black" | "un-stage" | "wallpaper" | "white" | "studio";
 
 /** Letterbox + artboard fill per background (all CSS vars from the token files). */
 const FILL: Record<StageBackground, string> = {
@@ -22,6 +22,7 @@ const FILL: Record<StageBackground, string> = {
   "un-stage": "var(--un-stage)",
   wallpaper: "var(--ios-wallpaper-base)",
   white: "var(--stage-white)",
+  studio: "var(--stage-studio)",
 };
 
 export type StageScale = {
