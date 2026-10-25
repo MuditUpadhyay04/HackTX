@@ -1,7 +1,7 @@
 """The live rant: browser -> us -> Muse Voice Transcribe, partials streaming back.
 
 Client protocol (JSON text frames, audio as binary frames):
-  -> {"type": "start"}
+  -> {"type": "start", "asset_id"?: "ph://..."}         the photo he's looking at, if any
   <- {"type": "ready", "provider": "meta" | "mock"}     start sending audio after this
   -> binary: 16-bit mono PCM at 24 kHz, about 80 ms per frame, in real time
   <- {"type": "partial", "text"}                       live hypothesis for the current turn
@@ -78,7 +78,7 @@ async def live_rant(ws: WebSocket) -> None:
                 break
 
         turns = await session.finish() if session else await _mock_stream(emit, len(pcm))
-        rant = rants.save_rant(turns, bytes(pcm), provider)
+        rant = rants.save_rant(turns, bytes(pcm), provider, asset_id=start.get("asset_id"))
         await emit({"type": "done", "rant": rant})
         await ws.close()
     except WebSocketDisconnect:

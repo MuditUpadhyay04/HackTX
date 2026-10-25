@@ -3,7 +3,7 @@ business number. Business-initiated messages must use a template, and the test
 number can message up to 5 verified recipients.
 
 Template to submit (body, English):
-    hi. {{1}} left you something. open it whenever you have a minute: {{2}} (sent with unsaid)
+    hi. {{1}} left you something. open it whenever you have a minute: {{2}} (sent with Un-Said)
 {{1}} is his name, {{2}} the card link. WhatsApp rejects templates that start or end
 with a variable, hence the words around them.
 """

@@ -52,6 +52,7 @@ export function useLiveRant() {
   const ready = useRef(false);
   const queue = useRef<ArrayBuffer[]>([]);
   const fileRecording = useRef(false);
+  const asset = useRef<string | null>(null);
   const settle = useRef<{ resolve: (r: Rant) => void; reject: (e: Error) => void } | null>(null);
 
   const onBuffer = useCallback((buffer: AudioStreamBuffer) => {
@@ -65,7 +66,9 @@ export function useLiveRant() {
 
   const { stream } = useAudioStream({ sampleRate: TARGET_RATE, channels: 1, encoding: "int16", onBuffer });
 
-  const start = useCallback(async () => {
+  /** assetId: the gallery photo he's looking at, so the photo remembers what he said. */
+  const start = useCallback(async (assetId?: string | null) => {
+    asset.current = assetId ?? null;
     setTurns([]);
     setPartial("");
     setState("starting");
@@ -81,7 +84,7 @@ export function useLiveRant() {
     const socket = new WebSocket(wsUrl("/api/rants/live"));
     socket.binaryType = "arraybuffer";
     ws.current = socket;
-    socket.onopen = () => socket.send(JSON.stringify({ type: "start" }));
+    socket.onopen = () => socket.send(JSON.stringify({ type: "start", asset_id: asset.current }));
     socket.onmessage = (e) => {
       const ev = JSON.parse(String(e.data));
       if (ev.type === "ready") {
@@ -148,7 +151,7 @@ export function useLiveRant() {
         setState("error");
         throw liveError;
       }
-      const rant = await api.uploadRant(wav.uri);
+      const rant = await api.uploadRant(wav.uri, asset.current);
       setState("idle");
       return rant;
     } finally {

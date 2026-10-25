@@ -46,7 +46,9 @@ CREATE TABLE IF NOT EXISTS rants (
     audio_path TEXT,
     safety TEXT,                           -- null until sorted
     sorted_by TEXT,                        -- meta | mock
-    sorted_at TEXT
+    sorted_at TEXT,
+    asset_id TEXT,                         -- the device photo he was looking at, if any
+    encourage_person TEXT                  -- who got "Tell them how you feel" for this rant
 );
 CREATE TABLE IF NOT EXISTS pieces (
     id TEXT PRIMARY KEY,
@@ -107,6 +109,59 @@ CREATE TABLE IF NOT EXISTS reminders (
     created_at TEXT NOT NULL,
     done_at TEXT
 );
+CREATE TABLE IF NOT EXISTS photo_links (     -- learned from his own words, never from faces
+    asset_id TEXT NOT NULL,
+    person_id TEXT NOT NULL,
+    times INTEGER NOT NULL DEFAULT 0,        -- recordings on this photo that were about them
+    letters INTEGER NOT NULL DEFAULT 0,      -- letters to them that carried this photo
+    first_at TEXT NOT NULL,
+    last_at TEXT NOT NULL,
+    PRIMARY KEY (asset_id, person_id)
+);
+CREATE TABLE IF NOT EXISTS attention (       -- every time Un-Said asked for his attention
+    id TEXT PRIMARY KEY,
+    kind TEXT NOT NULL,                      -- knock | push | encourage | permission_ask
+    detail TEXT,                             -- reply | linked | first | ready | drift | ...
+    person_id TEXT,
+    asset_id TEXT,
+    session_id TEXT,
+    created_at TEXT NOT NULL,
+    outcome TEXT NOT NULL DEFAULT 'shown',   -- shown | opened | dismissed | ignored
+    outcome_at TEXT
+);
+CREATE TABLE IF NOT EXISTS push_tokens (
+    token TEXT PRIMARY KEY,
+    platform TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL,
+    last_seen_at TEXT NOT NULL,
+    disabled_at TEXT,                        -- set for good after DeviceNotRegistered
+    disabled_reason TEXT
+);
+CREATE TABLE IF NOT EXISTS pushes (          -- queued so they can wait for his morning
+    id TEXT PRIMARY KEY,
+    kind TEXT NOT NULL,                      -- reply | ready | drift
+    ref_id TEXT,                             -- the reply or card it's about
+    person_id TEXT,
+    body TEXT NOT NULL,
+    due_at TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',  -- pending | sent | dropped | no_device | failed
+    attention_id TEXT,
+    created_at TEXT NOT NULL,
+    sent_at TEXT,
+    error TEXT
+);
+"""
+
+# Columns added after the first deploy. Existing databases get them on start.
+MIGRATIONS = {
+    "rants": {"asset_id": "TEXT", "encourage_person": "TEXT"},
+}
+
+INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_rants_asset ON rants (asset_id);
+CREATE INDEX IF NOT EXISTS idx_pieces_person ON pieces (person_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_attention_kind ON attention (kind, created_at);
+CREATE INDEX IF NOT EXISTS idx_pushes_due ON pushes (status, due_at);
 """
 
 
@@ -114,7 +169,18 @@ def init_db() -> None:
     settings.data_dir.mkdir(parents=True, exist_ok=True)
     settings.media_dir.mkdir(parents=True, exist_ok=True)
     with tx() as c:
-        c.executescript(SCHEMA)
+        migrate(c)
+
+
+def migrate(c: sqlite3.Connection) -> None:
+    """Creates what's missing and adds newer columns to an older database. Safe to run twice."""
+    c.executescript(SCHEMA)
+    for table, columns in MIGRATIONS.items():
+        have = {row[1] for row in c.execute(f"PRAGMA table_info({table})")}
+        for column, decl in columns.items():
+            if column not in have:
+                c.execute(f"ALTER TABLE {table} ADD COLUMN {column} {decl}")
+    c.executescript(INDEXES)
 
 
 @contextmanager

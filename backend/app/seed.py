@@ -123,7 +123,8 @@ def seed_fixtures() -> None:
             )
 
         # The card Mom opens to leave her voice note ("Mom left you a voice note on tuesday").
-        sent = datetime(2026, 10, 20, 9, 15, tzinfo=CDT)
+        # Sent two Sundays ago (the dal), so it doesn't count as "already reached out this week".
+        sent = datetime(2026, 10, 11, 20, 15, tzinfo=CDT)
         c.execute(
             "INSERT OR IGNORE INTO cards (id, token, recipient_id, lines, translation, photo_id, status, release_at, "
             "released_at, delivered_via, created_at, expires_at) VALUES (?, ?, 'mom', ?, ?, 'photo_kitchen', 'released', "
@@ -143,8 +144,11 @@ def seed_fixtures() -> None:
 
 
 def reset_activity() -> None:
-    """Clears everything he did, keeps people and photos, reseeds the fixtures."""
+    """Clears everything he did, keeps people, photos and registered phones, reseeds the fixtures."""
     with db.tx() as c:
-        for table in ("pieces", "reflections", "cards", "replies", "rants", "self_notes", "reminders"):
+        for table in (
+            "pieces", "reflections", "cards", "replies", "rants", "self_notes", "reminders",
+            "photo_links", "attention", "pushes",
+        ):
             c.execute(f"DELETE FROM {table}")
     seed_fixtures()

@@ -65,7 +65,7 @@ Keys go in `backend/.env` (copy [`.env.example`](.env.example)). Everything is o
 1. developers.facebook.com → create an app → add **WhatsApp**. It comes with a free test number; copy its **Phone number ID** and a token (use a System User token, since the temporary one expires in 24 h).
 2. Add Mom's number as a test recipient. She verifies it with a code. The test number can message up to 5 recipients.
 3. Create a message template named `unsaid_left_you_something`, language English, with this body:
-   `hi. {{1}} left you something. open it whenever you have a minute: {{2}} (sent with unsaid)`
+   `hi. {{1}} left you something. open it whenever you have a minute: {{2}} (sent with Un-Said)`
    Variables can't be the first or last thing in a template, hence the words around them. **Submit it first thing**; review can take minutes or a day.
 4. Set `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, and `WHATSAPP_TEMPLATE`. If a send fails, the card falls back to *"send it now?"* and the error is on the card (`delivery_error`).
 

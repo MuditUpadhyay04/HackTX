@@ -94,13 +94,16 @@ def photo_out(row) -> dict:
 
 
 def piece_out(row) -> dict:
+    has_audio = row["audio_start_ms"] is not None
     return {
         "id": row["id"],
         "rant_id": row["rant_id"],
         "person_id": row["person_id"],
         "text": row["text"],
         "tone": row["tone"],
-        "has_audio": row["audio_start_ms"] is not None,
+        "has_audio": has_audio,
+        # His own voice for this line. Needs the app key, like the rest of /api.
+        "audio_url": f"/api/pieces/{row['id']}/audio" if has_audio else None,
         "status": row["status"],
         "created_at": row["created_at"],
     }
@@ -174,6 +177,12 @@ def reply_out(row, now: datetime) -> dict:
         "day": timeutil.day_phrase(created, now, listener["timezone"]),
         "heard_at": row["heard_at"],
     }
+
+
+def reply_title(reply: dict) -> str:
+    """'Mom left you a voice note on tuesday.' Used by the Home nudge, the knock and the push."""
+    kind = "a voice note" if reply["audio_url"] else "a message"
+    return f"{reply['from_name']} left you {kind} {reply['day']}."
 
 
 def self_note_out(row) -> dict:

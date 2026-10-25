@@ -19,13 +19,43 @@ export type Person = {
   morning: string;
 };
 
-export type Piece = { id: string; person_id: string; text: string; tone: string; created_at: string; rant_id: string | null; has_audio: boolean };
+export type Piece = {
+  id: string;
+  person_id: string;
+  text: string;
+  tone: string;
+  created_at: string;
+  rant_id: string | null;
+  has_audio: boolean;
+  audio_url?: string | null; // his own voice for this line; play with authedUrl()
+  status?: "kept" | "in_card" | "discarded";
+};
 
-export type SortGroup = { person: Person; pieces: Piece[]; kept_total: number; tone: string; reflection: string };
+/** What he had said about this person before this rant. */
+export type History = { earlier_count: number; first_at: string | null; last_spoken_at: string | null };
+
+export type SortGroup = {
+  person: Person;
+  pieces: Piece[];
+  kept_total: number;
+  tone: string;
+  reflection: string;
+  history?: History;
+  /** "Tell them how you feel. Communication helps." on at most one card, rarely. */
+  encourage?: string | null;
+};
 
 export type Resource = { name: string; detail: string; links: { label: string; href: string }[] };
 
-export type Rant = { id: string; transcript: string; provider: string; sorted_by: string | null };
+export type Rant = { id: string; transcript: string; provider: string; sorted_by: string | null; asset_id?: string | null };
+
+/** What a gallery photo is about, learned only from what he said while looking at it. */
+export type PhotoMemory = {
+  asset_id: string;
+  people: { person: Person; times: number; letters: number; first_at: string; last_at: string; kept: number }[];
+  previous: (Piece & { person_name: string; day: string })[];
+  kept_by_person: Record<string, number>;
+};
 
 export type SortResult = {
   rant: Rant;
@@ -76,6 +106,10 @@ export type Home = {
 
 export const mediaUrl = (path: string | null) => (path ? `${API_URL}${path}` : null);
 
+/** For /api URLs played or loaded outside fetch (audio players): the key rides in the query. */
+export const authedUrl = (path: string | null | undefined) =>
+  path ? `${API_URL}${path}${APP_KEY ? `${path.includes("?") ? "&" : "?"}key=${encodeURIComponent(APP_KEY)}` : ""}` : null;
+
 export function wsUrl(path: string) {
   const base = API_URL.replace(/^http/, "ws");
   return `${base}${path}${APP_KEY ? `?key=${encodeURIComponent(APP_KEY)}` : ""}`;
@@ -107,21 +141,26 @@ const file = (uri: string, name: string, type: string) => ({ uri, name, type }) 
 export const api = {
   home: () => call<Home>("/api/home"),
 
-  uploadRant: (wavUri: string) => {
+  // assetId: the gallery photo he was looking at, so the photo remembers what he said.
+  uploadRant: (wavUri: string, assetId?: string | null) => {
     const form = new FormData();
     form.append("file", file(wavUri, "rant.wav", "audio/wav"));
+    if (assetId) form.append("asset_id", assetId);
     return call<Rant>("/api/rants/audio", { method: "POST", body: form });
   },
-  typedRant: (text: string) => call<Rant>("/api/rants/text", post({ text })),
+  typedRant: (text: string, assetId?: string | null) => call<Rant>("/api/rants/text", post({ text, asset_id: assetId ?? null })),
   sortRant: (rantId: string) => call<SortResult>(`/api/rants/${rantId}/sort`, post()),
 
   pieces: (personId: string) => call<Piece[]>(`/api/people/${personId}/pieces`),
 
-  uploadPhoto: (jpegUri: string, personId: string, caption = "") => {
+  memory: (assetId: string) => call<PhotoMemory>(`/api/memory/photo?asset_id=${encodeURIComponent(assetId)}`),
+
+  uploadPhoto: (jpegUri: string, personId: string, caption = "", assetId?: string | null) => {
     const form = new FormData();
     form.append("file", file(jpegUri, "photo.jpg", "image/jpeg"));
     form.append("person_id", personId);
     form.append("caption", caption);
+    if (assetId) form.append("asset_id", assetId);
     return call<{ id: string }>("/api/photos", { method: "POST", body: form });
   },
 

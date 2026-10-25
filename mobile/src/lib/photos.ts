@@ -28,6 +28,7 @@ export async function uploadGalleryPhoto(assetId: string, personId: string): Pro
   const uri = await new Asset(assetId).getUri();
   const image = await ImageManipulator.manipulate(uri).resize({ width: 1200 }).renderAsync();
   const jpeg = await image.saveAsync({ format: SaveFormat.JPEG, compress: 0.82 });
-  const { id } = await api.uploadPhoto(jpeg.uri, personId);
+  // The asset id links this gallery photo to them, so a later look at it can be about them.
+  const { id } = await api.uploadPhoto(jpeg.uri, personId, "", assetId);
   return id;
 }

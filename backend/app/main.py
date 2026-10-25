@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 
 from . import db, delivery, seed
 from .config import WEB_DIR, settings
-from .routes import demo, live, public, student
+from .routes import demo, live, memory, public, student
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 
@@ -38,6 +38,7 @@ app.include_router(student.router)
 app.include_router(live.router)
 app.include_router(public.router)
 app.include_router(demo.router)
+app.include_router(memory.router)
 
 
 @app.get("/api/health")

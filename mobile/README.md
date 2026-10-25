@@ -51,3 +51,5 @@ For Gurneal. They are kept as-is until he writes the real ones.
 | Letters / letter | "voice reply" (no duration yet) · footer day ("today", "on tuesday") |
 | You | "Server …" and the provider line under Settings · "asleep · 5:02 AM for Mom" |
 | Permissions | "Microphone access is off for Expo Go. Turn it on in Settings." |
+| Talk, on a photo he's spoken on before *(proposed)* | overline "Said here before" · "{name} · {day}" under each of his lines · "Listen" / "Pause" |
+| Split, on at most one card *(proposed, Mudit's line)* | "Tell them how you feel. Communication helps." |

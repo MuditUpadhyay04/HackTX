@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field
 
-from .. import audio, db, delivery, rants, seed, store, timeutil
+from .. import audio, db, delivery, memory, rants, seed, store, timeutil
 from ..ai import transcribe
 from ..auth import require_key
 from ..config import settings
@@ -46,6 +46,7 @@ def home(request: Request) -> dict:
     if not settings.public_base_url:
         db.kv_set("public_base_url", str(request.base_url).rstrip("/"))
     now = timeutil.now_utc()
+    db.kv_set("last_activity_at", db.iso(now))  # he's here; the weekly push waits for real quiet
     with db.tx() as c:
         photos = c.execute("SELECT * FROM photos ORDER BY person_id, taken_at DESC").fetchall()
         cards = c.execute(
@@ -76,12 +77,11 @@ def _nudges(replies: list[dict], cards: list[dict], now) -> list[dict]:
     for r in replies:
         if r["heard_at"]:
             continue
-        kind = "a voice note" if r["audio_url"] else "a message"
         out.append({
             "kind": "reply",
             "id": r["id"],
             "person_id": r["from_person_id"],
-            "title": f"{r['from_name']} left you {kind} {r['day']}.",
+            "title": store.reply_title(r),
             "body": "you haven't heard it yet." if r["audio_url"] else "you haven't read it yet.",
             "reply": r,
         })
@@ -179,8 +179,13 @@ async def upload_photo(
     person_id: str = Form(...),
     caption: str = Form(""),
     taken_at: str = Form(""),
+    asset_id: str = Form(""),
 ) -> dict:
-    """He brings a photo in. Nothing is read from his gallery without this."""
+    """He brings a photo in. Nothing is read from his gallery without this.
+
+    asset_id (optional): the gallery photo it came from. A letter that carried it links
+    that photo to this person, so a later look at it can be about them.
+    """
     ext = PHOTO_TYPES.get(file.content_type or "")
     if not ext:
         raise HTTPException(415, "photos must be jpeg, png, webp, or gif")
@@ -195,6 +200,7 @@ async def upload_photo(
             (photo_id, person_id, path, caption[:120], taken_at or None, db.iso(timeutil.now_utc())),
         )
         row = c.execute("SELECT * FROM photos WHERE id = ?", (photo_id,)).fetchone()
+    memory.link(memory.clean_asset_id(asset_id), [person_id], timeutil.now_utc(), letter=True)
     return store.photo_out(row)
 
 
@@ -210,16 +216,18 @@ def delete_photo(photo_id: str) -> dict:
 
 class TypedRant(BaseModel):
     text: str = Field(..., min_length=1, max_length=5000)
+    asset_id: str | None = Field(None, max_length=300)  # the photo he's looking at, if any
 
 
 @router.post("/rants/text")
 def rant_text(body: TypedRant) -> dict:
     """Typed instead of spoken. Same sorting, no audio."""
-    return rants.save_rant([{"turnId": 1, "startMs": None, "endMs": None, "text": body.text}], None, "typed")
+    turns = [{"turnId": 1, "startMs": None, "endMs": None, "text": body.text}]
+    return rants.save_rant(turns, None, "typed", asset_id=body.asset_id)
 
 
 @router.post("/rants/audio")
-async def rant_audio(file: UploadFile = File(...)) -> dict:
+async def rant_audio(file: UploadFile = File(...), asset_id: str = Form("")) -> dict:
     """The fallback when the live socket fails: the browser uploads the WAV it kept."""
     wav = await _read_limited(file, MAX_AUDIO)
     try:
@@ -238,7 +246,7 @@ async def rant_audio(file: UploadFile = File(...)) -> dict:
         turns = transcribe.mock_turns(audio.duration_ms(pcm))
         provider = "mock"
     try:
-        return rants.save_rant(turns, pcm, provider)
+        return rants.save_rant(turns, pcm, provider, asset_id=asset_id)
     except ValueError as exc:
         raise HTTPException(422, str(exc))
 

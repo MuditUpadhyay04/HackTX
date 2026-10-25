@@ -9,6 +9,7 @@ import { AppRail } from "../components/AppRail";
 import { Avatar, Chip, NavBar, Overline, PillGradientFill, Press, PrimaryPill, styles as ui, T, TextButton } from "../components/ui";
 import { Ionicons } from "@expo/vector-icons";
 import { api, type SortResult } from "../lib/api";
+import { usePhotoMemory, useVoiceBack } from "../lib/memory";
 import { toast } from "../lib/toast";
 import { useLiveRant } from "../lib/useLiveRant";
 import { color, inset, radius, shadow, space, spring, type } from "../theme/tokens";
@@ -17,6 +18,9 @@ export default function Talk() {
   const insets = useSafeAreaInsets();
   const { photo } = useLocalSearchParams<{ photo?: string }>();
   const live = useLiveRant();
+  // Data wiring (mobile/src/lib/memory.ts): what he said on this photo before, and his voice back.
+  const { memory } = usePhotoMemory(photo);
+  const voiceBack = useVoiceBack();
   const [typing, setTyping] = useState(false);
   const [typed, setTyped] = useState("");
   const [sorting, setSorting] = useState(false);
@@ -48,7 +52,7 @@ export default function Talk() {
     try {
       if (live.state === "idle" || live.state === "error") {
         setResult(null);
-        await live.start();
+        await live.start(photo ?? null); // the photo remembers what he says here
       } else if (live.state === "recording") {
         const rant = await live.stop();
         await sort(rant.id);
@@ -60,7 +64,7 @@ export default function Talk() {
 
   const submitTyped = async () => {
     try {
-      const rant = await api.typedRant(typed.trim());
+      const rant = await api.typedRant(typed.trim(), photo ?? null);
       setTranscript(typed.trim());
       await sort(rant.id);
     } catch (e) {
@@ -110,6 +114,8 @@ export default function Talk() {
                   <Chip label={g.tone} />
                   <Ionicons name="chevron-forward" size={18} color={color.text3} />
                 </View>
+                {/* Data wiring: at most one card, rarely (backend decides). Tapping the card opens their pile. */}
+                {g.encourage ? <T v="caption" style={{ marginTop: space.s8, color: color.violet }}>{g.encourage}</T> : null}
                 <View style={{ marginTop: space.s12, gap: space.s8 }}>
                   {g.pieces.slice(0, 3).map((p) => (
                     <T key={p.id} v="words" style={{ color: color.text2 }}>{`“${p.text}”`}</T>
@@ -147,6 +153,27 @@ export default function Talk() {
           <Image source={{ uri: photo }} style={styles.photo} contentFit="cover" transition={150} />
         ) : null}
         <View style={{ paddingLeft: inset.text, paddingRight: 92, marginTop: space.s24 }}>
+          {/* Data wiring: his own words from earlier visits to this photo, before he starts. */}
+          {memory && memory.previous.length > 0 && !recording && !spoken && !typing ? (
+            <View style={{ marginBottom: space.s24, gap: space.s12 }}>
+              <Overline>Said here before</Overline>
+              {memory.previous.slice(0, 3).map((p) => (
+                <View key={p.id} style={{ flexDirection: "row", alignItems: "center", gap: space.s12 }}>
+                  <View style={{ flex: 1 }}>
+                    <T v="rowPreview" lines={2}>{`“${p.text}”`}</T>
+                    <T v="meta">{`${p.person_name} · ${p.day}`}</T>
+                  </View>
+                  {p.audio_url ? (
+                    <TextButton
+                      featureId="memory-listen"
+                      label={voiceBack.playingId === p.id ? "Pause" : "Listen"}
+                      onPress={() => voiceBack.toggle(p.id, p.audio_url)}
+                    />
+                  ) : null}
+                </View>
+              ))}
+            </View>
+          ) : null}
           <Overline>Only you can hear this</Overline>
           {typing ? (
             <TextInput
