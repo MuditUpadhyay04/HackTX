@@ -59,7 +59,8 @@ We also knew what we didn't want to be. Phones already deliver about 63 notifica
 
 ## How we built it
 
-- **App:** Expo SDK 58 with Expo Router, running on an iPhone through Expo Go.
+- **App:** Expo SDK 58 with Expo Router, running on a Samsung Galaxy Z Fold 8 through Expo Go, in a demo-data mode that never reads the phone's own photos or contacts (the phone is borrowed).
+- **Phone demo:** a Next.js mock of the Fold 8 (One UI home, look-alike WhatsApp, Google Messages, Instagram, Phone and Gallery) with the real Un-Said app running inside it. The film is recorded on it.
   - `expo-media-library` (the SDK 58 `Query` API) reads his gallery on the device.
   - `expo-audio`'s **AudioStream** captures 16-bit PCM, resampled to 24 kHz, and streams it over a WebSocket.
   - `expo-image-manipulator` turns the one photo he sends into a 1200 px JPEG.
