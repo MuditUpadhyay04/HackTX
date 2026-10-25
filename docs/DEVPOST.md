@@ -82,7 +82,7 @@ We also knew what we didn't want to be. Phones already deliver about 63 notifica
 - **The gate runs before any card forms.** A concern means no cards and no reconnection prompts, only the resources: **988 Suicide & Crisis Lifeline** (call or text 988), **National Domestic Violence Hotline** (1-800-799-7233, text START to 88788), and **911**. *Un-Said isn't a crisis service. These people are.*
 - **The eval, 30 rants** (20 ordinary, 10 concerning, some code-switched):
   - phrase layer only: **10 concerning, 9 routed to resources; 20 ordinary, 0 blocked.** The miss was the subtle one ("there's no point… I don't see a reason to keep going"), which is what Spark's layer is for.
-  - with Muse Spark: `[pending: real-key run — fill in X/10 and Y/20]`.
+  - with Muse Spark (Oct 25, real key): **10/10 concerning routed to resources; 0/20 ordinary blocked.** Spark caught the subtle one the phrase list missed.
 - **No knocks after a concern.** `[pending: memory & knocks branch]`
 - **Privacy:**
   - Photos stay on the phone; only the photo you send is uploaded, as one resized JPEG.
@@ -95,7 +95,7 @@ We also knew what we didn't want to be. Phones already deliver about 63 notifica
 
 **Real (in the video and on the phone):**
 - the gallery and the photo view
-- the live transcript through Muse Voice Transcribe `[pending: real-key run]`
+- the live transcript through Muse Voice Transcribe (key check passes: file, realtime handshake)
 - the split by Muse Spark
 - the safety gate
 - piles, letter previews and hold until her morning
