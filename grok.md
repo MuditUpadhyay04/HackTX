@@ -2,6 +2,10 @@
 
 Running log of every change Grok Bot makes. Times are America/Chicago (CDT). Newest entries are at the top. Updated after every message Gurneal sends to Grok Bot.
 
+## Oct 24, 2026, 11:12 PM CDT
+
+Checkpoint `259c00b` on `unsaid-overhaul`. Restyled the Expo app: splash into Home, illustrated portraits, and the demo path (Gallery, Photo knock, Talk, Pile with time zone, Preview) plus Home, Letters, You, Letter, Connect, and Safety. Settings and Notes use the real APIs. Same calls, no backend edits. EAS Update is prepared (expo-updates, runtimeVersion appVersion, preview channel) and was not published. Typecheck, lint, and `npx expo export` (iOS, Android, and web) pass. Progress file copied here as OVERHAUL_STATUS.md.
+
 ## Oct 24, 2026, 11:10 PM CDT
 
 Gurneal told Grok to stop tracking Claude and focus only on the Un-Said app. The Claude watcher is paused. The overhaul priorities are (1) the core demo flow: Gallery, Photo + knock, Talk, Pile, Preview; (2) the Home/Letters/You tabs; (3) Letter, Connect, Safety. Checkpoints get pushed early and often.
