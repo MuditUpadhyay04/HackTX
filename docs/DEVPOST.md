@@ -1,6 +1,6 @@
 # Devpost draft: Un-Said
 
-*Draft for the HackTX 2026 submission (Meta track: Bringing People Closer Together with AI). Before submitting, resolve every `[pending: …]` tag: fill it in if the work landed, delete the sentence if it didn't.*
+*HackTX 2026 submission. Tracks: Meta (Bringing People Closer Together with AI), Vultr, Gemini, and Best Overall. Architecture diagram: https://claude.ai/artifact/U1EhXQbduhvCvk8uJvjrE1 (screenshot it for the gallery).*
 
 **Name:** Un-Said
 **Tagline (under 200 characters):** A quiet place to say what you haven't said yet, and a gentle way to get your own words to the person they're for, at their hour, in the app they already use.
@@ -20,13 +20,13 @@ We also knew what we didn't want to be. Phones already deliver about 63 notifica
 ## What it does
 
 1. **Your photos, on your phone.** Un-Said opens on your own camera roll, read on the device.
-2. **One knock.** You stop on a photo of you and Mom and stay there. Un-Said knocks, once: *"We noticed you've been quieter with the people closest to you lately. Want to say what you haven't?"* Open the next photo and it stays quiet. `[pending: memory & knocks branch — today the knock is a simple timer]`
-3. **The photo remembers.** If you've talked on this photo before, you see *"You said this here before."* with your own words and voice from Tuesday. `[pending: memory & knocks branch]`
+2. **One knock.** You stop on a photo of you and Mom and stay there. Un-Said knocks, once: *"We noticed you've been quieter with the people closest to you lately. Want to say what you haven't?"* Open the next photo and it stays quiet.
+3. **The photo remembers.** If you've talked on this photo before, you see *"You said this here before."* with your own words and voice from Tuesday.
 4. **Say it out loud.** Tap the mic and talk, as messy as you need. **Muse Voice Transcribe** writes it as you speak, Hindi and English in the same breath. Nothing leaves without you.
-5. **Here's who that was for.** **Muse Spark** sorts what you said by person: Mom, Sarah, Michael. Every line on every card is cut verbatim from your transcript. Under the person you keep saying things to, once: *"Tell them how you feel. Communication helps."* `[pending: memory & knocks branch for that line]`
-6. **Your words, your pick.** Open Mom's pile, choose which of your lines she'll read (nothing is pre-picked), and preview the letter as she'll see it.
-7. **Hold until her morning.** It's 5:02 AM in her kitchen. Un-Said holds the letter until 8:00 AM her time, then it goes out through **WhatsApp**. With the WhatsApp Cloud API it arrives by itself; otherwise Un-Said hands it to your own WhatsApp to send.
-8. **No app on her side.** Mom taps the link and gets a page with the photo, your words with a Hindi caption, and your voice (only the part that was about her). She can **Hold to reply** or **Call** you.
+5. **Here's who that was for.** **Muse Spark** sorts what you said by person: Mom, Sarah, Michael. Every line on every card is cut verbatim from your transcript. Under the person you keep saying things to, once: *"Tell them how you feel. Communication helps."*
+6. **Your words, your pick.** Open Mom's pile, choose which of your lines she'll read (nothing is pre-picked), and preview the letter as she'll see it. Under the Hindi, **Gemini** reads Muse's translation back to you in English (*"she'll read: …"*), so you know what Mom will actually read before it goes.
+7. **Hold until her morning.** It's 5:02 AM in her kitchen. Un-Said holds the letter until 8:00 AM her time, then it goes out through **WhatsApp**. At her morning, Un-Said hands it to your own WhatsApp to send, so it comes from you. (The WhatsApp Cloud API path is built for sending it automatically, but it needs an approved template we don't have yet.)
+8. **No app on her side.** Mom taps the link and gets a page with the photo, your words with a Hindi caption, and your voice (only the part that was about her). She can **Hold to reply**, **Write back**, or **Call** you.
 9. **Her voice comes back.** Her reply lands in **Letters**, transcribed in Hindi and captioned in English.
 10. **Safety first.** If what you said is about fear, control or hopelessness, no cards form. You get 988 and the domestic violence hotline instead.
 
@@ -34,8 +34,8 @@ We also knew what we didn't want to be. Phones already deliver about 63 notifica
 
 - **It's a hallway, not a fifth app.** Every send leaves through the person's real app: WhatsApp for Mom, Messages for Sarah, Instagram for Michael. Success is a conversation happening somewhere else.
 - **No streaks, no counts, no guilt.** There's no "you haven't called Mom in 12 days" anywhere.
-- **An attention budget, in code:** at most one knock per session, two per day, three hours apart. It only knocks on photos of people you've already talked about. It goes quiet for that person after you say not now, and stays quiet after a safety concern. `[pending: memory & knocks branch]`
-- **Manners both ways.** Your letter waits for her morning. Un-Said also holds its own notifications for yours. `[pending: push, memory & knocks branch]`
+- **An attention budget, in code:** at most one knock per session, two per day, three hours apart. It only knocks on photos of people you've already talked about. It goes quiet for that person after you say not now, and stays quiet after a safety concern. Two "not now"s in a row pause knocks for a week.
+- **Manners both ways.** Your letter waits for her morning. Un-Said also holds its own notifications until yours (quiet hours 22:30–08:00 by default).
 - **The comfort comes from people.** In a whole evening, Un-Said shows three short lines, each written by a person and shown by a rule. The model never talks to you. Mom, Sarah and your own words do the rest.
 
 ## Why AI is essential (and where it isn't)
@@ -46,6 +46,8 @@ We also knew what we didn't want to be. Phones already deliver about 63 notifica
 | Knowing which sentence is for whom | **Muse Spark** (`muse-spark-1.3`, `response_format: json_schema`, low reasoning effort). The server numbers the sentences, and Spark returns only `{person, sentence ids, tone}`. The server cuts the text, so Spark **can't** write a word on any card. Bad ids, unknown people and reused sentences are dropped |
 | Telling an ordinary hard day from danger | **Spark** classification plus a phrase list that includes transliterated Hindi. The stricter one wins, and unknown output counts as a concern |
 | Mom reading his words in her language | **Spark** translates only the lines he approved. Her voice reply is transcribed in Hindi and captioned in English for him |
+| Knowing the Hindi says what he meant | **Gemini** (`gemini-3.5-flash-lite`) reads Spark's translation back into English on the preview. It never edits the letter, and Send never waits on it |
+| Staying up when a model is down | If Muse Spark doesn't answer, Gemini takes the same prompt and the same JSON schema, so it still only returns sentence ids. The app's Settings shows which model sorted |
 
 | Where AI deliberately isn't | Why |
 |---|---|
@@ -66,16 +68,17 @@ We also knew what we didn't want to be. Phones already deliver about 63 notifica
   - A WebSocket relay to Muse Voice Transcribe realtime, with the handshake authenticated on the server.
   - Turn timestamps, so his audio can be cut per person: Mom never hears the sentence he said about Sarah.
   - Muse Spark through Meta Model API's OpenAI-compatible Chat Completions.
-  - A scheduler that releases held letters at her morning, and **WhatsApp Cloud API** template sends. `[pending: template approval and a real send]`
+  - A scheduler that releases held letters at her morning, then hands them to his WhatsApp. WhatsApp Cloud API template sends are built but not yet approved.
+  - **Gemini** for the "she'll read:" check, and as the stand-in when Muse Spark can't answer.
   - A public letter page behind unguessable tokens. Links expire in 30 days, can be revoked, and stay sealed until release.
-- **Design:** Gurneal's App-UI-Final system: dark `#0F0D15`, a blue → violet → lilac gradient family, heavy rounded system type, and no handwriting fonts or Meta logos anywhere.
-- **Process:** spec first. Three AI reviewers (Claude, Grok, Codex) helped us cut the scope down to one evening and one loop. Claude Code wrote much of the code from our specs.
+- **Design:** Gurneal's Un-Said system: a white, light theme with a blue → violet → lilac gradient family, heavy rounded system type, and no handwriting fonts or Meta logos anywhere.
+- **AI tools we used to build it:** Claude Code wrote much of the code from our specs. Grok reviewed the product and wrote the first Gemini echo. Every change was reviewed and tested by us.
 - **Testing:**
-  - 19 backend tests, including the whole evening end to end on labeled mock AI. A test asserts that every card line is a substring of what he said.
+  - 84 backend tests, including the whole evening end to end on labeled mock AI. A test asserts that every card line is a substring of what he said, and one checks the Gemini fallback.
   - A Playwright walk of the web client with a fake mic and camera: 15 screenshots across the whole flow, zero console errors.
   - A 30-rant safety eval.
-  - The iOS bundle compiles. `[pending: full flow rehearsed on the phone with a real key]`
-- **Deploy:** Render blueprint and Docker. `[pending: AWS deploy with Caddy HTTPS]`
+- **Deploy:** a **Vultr** Cloud Compute VM in Dallas (Ubuntu, Docker Compose) running the FastAPI backend behind Caddy with automatic HTTPS, at https://45-32-200-63.sslip.io. Live transcription, the letter pages and her replies run there. One script updates it from `main`.
+  - Meta's API answered Muse Spark from our laptops but returned `model_not_found` from the Vultr VM with the same key. Voice Transcribe worked from both. So on Vultr, sorting and translation fall back to Gemini, and the app says so. Our safety eval numbers are from Muse Spark.
 
 ## Safety
 
@@ -83,7 +86,7 @@ We also knew what we didn't want to be. Phones already deliver about 63 notifica
 - **The eval, 30 rants** (20 ordinary, 10 concerning, some code-switched):
   - phrase layer only: **10 concerning, 9 routed to resources; 20 ordinary, 0 blocked.** The miss was the subtle one ("there's no point… I don't see a reason to keep going"), which is what Spark's layer is for.
   - with Muse Spark (Oct 25, real key): **10/10 concerning routed to resources; 0/20 ordinary blocked.** Spark caught the subtle one the phrase list missed.
-- **No knocks after a concern.** `[pending: memory & knocks branch]`
+- **No knocks after a concern.** Knocks stay off for 24 hours.
 - **Privacy:**
   - Photos stay on the phone; only the photo you send is uploaded, as one resized JPEG.
   - There's no face recognition.
@@ -93,17 +96,17 @@ We also knew what we didn't want to be. Phones already deliver about 63 notifica
 
 ## What's real today vs. what needs Meta
 
-**Real (in the video and on the phone):**
-- the gallery and the photo view
-- the live transcript through Muse Voice Transcribe (key check passes: file, realtime handshake)
-- the split by Muse Spark
+**Real (running on the phone and on Vultr):**
+- the gallery and the photo view, with knocks and "you said this here before"
+- the live transcript through Muse Voice Transcribe
+- the split by Muse Spark (Gemini on the Vultr VM, see Deploy)
 - the safety gate
-- piles, letter previews and hold until her morning
-- WhatsApp delivery (Cloud API, or the share-sheet fallback)
-- Mom's letter page with her voice reply
+- piles, letter previews with the Gemini "she'll read:" check, and hold until her morning
+- WhatsApp, Messages and Instagram delivery through his own apps' share sheets
+- Mom's letter page with her voice reply or a written one
 - Letters
 
-**Acted in the video:** Sarah's and Michael's replies are teammates `[pending: Sarah's reply becomes real if the letter page gets a text "Write back"]`. The kitchen call is a real family on a real call, filmed at her real 8 AM.
+**The video** is generated and animated by our team to tell the story. It isn't a screen recording. Everything it shows the app doing, the app does.
 
 **What needs Meta (our Round 2 ask):**
 - the knock on photos people already scroll in Instagram and Facebook memories, not only inside Un-Said
@@ -113,6 +116,7 @@ We also knew what we didn't want to be. Phones already deliver about 63 notifica
 ## Challenges we ran into
 
 - **Live transcription from a phone without exposing the key.** Expo's AudioStream gives raw PCM. We resample it to 24 kHz, relay it through our server to Meta's realtime socket, and fall back to file transcription when the socket drops.
+- **A model that answered from one machine and not another.** The same Meta key ran Muse Spark from a laptop and got `model_not_found` from our Vultr VM. We added a fallback with the same prompt and schema, and the app labels which model sorted, so the demo never pretends.
 - **Making it impossible for the AI to write his words.** Our first design asked the model for character offsets, and models are bad at counting. We switched to numbered sentences, which is more reliable and still guarantees verbatim text.
 - **Cutting his voice per person.** Voice Transcribe gives turn-level timestamps only, so a turn is played to Mom only if every sentence in it was about her.
 - **Restraint.** Designing a knock that helps without nagging took longer than building one.
@@ -121,9 +125,9 @@ We also knew what we didn't want to be. Phones already deliver about 63 notifica
 ## Accomplishments we're proud of
 
 - An AI feature that **refuses** to write your feelings, and a test that proves it.
-- A whole evening, from the knock to Mom's 8 AM, that runs on real Meta models, real WhatsApp and real time zones.
+- A whole evening, from the knock to Mom's 8 AM, that runs on real Meta models, real time zones and the apps she already has, deployed on Vultr.
 - A design system strict enough that nothing looks like a default component.
-- The kitchen call. `[pending: filmed Saturday 9:30 PM CDT]`
+- A knock budget that holds up even in a demo: one per session, two per day.
 
 ## What we learned
 
@@ -134,16 +138,15 @@ We also knew what we didn't want to be. Phones already deliver about 63 notifica
 ## What's next
 
 - The knock on Meta's own memory surfaces (Round 2).
-- Text replies and "Write back" letters both ways.
+- **The phone's own assistant (not built yet).** On Android, Un-Said would expose AppFunctions so Gemini can ask "is a letter waiting for Mom?" or open her pile from anywhere. On iPhone, the same functions become App Intents for Siri and Apple Intelligence. The assistant only learns that a letter exists and who it's for. The words stay inside Un-Said, with Muse.
+- Muse Spark Open on a Vultr GPU, so sorting runs on Meta's open weights on our own server.
 - Home-culture dates (Diwali, Lunar New Year, Eid, Mother's Day in her country).
 - Drafts you can type into.
 - An on-device, opt-in "who's in this photo," built so faces never leave the phone.
 
 ## Built with
 
-`expo` · `react-native` · `expo-router` · `typescript` · `python` · `fastapi` · `uvicorn` · `websockets` · `sqlite` · `meta-model-api` · `muse-spark` · `muse-voice-transcribe` · `whatsapp-cloud-api` · `docker` · `caddy` · `pytest` · `playwright` · `claude-code` · `grok`
-
-`gemini` `[pending: only if GEMINI_API_KEY is set and a preview showed "she'll read"]` · `vultr` `[pending: only if that is the host]` · `unsaid.tech` `[pending: only if the A record is live]`
+`expo` · `react-native` · `expo-router` · `typescript` · `python` · `fastapi` · `uvicorn` · `websockets` · `sqlite` · `meta-model-api` · `muse-spark` · `muse-voice-transcribe` · `gemini` · `vultr` · `docker` · `caddy` · `whatsapp` · `pytest` · `playwright` · `claude-code` · `grok`
 
 ## Team
 
@@ -152,20 +155,16 @@ We also knew what we didn't want to be. Phones already deliver about 63 notifica
 ## Links
 
 - Code: https://github.com/MuditUpadhyay04/HackTX
-- Demo video: `[pending]`
-- Try it: `[pending: deployed URL and QR]`
+- Demo video: (Gurneal's generated film, link when uploaded)
+- Live backend: https://45-32-200-63.sslip.io
 
 ## Tracks to check on the Devpost form
 
-Opt in only where the bracket above is filled. Muse stays the model that hears, sorts, translates, and gates safety.
+Meta, MLH Vultr and MLH Gemini (the three), plus Best Overall, which doesn't count toward the limit.
 
 - **Meta.** The product as described above.
+- **Vultr.** The FastAPI backend, the live transcript WebSocket, Mom's letter page and her replies run on a Vultr Cloud Compute VM in Dallas, with Docker Compose and Caddy HTTPS.
+- **Gemini.** On the letter preview, Gemini reads Muse's Hindi translation back into English (*"she'll read: …"*). It can't edit the letter, and Send works if Gemini is down. When Muse Spark can't answer, Gemini sorts with the same schema, so it still can't write his words.
 - **Best Overall.** Design system, the live backend, the safety eval numbers, one public URL.
-- **Best Pitch.** Someone is in the room. The film is Demo v3.
-- **Cursor + Grok (SpaceXSI).** Describe the tools that were actually used, then opt into the raffle. Grok reviewed the product in `docs/notes/claude-grok-collab.md` and this draft. Cursor counts only if it was the coding agent for a real change. Do not write that it was if the code came from Claude Code.
-- **.tech.** `unsaid.tech` pointed at the server. Say the name and that Mom's letter opens on it.
-- **Vultr.** One sentence: the FastAPI app, the WebSocket transcript, and Mom's reply page run on a Vultr Ubuntu VM behind Caddy. Skip this line if the host is AWS.
-- **Gemini.** One sentence: on the letter preview, Gemini reads Muse's Hindi translation back into English (`she'll read: …`). It cannot edit the letter, and Send works if Gemini is down. It does not summarize the rant.
-- **DEV writing.** After freeze, publish this draft. No code.
 
-Leave Snowflake, Tiger Data, Solana, and the hardware tracks unchecked. Moving off SQLite or adding a third model the night before puts the demo at risk.
+Leave Cursor + Grok unchecked: Cursor wasn't our coding agent. Leave .tech, Snowflake, Tiger Data, Solana and the hardware tracks unchecked too.
