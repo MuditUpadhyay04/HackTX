@@ -8,9 +8,11 @@ import { Skeleton } from "../../components/motion";
 import { Avatar, Press, Row, styles as ui, T } from "../../components/ui";
 import { useHome } from "../../lib/useHome";
 import { color, inset, radius, space } from "../../theme/tokens";
+import { useLayout } from "../../lib/useLayout";
 
 export default function You() {
   const insets = useSafeAreaInsets();
+  const layout = useLayout();
   const { home, error, refresh } = useHome(15000);
   const loading = !home && !error;
   const notes = home?.self_notes.length ?? 0;
@@ -30,7 +32,7 @@ export default function You() {
 
   return (
     <View style={ui.screen}>
-      <ScrollView contentContainerStyle={{ paddingTop: insets.top + space.s24, paddingBottom: space.s48 }}>
+      <ScrollView contentContainerStyle={{ ...layout.column(), paddingTop: insets.top + space.s24, paddingBottom: space.s48 }}>
         <View style={{ marginHorizontal: inset.text, flexDirection: "row", alignItems: "center", gap: space.s16 }}>
           <Avatar name={home?.me.name ?? "Riley"} size={72} ring />
           <View style={{ flex: 1 }}>

@@ -7,6 +7,7 @@ import { NavBar, Press, Row, styles as ui, T } from "../components/ui";
 import { mediaUrl } from "../lib/api";
 import { useHome } from "../lib/useHome";
 import { color, inset, space } from "../theme/tokens";
+import { useLayout } from "../lib/useLayout";
 
 function when(iso: string) {
   const d = new Date(iso);
@@ -16,13 +17,14 @@ function when(iso: string) {
 
 export default function Notes() {
   const insets = useSafeAreaInsets();
+  const layout = useLayout();
   const { home, error, refresh } = useHome(30000);
   const notes = home?.self_notes ?? [];
 
   return (
     <View style={ui.screen}>
       <NavBar title="Notes to yourself" />
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + space.s48, paddingTop: space.s8 }}>
+      <ScrollView contentContainerStyle={{ ...layout.column(), paddingBottom: insets.bottom + space.s48, paddingTop: space.s8 }}>
         <T v="overline" style={{ marginHorizontal: inset.text, marginBottom: space.s16 }}>
           For you, later
         </T>

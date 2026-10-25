@@ -10,9 +10,11 @@ import { LetterCard, NavBar, OutlinePill, Overline, styles as ui, T } from "../.
 import { api, mediaUrl } from "../../lib/api";
 import { useHome } from "../../lib/useHome";
 import { color, inset, space } from "../../theme/tokens";
+import { useLayout } from "../../lib/useLayout";
 
 export default function Letter() {
   const insets = useSafeAreaInsets();
+  const layout = useLayout();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { home } = useHome(30000);
   const reply = home?.replies.find((r) => r.id === id);
@@ -37,7 +39,7 @@ export default function Letter() {
   return (
     <View style={ui.screen}>
       <NavBar title={`From ${reply.from_name}`} />
-      <ScrollView contentContainerStyle={{ paddingTop: space.s16, paddingBottom: insets.bottom + space.s48, gap: space.s16 }}>
+      <ScrollView contentContainerStyle={{ ...layout.column(), paddingTop: space.s16, paddingBottom: insets.bottom + space.s48, gap: space.s16 }}>
         <LetterCard lines={reply.audio_url ? [] : [reply.transcript]} signature={reply.from_name} footer={reply.audio_url ? listen : null} minHeight={360} />
         <T v="caption" style={{ textAlign: "center" }}>Take your time.</T>
         <OutlinePill

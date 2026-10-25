@@ -10,9 +10,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppGlyph } from "../components/AppRail";
 import { NavBar, PillGradientFill, Press, styles as ui, T } from "../components/ui";
 import { color, inset, radius, space } from "../theme/tokens";
+import { useLayout } from "../lib/useLayout";
 
 export default function Connect() {
   const insets = useSafeAreaInsets();
+  const layout = useLayout();
   const [permission, requestPermission] = usePermissions();
   const [demo, setDemo] = useState({ instagram: false, facebook: false });
 
@@ -25,7 +27,7 @@ export default function Connect() {
   return (
     <View style={ui.screen}>
       <NavBar title="Connect photos" />
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + space.s48 }}>
+      <ScrollView contentContainerStyle={{ ...layout.column(), paddingBottom: insets.bottom + space.s48 }}>
         <View style={{ marginHorizontal: inset.card, gap: space.s8, marginTop: space.s16 }}>
           {rows.map((r) => (
             <View key={r.key} style={styles.row}>

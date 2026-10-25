@@ -9,9 +9,11 @@ import { Avatar, Press, Row, styles as ui, T } from "../../components/ui";
 import { haptics } from "../../lib/haptics";
 import { useHome } from "../../lib/useHome";
 import { color, inset, radius, space } from "../../theme/tokens";
+import { useLayout } from "../../lib/useLayout";
 
 export default function Letters() {
   const insets = useSafeAreaInsets();
+  const layout = useLayout();
   const { home, error, refresh } = useHome();
   const replies = home?.replies ?? [];
   const senders = [...new Map(replies.map((r) => [r.from_person_id, r])).values()];
@@ -26,7 +28,7 @@ export default function Letters() {
 
   return (
     <View style={ui.screen}>
-      <ScrollView contentContainerStyle={{ paddingTop: insets.top + space.s8, paddingBottom: space.s48 }}>
+      <ScrollView contentContainerStyle={{ ...layout.column(), paddingTop: insets.top + space.s8, paddingBottom: space.s48 }}>
         <T v="display" style={{ marginHorizontal: inset.text }}>
           Letters
         </T>

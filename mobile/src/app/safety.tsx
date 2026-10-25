@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NavBar, OutlinePill, styles as ui, T } from "../components/ui";
 import { api, type Resource } from "../lib/api";
 import { color, inset, radius, space } from "../theme/tokens";
+import { useLayout } from "../lib/useLayout";
 
 const DEFAULT: Resource[] = [
   { name: "988 Suicide & Crisis Lifeline", detail: "Call or text 988", links: [{ label: "Call 988", href: "tel:988" }, { label: "Text 988", href: "sms:988" }] },
@@ -30,6 +31,7 @@ const cap = (label: string) => (label ? label.charAt(0).toUpperCase() + label.sl
 
 export default function Safety() {
   const insets = useSafeAreaInsets();
+  const layout = useLayout();
   const { resources } = useLocalSearchParams<{ resources?: string }>();
   const fromRant = Boolean(resources);
   const [list, setList] = useState<Resource[]>(() => {
@@ -48,7 +50,7 @@ export default function Safety() {
   return (
     <View style={ui.screen}>
       <NavBar onBack={() => router.dismissTo("/home")} />
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + space.s48 }}>
+      <ScrollView contentContainerStyle={{ ...layout.column(), paddingBottom: insets.bottom + space.s48 }}>
         <T v="display" style={{ marginHorizontal: inset.text, marginTop: space.s8 }}>{"You deserve to feel safe. Here's real help."}</T>
         {fromRant ? <T v="rowPreview" style={{ marginHorizontal: inset.text, marginTop: space.s16 }}>{"we're not going to show memories right now."}</T> : null}
         <View style={{ gap: space.s8, marginTop: space.s24 }}>

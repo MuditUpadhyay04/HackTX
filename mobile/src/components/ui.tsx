@@ -176,7 +176,7 @@ export function PillGradientFill({ style }: { style?: StyleProp<ViewStyle> }) {
 export function NavBar({ title, trailing, onBack, backLabel }: { title?: string; trailing?: ReactNode; onBack?: () => void; backLabel?: string }) {
   const insets = useSafeAreaInsets();
   return (
-    <View style={[styles.nav, { paddingTop: insets.top }]}>
+    <View style={[styles.nav, { paddingTop: insets.top, paddingLeft: space.s16 + insets.left, paddingRight: space.s16 + insets.right }]}>
       <Pressable
         hitSlop={12}
         onPress={() => {
@@ -203,32 +203,35 @@ export function LetterCard({ lines, signature, footer, minHeight = 420 }: { line
   const [first, ...rest] = lines;
   const heroSize = first && first.length > 60 ? 36 : first && first.length > 28 ? 48 : 64;
   return (
-    <View style={[styles.letter, shadow.letter, { minHeight }]}>
-      <Text style={{ fontSize: 40, lineHeight: 40, fontWeight: "800", color: color.letterAccent }}>{"“"}</Text>
-      <T v="overline" style={{ color: color.letterLabel, marginTop: space.s12 }}>For you</T>
-      {first ? (
-        <View style={{ marginTop: space.s16, alignSelf: "stretch" }}>
-          <Text style={[type.letterHero, { color: color.letterInk, fontSize: heroSize, lineHeight: heroSize * 1.125 }]}>{first}</Text>
-          {/* Under the last line, from its start, as in the reference ("you too."). */}
-          <View style={{ alignSelf: "flex-start", marginTop: -2, marginLeft: space.s4 }}>
-            <Svg width={arcWidth(first)} height={14}>
-              <Path
-                d={`M2 10 Q ${arcWidth(first) / 2} 1 ${arcWidth(first) - 2} 8`}
-                stroke={color.letterAccent}
-                strokeWidth={4}
-                strokeLinecap="round"
-                fill="none"
-              />
-            </Svg>
+    // Phone width on a phone; on a big or unfolded screen the card keeps letter proportions, centered.
+    <View style={styles.letterWrap}>
+      <View style={[styles.letter, shadow.letter, { minHeight }]}>
+        <Text style={{ fontSize: 40, lineHeight: 40, fontWeight: "800", color: color.letterAccent }}>{"“"}</Text>
+        <T v="overline" style={{ color: color.letterLabel, marginTop: space.s12 }}>For you</T>
+        {first ? (
+          <View style={{ marginTop: space.s16, alignSelf: "stretch" }}>
+            <Text style={[type.letterHero, { color: color.letterInk, fontSize: heroSize, lineHeight: heroSize * 1.125 }]}>{first}</Text>
+            {/* Under the last line, from its start, as in the reference ("you too."). */}
+            <View style={{ alignSelf: "flex-start", marginTop: -2, marginLeft: space.s4 }}>
+              <Svg width={arcWidth(first)} height={14}>
+                <Path
+                  d={`M2 10 Q ${arcWidth(first) / 2} 1 ${arcWidth(first) - 2} 8`}
+                  stroke={color.letterAccent}
+                  strokeWidth={4}
+                  strokeLinecap="round"
+                  fill="none"
+                />
+              </Svg>
+            </View>
           </View>
-        </View>
-      ) : null}
-      {rest.map((line, i) => (
-        <Text key={i} style={[type.letterBody, { color: color.letterInk, marginTop: space.s16 }]}>{line}</Text>
-      ))}
-      {footer}
-      <View style={{ flex: 1, minHeight: space.s24 }} />
-      <Text style={[type.signature, { color: color.letterInk }]}>{signature}</Text>
+        ) : null}
+        {rest.map((line, i) => (
+          <Text key={i} style={[type.letterBody, { color: color.letterInk, marginTop: space.s16 }]}>{line}</Text>
+        ))}
+        {footer}
+        <View style={{ flex: 1, minHeight: space.s24 }} />
+        <Text style={[type.signature, { color: color.letterInk }]}>{signature}</Text>
+      </View>
     </View>
   );
 }
@@ -240,15 +243,19 @@ function arcWidth(line: string) {
 export function Sheet({ visible, onClose, children }: { visible: boolean; onClose: () => void; children: ReactNode }) {
   const insets = useSafeAreaInsets();
   return (
-    <Modal transparent visible={visible} animationType="slide" onRequestClose={onClose}>
+    <Modal transparent visible={visible} animationType="slide" supportedOrientations={ALL_ORIENTATIONS} onRequestClose={onClose}>
       <Pressable style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)" }} onPress={onClose} />
-      <View style={[styles.sheet, { paddingBottom: insets.bottom + space.s16 }]}>
+      {/* On a wide screen the sheet stays phone-width and centered instead of spanning the window. */}
+      <View style={[styles.sheet, { paddingBottom: insets.bottom + space.s16, paddingLeft: space.s16 + insets.left, paddingRight: space.s16 + insets.right }]}>
         <View style={styles.grabber} />
         {children}
       </View>
     </Modal>
   );
 }
+
+/** iOS Modals default to portrait only; let sheets follow the phone in every pose. */
+export const ALL_ORIENTATIONS = ["portrait", "portrait-upside-down", "landscape", "landscape-left", "landscape-right"] as ("portrait" | "portrait-upside-down" | "landscape" | "landscape-left" | "landscape-right")[];
 
 export const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.bg },
@@ -259,7 +266,8 @@ export const styles = StyleSheet.create({
   chip: { flexDirection: "row", alignItems: "center", gap: space.s4, backgroundColor: color.surfaceRaised, borderRadius: radius.pill, paddingHorizontal: space.s8, paddingVertical: space.s4, alignSelf: "flex-start" },
   nav: { flexDirection: "row", alignItems: "center", paddingHorizontal: space.s16, height: undefined, minHeight: 44, backgroundColor: color.bg },
   navSide: { width: 88, height: 44, flexDirection: "row", alignItems: "center" },
-  letter: { marginHorizontal: inset.card, borderRadius: radius.hero, backgroundColor: color.letter, padding: space.s24 },
-  sheet: { backgroundColor: color.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: space.s16, paddingTop: space.s12 },
+  letterWrap: { paddingHorizontal: inset.card, alignItems: "center" },
+  letter: { width: "100%", maxWidth: 480, borderRadius: radius.hero, backgroundColor: color.letter, padding: space.s24 },
+  sheet: { backgroundColor: color.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: space.s16, paddingTop: space.s12, width: "100%", maxWidth: 560, alignSelf: "center", maxHeight: "85%" },
   grabber: { alignSelf: "center", width: 36, height: 5, borderRadius: 3, backgroundColor: color.text4, marginBottom: space.s16 },
 });

@@ -13,6 +13,7 @@ import { type App, handOff } from "../lib/handoff";
 import { uploadGalleryPhoto } from "../lib/photos";
 import { needsHisTap, useHeadsUpAsk } from "../lib/push";
 import { useHome } from "../lib/useHome";
+import { SPLIT_MAX, useLayout } from "../lib/useLayout";
 import { color, inset, radius, space } from "../theme/tokens";
 
 const POSSESSIVE = { her: "her", him: "his", them: "their" } as const;
@@ -24,6 +25,8 @@ function morningLabel(hhmm: string) {
 
 export default function Preview() {
   const insets = useSafeAreaInsets();
+  const layout = useLayout();
+  const split = layout.expanded;
   const params = useLocalSearchParams<{ person: string; pieces: string; app: App; photo?: string }>();
   const { home } = useHome(30000);
   const person = home?.people.find((p) => p.id === params.person);
@@ -47,7 +50,9 @@ export default function Preview() {
     return (
       <View style={ui.screen}>
         <NavBar backLabel="Edit" />
-        <Skeleton height={420} r={radius.hero} style={{ marginHorizontal: inset.card, marginTop: space.s16 }} />
+        <View style={layout.column()}>
+          <Skeleton height={420} r={radius.hero} style={{ marginHorizontal: inset.card, marginTop: space.s16 }} />
+        </View>
       </View>
     );
   }
@@ -88,61 +93,91 @@ export default function Preview() {
     }
   };
 
+  const letter = (
+    <>
+      {pieces.length || loaded ? (
+        <LetterCard lines={pieces.map((p) => p.text)} signature={home.me.name} />
+      ) : (
+        <Skeleton height={420} r={radius.hero} style={{ marginHorizontal: inset.card }} />
+      )}
+      <T v="caption" style={{ textAlign: "center", marginTop: space.s16 }}>{`This is how ${person.name} will see it.`}</T>
+    </>
+  );
+
+  const choices = (
+    <>
+      {holdable && !held ? (
+        <View style={styles.delivery}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: space.s12 }}>
+            <View style={styles.well}>
+              <Ionicons name="moon" size={18} color={color.violet} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <T v="rowName">{`${person.name}'s morning`}</T>
+              <T v="rowPreview">{`Arrives ${morningLabel(person.morning)} ${pos} time`}</T>
+            </View>
+          </View>
+          <View style={styles.rule} />
+          <Choice featureId="unsend-hold-until-morning" label={`Hold until ${pos} morning`} on={holding} onPress={() => setHold(true)} />
+          <Choice label="Send now" on={!holding} onPress={() => setHold(false)} />
+        </View>
+      ) : null}
+
+      {held ? (
+        <View style={styles.held}>
+          <Ionicons name="checkmark-circle" size={28} color={color.violet} />
+          <T v="section" style={{ textAlign: "center" }}>{`Held for ${person.name}'s morning.`}</T>
+          <Chip icon="moon" label={`arrives ${held}`} />
+          {headsUp.question ? (
+            // Wiring for the one permission ask (lib/push.ts). Copy is proposed; styling is Gurneal's.
+            <View style={{ alignItems: "center", marginTop: space.s8 }}>
+              <T v="caption" style={{ textAlign: "center" }}>{headsUp.question}</T>
+              <View style={{ flexDirection: "row", gap: space.s24 }}>
+                <TextButton label="Yes" tone="text" onPress={() => headsUp.answer(true).finally(() => router.dismissTo("/home"))} />
+                <TextButton label="Not now" onPress={() => headsUp.answer(false).finally(() => router.dismissTo("/home"))} />
+              </View>
+            </View>
+          ) : null}
+        </View>
+      ) : null}
+    </>
+  );
+
+  const dockContent = (
+    <>
+      <PrimaryPill featureId="unsend-queue-send" label="Send when they're ready" disabled={sending || pieces.length === 0} onPress={send} />
+      <View style={{ alignItems: "center" }}>
+        <TextButton label="Keep editing" onPress={() => router.back()} />
+      </View>
+    </>
+  );
+
   return (
     <View style={ui.screen}>
       <NavBar backLabel="Edit" title={`To ${person.name}`} />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingTop: space.s16, paddingBottom: space.s32 }}>
-        {pieces.length || loaded ? (
-          <LetterCard lines={pieces.map((p) => p.text)} signature={home.me.name} />
-        ) : (
-          <Skeleton height={420} r={radius.hero} style={{ marginHorizontal: inset.card }} />
-        )}
-        <T v="caption" style={{ textAlign: "center", marginTop: space.s16 }}>{`This is how ${person.name} will see it.`}</T>
-
-        {holdable && !held ? (
-          <View style={styles.delivery}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: space.s12 }}>
-              <View style={styles.well}>
-                <Ionicons name="moon" size={18} color={color.violet} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <T v="rowName">{`${person.name}'s morning`}</T>
-                <T v="rowPreview">{`Arrives ${morningLabel(person.morning)} ${pos} time`}</T>
-              </View>
-            </View>
-            <View style={styles.rule} />
-            <Choice featureId="unsend-hold-until-morning" label={`Hold until ${pos} morning`} on={holding} onPress={() => setHold(true)} />
-            <Choice label="Send now" on={!holding} onPress={() => setHold(false)} />
-          </View>
-        ) : null}
-
-        {held ? (
-          <View style={styles.held}>
-            <Ionicons name="checkmark-circle" size={28} color={color.violet} />
-            <T v="section" style={{ textAlign: "center" }}>{`Held for ${person.name}'s morning.`}</T>
-            <Chip icon="moon" label={`arrives ${held}`} />
-            {headsUp.question ? (
-              // Wiring for the one permission ask (lib/push.ts). Copy is proposed; styling is Gurneal's.
-              <View style={{ alignItems: "center", marginTop: space.s8 }}>
-                <T v="caption" style={{ textAlign: "center" }}>{headsUp.question}</T>
-                <View style={{ flexDirection: "row", gap: space.s24 }}>
-                  <TextButton label="Yes" tone="text" onPress={() => headsUp.answer(true).finally(() => router.dismissTo("/home"))} />
-                  <TextButton label="Not now" onPress={() => headsUp.answer(false).finally(() => router.dismissTo("/home"))} />
-                </View>
-              </View>
-            ) : null}
-          </View>
-        ) : null}
-      </ScrollView>
-
-      {!held ? (
-        <View style={[styles.dock, { paddingBottom: insets.bottom + space.s8 }]}>
-          <PrimaryPill featureId="unsend-queue-send" label="Send when they're ready" disabled={sending || pieces.length === 0} onPress={send} />
-          <View style={{ alignItems: "center" }}>
-            <TextButton label="Keep editing" onPress={() => router.back()} />
-          </View>
+      {split ? (
+        // Wide (unfolded, landscape): the letter on the left, when it arrives and the button on the right.
+        <View style={[styles.split, layout.column(SPLIT_MAX)]}>
+          <ScrollView style={styles.main} contentContainerStyle={{ paddingTop: space.s24, paddingBottom: insets.bottom + space.s32 }}>
+            {letter}
+          </ScrollView>
+          <ScrollView style={styles.side} contentContainerStyle={{ paddingBottom: insets.bottom + space.s32 }}>
+            {choices}
+            {!held ? <View style={styles.sideDock}>{dockContent}</View> : null}
+          </ScrollView>
         </View>
-      ) : null}
+      ) : (
+        <>
+          <ScrollView style={{ flex: 1 }} contentContainerStyle={[layout.column(), { paddingTop: space.s16, paddingBottom: space.s32 }]}>
+            {letter}
+            {choices}
+          </ScrollView>
+
+          {!held ? (
+            <View style={[styles.dock, { paddingBottom: insets.bottom + space.s8, paddingLeft: insets.left, paddingRight: insets.right }]}>{dockContent}</View>
+          ) : null}
+        </>
+      )}
     </View>
   );
 }
@@ -162,5 +197,9 @@ const styles = StyleSheet.create({
   rule: { height: StyleSheet.hairlineWidth, backgroundColor: color.hairline, marginVertical: space.s8 },
   choice: { flexDirection: "row", alignItems: "center", gap: space.s12, paddingVertical: space.s8, minHeight: 44 },
   held: { marginHorizontal: inset.card, marginTop: space.s24, alignItems: "center", gap: space.s8, backgroundColor: color.surface, borderRadius: radius.row, padding: space.s24 },
+  split: { flex: 1, flexDirection: "row", gap: space.s8 },
+  main: { flex: 3 },
+  side: { flex: 2 },
+  sideDock: { gap: space.s4, marginTop: space.s24 },
   dock: { paddingTop: space.s16, backgroundColor: color.bg, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.hairline },
 });

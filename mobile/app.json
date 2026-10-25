@@ -3,7 +3,7 @@
     "name": "Un-Said",
     "slug": "unsaid",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/brand/icon-1024.png",
     "userInterfaceStyle": "dark",
     "runtimeVersion": {

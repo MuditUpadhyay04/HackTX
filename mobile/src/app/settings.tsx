@@ -10,6 +10,7 @@ import { haptics } from "../lib/haptics";
 import { toast } from "../lib/toast";
 import { useHome } from "../lib/useHome";
 import { color, inset, space } from "../theme/tokens";
+import { useLayout } from "../lib/useLayout";
 
 const MODES: { id: Settings["knock_mode"]; title: string; body: string }[] = [
   { id: "gentle", title: "Gentle", body: "A quiet knock, rarely." },
@@ -25,6 +26,7 @@ const QUIET: { start: string; end: string; label: string }[] = [
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
+  const layout = useLayout();
   const { home } = useHome(30000);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +53,7 @@ export default function SettingsScreen() {
   return (
     <View style={ui.screen}>
       <NavBar title="Settings" />
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + space.s48 }}>
+      <ScrollView contentContainerStyle={{ ...layout.column(), paddingBottom: insets.bottom + space.s48 }}>
         {error && !settings ? (
           <View style={{ marginTop: space.s24, gap: space.s16 }}>
             <T v="rowPreview" style={{ marginHorizontal: inset.text }}>{`Can't reach Un-Said's server. ${error}`}</T>

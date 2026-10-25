@@ -3,7 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppGlyph } from "../../components/AppRail";
@@ -14,6 +14,7 @@ import { CHANNEL_APP, handOff } from "../../lib/handoff";
 import { haptics } from "../../lib/haptics";
 import { toast } from "../../lib/toast";
 import { useHome } from "../../lib/useHome";
+import { SPLIT_MAX, useLayout } from "../../lib/useLayout";
 import { color, inset, radius, shadow, space } from "../../theme/tokens";
 
 const OPEN_LABEL = { instagram: "Open Instagram", whatsapp: "Open WhatsApp", imessage: "Open Messages", self: "" } as const;
@@ -29,9 +30,13 @@ function holdProgress(card: Card, now?: string) {
 
 export default function Home() {
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
-  // Spec: 370×288 at 402 pt. Keep that ratio on narrower phones without letting the title crowd the "+".
-  const heroHeight = Math.round(Math.max(248, Math.min(288, (width - inset.card * 2) * 0.78)));
+  const layout = useLayout();
+  // Wide (unfolded, landscape): hero on the left, the lists on the right.
+  const split = layout.expanded;
+  const paneWidth = split ? Math.min(layout.usableWidth, SPLIT_MAX) / 2 : layout.usableWidth;
+  // Spec: 370×288 at 402 pt. Keep that ratio on narrower phones without letting the title crowd the "+";
+  // on a short window (a phone on its side) let it shrink so the hero isn't the whole screen.
+  const heroHeight = Math.round(Math.max(layout.short ? 200 : 248, Math.min(layout.short ? 240 : 288, (paneWidth - inset.card * 2) * 0.78)));
   const { home, error, refresh } = useHome();
   const [drafts, setDrafts] = useState<{ personId: string; latest: Piece }[] | null>(null);
   const [pulling, setPulling] = useState(false);
@@ -87,7 +92,7 @@ export default function Home() {
   return (
     <View style={ui.screen}>
       <ScrollView
-        contentContainerStyle={{ paddingTop: insets.top, paddingBottom: space.s48 }}
+        contentContainerStyle={[layout.column(SPLIT_MAX), { paddingTop: insets.top, paddingBottom: space.s48 }]}
         refreshControl={
           <RefreshControl
             refreshing={pulling}
@@ -112,197 +117,203 @@ export default function Home() {
           </Pressable>
         </View>
 
-        <Rise>
-          <T v="display" style={{ marginHorizontal: inset.text, marginTop: space.s16 }}>
-            Some words take a little longer.
-          </T>
-        </Rise>
+        <View style={split ? styles.split : null}>
+          <View style={split ? styles.pane : null}>
+            <Rise>
+              <T v="display" style={{ marginHorizontal: inset.text, marginTop: space.s16 }}>
+                Some words take a little longer.
+              </T>
+            </Rise>
 
-        <Rise delay={80}>
-          <Press featureId="draft-new" onPress={openNew} style={[styles.hero, shadow.hero, { height: heroHeight }]}>
-            <CardGradient />
-            <Text style={styles.quote}>{"“"}</Text>
-            <T v="cardTitle" style={{ marginTop: space.s8, marginRight: space.s64 }}>
-              What have you been meaning to say?
-            </T>
-            <View style={styles.plus}>
-              <Ionicons name="add" size={26} color="#fff" />
-            </View>
-          </Press>
-        </Rise>
-
-        {loading ? <LoadingBlock /> : null}
-
-        {error && !home ? (
-          <View style={{ marginTop: space.s24, gap: space.s16 }}>
-            <T v="rowPreview" style={{ marginHorizontal: inset.text }}>{`Can't reach Un-Said's server. ${error}`}</T>
-            <Press onPress={() => refresh()} style={[ui.pill, { backgroundColor: color.surfaceRaised }]}>
-              <T v="button">Try again</T>
-            </Press>
-          </View>
-        ) : null}
-
-        {error && home ? (
-          <T v="caption" style={{ marginHorizontal: inset.text, marginTop: space.s16 }}>{`Can't reach Un-Said's server. ${error}`}</T>
-        ) : null}
-
-        {home ? (
-          <>
-            <T v="section" style={styles.section}>
-              Your words
-            </T>
-            <View style={styles.list}>
-              {drafts === null ? (
-                <>
-                  <View style={[ui.row, { height: 76 }]} />
-                  <View style={[ui.row, { height: 76 }]} />
-                </>
-              ) : null}
-              {drafts?.length === 0 ? (
-                <T v="caption" style={{ marginHorizontal: space.s8 }}>
-                  The lines you keep show up here.
+            <Rise delay={80}>
+              <Press featureId="draft-new" onPress={openNew} style={[styles.hero, shadow.hero, { height: heroHeight }]}>
+                <CardGradient />
+                <Text style={styles.quote}>{"“"}</Text>
+                <T v="cardTitle" style={{ marginTop: space.s8, marginRight: space.s64 }}>
+                  What have you been meaning to say?
                 </T>
-              ) : null}
-              {drafts?.map(({ personId, latest }) => (
-                <Row key={personId} featureId="draft-open" onPress={() => router.push({ pathname: "/pile/[person]", params: { person: personId } })}>
-                  <Avatar name={name(personId)} />
-                  <View style={{ flex: 1 }}>
-                    <T v="rowName">{name(personId)}</T>
-                    <T v="rowPreview" lines={1}>
-                      {latest.text}
-                    </T>
-                  </View>
-                  <T v="meta">Draft ›</T>
-                </Row>
-              ))}
+                <View style={styles.plus}>
+                  <Ionicons name="add" size={26} color="#fff" />
+                </View>
+              </Press>
+            </Rise>
 
-              <Row onPress={() => router.push("/talk")}>
-                <View style={styles.micDot}>
-                  <PillGradientFill />
-                  <Ionicons name="mic" size={22} color="#fff" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <T v="rowName">Say it out loud</T>
-                  <T v="rowPreview">Only you can hear this.</T>
-                </View>
-              </Row>
+            {loading ? <LoadingBlock /> : null}
 
-              <Row onPress={() => router.push("/gallery")}>
-                <View style={[styles.micDot, { backgroundColor: color.surfaceRaised }]}>
-                  <Ionicons name="images" size={22} color="#fff" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <T v="rowName">Your photos</T>
-                  <T v="rowPreview">Find the people you miss.</T>
-                </View>
-              </Row>
-            </View>
+            {error && !home ? (
+              <View style={{ marginTop: space.s24, gap: space.s16 }}>
+                <T v="rowPreview" style={{ marginHorizontal: inset.text }}>{`Can't reach Un-Said's server. ${error}`}</T>
+                <Press onPress={() => refresh()} style={[ui.pill, { backgroundColor: color.surfaceRaised }]}>
+                  <T v="button">Try again</T>
+                </Press>
+              </View>
+            ) : null}
 
-            {lane.length ? (
+            {error && home ? (
+              <T v="caption" style={{ marginHorizontal: inset.text, marginTop: space.s16 }}>{`Can't reach Un-Said's server. ${error}`}</T>
+            ) : null}
+          </View>
+
+          <View style={split ? styles.pane : null}>
+            {home ? (
               <>
                 <T v="section" style={styles.section}>
-                  Your lane
+                  Your words
                 </T>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.lane}>
-                  {lane.map((photo) => (
-                    <Pressable
-                      key={photo.id}
-                      onPress={() => {
-                        haptics.tap();
-                        router.push({ pathname: "/pile/[person]", params: { person: photo.person_id } });
-                      }}
-                      style={{ width: 148 }}
-                    >
-                      <Image source={{ uri: mediaUrl(photo.url) ?? undefined }} style={styles.tile} contentFit="cover" />
-                      {photo.caption ? (
-                        <T v="caption" lines={2} style={{ marginTop: space.s8 }}>
-                          {photo.caption}
+                <View style={styles.list}>
+                  {drafts === null ? (
+                    <>
+                      <View style={[ui.row, { height: 76 }]} />
+                      <View style={[ui.row, { height: 76 }]} />
+                    </>
+                  ) : null}
+                  {drafts?.length === 0 ? (
+                    <T v="caption" style={{ marginHorizontal: space.s8 }}>
+                      The lines you keep show up here.
+                    </T>
+                  ) : null}
+                  {drafts?.map(({ personId, latest }) => (
+                    <Row key={personId} featureId="draft-open" onPress={() => router.push({ pathname: "/pile/[person]", params: { person: personId } })}>
+                      <Avatar name={name(personId)} />
+                      <View style={{ flex: 1 }}>
+                        <T v="rowName">{name(personId)}</T>
+                        <T v="rowPreview" lines={1}>
+                          {latest.text}
                         </T>
-                      ) : null}
-                    </Pressable>
-                  ))}
-                </ScrollView>
-              </>
-            ) : null}
-
-            {held.length || ready.length ? (
-              <View style={[styles.list, { marginTop: space.s24 }]}>
-                {held.map((c) => (
-                  <View key={c.id} style={styles.strip}>
-                    <Avatar name={c.recipient_name} size={32} />
-                    <View style={{ flex: 1 }}>
-                      <T v="rowName">{c.recipient_name}</T>
-                      <T v="meta" style={{ color: color.violet }}>{`arrives ${c.release_label ?? ""}`}</T>
-                    </View>
-                    <TextButton featureId="pending-unsend-cancel" tone="text3" label="Cancel" onPress={() => cancel(c)} />
-                    <View style={styles.track}>
-                      <View style={{ width: `${holdProgress(c, home.clock.now) * 100}%`, height: 3, overflow: "hidden", borderRadius: 2 }}>
-                        <PillGradientFill />
                       </View>
-                    </View>
-                  </View>
-                ))}
-                {ready.map((c) => (
-                  <View key={c.id} style={styles.strip}>
-                    <Avatar name={c.recipient_name} size={32} />
-                    <View style={{ flex: 1 }}>
-                      <T v="rowName">{c.recipient_name}</T>
-                      <T v="meta" style={{ color: color.violet }}>{`it's ${home.people.find((p) => p.id === c.recipient_id)?.local_time ?? ""} for ${c.recipient_name}`}</T>
-                    </View>
-                    <TextButton featureId="handoff-whatsapp" tone="text" label="Send now" onPress={() => sendReady(c)} />
-                  </View>
-                ))}
-              </View>
-            ) : null}
+                      <T v="meta">Draft ›</T>
+                    </Row>
+                  ))}
 
-            {arrived.length ? (
-              <View style={[styles.list, { marginTop: space.s24 }]}>
-                {arrived.map((n) => (
-                  <Row key={n.id} featureId="letter-open" onPress={() => router.push({ pathname: "/letter/[id]", params: { id: n.id } })}>
-                    <Avatar name={name(n.person_id)} ring />
+                  <Row onPress={() => router.push("/talk")}>
+                    <View style={styles.micDot}>
+                      <PillGradientFill />
+                      <Ionicons name="mic" size={22} color="#fff" />
+                    </View>
                     <View style={{ flex: 1 }}>
-                      <T v="rowName" lines={1}>
-                        {n.title}
-                      </T>
-                      <T v="rowPreview" lines={1}>
-                        {n.body}
-                      </T>
+                      <T v="rowName">Say it out loud</T>
+                      <T v="rowPreview">Only you can hear this.</T>
                     </View>
                   </Row>
-                ))}
-              </View>
-            ) : null}
 
-            {home.reminders.length ? (
-              <View style={[styles.list, { marginTop: space.s24 }]}>
-                {home.reminders.map((r) => (
-                  <View key={r.id} style={[ui.card, { gap: space.s12 }]}>
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: space.s12 }}>
-                      <Avatar name={r.person_name} />
-                      <View style={{ flex: 1 }}>
-                        <T v="rowName">{`${r.person_name} · waiting on you`}</T>
-                        <T v="rowPreview">{r.text}</T>
-                      </View>
+                  <Row onPress={() => router.push("/gallery")}>
+                    <View style={[styles.micDot, { backgroundColor: color.surfaceRaised }]}>
+                      <Ionicons name="images" size={22} color="#fff" />
                     </View>
-                    {r.handoff ? (
-                      <OutlinePill
-                        featureId={`handoff-${r.channel}`}
-                        label={OPEN_LABEL[r.channel]}
-                        icon={r.channel !== "self" ? <AppGlyph app={CHANNEL_APP[r.channel]} size={24} /> : null}
-                        onPress={async () => {
-                          await api.reminderDone(r.id);
-                          haptics.success();
-                          Linking.openURL(r.handoff!);
-                          refresh();
-                        }}
-                      />
-                    ) : null}
+                    <View style={{ flex: 1 }}>
+                      <T v="rowName">Your photos</T>
+                      <T v="rowPreview">Find the people you miss.</T>
+                    </View>
+                  </Row>
+                </View>
+
+                {lane.length ? (
+                  <>
+                    <T v="section" style={styles.section}>
+                      Your lane
+                    </T>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.lane}>
+                      {lane.map((photo) => (
+                        <Pressable
+                          key={photo.id}
+                          onPress={() => {
+                            haptics.tap();
+                            router.push({ pathname: "/pile/[person]", params: { person: photo.person_id } });
+                          }}
+                          style={{ width: 148 }}
+                        >
+                          <Image source={{ uri: mediaUrl(photo.url) ?? undefined }} style={styles.tile} contentFit="cover" />
+                          {photo.caption ? (
+                            <T v="caption" lines={2} style={{ marginTop: space.s8 }}>
+                              {photo.caption}
+                            </T>
+                          ) : null}
+                        </Pressable>
+                      ))}
+                    </ScrollView>
+                  </>
+                ) : null}
+
+                {held.length || ready.length ? (
+                  <View style={[styles.list, { marginTop: space.s24 }]}>
+                    {held.map((c) => (
+                      <View key={c.id} style={styles.strip}>
+                        <Avatar name={c.recipient_name} size={32} />
+                        <View style={{ flex: 1 }}>
+                          <T v="rowName">{c.recipient_name}</T>
+                          <T v="meta" style={{ color: color.violet }}>{`arrives ${c.release_label ?? ""}`}</T>
+                        </View>
+                        <TextButton featureId="pending-unsend-cancel" tone="text3" label="Cancel" onPress={() => cancel(c)} />
+                        <View style={styles.track}>
+                          <View style={{ width: `${holdProgress(c, home.clock.now) * 100}%`, height: 3, overflow: "hidden", borderRadius: 2 }}>
+                            <PillGradientFill />
+                          </View>
+                        </View>
+                      </View>
+                    ))}
+                    {ready.map((c) => (
+                      <View key={c.id} style={styles.strip}>
+                        <Avatar name={c.recipient_name} size={32} />
+                        <View style={{ flex: 1 }}>
+                          <T v="rowName">{c.recipient_name}</T>
+                          <T v="meta" style={{ color: color.violet }}>{`it's ${home.people.find((p) => p.id === c.recipient_id)?.local_time ?? ""} for ${c.recipient_name}`}</T>
+                        </View>
+                        <TextButton featureId="handoff-whatsapp" tone="text" label="Send now" onPress={() => sendReady(c)} />
+                      </View>
+                    ))}
                   </View>
-                ))}
-              </View>
+                ) : null}
+
+                {arrived.length ? (
+                  <View style={[styles.list, { marginTop: space.s24 }]}>
+                    {arrived.map((n) => (
+                      <Row key={n.id} featureId="letter-open" onPress={() => router.push({ pathname: "/letter/[id]", params: { id: n.id } })}>
+                        <Avatar name={name(n.person_id)} ring />
+                        <View style={{ flex: 1 }}>
+                          <T v="rowName" lines={1}>
+                            {n.title}
+                          </T>
+                          <T v="rowPreview" lines={1}>
+                            {n.body}
+                          </T>
+                        </View>
+                      </Row>
+                    ))}
+                  </View>
+                ) : null}
+
+                {home.reminders.length ? (
+                  <View style={[styles.list, { marginTop: space.s24 }]}>
+                    {home.reminders.map((r) => (
+                      <View key={r.id} style={[ui.card, { gap: space.s12 }]}>
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: space.s12 }}>
+                          <Avatar name={r.person_name} />
+                          <View style={{ flex: 1 }}>
+                            <T v="rowName">{`${r.person_name} · waiting on you`}</T>
+                            <T v="rowPreview">{r.text}</T>
+                          </View>
+                        </View>
+                        {r.handoff ? (
+                          <OutlinePill
+                            featureId={`handoff-${r.channel}`}
+                            label={OPEN_LABEL[r.channel]}
+                            icon={r.channel !== "self" ? <AppGlyph app={CHANNEL_APP[r.channel]} size={24} /> : null}
+                            onPress={async () => {
+                              await api.reminderDone(r.id);
+                              haptics.success();
+                              Linking.openURL(r.handoff!);
+                              refresh();
+                            }}
+                          />
+                        ) : null}
+                      </View>
+                    ))}
+                  </View>
+                ) : null}
+              </>
             ) : null}
-          </>
-        ) : null}
+          </View>
+        </View>
       </ScrollView>
 
       <Sheet visible={picking} onClose={() => setPicking(false)}>
@@ -352,6 +363,8 @@ const styles = StyleSheet.create({
   hero: { marginHorizontal: inset.card, marginTop: space.s24, height: 288, borderRadius: radius.hero, overflow: "hidden", padding: space.s24 },
   quote: { color: "#fff", fontSize: 40, lineHeight: 40, fontWeight: "800" },
   plus: { position: "absolute", right: space.s16, bottom: space.s16, width: 56, height: 56, borderRadius: radius.square, backgroundColor: color.surfaceRaised, alignItems: "center", justifyContent: "center" },
+  split: { flexDirection: "row", alignItems: "flex-start" },
+  pane: { flex: 1, flexBasis: 0, minWidth: 0 },
   section: { marginHorizontal: inset.text, marginTop: space.s24, marginBottom: space.s8 },
   list: { marginHorizontal: inset.card, gap: space.s8, marginTop: space.s8 },
   micDot: { width: 44, height: 44, borderRadius: 22, overflow: "hidden", alignItems: "center", justifyContent: "center" },

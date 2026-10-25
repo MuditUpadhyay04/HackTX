@@ -3,26 +3,28 @@ import { Image } from "expo-image";
 import { usePermissions } from "expo-media-library";
 import { router } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { FlatList, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
 
 import { AppIcon, PrimaryPill } from "../components/ui";
 import { haptics } from "../lib/haptics";
 import { type GalleryPhoto, loadPhotos } from "../lib/photos";
+import { useLayout } from "../lib/useLayout";
 import { color, space } from "../theme/tokens";
 
-const COLUMNS = 3;
+// Like Photos: three across on a phone in portrait, more as the window widens (unfolded, landscape).
+const MIN_COLUMNS = 3;
+const TARGET_TILE = 128;
 const GAP = 2;
 const PAGE = 90;
 
 const dedupe = (list: GalleryPhoto[]) => [...new Map(list.map((p) => [p.id, p])).values()];
 
 export default function Gallery() {
-  const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
-  const tile = Math.floor((width - GAP * (COLUMNS - 1)) / COLUMNS);
+  const { insets, usableWidth } = useLayout();
+  const columns = Math.max(MIN_COLUMNS, Math.floor(usableWidth / TARGET_TILE));
+  const tile = Math.floor((usableWidth - GAP * (columns - 1)) / columns);
   const [permission, requestPermission] = usePermissions();
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
   const [done, setDone] = useState(false);
@@ -54,7 +56,7 @@ export default function Gallery() {
   }, [permission?.granted]);
 
   const header = (
-    <View style={[styles.header, { paddingTop: insets.top + space.s4 }]}>
+    <View style={[styles.header, { paddingTop: insets.top + space.s4, paddingLeft: space.s16 + insets.left, paddingRight: space.s16 + insets.right }]}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Back"
@@ -110,12 +112,14 @@ export default function Gallery() {
   return (
     <View style={styles.black}>
       <FlatList
+        // numColumns can't change on a mounted list; remount when the window changes the column count.
+        key={`cols-${columns}`}
         data={photos}
         keyExtractor={(p) => p.id}
-        numColumns={COLUMNS}
+        numColumns={columns}
         ListHeaderComponent={header}
         columnWrapperStyle={{ gap: GAP }}
-        contentContainerStyle={{ gap: GAP, paddingBottom: insets.bottom + space.s32 }}
+        contentContainerStyle={{ gap: GAP, paddingBottom: insets.bottom + space.s32, paddingLeft: insets.left, paddingRight: insets.right }}
         onEndReached={more}
         onEndReachedThreshold={1.5}
         renderItem={({ item }) => (
@@ -135,7 +139,7 @@ const styles = StyleSheet.create({
   black: { flex: 1, backgroundColor: "#000" },
   header: { flexDirection: "row", alignItems: "flex-end", gap: space.s8, paddingHorizontal: space.s16, paddingBottom: space.s12 },
   back: { width: 36, height: 41, justifyContent: "center", marginLeft: -space.s8 },
-  ask: { flex: 1, justifyContent: "center", alignItems: "center", gap: space.s16, paddingBottom: space.s64 },
+  ask: { flex: 1, width: "100%", maxWidth: 440, alignSelf: "center", justifyContent: "center", alignItems: "center", gap: space.s16, paddingBottom: space.s64 },
   askWell: { width: 80, height: 80, borderRadius: 24, backgroundColor: color.surfaceRaised, alignItems: "center", justifyContent: "center" },
   title: { color: "#fff", fontSize: 34, lineHeight: 41, fontWeight: "700", letterSpacing: 0.4 },
   sub: { color: color.text3, fontSize: 15, lineHeight: 20 },

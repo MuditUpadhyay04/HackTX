@@ -3,7 +3,8 @@
 Branch: `unsaid-overhaul`, off `main` at `c32f7ee`. Mobile only. Nothing under `backend/` (or `backend/web/`) was changed.
 
 - Pass 1 (Grok, stopped at Gurneal's request 11:19 PM CDT Oct 24): restyle of every screen. See "Done, by screen".
-- Pass 2 (Grok, Oct 24–25): phone-portrait finish of the demo path (Talk, Gallery, Photo + knock, Pile, Preview), second pass on Home / Letters / You, Android adaptive icon, web-build fix, verification and screenshots. See "Pass 2".
+- Pass 3 (Grok, Oct 24): every screen re-lays out live for any window size and orientation (the iPhone Duo foldable's outer and inner displays, landscape, half-open, Split View). See "Pass 3".
+- Pass 2 (Grok, Oct 24): phone-portrait finish of the demo path (Talk, Gallery, Photo + knock, Pile, Preview), second pass on Home / Letters / You, Android adaptive icon, web-build fix, verification and screenshots. See "Pass 2".
 
 The app is for a **local demo**, not a hosted deployment. See "Local demo" below.
 
@@ -11,7 +12,8 @@ The app is for a **local demo**, not a hosted deployment. See "Local demo" below
 
 - App overhaul: `259c00bc8e13d5fa552f7829d4841245ed852435`
 - Handoff document: `4cf607183f6a5a4d2fd956360d363173bce6fead`, `13abbe4`, `6703bf4`
-- Pass 2 (phone portrait): the commit that adds this section (see `git log`)
+- Pass 2 (phone portrait): `938b7cf`
+- Pass 3 (foldable / any window size): the commit that adds the "Pass 3" section (see `git log`)
 
 Draft PR: https://github.com/MuditUpadhyay04/HackTX/pull/1 (not merged).
 
@@ -82,9 +84,37 @@ Node 22 (Expo SDK 58 needs Node 22.13 or newer). `npm ci`, `npx tsc --noEmit`, `
 
 Screenshots of the web build against the local backend (Playwright headless Chromium, 402×874, 2×) were saved on Grok's box in `/workspace/unsaid-shots/` (`phone-*.png`, `p1-*.png`). They are not committed. Web is a stand-in for the phone: native-only pieces (media library, haptics, push, the iOS action sheet) don't run there.
 
+## Pass 3 — foldable and any window size (iPhone Duo)
+
+Target: the iPhone Duo (5.4" outer and 7.6" inner displays, landscape, half-open poses, Split View). **No device size is hardcoded.** Every rule reads the live window from `useWindowDimensions`, so folding, unfolding, rotating, or resizing a Split View pane re-lays out the screen in place.
+
+- **`src/lib/useLayout.ts`** (new). It returns `size: "compact" | "expanded"` (expanded at a window width of 600 pt or more), `landscape`, `short` (height < 520), `usableWidth` (width minus the left and right safe areas), the insets, and `column(max)`, a centered content column that clears the left and right safe areas (`READING_MAX` 640, `SPLIT_MAX` 1080).
+- **`app.json`**: `orientation` is now `"default"` (it was `"portrait"`). `expo-screen-orientation` wasn't needed. iOS modals are portrait-only by default, so `Sheet` and the app-rail sheet pass `supportedOrientations` (all orientations).
+- **Safe areas**: `NavBar`, sheets, the Talk/Pile/Preview docks, the Gallery header and grid, and the Photo chrome and knock banner all add `insets.left`/`insets.right`, so a side camera or rounded corner in landscape never clips content. Nothing assumes a notch or a Dynamic Island: all of it comes from `useSafeAreaInsets`.
+- **Width caps**: the Letters, You, Settings, Notes, Connect, Safety, and Letter screens use a centered 640 pt column. The letter card is at most 480 pt wide and centered. Sheets and the knock banner are at most 560 and 480 pt wide.
+- **Two columns when expanded**:
+  - Home: the headline and hero on the left, the lists on the right. The hero height follows its pane and shrinks on short windows.
+  - Pile: the person card and "Preview letter" on the left, the lines on the right.
+  - Preview: the letter on the left, the delivery choice and button on the right.
+  - Talk: the transcript on the left, and the tool row and mic in a 340 pt side panel. The split's person cards sit two across.
+- **Gallery**: the column count follows the width (3 at about 402 pt, about 6 at 820–874 pt), and the list remounts when the column count changes.
+- **Phone portrait is unchanged**: compact mode is the Pass 2 layout. This was re-checked at 402×874.
+
+### Checks (pass 3)
+
+`npx tsc --noEmit`, `npx expo lint`, and `npx expo export --platform ios|android|web` all passed. `expo config` shows `orientation: 'default'`.
+
+Screenshots are from the web build at **approximate stand-in sizes**, not real Duo measurements, saved on Grok's box in `/workspace/unsaid-shots/`:
+
+- `phone-*.png`: 402×874, outer display portrait.
+- `duo-landscape-*.png`: 874×402, outer display on its side.
+- `duo-inner-*.png`: 820×980, inner display unfolded.
+
+They are not committed. Still untested on a real foldable: half-open (tabletop) posture, Split View resizing, and rotation animation. Web can't simulate those; check them on the device.
+
 ## What remains, in order
 
-1. **Phone test** on a real device through Expo Go (see Local demo). Check the Talk keyboard lift, the knock banner, and the gallery with real photos — web can't show those.
+1. **Phone test** on a real device through Expo Go (see Local demo). Check the Talk keyboard lift, the knock banner, and the gallery with real photos — web can't show those. On the Duo, also check folding and unfolding mid-screen, landscape with the keyboard up in Talk, tabletop posture, and Split View.
 2. **Launch decision**: Home (current) or the gallery first.
 3. **Backend-dependent features** listed in `mobile/BACKEND_REQUESTS.md`: Keep this moment, Edit as a draft, saving the pile's channel on the person, real Instagram/Facebook import, recording a self note, a "Delivered" beat on the waiting strip, and `release_label` saying "her time" for everyone.
 4. **EAS** (Nick, after logging into Expo): configure, preview build, and update. See below.

@@ -2,7 +2,7 @@
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { type ReactNode, useEffect, useState } from "react";
-import { ActionSheetIOS, Alert, Animated, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { ActionSheetIOS, Alert, Animated, KeyboardAvoidingView, Platform, ScrollView, type StyleProp, StyleSheet, TextInput, View, type ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppRail } from "../components/AppRail";
@@ -14,10 +14,14 @@ import { APP_LABEL, CHANNEL_APP } from "../lib/handoff";
 import { usePhotoMemory, useVoiceBack } from "../lib/memory";
 import { toast } from "../lib/toast";
 import { useLiveRant } from "../lib/useLiveRant";
+import { READING_MAX, useLayout } from "../lib/useLayout";
 import { color, inset, radius, shadow, space, spring, type } from "../theme/tokens";
 
 export default function Talk() {
   const insets = useSafeAreaInsets();
+  const layout = useLayout();
+  // Wide (unfolded, landscape): transcript on the left, the mic and tools in a side panel.
+  const wide = layout.expanded;
   const { photo, toName, channel } = useLocalSearchParams<{ photo?: string; toName?: string; channel?: string }>();
   const title = toName ? `To ${toName}` : "Say it out loud";
   const channelLine = (() => {
@@ -105,49 +109,54 @@ export default function Talk() {
     return (
       <View style={ui.screen}>
         <NavBar title={title} />
-        <ScrollView contentContainerStyle={{ padding: inset.card, paddingBottom: insets.bottom + space.s48, gap: space.s8 }}>
-          {result.self_note ? <SelfNoteCard /> : null}
-          <T v="section" style={{ marginHorizontal: space.s8, marginBottom: space.s16 }}>{"Here's who that was for."}</T>
-          {result.groups.length === 0 ? (
-            <T v="rowPreview" style={{ marginHorizontal: space.s8 }}>{"nothing in that was about anyone yet. it's kept, just for you."}</T>
-          ) : null}
-          {result.groups.map((g, i) => (
-            <CardIn key={g.person.id} index={i}>
-              <Press
-                featureId="pile-open"
-                onPress={() => router.push({ pathname: "/pile/[person]", params: { person: g.person.id, photo: photo ?? "" } })}
-                style={styles.personCard}
-              >
-                <View style={{ flexDirection: "row", alignItems: "center", gap: space.s12 }}>
-                  <Avatar name={g.person.name} ring />
-                  <T v="rowName" style={{ flex: 1 }}>{g.person.name}</T>
-                  <Chip label={g.tone} />
-                  <Ionicons name="chevron-forward" size={18} color={color.text3} />
-                </View>
-                {/* Data wiring: at most one card, rarely (backend decides). Tapping the card opens their pile. */}
-                {g.encourage ? <T v="caption" style={{ marginTop: space.s8, color: color.violet }}>{g.encourage}</T> : null}
-                <View style={{ marginTop: space.s12, gap: space.s8 }}>
-                  {g.pieces.slice(0, 3).map((p) => (
-                    <T key={p.id} v="words" style={{ color: color.text2 }}>{`“${p.text}”`}</T>
-                  ))}
-                </View>
-                {g.kept_total > Math.min(3, g.pieces.length) ? (
-                  <T v="meta" style={{ marginTop: space.s8 }}>{`+${g.kept_total - Math.min(3, g.pieces.length)} more`}</T>
-                ) : null}
-              </Press>
-            </CardIn>
-          ))}
-          <View style={{ alignItems: "center", marginTop: space.s16 }}>
-            <TextButton
-              featureId="rant-save-private"
-              label="Keep it just for me"
-              onPress={() => {
-                toast("Saved. Only you can see it.");
-                router.dismissTo("/home");
-              }}
-            />
+        <ScrollView contentContainerStyle={[layout.column(wide ? 960 : READING_MAX), { paddingTop: inset.card, paddingBottom: insets.bottom + space.s48 }]}>
+          <View style={{ paddingHorizontal: inset.card, gap: space.s8 }}>
+            {result.self_note ? <SelfNoteCard /> : null}
+            <T v="section" style={{ marginHorizontal: space.s8, marginBottom: space.s16 }}>{"Here's who that was for."}</T>
+            {result.groups.length === 0 ? (
+              <T v="rowPreview" style={{ marginHorizontal: space.s8 }}>{"nothing in that was about anyone yet. it's kept, just for you."}</T>
+            ) : null}
+            {/* Two across on a wide screen, one on a phone. */}
+            <View style={wide ? styles.grid : { gap: space.s8 }}>
+              {result.groups.map((g, i) => (
+                <CardIn key={g.person.id} index={i} style={wide ? styles.gridCell : undefined}>
+                  <Press
+                    featureId="pile-open"
+                    onPress={() => router.push({ pathname: "/pile/[person]", params: { person: g.person.id, photo: photo ?? "" } })}
+                    style={styles.personCard}
+                  >
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: space.s12 }}>
+                      <Avatar name={g.person.name} ring />
+                      <T v="rowName" style={{ flex: 1 }}>{g.person.name}</T>
+                      <Chip label={g.tone} />
+                      <Ionicons name="chevron-forward" size={18} color={color.text3} />
+                    </View>
+                    {/* Data wiring: at most one card, rarely (backend decides). Tapping the card opens their pile. */}
+                    {g.encourage ? <T v="caption" style={{ marginTop: space.s8, color: color.violet }}>{g.encourage}</T> : null}
+                    <View style={{ marginTop: space.s12, gap: space.s8 }}>
+                      {g.pieces.slice(0, 3).map((p) => (
+                        <T key={p.id} v="words" style={{ color: color.text2 }}>{`“${p.text}”`}</T>
+                      ))}
+                  </View>
+                  {g.kept_total > Math.min(3, g.pieces.length) ? (
+                    <T v="meta" style={{ marginTop: space.s8 }}>{`+${g.kept_total - Math.min(3, g.pieces.length)} more`}</T>
+                  ) : null}
+                </Press>
+              </CardIn>
+            ))}
+            </View>
+            <View style={{ alignItems: "center", marginTop: space.s16 }}>
+              <TextButton
+                featureId="rant-save-private"
+                label="Keep it just for me"
+                onPress={() => {
+                  toast("Saved. Only you can see it.");
+                  router.dismissTo("/home");
+                }}
+              />
+            </View>
+            <T v="caption" style={{ marginHorizontal: space.s8, marginTop: space.s16, color: color.text4 }}>{transcript}</T>
           </View>
-          <T v="caption" style={{ marginHorizontal: space.s8, marginTop: space.s16, color: color.text4 }}>{transcript}</T>
         </ScrollView>
       </View>
     );
@@ -157,92 +166,110 @@ export default function Talk() {
 
   const showPhoto = Boolean(photo) && !recording && !spoken && !typing;
 
+  const dock = (
+    <>
+      <View style={styles.tools}>
+        <AppRail row />
+        <View style={{ flex: 1 }} />
+        <TextButton featureId="rant-type" label={typing ? "Talk instead" : "Type instead"} onPress={() => { live.cancel(); setTyping((t) => !t); }} />
+      </View>
+      {typing ? (
+        <View style={{ alignSelf: "stretch", gap: space.s4 }}>
+          <PrimaryPill label="Done" disabled={!typed.trim() || sorting} onPress={submitTyped} />
+          <View style={{ alignItems: "center" }}>
+            <TextButton featureId="rant-discard" label="Start over" onPress={startOver} />
+          </View>
+        </View>
+      ) : (
+        <View style={styles.micColumn}>
+          <Waveform levels={live.levels} live={recording} />
+          <View style={[styles.micRing, recording && styles.micRingOn]}>
+            <Press featureId={recording ? "rant-stop" : "rant-record"} onPress={toggleMic} disabled={live.state === "finishing" || sorting} style={[styles.mic, shadow.pill]}>
+              <PillGradientFill />
+              <Ionicons name={recording ? "stop" : "mic"} size={32} color="#fff" />
+            </Press>
+          </View>
+          <T v="caption">{live.state === "finishing" || sorting ? "sorting it by person…" : recording ? "Tap to stop" : "Tap to talk"}</T>
+          <TextButton featureId="rant-discard" label="Start over" tone="text3" onPress={startOver} />
+        </View>
+      )}
+    </>
+  );
+
   return (
     <KeyboardAvoidingView style={ui.screen} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <NavBar title={title} />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: space.s24 }} keyboardShouldPersistTaps="handled">
-        {showPhoto ? <Image source={{ uri: photo }} style={styles.photo} contentFit="cover" transition={150} /> : null}
-        {/* Full-width column: the app rail lives in the dock's tool row, so nothing sits on the transcript. */}
-        <View style={styles.column}>
-          {/* Data wiring: his own words from earlier visits to this photo, before he starts. */}
-          {memory && memory.previous.length > 0 && !recording && !spoken && !typing ? (
-            <View style={styles.memory}>
-              <Overline>Said here before</Overline>
-              {memory.previous.slice(0, 3).map((p) => (
-                <View key={p.id} style={{ flexDirection: "row", alignItems: "center", gap: space.s12 }}>
-                  <View style={{ flex: 1 }}>
-                    <T v="rowPreview" lines={2}>{`“${p.text}”`}</T>
-                    <T v="meta">{`${p.person_name} · ${p.day}`}</T>
+      <View style={wide ? [styles.wideRow, layout.column(1080)] : { flex: 1 }}>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={[wide ? null : layout.column(), { paddingBottom: space.s24 }]} keyboardShouldPersistTaps="handled">
+          {showPhoto ? (
+            <Image source={{ uri: photo }} style={[styles.photo, { height: Math.min(224, Math.round(layout.height * 0.36)) }]} contentFit="cover" transition={150} />
+          ) : null}
+          {/* Full-width column: the app rail lives in the dock's tool row, so nothing sits on the transcript. */}
+          <View style={styles.column}>
+            {/* Data wiring: his own words from earlier visits to this photo, before he starts. */}
+            {memory && memory.previous.length > 0 && !recording && !spoken && !typing ? (
+              <View style={styles.memory}>
+                <Overline>Said here before</Overline>
+                {memory.previous.slice(0, 3).map((p) => (
+                  <View key={p.id} style={{ flexDirection: "row", alignItems: "center", gap: space.s12 }}>
+                    <View style={{ flex: 1 }}>
+                      <T v="rowPreview" lines={2}>{`“${p.text}”`}</T>
+                      <T v="meta">{`${p.person_name} · ${p.day}`}</T>
+                    </View>
+                    {p.audio_url ? (
+                      <TextButton
+                        featureId="memory-listen"
+                        label={voiceBack.playingId === p.id ? "Pause" : "Listen"}
+                        onPress={() => voiceBack.toggle(p.id, p.audio_url)}
+                      />
+                    ) : null}
                   </View>
-                  {p.audio_url ? (
-                    <TextButton
-                      featureId="memory-listen"
-                      label={voiceBack.playingId === p.id ? "Pause" : "Listen"}
-                      onPress={() => voiceBack.toggle(p.id, p.audio_url)}
-                    />
-                  ) : null}
-                </View>
-              ))}
-            </View>
-          ) : null}
-          <Overline>Only you can hear this</Overline>
-          {channelLine ? <T v="rowPreview" style={{ marginTop: space.s8 }}>{channelLine}</T> : null}
-          {typing ? (
-            <TextInput
-              testID="rant-type"
-              value={typed}
-              onChangeText={setTyped}
-              multiline
-              autoFocus
-              selectionColor={color.caret}
-              cursorColor={color.caret}
-              scrollEnabled={false}
-              style={[type.compose, styles.compose, { padding: 0 }, Platform.OS === "web" ? ({ outlineStyle: "none" } as object) : null]}
-            />
-          ) : (
-            <T v="compose" style={styles.compose}>
-              {spoken}
-              {recording || !spoken ? <T v="compose" style={{ color: color.caret, fontWeight: "400" }}>|</T> : null}
-            </T>
-          )}
-          {sorting ? (
-            <View style={{ marginTop: space.s24, gap: space.s8 }}>
-              <Skeleton height={112} />
-              <Skeleton height={112} />
-            </View>
-          ) : null}
-          <T v="caption" style={{ marginTop: space.s16 }}>Nothing leaves without you.</T>
-          {live.provider === "mock" ? <T v="meta" style={{ marginTop: space.s8, color: color.text4 }}>mock transcription (no Muse key on the server)</T> : null}
-        </View>
-      </ScrollView>
+                ))}
+              </View>
+            ) : null}
+            <Overline>Only you can hear this</Overline>
+            {channelLine ? <T v="rowPreview" style={{ marginTop: space.s8 }}>{channelLine}</T> : null}
+            {typing ? (
+              <TextInput
+                testID="rant-type"
+                value={typed}
+                onChangeText={setTyped}
+                multiline
+                autoFocus
+                selectionColor={color.caret}
+                cursorColor={color.caret}
+                scrollEnabled={false}
+                style={[type.compose, styles.compose, { padding: 0 }, Platform.OS === "web" ? ({ outlineStyle: "none" } as object) : null]}
+              />
+            ) : (
+              <T v="compose" style={styles.compose}>
+                {spoken}
+                {recording || !spoken ? <T v="compose" style={{ color: color.caret, fontWeight: "400" }}>|</T> : null}
+              </T>
+            )}
+            {sorting ? (
+              <View style={{ marginTop: space.s24, gap: space.s8 }}>
+                <Skeleton height={112} />
+                <Skeleton height={112} />
+              </View>
+            ) : null}
+            <T v="caption" style={{ marginTop: space.s16 }}>Nothing leaves without you.</T>
+            {live.provider === "mock" ? <T v="meta" style={{ marginTop: space.s8, color: color.text4 }}>mock transcription (no Muse key on the server)</T> : null}
+          </View>
+        </ScrollView>
 
-      {/* The dock is in the column flow (not absolute), so the transcript can never run under it
-          and the keyboard lifts it on iOS. */}
-      <View style={[styles.dock, { paddingBottom: insets.bottom + space.s12 }]}>
-        <View style={styles.tools}>
-          <AppRail row />
-          <View style={{ flex: 1 }} />
-          <TextButton featureId="rant-type" label={typing ? "Talk instead" : "Type instead"} onPress={() => { live.cancel(); setTyping((t) => !t); }} />
-        </View>
-        {typing ? (
-          <View style={{ alignSelf: "stretch", gap: space.s4 }}>
-            <PrimaryPill label="Done" disabled={!typed.trim() || sorting} onPress={submitTyped} />
-            <View style={{ alignItems: "center" }}>
-              <TextButton featureId="rant-discard" label="Start over" onPress={startOver} />
-            </View>
-          </View>
+        {/* The dock is in the column flow (not absolute), so the transcript can never run under it
+            and the keyboard lifts it on iOS. On a wide screen it becomes a side panel. */}
+        {wide ? (
+          <ScrollView
+            style={styles.panel}
+            contentContainerStyle={[styles.dock, styles.panelInner, { paddingBottom: insets.bottom + space.s12 }]}
+            keyboardShouldPersistTaps="handled"
+          >
+            {dock}
+          </ScrollView>
         ) : (
-          <View style={styles.micColumn}>
-            <Waveform levels={live.levels} live={recording} />
-            <View style={[styles.micRing, recording && styles.micRingOn]}>
-              <Press featureId={recording ? "rant-stop" : "rant-record"} onPress={toggleMic} disabled={live.state === "finishing" || sorting} style={[styles.mic, shadow.pill]}>
-                <PillGradientFill />
-                <Ionicons name={recording ? "stop" : "mic"} size={32} color="#fff" />
-              </Press>
-            </View>
-            <T v="caption">{live.state === "finishing" || sorting ? "sorting it by person…" : recording ? "Tap to stop" : "Tap to talk"}</T>
-            <TextButton featureId="rant-discard" label="Start over" tone="text3" onPress={startOver} />
-          </View>
+          <View style={[styles.dock, { paddingBottom: insets.bottom + space.s12, paddingLeft: insets.left, paddingRight: insets.right }]}>{dock}</View>
         )}
       </View>
     </KeyboardAvoidingView>
@@ -259,14 +286,14 @@ function Waveform({ levels, live }: { levels: number[]; live: boolean }) {
   );
 }
 
-function CardIn({ index, children }: { index: number; children: ReactNode }) {
+function CardIn({ index, children, style }: { index: number; children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const [v] = useState(() => new Animated.Value(0));
   useEffect(() => {
     const timer = setTimeout(() => Animated.spring(v, { toValue: 1, ...spring.cardIn, useNativeDriver: true }).start(), index * 120);
     return () => clearTimeout(timer);
   }, [index, v]);
   return (
-    <Animated.View style={{ opacity: v, transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [0.96, 1] }) }] }}>
+    <Animated.View style={[style, { opacity: v, transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [0.96, 1] }) }] }]}>
       {children}
     </Animated.View>
   );
@@ -289,6 +316,11 @@ const styles = StyleSheet.create({
   tools: { alignSelf: "stretch", flexDirection: "row", alignItems: "center", paddingHorizontal: inset.text, paddingBottom: space.s12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: color.hairline },
   micColumn: { alignItems: "center", gap: space.s8 },
   personCard: { backgroundColor: color.surface, borderRadius: radius.row, padding: space.s16 },
+  wideRow: { flex: 1, flexDirection: "row" },
+  panel: { width: 340, flexGrow: 0, borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: color.hairline },
+  panelInner: { flexGrow: 1, justifyContent: "center" },
+  grid: { flexDirection: "row", flexWrap: "wrap", gap: space.s8 },
+  gridCell: { flexBasis: "48%", flexGrow: 1 },
   dock: { alignItems: "center", gap: space.s12, paddingTop: space.s12, backgroundColor: color.bg },
   micRing: { width: 104, height: 104, borderRadius: 52, alignItems: "center", justifyContent: "center" },
   micRingOn: { borderWidth: 2, borderColor: "rgba(168,144,246,0.4)" },

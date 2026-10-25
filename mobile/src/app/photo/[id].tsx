@@ -66,7 +66,7 @@ export default function PhotoViewer() {
       </ScrollView>
 
       {chrome ? (
-        <View style={[styles.top, { paddingTop: insets.top + space.s4 }]}>
+        <View style={[styles.top, { paddingTop: insets.top + space.s4, paddingLeft: space.s16 + insets.left, paddingRight: space.s16 + insets.right }]}>
           <LinearGradient pointerEvents="none" colors={["rgba(0,0,0,0.55)", "rgba(0,0,0,0)"]} style={StyleSheet.absoluteFill} />
           <Pressable
             accessibilityRole="button"
@@ -86,7 +86,9 @@ export default function PhotoViewer() {
         </View>
       ) : null}
 
-      <Animated.View style={[styles.knockWrap, { paddingTop: insets.top + space.s8, transform: [{ translateY: knockY }] }]}>
+      <Animated.View
+        style={[styles.knockWrap, { paddingTop: insets.top + space.s8, left: space.s8 + insets.left, right: space.s8 + insets.right, transform: [{ translateY: knockY }] }]}
+      >
         <Pressable testID="drift-nudge-open" onPress={() => { open(); hideKnock(); talk(); }} style={[styles.knock, shadow.letter]}>
           <AppIcon size={40} />
           <View style={{ flex: 1 }}>
@@ -109,6 +111,7 @@ const styles = StyleSheet.create({
   round: { width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(0,0,0,0.45)", alignItems: "center", justifyContent: "center" },
   date: { ...type.navTitle, flex: 1, textAlign: "center", fontSize: 15 },
   knockWrap: { position: "absolute", top: 0, left: space.s8, right: space.s8 },
-  knock: { flexDirection: "row", gap: space.s12, alignItems: "center", backgroundColor: color.surface, borderRadius: 24, padding: space.s12, borderWidth: StyleSheet.hairlineWidth, borderColor: color.hairline },
+  // Notification-width on a big or sideways screen, centered, like an iOS banner.
+  knock: { width: "100%", maxWidth: 480, alignSelf: "center", flexDirection: "row", gap: space.s12, alignItems: "center", backgroundColor: color.surface, borderRadius: 24, padding: space.s12, borderWidth: StyleSheet.hairlineWidth, borderColor: color.hairline },
   grabber: { alignSelf: "center", width: 36, height: 5, borderRadius: 3, backgroundColor: color.text4, marginTop: space.s8 },
 });
