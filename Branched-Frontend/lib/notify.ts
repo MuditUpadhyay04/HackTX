@@ -1,5 +1,5 @@
 /**
- * lib/notify.ts: fire a push like iOS does (Phase 2 NOTIFICATION BANNERS, "Code trigger").
+ * lib/notify.ts: fire a push like Android does (Phase 2 NOTIFICATION BANNERS, "Code trigger").
  * notify() appends the incoming message to that thread (unless the thread already ends on it),
  * bumps its unread badge and drops the banner on the current display.
  * onBannerTap() registers what a tap does (Phase 2: a route change; Phase 3: the shell).

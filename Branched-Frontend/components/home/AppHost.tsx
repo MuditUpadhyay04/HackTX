@@ -12,7 +12,7 @@ import { usePrefersReducedMotion } from "@/lib/motion";
 import { HOME_INDICATOR, HOME_LAYOUT, ICON, SEARCH, iconRectPt, type HomeAppId, type HomeDisplay, type Rect } from "./layout";
 
 /**
- * The open app on one display, with the iOS app-launch zoom: the app's frame grows out of its icon
+ * The open app on one display, with the Android app-launch zoom: the app's frame grows out of its icon
  * (a clip that animates from the icon's rect and corner radius to the full display), the icon itself
  * sits on top and crossfades into the app, and the home screen dims behind. Closing runs it in
  * reverse back into the icon. One spring drives a single progress value (0 = icon, 1 = full screen),
@@ -22,10 +22,10 @@ import { HOME_INDICATOR, HOME_LAYOUT, ICON, SEARCH, iconRectPt, type HomeAppId, 
  * its own size, so the 3D device never re-rasterizes a layer soft (that flashed a blurry frame).
  *
  * The same app stays open across fold/unfold: the cover and inner hosts both show it, each with its
- * own display. A home bar at the bottom closes it, like swiping up on iOS.
+ * own display. A home bar at the bottom closes it, like swiping up from the gesture handle.
  */
 
-/** Launch: ~0.5 s, no overshoot (damping ratio ~0.95). Close is a touch quicker, like iOS. */
+/** Launch: ~0.5 s, no overshoot (damping ratio ~0.95). Close is a touch quicker, like Android. */
 const OPEN = { type: "spring", stiffness: 240, damping: 29.5, mass: 1, restDelta: 0.001 } as const;
 const CLOSE = { type: "spring", stiffness: 300, damping: 33, mass: 1, restDelta: 0.001 } as const;
 
@@ -145,7 +145,7 @@ export function AppHost({ display }: { display: HomeDisplay }) {
             border: 0,
             background: "none",
             cursor: "pointer",
-            // above the app's own layers (the keyboard, sheets), like the iOS home indicator
+            // above the app's own layers (the keyboard, sheets), like the gesture handle
             zIndex: 100,
           }}
         >
@@ -175,7 +175,7 @@ function isMidFold(a: number): boolean {
 /** Apps kept mounted (hidden) in every screen copy while open: see `keep` above. */
 const KEEP_MOUNTED = new Set<AppTarget>(["unsaid"]);
 
-/** The iOS icon squircle's corner, as a share of the icon's side (lib/squircle.ts). */
+/** The One UI icon's corner, as a share of the icon's side (lib/squircle.ts). */
 const ICON_CORNER = 0.34;
 
 /** The display's own corner radius in pt, so the growing frame lands exactly on the glass edge. */

@@ -77,7 +77,7 @@ export const easings = {
 // Timing (ms)
 // ---------------------------------------------------------------------------
 
-/** iOS caret in the host apps: 500 ms on / 500 ms off. */
+/** text cursor in the host apps: 500 ms on / 500 ms off. */
 export const caretBlink = { on: 500, off: 500 } as const;
 
 export const durations = {
@@ -105,7 +105,7 @@ export const durations = {
   conceptOnly: 1600,
 } as const;
 
-/** iOS press feedback (spec fold control): scale 0.97 + 15% darken. */
+/** press feedback (spec fold control): scale 0.97 + 15% darken. */
 export const press = { scale: 0.97, brightness: 0.85 } as const;
 
 /** Seconds, for Framer Motion `duration`. */

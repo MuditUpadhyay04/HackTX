@@ -1,7 +1,7 @@
 // @token-source: look-alike app geometry in Android dp (One UI 9 / the real Android apps)
 /**
  * Every size, gap, radius and type size the look-alike apps use, in dp (= CSS px inside the
- * cover display's 384 x 597.7 dp viewport, GEOM.viewport.cover). Components read these by name.
+ * cover display's 384 x 587.2 dp viewport, GEOM.viewport.cover). Components read these by name.
  * Colors are NOT here: they are CSS variables in app/tokens.css.
  */
 import { GEOM } from "@/components/device/geometry";
@@ -39,34 +39,41 @@ export const HOME_INDICATOR = { width: 112, height: 4, radius: 2, bottom: 7 } as
 /** Bottom safe area (gesture handle) under the composer when the keyboard is down. */
 export const SAFE_BOTTOM = 18;
 
+/**
+ * Samsung Keyboard (One UI 9, light, QWERTY) at 384 dp wide. Height = toolbar 44 + topInset 6 +
+ * 4 rows x 46 + 3 gaps x 8 + bottomInset 6 + the gesture strip 20 = 284.
+ */
 export const KEYBOARD = {
-  height: 291,
-  predictive: 44,
-  keyHeight: 42,
-  rowGap: 11,
-  keyGap: 6,
-  sideInset: 3,
+  height: 284,
+  /** the toolbar row (emoji, stickers, GIF, voice, clipboard, settings, more) that suggestions replace */
+  toolbar: 44,
+  toolbarGlyph: 22,
+  suggestionSize: 16,
+  keyHeight: 46,
+  rowGap: 8,
+  keyGap: 5,
+  sideInset: 4,
   topInset: 6,
-  radius: 5,
-  letterSize: 22.5,
-  labelSize: 16,
-  /** the bottom strip (emoji / dictation glyphs) below the key rows: height minus predictive bar and
-   *  rows (44 + 0.5 + 4 × 42 + 5.5 + 3 × 11 = 251) leaves 40; 38 keeps a 2 pt gap above the glyphs */
-  strip: 38,
-  glyph: 26,
-  pop: { width: 52, height: 108, letterSize: 34 },
+  bottomInset: 6,
+  radius: 9,
+  letterSize: 21,
+  labelSize: 15,
+  /** the small long-press number in the top row keys' corner */
+  hintSize: 9.5,
+  /** width in key units of the shift / delete / !#1 / return keys */
+  wideUnits: 1.42,
+  /** the gesture-navigation strip under the key rows */
+  strip: 20,
+  glyph: 22,
+  /** the key preview bubble shown above a pressed letter */
+  pop: { width: 44, height: 50, gap: 6, radius: 12, letterSize: 26 },
   deleteRepeat: { delay: 400, start: 110, min: 40, accel: 0.85 },
 } as const;
 
+/** The Android text cursor: a 2 dp bar in the app's accent color. */
 export const CARET = { width: 2, height: 20 } as const;
 
 export const WA = {
-  navHeight: 52,
-  backChevron: { width: 12, height: 21 },
-  avatar: 36,
-  nameSize: 17,
-  subtitleSize: 12,
-  bubbleText: 16.5,
   bubbleLine: 21,
   bubbleRadius: 8,
   bubblePadX: 8,
@@ -90,45 +97,7 @@ export const WA = {
   seenSize: 12,
   seenGap: 4,
   photo: { width: 240, height: 300, inset: 3, radius: 6 },
-  composer: { height: 52, field: 36, glyph: 26, gap: 14, fieldRadius: 18, send: 34, padX: 10 },
-  chatList: {
-    titleSize: 34,
-    rowHeight: 76,
-    avatar: 54,
-    nameSize: 17,
-    previewSize: 15,
-    timeSize: 14,
-    badge: 20,
-    badgeSize: 13,
-    chipHeight: 32,
-    chipSize: 15,
-    searchHeight: 36,
-  },
-  tabBar: { height: 50, glyph: 28, labelSize: 10, badge: 18 },
   doodleTile: 220,
-} as const;
-
-export const IMSG = {
-  navHeight: 92,
-  avatar: 54,
-  nameSize: 12,
-  bubbleText: 17,
-  bubbleLine: 22,
-  bubbleRadius: 18,
-  bubblePadX: 12,
-  bubblePadY: 7,
-  bubbleMax: 0.72,
-  sideInset: 16,
-  runGap: 2,
-  groupGap: 8,
-  stampSize: 11,
-  stampGap: 14,
-  receiptSize: 11,
-  tail: { width: 17, height: 21 },
-  pill: { height: 20, minWidth: 20, size: 13 },
-  composer: { height: 52, plus: 34, field: 36, glyph: 22, send: 28, gap: 8, padX: 12 },
-  typing: { width: 58, height: 36, dot: 8, gap: 4 },
-  facetime: { width: 30, height: 22 },
 } as const;
 
 export const IG = {
@@ -174,4 +143,3 @@ export const BANNER = {
   dismissDistance: 40,
 } as const;
 
-export const SHEET = { radius: 14, rowHeight: 57, gap: 8, side: 8, titleSize: 20 } as const;

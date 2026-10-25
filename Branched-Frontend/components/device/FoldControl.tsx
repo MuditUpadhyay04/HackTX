@@ -7,7 +7,7 @@ import { STAGE_WIDTH } from "@/components/stage/Stage";
 import { press, usePrefersReducedMotion } from "@/lib/motion";
 
 /**
- * The Fold / Unfold control (spec Phase 1, FOLD CONTROL). A small iOS-material glass pill on the
+ * The Fold / Unfold control (spec Phase 1, FOLD CONTROL). A small frosted glass pill on the
  * demo stage, centered below the device at artboard y 1012, 36 pt tall. Part of the stage, not the
  * phone UI: shown by default, hidden with ?frame=bare (the F keys still work), never in /opening.
  *

@@ -3,7 +3,7 @@ import { scenesByGroup, sceneUrl } from "@/lib/scenes";
 import { size } from "@/lib/tokens";
 
 /*
- * Dev index of lib/scenes.ts: an iOS inset-grouped list on black. Colors are tokens only.
+ * Dev index of lib/scenes.ts: an One UI rounded list on black. Colors are tokens only.
  */
 const color = {
   label: "var(--label-on-dark)",

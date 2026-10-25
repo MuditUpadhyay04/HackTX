@@ -81,7 +81,7 @@ function Dot({ center, diameter, background }: { center: readonly [number, numbe
   );
 }
 
-/** A titanium ring around a dark lens with a violet coating reflection and a specular dot. */
+/** A aluminum ring around a dark lens with a violet coating reflection and a specular dot. */
 function Lens({ cx, cy }: { cx: number; cy: number }) {
   const { ring, glass } = GEOM.plateau.lens;
   const refl = GEOM.plateau.lensReflection;

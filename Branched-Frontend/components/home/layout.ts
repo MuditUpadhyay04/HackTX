@@ -1,7 +1,7 @@
 // @token-source: home-screen geometry in dp (One UI 9 launcher on the Galaxy Z Fold 8)
 /**
  * components/home/layout.ts: every number of the two home screens, in the displays' logical dp
- * (GEOM.viewport: cover 384 x 597.7, inner 801.5 x 597.7), plus the app lists and getIconRect().
+ * (GEOM.viewport: cover 384 x 587.2, inner 781 x 587.2), plus the app lists and getIconRect().
  *
  * COVER (folded): the One UI phone launcher. Weather and Calendar widgets (2 x 2 each) on top, a
  * 4-column icon grid under them, the page indicator, and the dock (four icons, no labels) along the
@@ -87,13 +87,13 @@ export const ICON = {
   /** column pitch (icon + gap) */
   pitchX: 86,
   /** row pitch */
-  pitchY: 90,
+  pitchY: 88,
 } as const;
 
 /** Widgets: 2 x 2 cells, or 4 x 2 for the medium ones. One UI widget corners are about 26 dp. */
 export const WIDGET = {
   size: ICON.pitchX + ICON.size, // 142
-  height: ICON.pitchY + ICON.size, // 146
+  height: ICON.pitchY + ICON.size, // 144
   mediumWidth: 3 * ICON.pitchX + ICON.size, // 314
   radius: 26,
   padding: 14,
@@ -166,8 +166,8 @@ const range = (n: number, start: number, step: number) => Array.from({ length: n
 const dockXs = (width: number, pitch: number) => range(DOCK_APPS.length, width / 2 - ((DOCK_APPS.length - 1) * pitch) / 2 - ICON.dockSize / 2, pitch);
 const dockY = (height: number) => height - DOCK.bottom - ICON.dockSize;
 
-/** Cover (384 x 597.7): a 4-column grid, 314 dp wide, centered. */
-const COVER_TOP = 50;
+/** Cover (384 x 587.2): a 4-column grid, 314 dp wide, centered. */
+const COVER_TOP = 46;
 const COVER_LEFT = (cover.width - (3 * ICON.pitchX + ICON.size)) / 2;
 const coverLayout: ScreenLayout = {
   width: cover.width,
@@ -186,11 +186,11 @@ const coverLayout: ScreenLayout = {
 };
 
 /**
- * Inner (801.5 x 597.7): two 4-column blocks, one per half, so no icon crosses the crease
- * (x 400.75). Left block: Weather + Calendar (rows 0-1), four apps (row 2), Now playing (rows 3-4).
+ * Inner (781 x 587.2): two 4-column blocks, one per half, so no icon crosses the crease
+ * (x 390.5). Left block: Weather + Calendar (rows 0-1), four apps (row 2), Now playing (rows 3-4).
  * Right block: eight apps (rows 0-1), Gallery + Reminder widgets (rows 2-3).
  */
-const INNER_TOP = 50;
+const INNER_TOP = 46;
 const BLOCK = 3 * ICON.pitchX + ICON.size; // 314
 const INNER_LEFT = (inner.width / 2 - BLOCK) / 2;
 const INNER_RIGHT_BLOCK = inner.width / 2 + INNER_LEFT;

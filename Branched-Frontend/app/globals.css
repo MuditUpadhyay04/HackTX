@@ -34,7 +34,7 @@ button {
   user-select: none;
 }
 
-/* The fold pill: the browser ring is replaced by an iOS-blue ring that shows for keyboard focus only. */
+/* The fold pill: the browser ring is replaced by an accent-blue ring that shows for keyboard focus only. */
 [data-fold-control] {
   outline: none;
 }

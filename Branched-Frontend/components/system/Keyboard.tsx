@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ButtonHTMLAttributes, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import { KEYBOARD } from "@/components/lookalike/metrics";
 import { usePane } from "@/components/lookalike/shared/pane";
 import { Placeholder } from "@/components/Placeholder";
@@ -9,8 +9,11 @@ import { predictions as predictWords } from "@/lib/mock/predict";
 import { useMessaging, type ThreadId } from "@/lib/store/messaging";
 import { KeyPop } from "./KeyPop";
 
-/** Key unit width for a keyboard `width` pt wide (ten letter keys and nine gaps per row). */
+/** Key unit width for a keyboard `width` dp wide (ten letter keys and nine gaps per row). */
 const unitFor = (width: number) => (width - 2 * KEYBOARD.sideInset - 9 * KEYBOARD.keyGap) / 10;
+
+/** Two shift taps closer than this lock caps (Samsung Keyboard: double-tap shift). */
+const CAPS_LOCK_MS = 350;
 
 export type KeyboardProps = {
   threadId: ThreadId;
@@ -19,21 +22,25 @@ export type KeyboardProps = {
 };
 
 /**
- * The iOS keyboard look-alike (Phase 2 CHROME SPECS + INTERACTIVE MESSAGING): light, QWERTY, 291 pt
- * tall at 402 wide including the predictive bar, key radius 5 with the 1 pt key shadow, the key-pop
- * callout, auto-shift that releases after one letter, 123 / #+= / emoji layouts, hold-to-delete that
- * repeats and accelerates, and the physical keyboard bridged in while it is up.
+ * The Samsung Keyboard look-alike (One UI 9, light theme): a toolbar row on top (emoji, stickers,
+ * GIF, voice input, clipboard, settings, more) that three suggestions replace once you start typing,
+ * QWERTY with white rounded keys on a light gray panel, long-press digit hints on the top row,
+ * shift (double tap locks caps), the "!#1" symbol pages, an emoji page, hold-to-delete that repeats
+ * and accelerates, and the physical keyboard bridged in while it is up.
  */
 export function Keyboard({ threadId, platform }: KeyboardProps) {
   const { width } = usePane();
   const unit = unitFor(width);
-  const keyWidth = (units = 1) => units * unit;
   const draft = useMessaging((s) => s.threads[threadId].draft);
   const [layout, setLayout] = useState<Layout>("letters");
   const [shiftOverride, setShiftOverride] = useState<boolean | null>(null);
+  const [capsLock, setCapsLock] = useState(false);
   const [pressed, setPressed] = useState<string | null>(null);
-  const shift = shiftOverride ?? autoShift(draft);
+  const [toolbarPinned, setToolbarPinned] = useState(false);
+  const lastShiftTap = useRef(0);
+  const shift = capsLock || (shiftOverride ?? autoShift(draft));
   const words = predictWords(threadId, draft);
+  const showSuggestions = draft.length > 0 && !toolbarPinned && layout !== "emoji";
 
   // reset the manual shift whenever the draft changes (auto-shift takes over again)
   const lastDraft = useRef(draft);
@@ -41,13 +48,13 @@ export function Keyboard({ threadId, platform }: KeyboardProps) {
     if (lastDraft.current !== draft) {
       lastDraft.current = draft;
       setShiftOverride(null);
+      setToolbarPinned(false);
     }
   }, [draft]);
 
   const typeChar = useCallback(
     (ch: string) => {
-      const s = useMessaging.getState();
-      s.type(threadId, ch);
+      useMessaging.getState().type(threadId, ch);
     },
     [threadId],
   );
@@ -88,7 +95,7 @@ export function Keyboard({ threadId, platform }: KeyboardProps) {
       if (e.key === "Backspace") {
         e.preventDefault();
         useMessaging.getState().backspace(threadId);
-        setPressed("delete");
+        setPressed("delete:delete");
       } else if (e.key === "Enter") {
         e.preventDefault();
         typeChar("\n");
@@ -107,7 +114,8 @@ export function Keyboard({ threadId, platform }: KeyboardProps) {
     };
   }, [threadId, typeChar]);
 
-  const press = (k: KeyDef) => {
+  /** `at`: the pointer event's timeStamp (ms), for the double-tap caps lock. */
+  const press = (k: KeyDef, at: number) => {
     switch (k.kind) {
       case "char": {
         const ch = layout === "letters" && shift ? k.value.toUpperCase() : k.value;
@@ -115,9 +123,19 @@ export function Keyboard({ threadId, platform }: KeyboardProps) {
         if (shiftOverride) setShiftOverride(false);
         break;
       }
-      case "shift":
-        setShiftOverride(!shift);
+      case "shift": {
+        const now = at;
+        if (capsLock) {
+          setCapsLock(false);
+          setShiftOverride(false);
+        } else if (shift && now - lastShiftTap.current < CAPS_LOCK_MS) {
+          setCapsLock(true);
+        } else {
+          setShiftOverride(!shift);
+        }
+        lastShiftTap.current = now;
         break;
+      }
       case "mode":
         setLayout(k.value as Layout);
         break;
@@ -134,6 +152,7 @@ export function Keyboard({ threadId, platform }: KeyboardProps) {
   };
 
   const rows = layout === "emoji" ? null : ROWS[layout];
+  const toggleEmoji = () => setLayout(layout === "emoji" ? "letters" : "emoji");
 
   return (
     <div
@@ -145,7 +164,9 @@ export function Keyboard({ threadId, platform }: KeyboardProps) {
         height: KEYBOARD.height,
         background: "var(--ui-kb-bg)",
         color: "var(--kb-label)",
+        fontFamily: "var(--font-system)",
         touchAction: "manipulation",
+        userSelect: "none",
       }}
       onPointerUp={() => {
         setPressed(null);
@@ -156,31 +177,88 @@ export function Keyboard({ threadId, platform }: KeyboardProps) {
         stopDelete();
       }}
     >
-      {/* predictive bar */}
-      <div style={{ display: "flex", height: KEYBOARD.predictive, alignItems: "center" }}>
-        {words.map((w, i) => (
-          <div key={`${w}-${i}`} style={{ flex: 1, display: "flex", alignItems: "center", height: "100%" }}>
-            {i > 0 ? (
-              <span
-                aria-hidden="true"
-                style={{ width: "var(--hairline)", height: KEYBOARD.predictive / 2, background: "var(--ui-separator)" }}
-              />
-            ) : null}
+      {/* toolbar, or the suggestion strip while typing */}
+      <div style={{ display: "flex", height: KEYBOARD.toolbar, alignItems: "center", paddingInline: KEYBOARD.sideInset + 2 }}>
+        {showSuggestions ? (
+          <>
             <button
               type="button"
-              data-action="predict"
-              onClick={() => useMessaging.getState().predict(threadId, w)}
-              style={{ ...resetButton, flex: 1, height: "100%", fontSize: KEYBOARD.labelSize + 1, color: "var(--kb-label)" }}
+              data-action="key-toolbar"
+              aria-label="show toolbar"
+              onClick={() => setToolbarPinned(true)}
+              style={{ ...resetButton, width: 34, height: "100%", color: "var(--kb-icon)" }}
             >
-              {w}
+              <ChevronGlyph />
             </button>
-          </div>
-        ))}
+            {words.map((w, i) => (
+              <div key={`${w}-${i}`} style={{ flex: 1, display: "flex", alignItems: "center", height: "100%", minWidth: 0 }}>
+                {i > 0 ? (
+                  <span aria-hidden="true" style={{ width: 1, height: KEYBOARD.toolbar * 0.42, background: "var(--kb-divider)" }} />
+                ) : null}
+                <button
+                  type="button"
+                  data-action="predict"
+                  onClick={() => useMessaging.getState().predict(threadId, w)}
+                  style={{
+                    ...resetButton,
+                    flex: 1,
+                    minWidth: 0,
+                    height: "100%",
+                    fontSize: KEYBOARD.suggestionSize,
+                    color: "var(--kb-label)",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                  }}
+                >
+                  {w}
+                </button>
+              </div>
+            ))}
+            <span style={{ width: 34 }} />
+          </>
+        ) : (
+          <>
+            <ToolButton label="emoji" action="key-emoji" active={layout === "emoji"} onClick={toggleEmoji}>
+              <EmojiGlyph />
+            </ToolButton>
+            <Placeholder id={`${platform}:keyboard-stickers`}>
+              <ToolButton label="stickers">
+                <StickerGlyph />
+              </ToolButton>
+            </Placeholder>
+            <Placeholder id={`${platform}:keyboard-gif`}>
+              <ToolButton label="GIF">
+                <GifGlyph />
+              </ToolButton>
+            </Placeholder>
+            <Placeholder id={`${platform}:dictation`}>
+              <ToolButton label="voice input">
+                <MicGlyph />
+              </ToolButton>
+            </Placeholder>
+            <Placeholder id={`${platform}:keyboard-clipboard`}>
+              <ToolButton label="clipboard">
+                <ClipboardGlyph />
+              </ToolButton>
+            </Placeholder>
+            <Placeholder id={`${platform}:keyboard-settings`}>
+              <ToolButton label="keyboard settings">
+                <GearGlyph />
+              </ToolButton>
+            </Placeholder>
+            <span style={{ flex: 1 }} />
+            <Placeholder id={`${platform}:keyboard-more`}>
+              <ToolButton label="more">
+                <MoreGlyph />
+              </ToolButton>
+            </Placeholder>
+          </>
+        )}
       </div>
 
       {/* key rows */}
       {rows ? (
-        <div style={{ paddingTop: KEYBOARD.topInset - KEYBOARD.rowGap / 2, paddingInline: KEYBOARD.sideInset }}>
+        <div style={{ paddingTop: KEYBOARD.topInset, paddingInline: KEYBOARD.sideInset }}>
           {rows.map((row, ri) => (
             <div
               key={ri}
@@ -188,139 +266,146 @@ export function Keyboard({ threadId, platform }: KeyboardProps) {
                 display: "flex",
                 gap: KEYBOARD.keyGap,
                 height: KEYBOARD.keyHeight,
-                marginTop: ri === 0 ? KEYBOARD.rowGap / 2 : KEYBOARD.rowGap,
+                marginTop: ri === 0 ? 0 : KEYBOARD.rowGap,
                 paddingInline: layout === "letters" && ri === 1 ? (unit + KEYBOARD.keyGap) / 2 : 0,
               }}
             >
               {row.map((k, ki) => {
                 const id = `${k.kind}:${k.value}`;
+                const isPressed = pressed === id;
                 const special = k.kind !== "char" && k.kind !== "space";
-                const isEdgeSpecial = ri === 2 && (k.kind === "shift" || k.kind === "delete" || k.kind === "mode");
-                const flexGap = isEdgeSpecial && ((ki === 0) || ki === row.length - 1);
+                const isReturn = k.kind === "return";
                 const isShiftOn = k.kind === "shift" && shift;
+                // the third row's edge keys (shift / page / delete) take up the slack
+                const stretch = k.kind === "space" || (ri === 2 && (ki === 0 || ki === row.length - 1));
                 const label =
                   k.kind === "char" && layout === "letters" && shift ? k.value.toUpperCase() : (k.label ?? k.value);
-                const w = k.kind === "space" ? undefined : keyWidth(k.units);
+                const w = (k.units ?? 1) * unit;
+                const bg = isReturn
+                  ? isPressed
+                    ? "var(--kb-key-special-pressed)"
+                    : "var(--kb-return-bg)"
+                  : special
+                    ? isPressed
+                      ? "var(--kb-key-special-pressed)"
+                      : "var(--ui-kb-key-special)"
+                    : isPressed
+                      ? "var(--kb-key-pressed)"
+                      : "var(--ui-kb-key)";
                 return (
-                  <KeyCell key={`${ri}-${ki}`} spacerAfter={flexGap && ki === 0} spacerBefore={flexGap && ki > 0}>
-                    <button
-                      type="button"
-                      data-action={k.kind === "char" ? "type-key" : `key-${k.kind}`}
-                      data-key={k.value}
-                      onPointerDown={(e) => {
-                        e.preventDefault();
-                        setPressed(id);
-                        if (k.kind === "delete") startDelete();
-                        else press(k);
-                      }}
-                      onPointerUp={() => {
-                        if (k.kind === "delete") stopDelete();
-                      }}
-                      style={{
-                        ...resetButton,
-                        position: "relative",
-                        width: w,
-                        flex: k.kind === "space" ? 1 : undefined,
-                        height: KEYBOARD.keyHeight,
-                        borderRadius: KEYBOARD.radius,
-                        background:
-                          special && !isShiftOn
-                            ? pressed === id
-                              ? "var(--ui-kb-key)"
-                              : "var(--ui-kb-key-special)"
-                            : pressed === id && k.kind !== "char"
-                              ? "var(--ui-kb-key-special)"
-                              : "var(--ui-kb-key)",
-                        boxShadow: "var(--shadow-key)",
-                        fontSize: k.kind === "char" ? KEYBOARD.letterSize : KEYBOARD.labelSize,
-                        lineHeight: 1,
-                        color: "var(--kb-label)",
-                      }}
-                    >
-                      {k.kind === "shift" ? (
-                        <ShiftGlyph on={isShiftOn} />
-                      ) : k.kind === "delete" ? (
-                        <DeleteGlyph />
-                      ) : (
-                        <span style={{ transform: k.kind === "char" && layout === "letters" && !shift ? "translateY(-8%)" : undefined }}>
-                          {label}
-                        </span>
-                      )}
-                      {k.kind === "char" && pressed === id ? (
-                        <KeyPop label={label} keyWidth={w ?? unit} keyHeight={KEYBOARD.keyHeight} />
-                      ) : null}
-                    </button>
-                  </KeyCell>
+                  <button
+                    key={`${ri}-${ki}`}
+                    type="button"
+                    data-action={k.kind === "char" ? "type-key" : `key-${k.kind}`}
+                    data-key={k.value}
+                    aria-label={k.kind === "char" ? undefined : k.kind === "space" ? "space" : k.kind}
+                    onPointerDown={(e) => {
+                      e.preventDefault();
+                      setPressed(id);
+                      if (k.kind === "delete") startDelete();
+                      else press(k, e.timeStamp);
+                    }}
+                    onPointerUp={() => {
+                      if (k.kind === "delete") stopDelete();
+                    }}
+                    style={{
+                      ...resetButton,
+                      position: "relative",
+                      width: stretch ? undefined : w,
+                      minWidth: stretch ? w : undefined,
+                      flex: stretch ? 1 : undefined,
+                      height: KEYBOARD.keyHeight,
+                      borderRadius: KEYBOARD.radius,
+                      background: bg,
+                      fontSize: k.kind === "char" ? KEYBOARD.letterSize : KEYBOARD.labelSize,
+                      fontWeight: k.kind === "mode" ? 500 : 400,
+                      lineHeight: 1,
+                      color: isReturn ? "var(--kb-return-label)" : "var(--kb-label)",
+                    }}
+                  >
+                    {k.kind === "shift" ? (
+                      <ShiftGlyph on={isShiftOn} locked={capsLock} />
+                    ) : k.kind === "delete" ? (
+                      <DeleteGlyph />
+                    ) : k.kind === "return" ? (
+                      <ReturnGlyph />
+                    ) : k.kind === "space" ? (
+                      <span style={{ fontSize: KEYBOARD.labelSize - 2, color: "var(--kb-hint)" }}>{label}</span>
+                    ) : (
+                      <span>{label}</span>
+                    )}
+                    {k.hint && layout === "letters" ? (
+                      <span
+                        aria-hidden="true"
+                        style={{ position: "absolute", top: 3, right: 5, fontSize: KEYBOARD.hintSize, lineHeight: 1, color: "var(--kb-hint)" }}
+                      >
+                        {k.hint}
+                      </span>
+                    ) : null}
+                    {k.kind === "char" && isPressed ? <KeyPop label={label} keyWidth={w} keyHeight={KEYBOARD.keyHeight} /> : null}
+                  </button>
                 );
               })}
             </div>
           ))}
         </div>
       ) : (
-        <EmojiPage threadId={threadId} onAbc={() => setLayout("letters")} />
+        <EmojiPage threadId={threadId} unit={unit} onAbc={() => setLayout("letters")} />
       )}
-
-      {/* bottom strip: emoji (layout switch) and dictation (placeholder) */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          bottom: 0,
-          width,
-          height: KEYBOARD.strip,
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          paddingInline: KEYBOARD.sideInset * 7,
-          color: "var(--ui-gray)",
-        }}
-      >
-        <button
-          type="button"
-          data-action="key-emoji"
-          aria-label="emoji"
-          onClick={() => setLayout(layout === "emoji" ? "letters" : "emoji")}
-          style={{ ...resetButton, width: KEYBOARD.strip, height: KEYBOARD.strip - KEYBOARD.topInset * 2, color: "var(--kb-label)" }}
-        >
-          <EmojiGlyph />
-        </button>
-        <Placeholder id={`${platform}:dictation`}>
-          <button
-            type="button"
-            aria-label="dictation"
-            style={{ ...resetButton, width: KEYBOARD.strip, height: KEYBOARD.strip - KEYBOARD.topInset * 2, color: "var(--kb-label)" }}
-          >
-            <DictationGlyph />
-          </button>
-        </Placeholder>
-      </div>
     </div>
   );
 }
 
-function KeyCell({ children, spacerAfter, spacerBefore }: { children: ReactNode; spacerAfter?: boolean; spacerBefore?: boolean }) {
+function ToolButton({
+  children,
+  label,
+  action,
+  active,
+  onClick,
+  style,
+  ...rest
+}: {
+  children: ReactNode;
+  label: string;
+  action?: string;
+  active?: boolean;
+  onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
+  style?: CSSProperties;
+} & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick" | "style">) {
+  // Placeholder clones this with its own handlers and press style, so pass everything through
   return (
-    <>
-      {spacerBefore ? <span style={{ flex: 1, marginLeft: -KEYBOARD.keyGap }} /> : null}
+    <button
+      type="button"
+      aria-label={label}
+      data-action={action}
+      {...rest}
+      onClick={onClick}
+      style={{
+        ...resetButton,
+        width: 42,
+        height: KEYBOARD.toolbar,
+        color: active ? "var(--kb-accent)" : "var(--kb-icon)",
+        ...style,
+      }}
+    >
       {children}
-      {spacerAfter ? <span style={{ flex: 1, marginRight: -KEYBOARD.keyGap }} /> : null}
-    </>
+    </button>
   );
 }
 
-function EmojiPage({ threadId, onAbc }: { threadId: ThreadId; onAbc: () => void }) {
-  const paneWidth = usePane().width;
-  const keyWidth = (units = 1) => units * unitFor(paneWidth);
+function EmojiPage({ threadId, unit, onAbc }: { threadId: ThreadId; unit: number; onAbc: () => void }) {
+  const gridHeight = KEYBOARD.keyHeight * 3 + KEYBOARD.rowGap * 2;
+  const keyStyle: CSSProperties = {
+    ...resetButton,
+    height: KEYBOARD.keyHeight,
+    borderRadius: KEYBOARD.radius,
+    background: "var(--ui-kb-key-special)",
+    fontSize: KEYBOARD.labelSize,
+    fontWeight: 500,
+  };
   return (
-    <div style={{ paddingInline: KEYBOARD.sideInset * 3, paddingTop: KEYBOARD.topInset }}>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(8, 1fr)",
-          rowGap: KEYBOARD.keyGap,
-          height: KEYBOARD.keyHeight * 4 + KEYBOARD.rowGap * 2 - KEYBOARD.keyHeight,
-        }}
-      >
+    <div style={{ paddingInline: KEYBOARD.sideInset, paddingTop: KEYBOARD.topInset }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gridAutoRows: "1fr", height: gridHeight }}>
         {EMOJI.map((e) => (
           <button
             key={e}
@@ -333,35 +418,24 @@ function EmojiPage({ threadId, onAbc }: { threadId: ThreadId; onAbc: () => void 
           </button>
         ))}
       </div>
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: KEYBOARD.rowGap }}>
-        <button
-          type="button"
-          data-action="key-mode"
-          onClick={onAbc}
-          style={{
-            ...resetButton,
-            width: keyWidth(2.6),
-            height: KEYBOARD.keyHeight,
-            borderRadius: KEYBOARD.radius,
-            background: "var(--ui-kb-key-special)",
-            boxShadow: "var(--shadow-key)",
-            fontSize: KEYBOARD.labelSize,
-          }}
-        >
+      <div style={{ display: "flex", gap: KEYBOARD.keyGap, marginTop: KEYBOARD.rowGap }}>
+        <button type="button" data-action="key-mode" onClick={onAbc} style={{ ...keyStyle, width: unit * 2 }}>
           ABC
         </button>
         <button
           type="button"
+          data-action="key-space"
+          onClick={() => useMessaging.getState().type(threadId, " ")}
+          style={{ ...keyStyle, flex: 1, background: "var(--ui-kb-key)", fontWeight: 400 }}
+        >
+          <span style={{ fontSize: KEYBOARD.labelSize - 2, color: "var(--kb-hint)" }}>English (US)</span>
+        </button>
+        <button
+          type="button"
           data-action="key-delete"
+          aria-label="delete"
           onClick={() => useMessaging.getState().backspace(threadId)}
-          style={{
-            ...resetButton,
-            width: keyWidth(1.3),
-            height: KEYBOARD.keyHeight,
-            borderRadius: KEYBOARD.radius,
-            background: "var(--ui-kb-key-special)",
-            boxShadow: "var(--shadow-key)",
-          }}
+          style={{ ...keyStyle, width: unit * 2 }}
         >
           <DeleteGlyph />
         </button>
@@ -384,53 +458,122 @@ const resetButton: CSSProperties = {
   cursor: "pointer",
   outline: "none",
   touchAction: "manipulation",
+  WebkitTapHighlightColor: "transparent",
 };
 
-function ShiftGlyph({ on }: { on: boolean }) {
+// ---------------------------------------------------------------------------
+// Glyphs (One UI line icons, 1.6 dp strokes)
+// ---------------------------------------------------------------------------
+
+const G = KEYBOARD.glyph;
+const T = KEYBOARD.toolbarGlyph;
+const line = { fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round" } as const;
+
+function ShiftGlyph({ on, locked }: { on: boolean; locked: boolean }) {
   return (
-    <svg width={KEYBOARD.glyph * 0.85} height={KEYBOARD.glyph * 0.85} viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        d="M12 3.6 2.9 12.9h5v6.4c0 .6.4 1 1 1h6.2c.6 0 1-.4 1-1v-6.4h5L12 3.6Z"
-        fill={on ? "currentColor" : "none"}
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
+    <svg width={G} height={G} viewBox="0 0 24 24" aria-hidden="true" style={{ color: on ? "var(--kb-accent)" : "currentColor" }}>
+      <path d="M12 4 4.5 11.6h4.3v5.2h6.4v-5.2h4.3L12 4Z" {...line} fill={on ? "currentColor" : "none"} />
+      {locked ? <path d="M8.8 20h6.4" {...line} /> : null}
     </svg>
   );
 }
 
 function DeleteGlyph() {
   return (
-    <svg width={KEYBOARD.glyph} height={KEYBOARD.glyph * 0.8} viewBox="0 0 30 24" aria-hidden="true">
-      <path
-        d="M9.6 3.5h15.2c1.5 0 2.7 1.2 2.7 2.7v11.6c0 1.5-1.2 2.7-2.7 2.7H9.6c-.8 0-1.5-.3-2-.9L2.3 13.3c-.7-.8-.7-1.9 0-2.6L7.6 4.4c.5-.6 1.2-.9 2-.9Z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      <path d="m13.3 8.3 7.4 7.4m0-7.4-7.4 7.4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    <svg width={G + 2} height={G} viewBox="0 0 26 24" aria-hidden="true">
+      <path d="M8.6 5.5h13.2c1 0 1.7.8 1.7 1.7v9.6c0 1-.8 1.7-1.7 1.7H8.6L3 12l5.6-6.5Z" {...line} />
+      <path d="m12.2 9.2 5.6 5.6m0-5.6-5.6 5.6" {...line} />
+    </svg>
+  );
+}
+
+function ReturnGlyph() {
+  return (
+    <svg width={G} height={G} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M19 5.5v6.2c0 1-.8 1.8-1.8 1.8H5.5" {...line} />
+      <path d="m9.2 9.6-3.9 3.9 3.9 3.9" {...line} />
+    </svg>
+  );
+}
+
+function ChevronGlyph() {
+  return (
+    <svg width={T} height={T} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="m14.5 6-6 6 6 6" {...line} />
     </svg>
   );
 }
 
 function EmojiGlyph() {
   return (
-    <svg width={KEYBOARD.glyph} height={KEYBOARD.glyph} viewBox="0 0 26 26" aria-hidden="true">
-      <circle cx="13" cy="13" r="10.6" fill="none" stroke="currentColor" strokeWidth="1.6" />
-      <circle cx="9.4" cy="10.6" r="1.3" fill="currentColor" />
-      <circle cx="16.6" cy="10.6" r="1.3" fill="currentColor" />
-      <path d="M8.2 15.2c1 1.9 2.8 3 4.8 3s3.8-1.1 4.8-3" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    <svg width={T} height={T} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="8.8" {...line} />
+      <circle cx="9" cy="10" r="1.1" fill="currentColor" />
+      <circle cx="15" cy="10" r="1.1" fill="currentColor" />
+      <path d="M8.3 14c.9 1.5 2.2 2.3 3.7 2.3s2.8-.8 3.7-2.3" {...line} />
     </svg>
   );
 }
 
-function DictationGlyph() {
+function StickerGlyph() {
   return (
-    <svg width={KEYBOARD.glyph} height={KEYBOARD.glyph} viewBox="0 0 26 26" aria-hidden="true">
-      <rect x="9.2" y="2.6" width="7.6" height="13.4" rx="3.8" fill="none" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M5.6 12.2c0 4.1 3.3 7.4 7.4 7.4s7.4-3.3 7.4-7.4M13 19.6v3.8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    <svg width={T} height={T} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M20.5 13.5V6.8c0-1.8-1.5-3.3-3.3-3.3H6.8c-1.8 0-3.3 1.5-3.3 3.3v10.4c0 1.8 1.5 3.3 3.3 3.3h6.7l7-7Z" {...line} />
+      <path d="M13.5 20.5v-3.7c0-1.8 1.5-3.3 3.3-3.3h3.7" {...line} />
+      <circle cx="9" cy="9.5" r="1" fill="currentColor" />
+      <circle cx="14.5" cy="9.5" r="1" fill="currentColor" />
+    </svg>
+  );
+}
+
+function GifGlyph() {
+  return (
+    <svg width={T + 2} height={T} viewBox="0 0 26 24" aria-hidden="true">
+      <rect x="2.5" y="5" width="21" height="14" rx="3.5" {...line} />
+      <text x="13" y="15.6" textAnchor="middle" fontSize="8.4" fontWeight="700" fontFamily="var(--font-system)" fill="currentColor">
+        GIF
+      </text>
+    </svg>
+  );
+}
+
+function MicGlyph() {
+  return (
+    <svg width={T} height={T} viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="9" y="3.2" width="6" height="11" rx="3" {...line} />
+      <path d="M5.8 11.2c0 3.4 2.8 6.2 6.2 6.2s6.2-2.8 6.2-6.2M12 17.4v3.4" {...line} />
+    </svg>
+  );
+}
+
+function ClipboardGlyph() {
+  return (
+    <svg width={T} height={T} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M8.5 5H7c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-1.5" {...line} />
+      <rect x="8.5" y="3" width="7" height="4" rx="1.4" {...line} />
+      <path d="M8.8 11.5h6.4M8.8 15h4.4" {...line} />
+    </svg>
+  );
+}
+
+function GearGlyph() {
+  return (
+    <svg width={T} height={T} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="2.8" {...line} />
+      <path
+        d="M12 3.2l1.6 1.9 2.5-.4.9 2.4 2.4.9-.4 2.5 1.9 1.6-1.9 1.6.4 2.5-2.4.9-.9 2.4-2.5-.4L12 20.8l-1.6-1.9-2.5.4-.9-2.4-2.4-.9.4-2.5L3.2 12l1.9-1.6-.4-2.5 2.4-.9.9-2.4 2.5.4L12 3.2Z"
+        {...line}
+      />
+    </svg>
+  );
+}
+
+function MoreGlyph() {
+  return (
+    <svg width={T} height={T} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="5.5" cy="12" r="1.5" fill="currentColor" />
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+      <circle cx="18.5" cy="12" r="1.5" fill="currentColor" />
     </svg>
   );
 }

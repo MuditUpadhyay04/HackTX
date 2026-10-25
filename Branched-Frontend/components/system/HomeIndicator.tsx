@@ -1,8 +1,8 @@
 import { HOME_INDICATOR } from "@/components/home/layout";
 
 /**
- * The iOS home indicator: a 134 x 5 pt capsule, 8 pt above the bottom edge, centered in `width` pt.
- * Shown over apps (light tone over dark content, dark over light); iOS hides it on the home screen.
+ * The One UI gesture handle: a thin pill near the bottom edge, centered in `width` pt.
+ * Shown over apps (light tone over dark content, dark over light); One UI keeps it on the home screen too.
  */
 export function HomeIndicator({ width, tone = "dark" }: { width: number; tone?: "light" | "dark" }) {
   return (

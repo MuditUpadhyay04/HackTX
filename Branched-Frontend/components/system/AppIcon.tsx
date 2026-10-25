@@ -11,7 +11,7 @@ const label = typeScale.caption2;
 
 /**
  * A home-screen app icon: the squircle artwork, and (outside the dock) its name under it in 11 pt
- * white with the iOS label shadow, one line, truncated at the tail like iOS. Until each app's screen
+ * white with the label shadow, one line, truncated at the tail. Until each app's screen
  * is registered with the shell, a tap is a placeholder (press state + "concept only").
  *
  * `x` / `y` place the icon's top-left in the display's pt viewport.
@@ -52,7 +52,7 @@ export function AppIcon({
     outline: "none",
   };
   return (
-    <Placeholder id={`ios:app-${app}`} pressed={pressed} press="darken">
+    <Placeholder id={`oneui:app-${app}`} pressed={pressed} press="darken">
       <button type="button" aria-label={name} data-app-icon={app} style={button} onClick={onClick}>
         <AppGlyph app={app} size={size} />
         {showLabel ? (

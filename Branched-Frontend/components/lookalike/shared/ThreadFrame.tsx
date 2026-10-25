@@ -28,9 +28,8 @@ export type ThreadFrameProps = {
 };
 
 /**
- * Shared thread layout for the three messaging look-alikes. The nav sits over the content (iOS
- * translucent bars). When the keyboard rises (ease-std, 300 ms) the messages and the composer move
- * up together by transform only, keeping the last message in view, exactly like iOS; the messages
+ * Shared thread layout for the three messaging look-alikes. The nav sits over the content (Android * translucent bars). When the keyboard rises (ease-std, 300 ms) the messages and the composer move
+ * up together by transform only, keeping the last message in view, exactly like Android; the messages
  * that slide under the nav stay reachable because the scroll content gains the same inset on top.
  */
 export function ThreadFrame({

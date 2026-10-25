@@ -4,7 +4,7 @@ import { CARET } from "@/components/lookalike/metrics";
 import { useFlags } from "@/lib/flags";
 
 /**
- * The iOS text caret: a 2 pt bar in the app's tint, blinking 500 ms on / 500 ms off
+ * The Android text cursor: a 2 dp bar in the app's accent color, blinking 500 ms on / 500 ms off
  * (caret-blink, section 4.4). ?caret=static keeps it on for screenshots.
  */
 export function Caret({ tint, height = CARET.height }: { tint: string; height?: number }) {

@@ -82,7 +82,7 @@ function deviceScenes(): Scene[] {
 }
 
 /**
- * Phase 3 (D8, D12): the iOS home screens on the iPhone Fold, clean (no fold pill): the cover home
+ * Phase 3 (D8, D12): the One UI home screens on the Galaxy Z Fold 8, clean (no fold pill): the cover home
  * folded, the inner home unfolded, and the fold in between (content visible, motion blur mid-fold).
  */
 function homeScenes(): Scene[] {

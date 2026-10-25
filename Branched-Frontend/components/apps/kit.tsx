@@ -4,12 +4,13 @@
  * components/apps/kit.tsx: the shared shell for the look-alike apps that open on the phone.
  *
  *   <AppFrame display tone>   fills the display, provides the pane size, draws the in-app status bar
- *   useStack(root)            an iOS navigation stack: push slides in from the right, pop slides out,
- *                             the screen underneath parallaxes 30% (UINavigationController)
+ *   useStack(root)            an Android back stack: a new screen slides in from the right while it
+ *                             fades in (Material shared axis X), back reverses it
  *   <StackView stack render>  draws the stack
- *   <Split list detail>       the unfolded inner display: list pane left, detail pane right (iPad-style)
+ *   <Split list detail>       the unfolded inner display: list pane left, detail pane right (the Fold's
+ *                             two-pane layout)
  *
- * Sizes are pt inside the display's viewport (cover 402 x 573, inner 822.5 x 573).
+ * Sizes are dp inside the display's viewport (cover 384 x 587.2, inner 781 x 587.2).
  */
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
@@ -23,10 +24,13 @@ import type { AppTarget } from "@/lib/apps/registry";
 
 export type Tone = "dark" | "light";
 
-/** iOS push/pop: a critically damped spring close to UIKit's 0.35 s curve. */
-const PUSH = { type: "spring", stiffness: 420, damping: 44, mass: 1 } as const;
+/** Android screen transition: 300 ms on the Material emphasized-decelerate curve. */
+const PUSH = { type: "tween", duration: 0.3, ease: [0.05, 0.7, 0.1, 1] } as const;
+/** How far (share of the pane) the incoming screen travels, and the outgoing one drifts. */
+const SLIDE_IN = 0.18;
+const SLIDE_OUT = 0.06;
 
-/** The list pane on the inner display (iPad Messages / WhatsApp sidebar width). */
+/** The list pane on the inner display (the Fold's two-pane list width). */
 export const SPLIT_LIST_WIDTH = 330;
 
 export function AppFrame({
@@ -127,8 +131,8 @@ export function useStack<R>(target: AppTarget, root: R): Stack<R> {
 }
 
 /**
- * Draws a stack: the top screen at 0, the one below parallaxed -30% (and only while the top one
- * slides), everything else unmounted. `keyOf` must be unique per route instance.
+ * Draws a stack: the top screen at 0, the one below drifted slightly left (only while the top one
+ * moves), everything else unmounted. `keyOf` must be unique per route instance.
  */
 export function StackView<R>({ stack, keyOf, render }: { stack: Stack<R>; keyOf: (r: R, i: number) => string; render: (r: R) => ReactNode }) {
   const { width } = usePane();
@@ -143,15 +147,14 @@ export function StackView<R>({ stack, keyOf, render }: { stack: Stack<R>; keyOf:
         return (
           <motion.div
             key={keyOf(r, i)}
-            initial={i === 0 ? false : { x: width }}
-            animate={{ x: isTop ? 0 : -width * 0.3 }}
-            exit={{ x: width, transition }}
+            initial={i === 0 ? false : { x: width * SLIDE_IN, opacity: 0 }}
+            animate={{ x: isTop ? 0 : -width * SLIDE_OUT, opacity: 1 }}
+            exit={{ x: width * SLIDE_IN, opacity: 0, transition }}
             transition={transition}
             style={{
               position: "absolute",
               inset: 0,
               zIndex: i,
-              boxShadow: isTop && i > 0 ? "-6px 0 18px var(--ui-push-shadow)" : undefined,
               pointerEvents: isTop ? "auto" : "none",
             }}
           >
@@ -183,7 +186,7 @@ export const resetButton: CSSProperties = {
   WebkitTapHighlightColor: "transparent",
 };
 
-/** A tap target with the iOS dim-on-press (nav bar buttons) or row highlight (lists). */
+/** A tap target that dims on press (toolbar buttons) or highlights (list rows). */
 export function Tap({
   children,
   onPress,
@@ -263,7 +266,7 @@ export function Avatar({ src, size, style }: { src: string; size: number; style?
 /** One-line ellipsis text. */
 export const ellipsis: CSSProperties = { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0 };
 
-/** A scrolling column that hides its scrollbar (iOS). */
+/** A scrolling column that hides its scrollbar (Android overlay scrollbars). */
 export function Scroll({ children, style, top = 0, bottom = 0 }: { children: ReactNode; style?: CSSProperties; top?: number; bottom?: number }) {
   return (
     <div

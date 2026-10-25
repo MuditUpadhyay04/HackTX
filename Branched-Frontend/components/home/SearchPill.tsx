@@ -5,14 +5,14 @@ import { Placeholder } from "@/components/Placeholder";
 import { HOME_LAYOUT, SEARCH, type HomeDisplay } from "./layout";
 
 /**
- * The home-screen Search button, bottom-right under the dock (D8; iOS 26 / iPadOS 26): a round
- * Liquid Glass button with the magnifier. Search is outside this demo: a placeholder.
+ * The home-screen Search button, bottom-right under the dock (D8; One UI 9): a round
+ * frosted glass button with the magnifier. Search is outside this demo: a placeholder.
  */
 export function SearchPill({ display }: { display: HomeDisplay }) {
   const L = HOME_LAYOUT[display];
   const onClick = useOpenApp("search");
   return (
-    <Placeholder id="ios:search" press="darken">
+    <Placeholder id="oneui:search" press="darken">
       <button
         type="button"
         onClick={onClick}

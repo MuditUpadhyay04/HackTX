@@ -4,7 +4,7 @@
  *   un        the Un-Said theme, synced from App-UI-Final (lib/unsaid-theme.json; never edit, never redefine)
  *   tokens    look-alike palettes + gradients + device colors (assets/palettes/branched-tokens.json,
  *             CLAUDE_PROMPT.md 4.2-4.3) and this build's own scales: space, radius, shadow, blur,
- *             type (iOS text styles + Meta sizes), device materials (Phase 1) and the wallpaper.
+ *             type (text styles + Meta sizes), device materials (Phase 1) and the wallpaper.
  *
  * app/tokens.css mirrors these values as CSS custom properties (same names: --wa-green,
  * --device-frame-base, --space-16, --radius-24, --shadow-banner, --blur-30, --type-body-size ...).
@@ -45,17 +45,17 @@ const extraColors = {
   // 4.3 stage (black behind the opening; white for light stages, Stage bg "white")
   "stage-black": "#000000",
   "stage-white": "#FFFFFF",
-  // D12: the Apple product-page studio backdrop behind the device (warm off-white)
+  // D12: the studio backdrop behind the device (warm off-white)
   "stage-studio": "#F5F5F1",
   // Phase 1 wallpaper base (the ui-wallpaper gradient sits on it)
   "ui-wallpaper-base": "#0B0B12",
-  // iOS system label + separator colors (Apple HIG), light and dark, for iOS chrome text and hairlines
+  // One UI system label + separator colors , light and dark, for chrome text and hairlines
   "ui-label": "#000000",
   "ui-label-secondary": "rgba(60,60,67,0.6)",
   "ui-separator": "rgba(60,60,67,0.29)",
   "ui-bg": "#FFFFFF",
   "label-on-dark": "#FFFFFF",
-  // iOS dark mode system colors (Apple HIG): elevated / grouped backgrounds, fill, separator, labels
+  // dark mode system colors : elevated / grouped backgrounds, fill, separator, labels
   "ui-dark-elevated": "#1C1C1E",
   "ui-dark-grouped": "#2C2C2E",
   "ui-dark-fill": "#39393D",
@@ -86,8 +86,8 @@ const extraColors = {
   "device-debug-box": "#FF3B30",
   "device-debug-box-alt": "#0A84FF",
   "device-debug-label-bg": "rgba(0,0,0,0.72)",
-  // Phase 2 look-alike apps (apps builder): CLAUDE_PROMPT.md Phase 2 CHROME SPECS, or the iOS system
-  // colors (HIG) where the spec gives none
+  // Phase 2 look-alike apps (apps builder): CLAUDE_PROMPT.md Phase 2 CHROME SPECS, or the One UI system
+  // colors  where the spec gives none
   "wa-wallpaper": "#EFE7DE",
   "wa-nav-material": "rgba(255,255,255,0.96)",
   "wa-pill": "rgba(255,255,255,0.92)",
@@ -104,7 +104,7 @@ const extraColors = {
   "kb-label": "#000000",
   "kb-special-label": "#000000",
   "icon-photos-fill": "linear-gradient(180deg, #FFFFFF 0%, #ECECEC 100%)",
-  // look-alike apps (components/apps/*): iOS system colors (HIG) and app chrome the spec leaves open
+  // look-alike apps (components/apps/*): One UI system colors and app chrome the spec leaves open
   "on-accent": "#FFFFFF",
   "on-accent-2": "rgba(255,255,255,0.8)",
   "ui-indigo": "#5E5CE6",
@@ -138,7 +138,7 @@ export type ColorToken = keyof typeof color;
  */
 const c = unTheme.color;
 const uiWallpaper = [
-  // Apple keynote look (D12): a dark vignette holding luminous blue -> violet -> orchid fields with
+  // keynote look (D12): a dark vignette holding luminous blue -> violet -> orchid fields with
   // one bright lilac core, all blurred together so the colors bleed like light, not like blobs
   `radial-gradient(125% 100% at 50% 56%, transparent 52%, #05050B 100%)`,
   `radial-gradient(26% 32% at 57% 50%, ${c["un-icon-lilac"]}, transparent 70%)`,
@@ -150,7 +150,7 @@ const uiWallpaper = [
   `linear-gradient(#05050B, #05050B)`,
 ].join(", ");
 
-/** The lit device display (iPhone Fold, Phase 1): the same synced un-icon-* colors, unblurred. */
+/** The lit device display (Galaxy Z Fold 8, Phase 1): the same synced un-icon-* colors, unblurred. */
 const screenWallpaper = [
   // same keynote family as the stage (D12): luminous fields on a deep base, crisp (no blur on glass)
   `radial-gradient(42% 46% at 62% 40%, ${c["un-icon-lilac"]} 0%, transparent 72%)`,
@@ -183,12 +183,12 @@ export const wallpaper = {
 // Device (section 4.3) and Phase 1 materials
 // ---------------------------------------------------------------------------
 
-/** White iPhone Duo colors, unprefixed, exactly as branched-tokens.json `device`. */
+/** Galaxy Z Fold 8 colors, unprefixed, exactly as branched-tokens.json `device`. */
 export const device = branched.device;
 
-/** Phase 1 device materials and the iOS materials of Phases 2-3 (full CSS values). */
+/** Phase 1 device materials and the UI materials of Phases 2-3 (full CSS values). */
 export const material = {
-  // white frame (titanium-ceramic)
+  // white frame (aluminum)
   "device-frame-fill": "linear-gradient(135deg, #FFFFFF 0%, #EDECE8 18%, #D8D7D2 46%, #F4F3EF 68%, #BDBCB6 100%)",
   "device-frame-side-fill": "linear-gradient(225deg, #FFFFFF 0%, #EDECE8 18%, #D8D7D2 46%, #F4F3EF 68%, #BDBCB6 100%)",
   "device-frame-sheen":
@@ -213,7 +213,7 @@ export const material = {
   // reflection fade (mask-image)
   "device-reflection-mask": "linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0) 35%)",
   "device-reflection-filter": "blur(1.5px)",
-  // iPhone Fold, natural titanium (RULES.md D10)
+  // Galaxy Z Fold 8, Graphite aluminum (RULES.md D10)
   "device-ti-band": "linear-gradient(135deg, #ECE9E3 0%, #A9A49B 16%, #D9D5CE 34%, #8E8A82 58%, #CFCBC4 78%, #6E6A63 100%)",
   "device-ti-side": "linear-gradient(180deg, #46443F 0%, #A39E95 10%, #F6F4F0 28%, #C3BEB5 50%, #DEDAD3 68%, #77736C 90%, #46443F 100%)",
   "device-ti-spine": "linear-gradient(180deg, #D9D5CE 0%, #B3AEA5 30%, #D2CEC7 55%, #8E8A82 100%)",
@@ -226,7 +226,7 @@ export const material = {
   "device-screen-wallpaper": screenWallpaper,
   "device-screen-off": "linear-gradient(160deg, #17181C 0%, #060607 36%, #000000 100%)",
   "device-glass-sheen": "linear-gradient(118deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.04) 22%, rgba(255,255,255,0) 40%)",
-  // iOS light notification material (banners, Phase 2): fill + backdrop filter
+  // light notification material (banners, Phase 2): fill + backdrop filter
   "material-light": "rgba(245,245,245,0.78)",
   "material-light-filter": "blur(30px) saturate(180%)",
   // home-screen glass (widgets, dock, search pill; Phase 3)
@@ -237,7 +237,7 @@ export const material = {
   "material-pill-dark": "rgba(255,255,255,0.14)",
   "material-pill-light": "rgba(0,0,0,0.06)",
   "material-pill-filter": "blur(20px)",
-  // Messages look-alike app icon tile (Phase 2 banners; drawn, never an Apple file)
+  // Messages look-alike app icon tile (Phase 2 banners; drawn, never an original file)
   "icon-messages-fill": "linear-gradient(180deg, #5CF777 0%, #0EBE2C 100%)",
 } as const;
 export type MaterialToken = keyof typeof material;
@@ -246,14 +246,14 @@ export type MaterialToken = keyof typeof material;
 // Scales
 // ---------------------------------------------------------------------------
 
-/** 4-pt grid (pt = CSS px at 1x). 2/6/10/14 are the iOS half-steps the spec uses. */
+/** 4-pt grid (pt = CSS px at 1x). 2/6/10/14 are the half-steps the spec uses. */
 export const space = {
   0: 0, 2: 2, 4: 4, 6: 6, 8: 8, 10: 10, 12: 12, 14: 14, 16: 16, 20: 20, 24: 24, 28: 28,
   32: 32, 36: 36, 40: 40, 44: 44, 48: 48, 56: 56, 64: 64, 72: 72, 80: 80, 96: 96, 120: 120,
 } as const;
 export type SpaceToken = keyof typeof space;
 
-/** iOS radii (pt). squircle = continuous-corner app icon (22.37%); pill = capsule. */
+/** Radii (pt). squircle = rounded app icon (34%); pill = capsule. */
 export const radius = {
   2: 2, 4: 4, 5: 5, 8: 8, 10: 10, 12: 12, 14: 14, 16: 16, 18: 18, 22: 22, 24: 24, 26: 26,
   28: 28, 34: 34, 40: 40, 44: 44, 52: 52, 62: 62, 68: 68,
@@ -264,7 +264,7 @@ export type RadiusToken = keyof typeof radius;
 
 /**
  * Fixed control sizes (pt) used in style props, so components never carry bare numbers.
- * iOS HIG: 44 pt minimum hit target; UISwitch 51 x 31 with a 27 pt knob inset 2 pt;
+ * Minimum hit target 44; switch 51 x 31 with a 27 pt knob inset 2 pt;
  * sheet grabber 36 x 5. The rest are this build's dev / test layouts.
  * Mirrored in app/tokens.css as --size-<kebab-name>.
  */
@@ -288,14 +288,14 @@ export const size = {
   glyphLarge: 24,
   // glyph stroke weight per host family, in RENDERED pt (the Glyph component scales it into the
   // 24-unit grid, so a 20 pt and a 24 pt glyph draw the same line). Tuned at 2x so every host's
-  // outline reads as heavy as the iOS search / plus; Meta AI's arrow is white on a blue disc and
+  // outline reads as heavy as the search / plus; Meta AI's arrow is white on a blue disc and
   // is drawn bold in Meta's UI, so it sits one step heavier.
   glyphStrokeIos: 1.6,
   glyphStrokeWhatsapp: 1.6,
   glyphStrokeInstagram: 1.6,
   glyphStrokeFacebook: 1.6,
   glyphStrokeMetaAi: 2,
-  // iOS table-row disclosure chevron (8 x 13 pt, 2 pt stroke) on /scenes
+  // list-row chevron (8 x 13 pt, 2 pt stroke) on /scenes
   disclosureWidth: 8,
   disclosureHeight: 13,
   disclosureStroke: 2,
@@ -317,17 +317,17 @@ export type SizeToken = keyof typeof size;
 /** SF hairline (0.5 pt). */
 export const hairline = 0.5;
 
-/** Shadows: only where iOS uses them (section 5). Full box-shadow / text-shadow values. */
+/** Shadows: only where the UI uses them (section 5). Full box-shadow / text-shadow values. */
 export const shadow = {
-  // iOS notification banner (Phase 2: "the soft iOS banner shadow"; value chosen, spec gives none)
+  // heads-up notification (Phase 2: "the soft notification shadow"; value chosen, spec gives none)
   banner: "0 4px 12px rgba(0,0,0,0.06), 0 12px 32px rgba(0,0,0,0.10)",
-  // the "concept only" toast reads as an iOS HUD; same lift as the banner
+  // the "concept only" toast reads as an Android toast; same lift as the banner
   hud: "0 4px 12px rgba(0,0,0,0.06), 0 12px 32px rgba(0,0,0,0.10)",
-  // floating iOS sheet (dev panel, sheets)
+  // floating sheet (dev panel, sheets)
   sheet: "0 10px 40px rgba(0,0,0,0.35), 0 0 0 0.5px rgba(255,255,255,0.08)",
-  // iOS switch / slider knob
+  // switch / slider knob
   knob: "0 3px 8px rgba(0,0,0,0.15), 0 3px 1px rgba(0,0,0,0.06)",
-  // iOS keyboard key (Phase 2)
+  // keyboard key (Phase 2)
   key: "0 1px 0 rgba(0,0,0,0.3)",
   // home-screen icon label (Phase 3, text-shadow)
   "icon-label": "0 0.5px 1px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.35)",
@@ -364,26 +364,19 @@ export type BlurToken = keyof typeof blur;
 // ---------------------------------------------------------------------------
 
 /**
- * The home-screen wallpaper (components/home/HomeWallpaper.tsx): the iOS 26 neutral silk "swoosh"
+ * The home-screen wallpaper (components/home/HomeWallpaper.tsx): the One UI abstract
  * family, sampled from Gurneal's reference (https://iphone-duo-tawny.vercel.app, Launcher theme):
  * a deep ink / slate field on the left, silver-lilac and pearl ribbons, an espresso band and a gold
  * glow on the right. Drawn as SVG paths + gradients (no image file).
  */
 export const homeWallpaper = {
-  ink: "#141219",
-  slate: "#2B3142",
-  steel: "#5A6179",
-  lilac: "#B7B6C4",
-  pearl: "#DDD6D2",
-  white: "#F4F1ED",
-  mauve: "#8C8087",
-  gold: "#CFA56C",
-  amber: "#8A633D",
-  espresso: "#2A1E18",
-  taupe: "#7A6352",
-  cream: "#E9DFD3",
-  /** cast shadows and edge highlights inside the art */
-  shade: "#000000",
+  ink: "#0B0D1C",
+  indigo: "#2A2F86",
+  blue: "#1F6FE0",
+  violet: "#7B4DE0",
+  teal: "#16A3A8",
+  coral: "#E86A7A",
+  /** edge highlights inside the art */
   light: "#FFFFFF",
 } as const;
 
@@ -391,12 +384,12 @@ export const homeWallpaper = {
 export const homeColor = {
   // D9 official Meta icons: the tile each official file sits on, sampled from the file itself
   "icon-facebook-tile": "#0866FF", // Facebook_Logo_Primary.png circle fill (8, 102, 255)
-  "icon-messenger-tile": "#FFFFFF", // the iOS Messenger icon: the blue bubble (Messenger_Icon_Primary_Blue.svg) on white
+  "icon-messenger-tile": "#FFFFFF", // the Messenger icon: the blue bubble (Messenger_Icon_Primary_Blue.svg) on white
   "icon-whatsapp-tile": "#25D366", // Digital_Glyph_Green_RGB_2026.svg .cls-1 fill
-  "icon-threads-tile": "#000000", // the iOS Threads icon: threads-logo-white.svg on black
+  "icon-threads-tile": "#000000", // the Threads icon: threads-logo-white.svg on black
   // D9: a Meta app with no official file yet shows a plain tile (no logo drawn)
   "icon-meta-pending": "#D1D1D6",
-  // drawn Apple look-alikes (D8/D9: Messages, Phone, Photos)
+  // drawn Android look-alikes (D8/D9: Messages, Phone, Photos)
   "icon-glyph": "#FFFFFF",
   "icon-green-top": "#54EF6D",
   "icon-green-bottom": "#25C040",
@@ -412,16 +405,16 @@ export const homeColor = {
   "icon-glyph-frost-mid": "#ECFAEE",
   "icon-glyph-frost-end": "#B8ECC1",
   "icon-glass-rim": "#FFFFFF",
-  // widgets (spec Phase 3 LAYOUT: Weather on a blue sky #3C8CE7 -> #7EC3F8; Calendar white with iOS red)
+  // widgets (spec Phase 3 LAYOUT: Weather on a blue sky #3C8CE7 -> #7EC3F8; Calendar white with a red accent)
   "widget-weather-top": "#3C8CE7",
   "widget-weather-bottom": "#7EC3F8",
   "widget-weather-sun": "#FFD60A",
   "widget-calendar-bg": "#FFFFFF",
-  "widget-event-blue": "#007AFF",
+  "widget-event-blue": "#3E91FF",
   "widget-event-purple": "#AF52DE",
   // page dots (spec: active white, inactive rgba(255,255,255,0.4))
   "home-dot-inactive": "rgba(255,255,255,0.4)",
-  // Liquid Glass dock / search button edge highlight
+  // frosted glass dock / search button edge highlight
   "home-glass-edge": "rgba(255,255,255,0.55)",
 } as const;
 export type HomeColorToken = keyof typeof homeColor;
@@ -430,7 +423,7 @@ export type HomeColorToken = keyof typeof homeColor;
 export const homeGradient = {
   "icon-green-fill": `linear-gradient(180deg, ${homeColor["icon-green-top"]} 0%, ${homeColor["icon-green-bottom"]} 100%)`,
   "widget-weather-fill": `linear-gradient(180deg, ${homeColor["widget-weather-top"]} 0%, ${homeColor["widget-weather-bottom"]} 100%)`,
-  // iOS 26 Liquid Glass sheen on the dock and the search button: lit top edge, clear body
+  // frosted sheen on the dock and the search button: lit top edge, clear body
   "home-glass-sheen": "linear-gradient(160deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.10) 40%, rgba(255,255,255,0.16) 100%)",
 } as const;
 
@@ -463,14 +456,14 @@ export type TypeStyle = {
   /** pt */
   lineHeight: number;
   weight: number;
-  /** letter-spacing in pt (SF tracking at this size, per the HIG) */
+  /** letter-spacing in pt (tracking at this size) */
   tracking: number;
 };
 
 /**
- * iOS text styles (Apple HIG, Large / default Dynamic Type size) plus the Meta sizes
+ * text styles (Material type scale, default font size) plus the Meta sizes
  * (Instagram / Facebook / Meta AI use 14, 15 and 17 pt; section 4.2).
- * The emphasized variant of an iOS style is the same metrics at weight 600.
+ * The emphasized variant of a style is the same metrics at weight 600.
  */
 export const type = {
   largeTitle: { size: 34, lineHeight: 41, weight: 400, tracking: 0.4 },
@@ -490,7 +483,7 @@ export const type = {
 } as const satisfies Record<string, TypeStyle>;
 export type TypeToken = keyof typeof type;
 
-/** Weight used for the emphasized (semibold) variant of every iOS style. */
+/** Weight used for the emphasized (semibold) variant of every style. */
 export const emphasizedWeight = 600;
 
 /** CSS name of a type style: largeTitle -> large-title, meta14 -> meta-14. */

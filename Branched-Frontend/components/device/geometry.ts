@@ -38,8 +38,9 @@ const PANEL = {
   height: 830,
   /** slab thickness (z) of one half; folded the device is 2x this */
   thickness: 18,
-  /** corner radius of the outer corners (hinge-side corners are square) */
-  radius: 48,
+  /** corner radius of the outer corners (hinge-side corners are square): the Fold 8's flat top and
+   *  bottom edges meet the sides in tight corners */
+  radius: 24,
 } as const;
 
 /** The even band around every display: aluminum frame + black glass bezel. */
@@ -52,36 +53,36 @@ const BAND = {
   chamfer: 1.25,
   /** dark line where the frame meets the glass */
   seat: 1,
-  /** black bezel */
-  bezel: 17,
+  /** black bezel (Fold 8: very thin) */
+  bezel: 4,
   /** frame + bezel */
-  inset: 22,
+  inset: 9,
 } as const;
 
 const DISPLAY = {
   cover: {
-    width: PANEL.width - 2 * BAND.inset, // 505
-    height: PANEL.height - 2 * BAND.inset, // 786
+    width: PANEL.width - 2 * BAND.inset, // 531
+    height: PANEL.height - 2 * BAND.inset, // 812
     radiusOuter: PANEL.radius - BAND.inset,
     /** the cover display's corners on the hinge side (Fold 8: all four corners match) */
     radiusHinge: PANEL.radius - BAND.inset,
   },
   inner: {
-    width: 2 * PANEL.width - 2 * BAND.inset, // 1054
-    height: PANEL.height - 2 * BAND.inset, // 786
+    width: 2 * PANEL.width - 2 * BAND.inset, // 1080
+    height: PANEL.height - 2 * BAND.inset, // 812
     radius: PANEL.radius - BAND.inset,
   },
 } as const;
 
 /**
  * Logical Android viewports (dp). The cover display is 384 dp wide (1248 px at density 3.25),
- * rendered at 505 / 384 = 1.315 px per dp; the inner display uses the same density (one dp is the
- * same size on both screens), which makes it a landscape 801.5 x 597.7 dp viewport.
+ * rendered at 531 / 384 = 1.383 px per dp; the inner display uses the same density (one dp is the
+ * same size on both screens), which makes it a landscape 781 x 587.2 dp viewport.
  */
 const VIEWPORT_SCALE = DISPLAY.cover.width / 384;
 const VIEWPORT = {
   scale: VIEWPORT_SCALE,
-  cover: { width: 402, height: DISPLAY.cover.height / VIEWPORT_SCALE },
+  cover: { width: 384, height: DISPLAY.cover.height / VIEWPORT_SCALE },
   inner: { width: DISPLAY.inner.width / VIEWPORT_SCALE, height: DISPLAY.inner.height / VIEWPORT_SCALE },
 } as const;
 
@@ -90,8 +91,8 @@ const VIEWPORT = {
  * cover display; on the inner display, centered over its right half.
  */
 const PUNCH = {
-  cover: { diameter: 22, fromRight: DISPLAY.cover.width / 2, fromTop: 30 },
-  inner: { diameter: 22, fromRight: (PANEL.width - BAND.inset) / 2, fromTop: 30 },
+  cover: { diameter: 22, fromRight: DISPLAY.cover.width / 2, fromTop: 24 },
+  inner: { diameter: 22, fromRight: (PANEL.width - BAND.inset) / 2, fromTop: 24 },
   /** glass ring around the lens */
   ring: 2,
 } as const;
@@ -314,11 +315,11 @@ export const ARTBOARD = {
     group: { x: 411, y: 125, width: 1098, height: 830 },
     leftHalf: { x: 411, y: 125, width: 549, height: 830 },
     rightHalf: { x: 960, y: 125, width: 549, height: 830 },
-    inner: { x: 433, y: 147, width: 1054, height: 786 },
+    inner: { x: 420, y: 134, width: 1080, height: 812 },
   },
   folded: {
     device: { x: 685.5, y: 125, width: 549, height: 830 },
-    cover: { x: 707.5, y: 147, width: 505, height: 786 },
+    cover: { x: 694.5, y: 134, width: 531, height: 812 },
   },
 } as const satisfies Record<string, Record<string, Rect>>;
 

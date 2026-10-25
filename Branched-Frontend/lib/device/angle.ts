@@ -1,5 +1,5 @@
 /**
- * lib/device/angle.ts: the iPhone Fold (docs/RULES.md D10) as a pure function of openAngle. The
+ * lib/device/angle.ts: the Galaxy Z Fold 8 (docs/RULES.md D10) as a pure function of openAngle. The
  * fold control, the static /device states and the opening timeline (Phases 4-5) all drive the
  * device through these functions.
  *

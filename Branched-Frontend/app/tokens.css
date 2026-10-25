@@ -7,7 +7,7 @@
  */
 
 :root {
-  /* look-alike: WhatsApp (iOS, light) (section 4.2) */
+  /* look-alike: WhatsApp (Android, light) (section 4.2) */
   --wa-green: #25D366;
   --wa-accent: #1DAA61;
   --wa-chat-bg: #EFEAE2;
@@ -26,12 +26,12 @@
   --wa-call-end: #F15C6D;
   --wa-call-text: #E9EDEF;
 
-  /* look-alike: Messages / iMessage (iOS, light) (section 4.2) */
-  --msg-blue: #007AFF;
+  /* look-alike: Messages (Android, light) (section 4.2) */
+  --msg-blue: #0B57D0;
   --msg-gray: #E9E9EB;
-  --msg-green: #34C759;
+  --msg-green: #1E8E3E;
   --msg-meta: #8E8E93;
-  --msg-failed: #FF3B30;
+  --msg-failed: #D93025;
   --msg-nav: #F9F9F9;
   --msg-field-stroke: #C7C7CC;
 
@@ -59,20 +59,20 @@
   --meta-ai-text: #1C2B33;
   --meta-ai-surface: #F1F4F7;
 
-  /* look-alike: iOS system (light, plus dark where used) (section 4.2) */
-  --ui-blue: #007AFF;
-  --ui-red: #FF3B30;
-  --ui-green: #34C759;
-  --ui-gray: #8E8E93;
-  --ui-gray4: #D1D1D6;
-  --ui-gray5: #E5E5EA;
-  --ui-gray6: #F2F2F7;
+  /* look-alike: One UI system (light, plus dark where used) (section 4.2) */
+  --ui-blue: #3E91FF;
+  --ui-red: #F2404C;
+  --ui-green: #3DB86B;
+  --ui-gray: #8A8A8E;
+  --ui-gray4: #D4D4D6;
+  --ui-gray5: #E6E6E8;
+  --ui-gray6: #F4F4F6;
   --ui-kb-bg: #D1D4DA;
   --ui-kb-key: #FFFFFF;
   --ui-kb-key-special: #ABB0BA;
   --ui-banner: #F5F5F5;
 
-  /* device: white iPhone Duo (section 4.3) */
+  /* device: Galaxy Z Fold 8 (section 4.3) */
   --device-frame-base: #E9E8E4;
   --device-frame-highlight: #FFFFFF;
   --device-frame-mid: #D8D7D2;
@@ -90,7 +90,7 @@
   --device-ti-deep: #141518;
   --device-back-glass-ti: #2E3035;
 
-  /* stage, wallpaper base, iOS labels, device parts (sections 4.3, Phase 1) */
+  /* stage, wallpaper base, system labels, device parts (sections 4.3, Phase 1) */
   --stage-black: #000000;
   --stage-white: #FFFFFF;
   --stage-studio: #F5F5F1;
@@ -140,7 +140,7 @@
   --wallpaper-scale: 1.2;
   --wallpaper-noise-opacity: 0.04;
 
-  /* materials: device (Phase 1) and iOS materials (banner, home glass, fold-control pill) */
+  /* materials: device (Phase 1) and UI materials (banner, home glass, fold-control pill) */
   --device-frame-fill: linear-gradient(135deg, #FFFFFF 0%, #EDECE8 18%, #D8D7D2 46%, #F4F3EF 68%, #BDBCB6 100%);
   --device-frame-side-fill: linear-gradient(225deg, #FFFFFF 0%, #EDECE8 18%, #D8D7D2 46%, #F4F3EF 68%, #BDBCB6 100%);
   --device-frame-sheen: repeating-linear-gradient(90deg, rgba(255,255,255,0) 0px, rgba(255,255,255,0) 1px, rgba(255,255,255,0.10) 1px, rgba(255,255,255,0.10) 2px);
@@ -178,9 +178,9 @@
   --material-pill-light: rgba(0,0,0,0.06);
   --material-pill-filter: blur(20px);
 
-  /* space: 4-pt grid (pt = CSS px at 1x). Named iOS exceptions, used only where iOS uses them:
+  /* space: 4-pt grid (pt = CSS px at 1x). Named exceptions, used only where the apps use them:
      2 (hairline-adjacent insets, switch knob inset), 6 (icon-label gap family, compact rows), 10 and 14
-     (iOS list/bubble paddings). Everything else stays on the 4/8 grid. */
+     (list/bubble paddings). Everything else stays on the 4/8 grid. */
   --space-0: 0px;
   --space-2: 2px;
   --space-4: 4px;
@@ -206,7 +206,7 @@
   --space-120: 120px;
   --hairline: 0.5px;
 
-  /* size: fixed control sizes (lib/tokens.ts size); 44 = HIG hit target, UISwitch 51x31 / 27 knob */
+  /* size: fixed control sizes (lib/tokens.ts size); 44 = minimum hit target, switch 51x31 / 27 knob */
   --size-tap-target: 44px;
   --size-grabber-width: 36px;
   --size-grabber-height: 5px;
@@ -243,7 +243,7 @@
   --size-test-ref-un-palette-height: 198px;
   --size-test-ref-palette-height: 435px;
 
-  /* type: system stack + iOS text styles (HIG) + Meta sizes. --type-<style> is a font shorthand. */
+  /* type: system stack + text styles  + Meta sizes. --type-<style> is a font shorthand. */
   --font-system: var(--font-roboto), Roboto, "Noto Sans", system-ui, sans-serif;
   --font-display: var(--font-roboto-flex), var(--font-roboto), Roboto, system-ui, sans-serif;
   --type-large-title-size: 34px;
@@ -351,7 +351,7 @@
   --dur-400: 400ms;
 
   /* Phase 2 look-alike apps (apps builder): values from CLAUDE_PROMPT.md Phase 2 CHROME SPECS, or the
-     iOS system colors (HIG) where the spec gives none */
+     One UI system colors where the spec gives none */
   --wa-wallpaper: #EFE7DE;
   --wa-nav-material: rgba(255,255,255,0.96);
   --wa-pill: rgba(255,255,255,0.92);
@@ -369,13 +369,13 @@
   --kb-special-label: #000000;
   --icon-messages-fill: linear-gradient(180deg, #5CF777 0%, #0EBE2C 100%);
   --icon-photos-fill: #FFFFFF;
-  /* look-alike apps (components/apps/*): iOS system colors (HIG) and app chrome the spec leaves open */
+  /* look-alike apps (components/apps/*): One UI system colors and app chrome the spec leaves open */
   --on-accent: #FFFFFF;
   --on-accent-2: rgba(255,255,255,0.8);
-  --ui-indigo: #5E5CE6;
+  --ui-indigo: #6A5CE8;
   --ui-teal: #30B0C7;
-  --ui-yellow: #FFCC00;
-  --ui-pink: #FF2D55;
+  --ui-yellow: #FFC22E;
+  --ui-pink: #F0457A;
   --ui-push-shadow: rgba(0,0,0,0.12);
   --meta-ai-blue: #3EC6F6;
   --meta-ai-violet: #7A5CF5;
@@ -390,7 +390,7 @@
 
   /* Phase 3 home screen (home-screen builder; lib/tokens.ts homeWallpaper / homeColor / homeGradient).
      D9 tiles are sampled from the official Meta files in public/brand/meta/. */
-  --home-wallpaper-ink: #141219;
+  --home-wallpaper-ink: #0B0D1C;
   --home-wallpaper-slate: #2B3142;
   --home-wallpaper-steel: #5A6179;
   --home-wallpaper-lilac: #B7B6C4;
@@ -422,21 +422,25 @@
   --icon-glyph-frost-mid: #ECFAEE;
   --icon-glyph-frost-end: #B8ECC1;
   --icon-glass-rim: #FFFFFF;
+  --hun-fill: #FFFFFF;
+  --toast-fill: rgba(50,50,52,0.92);
   --widget-weather-top: #3C8CE7;
   --widget-weather-bottom: #7EC3F8;
   --widget-weather-sun: #FFD60A;
   --widget-calendar-bg: #FFFFFF;
-  --widget-music-fill: linear-gradient(160deg, #3A2A4F 0%, #1C1626 100%);
-  --widget-music-art: center / cover no-repeat url(/mock/album-encore.jpg); /* Encore (Eminem), iTunes artwork */
+  --widget-music-fill: linear-gradient(160deg, #4A2D2A 0%, #26201E 100%);
+  --widget-music-ink: #26201E;
+  --widget-calendar-accent: #E5484D;
+  --widget-music-art: center / cover no-repeat url(/mock/album-encore.jpg); /* Encore (Eminem), album artwork */
   --widget-music-accent: #FF5E7E;
   --widget-music-track: rgba(255,255,255,0.25);
-  --widget-reminders-accent: #FF9500;
-  --home-wallpaper-dim: rgba(0,0,0,0.38);
-  /* iOS 26 dock glass: a light frosted capsule (white veil over the wallpaper) with a soft lit rim */
+  --widget-reminders-accent: #3E91FF;
+  --home-wallpaper-dim: rgba(0,0,0,0.18);
+  /* frosted dock glass: a light frosted capsule (white veil over the wallpaper) with a soft lit rim */
   --home-dock-fill: linear-gradient(180deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.20) 100%);
   --home-dock-stroke: inset 0 0 0 0.75px rgba(255,255,255,0.35), inset 0 1px 1px rgba(255,255,255,0.35), 0 4px 14px rgba(0,0,0,0.18);
-  --widget-event-blue: #007AFF;
-  --widget-event-purple: #AF52DE;
+  --widget-event-blue: #3E91FF;
+  --widget-event-purple: #8E6CEF;
   --home-dot-inactive: rgba(255,255,255,0.4);
   --home-glass-edge: rgba(255,255,255,0.55);
   --icon-green-fill: linear-gradient(180deg, #5DF576 0%, #0BBD29 100%);
@@ -446,7 +450,7 @@
   --icon-messages-line: #AECBFA;
   --icon-gallery-fill: linear-gradient(160deg, #FF5F7E 0%, #E8335A 100%);
   --icon-gallery-center: #FFC2CF;
-  --widget-weather-fill: linear-gradient(180deg, #3C8CE7 0%, #7EC3F8 100%);
+  --widget-weather-fill: linear-gradient(160deg, #2F7DF6 0%, #58A6FF 60%, #8CC4FF 100%);
   --home-glass-sheen: linear-gradient(160deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.10) 40%, rgba(255,255,255,0.16) 100%);
 }
 
@@ -457,8 +461,8 @@
   /* Tailwind numeric spacing = the 4-pt grid: p-4 = 16pt = --space-16, gap-0.5 = 2pt */
   --spacing: 4px;
 
-  /* Radii off the 4/8 grid are spec-given iOS/device geometry, never free choices: 5 keyboard key,
-     10 and 14 iOS controls/cards, 18 bubbles, 26 home widgets, 34 dock, 62/68 display + panel corners
+  /* Radii off the 4/8 grid are spec-given device geometry, never free choices: 5 keyboard key,
+     10 and 14 controls/cards, 18 bubbles, 26 home widgets, 34 dock, 62/68 display + panel corners
      (CLAUDE_PROMPT.md Phase 1-3 GEOMETRY). */
   --radius-2: 2px;
   --radius-4: 4px;
@@ -501,7 +505,7 @@
   --shadow-device-lens-ring: 0 0 0 1px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.25);
   --shadow-device-lens-glass: inset 0 2px 6px rgba(0,0,0,0.8), inset 0 0 0 2px rgba(0,0,0,0.6);
   --shadow-device-button: inset 0 0.75px 0 rgba(255,255,255,0.85), inset 0 -0.75px 0 rgba(0,0,0,0.22), 0 0 0 0.5px rgba(70,68,63,0.45);
-  /* the buttons' visible lip: brushed titanium lit from above, like the frame band */
+  /* the buttons' visible lip: brushed aluminum lit from above, like the frame band */
   --device-button-lip: linear-gradient(180deg, #A3A6AD 0%, #6A6D74 35%, #3A3D43 75%, #1C1D21 100%);
   /* Phase 2 look-alike apps */
   --shadow-wa-bubble: 0 1px 0.5px rgba(11,20,26,0.13);

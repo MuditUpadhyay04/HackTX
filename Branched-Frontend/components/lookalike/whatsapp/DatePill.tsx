@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 import { WA } from "@/components/lookalike/metrics";
 import { LockGlyph } from "./glyphs";
 
-/** WhatsApp date pill (Phase 2 CHROME SPECS): centered, white 92%, 12.5 medium #54656F, radius 8. */
+/** WhatsApp date pill: centered, white 92%, 12.5 medium #54656F, radius 8 (the encryption notice
+ * uses the pale yellow pill with a lock). */
 export function DatePill({ children, system }: { children: ReactNode; system?: boolean }) {
   return (
     <div style={{ display: "flex", justifyContent: "center", paddingBlock: WA.pillGap, paddingInline: "var(--space-24)" }}>

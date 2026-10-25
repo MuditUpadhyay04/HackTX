@@ -66,7 +66,7 @@ function SpineCap({ angle, y }: { angle: MotionValue<number>; y: number }) {
 }
 
 /**
- * The hinge spine: a titanium cylinder (radius = slab thickness) around the hinge axis, swept over
+ * The hinge spine: a aluminum cylinder (radius = slab thickness) around the hinge axis, swept over
  * the angle between the two backs: nothing when flat, a rounded half cylinder on the device's left
  * edge when folded. Flat facets, Lambert-shaded per frame, plus the two end caps.
  */

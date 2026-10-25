@@ -274,7 +274,7 @@ function isTextField(target: EventTarget | null): boolean {
 }
 
 /**
- * An app's iOS keyboard (components/system/Keyboard.tsx, [data-keyboard]) is up and live: typed keys
+ * An app's keyboard (components/system/Keyboard.tsx, [data-keyboard]) is up and live: typed keys
  * go to its composer, so F must type an "f" instead of folding the phone. Inert copies on the
  * moving halves and hidden hosts don't count.
  */

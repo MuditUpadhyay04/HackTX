@@ -13,7 +13,7 @@ import { useSearchParams } from "next/navigation";
  *   ?motion=reduced  force the reduced-motion crossfades
  *   ?frame=bare      render a screen without the stage/device frame
  *   ?toasts=off      never show the "concept only" toast
- *   ?caret=static    draw the iOS caret without blinking (screenshots)
+ *   ?caret=static    draw the text cursor without blinking (screenshots)
  */
 export type Flags = {
   labels: boolean;

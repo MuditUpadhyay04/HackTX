@@ -1,9 +1,10 @@
 "use client";
 
 /**
- * Instagram look-alike that opens on the phone at the Direct inbox (where Michael's notification
- * lands): the inbox, Michael's DM thread (shared reels, the 290 sunrise photo, gradient outgoing
- * bubbles, the Message… composer on the shared iOS keyboard) and the Reels viewer a shared reel opens.
+ * Instagram for Android look-alike that opens on the phone at the Direct inbox (where Michael's
+ * notification lands): the inbox, Michael's DM thread (shared reels, the 290 sunrise photo, gradient
+ * outgoing bubbles, the Message… composer on the Samsung Keyboard) and the Reels viewer a shared reel
+ * opens. Android chrome: Material ← back arrows, left-aligned top-bar titles, Roboto type.
  * Folded: one column with push/pop. Unfolded: inbox left, thread right. Copy: lib/mock/threads.ts
  * (MICHAEL_SEED) and lib/mock/reels.ts. No Instagram logo files: glyphs are our own drawings.
  */
@@ -22,6 +23,7 @@ import { reelOrder, reels, type ReelId } from "@/lib/mock/reels";
 import { COMPOSER_PLACEHOLDER, PRESENCE_LABEL, type Message } from "@/lib/mock/threads";
 import { springSend, usePrefersReducedMotion } from "@/lib/motion";
 import { useMessaging, type ThreadId } from "@/lib/store/messaging";
+import { Placeholder } from "@/components/Placeholder";
 import { AppFrame, Avatar, Scroll, Split, StackView, TOP, Tap, ellipsis, useStack } from "../kit";
 
 type Route = { kind: "inbox" } | { kind: "thread"; id: ThreadId } | { kind: "reels"; start: ReelId };
@@ -57,7 +59,7 @@ export function InstagramApp({ display }: AppScreenProps) {
 
   if (display === "inner") {
     return (
-      <AppFrame display={display} tone={dark ? "light" : "dark"} background="var(--ui-bg)">
+      <AppFrame display={display} tone={dark ? "light" : "dark"} background="var(--ig-bg)">
         <Split
           divider="var(--ig-hairline)"
           list={<Inbox onOpen={open} selected={selected} />}
@@ -72,7 +74,7 @@ export function InstagramApp({ display }: AppScreenProps) {
     );
   }
   return (
-    <AppFrame display={display} tone={dark ? "light" : "dark"} background="var(--ui-bg)">
+    <AppFrame display={display} tone={dark ? "light" : "dark"} background="var(--ig-bg)">
       <StackView
         stack={stack}
         keyOf={(r, i) => `${r.kind}-${i}`}
@@ -97,9 +99,21 @@ export function InstagramApp({ display }: AppScreenProps) {
 const s = { fill: "none", stroke: "currentColor", strokeWidth: 1.9, strokeLinecap: "round", strokeLinejoin: "round" } as const;
 
 const Glyph = {
+  /** Material "arrow_back": a shaft with an arrowhead (Android), not a chevron */
   back: (size = 24) => (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M15 4 7 12l8 8" {...s} strokeWidth={2.2} />
+      <path d="M20 12H4.6M11 5.4 4.4 12l6.6 6.6" {...s} strokeWidth={2} />
+    </svg>
+  ),
+  camera: (size = 26) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M3.5 8.6c0-1.1.9-2 2-2h1.9l1.4-2h6.4l1.4 2h1.9c1.1 0 2 .9 2 2v9c0 1.1-.9 2-2 2h-13c-1.1 0-2-.9-2-2v-9Z" {...s} />
+      <circle cx="12" cy="12.8" r="3.6" {...s} />
+    </svg>
+  ),
+  trend: (size = 26) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M3.5 17.5 9.5 11l4 4 7-7.5M15.5 7.5h5v5" {...s} />
     </svg>
   ),
   edit: (size = 26) => (
@@ -119,7 +133,7 @@ const Glyph = {
       <path d="m15.8 10.4 5-3v9.2l-5-3" {...s} />
     </svg>
   ),
-  camera: (size = 20) => (
+  cameraSolid: (size = 20) => (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
       <path d="M4 8.6c0-1.1.9-2 2-2h1.6l1.2-1.8h6.4l1.2 1.8H18c1.1 0 2 .9 2 2v8.6c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V8.6Z" fill="currentColor" />
       <circle cx="12" cy="12.8" r="3.4" fill="var(--ig-blue)" />
@@ -187,18 +201,24 @@ const Glyph = {
 function Inbox({ onOpen, selected }: { onOpen: (id: ThreadId) => void; selected: ThreadId | null }) {
   const me = person("riley");
   return (
-    <Scroll top={TOP} bottom={30} style={{ background: "var(--ui-bg)", color: "var(--ig-text)" }}>
-      <div style={{ height: 44, display: "flex", alignItems: "center", gap: 10, paddingInline: 12 }}>
+    <Scroll top={TOP} bottom={30} style={{ background: "var(--ig-bg)", color: "var(--ig-text)" }}>
+      {/* Android top app bar: ← handle ⌄ ... trend / new message */}
+      <div style={{ height: 56, display: "flex", alignItems: "center", gap: 18, paddingLeft: 14, paddingRight: 16 }}>
         <span style={{ display: "flex", width: 24 }}>{Glyph.back()}</span>
-        <span style={{ flex: 1, display: "flex", alignItems: "center", gap: 4, fontSize: 20, fontWeight: 700, letterSpacing: -0.3 }}>
+        <span style={{ flex: 1, display: "flex", alignItems: "center", gap: 4, fontSize: 21, fontWeight: 700, letterSpacing: -0.2 }}>
           {MY_HANDLE} {Glyph.chevronDown()}
         </span>
-        <Tap label="New message" style={{ display: "flex" }}>
-          {Glyph.edit()}
-        </Tap>
+        <span style={{ display: "flex", gap: 22 }}>
+          <Placeholder id="instagram:inbox-trending">
+            <span style={{ display: "flex" }}>{Glyph.trend()}</span>
+          </Placeholder>
+          <Placeholder id="instagram:new-message">
+            <span style={{ display: "flex" }} aria-label="New message">{Glyph.edit()}</span>
+          </Placeholder>
+        </span>
       </div>
-      <div style={{ paddingInline: 16, marginTop: 6 }}>
-        <div style={{ height: 36, borderRadius: 10, background: "var(--ig-dm-in)", display: "flex", alignItems: "center", gap: 8, paddingInline: 10, color: "var(--ig-muted)", fontSize: 16 }}>
+      <div style={{ paddingInline: 16, marginTop: 2 }}>
+        <div style={{ height: 40, borderRadius: 20, background: "var(--ig-dm-in)", display: "flex", alignItems: "center", gap: 8, paddingInline: 10, color: "var(--ig-muted)", fontSize: 16 }}>
           <svg width={18} height={18} viewBox="0 0 20 20" aria-hidden="true">
             <defs>
               <linearGradient id="ig-meta-ring" x1="0" y1="0" x2="1" y2="1">
@@ -215,7 +235,7 @@ function Inbox({ onOpen, selected }: { onOpen: (id: ThreadId) => void; selected:
       {/* Notes row: Riley's own "Your note" bubble */}
       <div style={{ display: "flex", gap: 18, paddingInline: 16, paddingTop: 30, paddingBottom: 10 }}>
         <div style={{ position: "relative", width: 78, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-          <span style={{ position: "absolute", top: -22, left: 4, background: "var(--ui-bg)", borderRadius: 14, padding: "5px 9px", fontSize: 11, color: "var(--ig-muted)", boxShadow: "0 1px 6px var(--ui-push-shadow)", whiteSpace: "nowrap" }}>Note…</span>
+          <span style={{ position: "absolute", top: -22, left: 4, background: "var(--ig-bg)", borderRadius: 14, padding: "5px 9px", fontSize: 11, color: "var(--ig-muted)", boxShadow: "0 1px 6px var(--ui-push-shadow)", whiteSpace: "nowrap" }}>Note…</span>
           <Avatar src={me.avatar} size={74} />
           <span style={{ fontSize: 12, color: "var(--ig-muted)" }}>Your note</span>
         </div>
@@ -242,7 +262,7 @@ function InboxRow({ id, onOpen, selected }: { id: ThreadId; onOpen: (id: ThreadI
     <Tap onPress={() => onOpen(id)} onLongPress={() => useMessaging.getState().toggleUnread(id)} highlight="var(--ig-pressed)" style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", height: 72, paddingInline: 16, background: selected ? "var(--ig-dm-in)" : undefined }}>
       <span style={{ position: "relative" }}>
         <Avatar src={c.avatar} size={56} />
-        {t.presence === "active" ? <span style={{ position: "absolute", right: 1, bottom: 1, width: 14, height: 14, borderRadius: 7, background: "var(--ig-active)", border: "2.5px solid var(--ui-bg)" }} /> : null}
+        {t.presence === "active" ? <span style={{ position: "absolute", right: 1, bottom: 1, width: 14, height: 14, borderRadius: 7, background: "var(--ig-active)", border: "2.5px solid var(--ig-bg)" }} /> : null}
       </span>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ ...ellipsis, fontSize: 15, fontWeight: unread ? 700 : 400 }}>{c.name}</div>
@@ -340,10 +360,10 @@ function Thread({ id, onBack, onReel }: { id: ThreadId; onBack?: () => void; onR
       <ThreadFrame
         nav={<ThreadNav name={c.name} avatar={c.avatar} active={t.presence === "active"} onBack={onBack} />}
         navHeight={STATUS.height + IG.navHeight}
-        background="var(--ui-bg)"
+        background="var(--ig-bg)"
         composer={<IgComposer draft={t.draft} focused={t.keyboard} onFocus={() => focus(id)} onSend={() => send(id)} />}
         composerHeight={IG.composer.height}
-        composerBackground="var(--ui-bg)"
+        composerBackground="var(--ig-bg)"
         keyboardOpen={t.keyboard}
         keyboard={<Keyboard threadId={id} platform="instagram" />}
         stickKey={msgs.length}
@@ -374,7 +394,7 @@ function ProfileHeader({ name, handle, avatar }: { name: string; handle?: string
 
 function ThreadNav({ name, avatar, active, onBack }: { name: string; avatar: string; active: boolean; onBack?: () => void }) {
   return (
-    <div style={{ height: STATUS.height + IG.navHeight, paddingTop: STATUS.height, background: "var(--ui-bg)", boxShadow: "inset 0 calc(-1 * var(--hairline)) 0 var(--ig-hairline)", color: "var(--ig-text)" }}>
+    <div style={{ height: STATUS.height + IG.navHeight, paddingTop: STATUS.height, background: "var(--ig-bg)", boxShadow: "inset 0 calc(-1 * var(--hairline)) 0 var(--ig-hairline)", color: "var(--ig-text)" }}>
       <div style={{ height: IG.navHeight, display: "flex", alignItems: "center", gap: 10, paddingLeft: onBack ? 8 : 16, paddingRight: 16 }}>
         {onBack ? (
           <Tap label="Back" onPress={onBack} style={{ display: "flex" }}>
@@ -383,7 +403,7 @@ function ThreadNav({ name, avatar, active, onBack }: { name: string; avatar: str
         ) : null}
         <span style={{ position: "relative" }}>
           <Avatar src={avatar} size={IG.avatar} />
-          {active ? <span style={{ position: "absolute", right: -1, bottom: -1, width: 11, height: 11, borderRadius: 6, background: "var(--ig-active)", border: "2px solid var(--ui-bg)" }} /> : null}
+          {active ? <span style={{ position: "absolute", right: -1, bottom: -1, width: 11, height: 11, borderRadius: 6, background: "var(--ig-active)", border: "2px solid var(--ig-bg)" }} /> : null}
         </span>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ ...ellipsis, fontSize: IG.nameSize, fontWeight: 700 }}>{name}</div>
@@ -469,7 +489,7 @@ function IgComposer({ draft, focused, onFocus, onSend }: { draft: string; focuse
   const c = IG.composer;
   const has = draft.length > 0;
   return (
-    <div style={{ height: c.height, display: "flex", alignItems: "center", paddingInline: c.padX, background: "var(--ui-bg)" }}>
+    <div style={{ height: c.height, display: "flex", alignItems: "center", paddingInline: c.padX, background: "var(--ig-bg)" }}>
       <div
         role="textbox"
         tabIndex={-1}
@@ -480,7 +500,7 @@ function IgComposer({ draft, focused, onFocus, onSend }: { draft: string; focuse
         }}
         style={{ flex: 1, minWidth: 0, height: c.field, borderRadius: c.field / 2, background: "var(--ig-dm-in)", display: "flex", alignItems: "center", gap: 10, paddingLeft: 5, paddingRight: 14, cursor: "text", color: "var(--ig-text)", outline: "none" }}
       >
-        <span style={{ width: c.camera, height: c.camera, borderRadius: c.camera / 2, background: "var(--ig-blue)", color: "var(--on-accent)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{Glyph.camera(20)}</span>
+        <span style={{ width: c.camera, height: c.camera, borderRadius: c.camera / 2, background: "var(--ig-blue)", color: "var(--on-accent)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{Glyph.cameraSolid(20)}</span>
         <span style={{ flex: 1, minWidth: 0, ...ellipsis, fontSize: 16, color: has ? "var(--ig-text)" : "var(--ig-muted)" }}>
           {has ? draft : null}
           {focused ? <Caret tint="var(--ig-blue)" /> : null}
@@ -538,7 +558,7 @@ function Reels({ start, onBack }: { start: ReelId; onBack: () => void }) {
                   {r.shares}
                 </span>
                 {Glyph.more(26)}
-                <span style={{ width: 28, height: 28, borderRadius: 7, border: "2px solid var(--ui-bg)", overflow: "hidden", display: "flex" }}>
+                <span style={{ width: 28, height: 28, borderRadius: 7, border: "2px solid var(--on-accent)", overflow: "hidden", display: "flex" }}>
                   <Avatar src={p.avatar} size={24} style={{ borderRadius: 4 }} />
                 </span>
               </div>
@@ -562,11 +582,15 @@ function Reels({ start, onBack }: { start: ReelId; onBack: () => void }) {
           );
         })}
       </div>
-      <div style={{ position: "absolute", left: 0, right: 0, top: TOP, height: 44, display: "flex", alignItems: "center", paddingInline: 12, gap: 10, pointerEvents: "none" }}>
+      {/* Android top bar over the reel: ← Reels ... camera */}
+      <div style={{ position: "absolute", left: 0, right: 0, top: TOP, height: 56, display: "flex", alignItems: "center", paddingLeft: 14, paddingRight: 16, gap: 18, pointerEvents: "none" }}>
         <Tap label="Back" onPress={onBack} style={{ display: "flex", pointerEvents: "auto" }}>
-          {Glyph.back(28)}
+          {Glyph.back(26)}
         </Tap>
-        <span style={{ fontSize: 22, fontWeight: 700 }}>Reels</span>
+        <span style={{ flex: 1, fontSize: 22, fontWeight: 700 }}>Reels</span>
+        <Placeholder id="instagram:reels-camera">
+          <span style={{ display: "flex", pointerEvents: "auto" }}>{Glyph.camera(28)}</span>
+        </Placeholder>
       </div>
     </div>
   );

@@ -28,7 +28,7 @@ declare global {
 
 const CLOCK = /^([01]\d|2[0-3]):[0-5]\d$/;
 
-/* ---------- styles (tokens only; iOS dark sheet, HIG dark mode). Dev-only UI (hidden in recordings). ---------- */
+/* ---------- styles (tokens only; dark sheet, dark mode). Dev-only UI (hidden in recordings). ---------- */
 
 const panel: CSSProperties = {
   position: "fixed",

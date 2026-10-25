@@ -123,7 +123,7 @@ export const SARAH_SEED: Message[] = build("sarah", [
   ["2026-10-10T15:47", "them", "text", t("ok I guess not")],
   ["2026-10-10T15:47", "them", "text", t("are you okay?")],
   ["2026-10-13T22:58", "them", "text", t("goodnight 🤍")],
-  ["2026-10-15T23:20", "them", "text", t("I miss your voice. can we facetime tomorrow?")],
+  ["2026-10-15T23:20", "them", "text", t("I miss your voice. can we video call tomorrow?")],
   [
     "2026-10-18T00:47",
     "them",
@@ -320,12 +320,12 @@ export const SCRIPT_PREDICTIONS: Record<"mom" | "sarah" | "michael", [string, st
   michael: ["tired", "tbh", "bro"],
 };
 
-/** iMessage: her typing dots after "Read" (per-thread flag; default on for Sarah only). */
+/** Google Messages (RCS): her typing dots after "Read" (per-thread flag; default on for Sarah only). */
 export const TYPING_AFTER_READ: Partial<Record<ThreadId, boolean>> = { sarah: true };
 
 /** Composer placeholders (chrome). */
 export const COMPOSER_PLACEHOLDER = {
-  messages: "iMessage",
+  messages: "RCS message",
   instagram: "Message…",
 } as const;
 

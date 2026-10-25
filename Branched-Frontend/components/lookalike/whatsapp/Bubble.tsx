@@ -63,15 +63,15 @@ export type BubbleProps = {
   time: string;
   receipt?: Receipt;
   children: ReactNode;
-  /** media bubbles hug their content with a 3 pt frame */
+  /** media bubbles hug their content with a 3 dp frame */
   media?: boolean;
   width?: number;
 };
 
 /**
- * WhatsApp bubble (Phase 2 CHROME SPECS): incoming white / outgoing #D9FDD3, 16.5 pt text, radius 8,
- * a tail on the first bubble of each run, the time inside at the bottom right (11 pt) and the
- * double tick on his.
+ * WhatsApp for Android bubble: incoming white / outgoing #D9FDD3, 16 sp text, radius 8, a tail at
+ * the top corner of the first bubble of each run, the time inside at the bottom right (11 sp) and
+ * the double tick (blue once read) on his.
  */
 export function Bubble({ mine, tail, time, receipt, children, media, width }: BubbleProps) {
   const pane = usePane();
@@ -94,10 +94,9 @@ export function Bubble({ mine, tail, time, receipt, children, media, width }: Bu
           borderTopRightRadius: tail && mine ? 0 : WA.bubbleRadius,
           boxShadow: "var(--shadow-wa-bubble)",
           padding: media ? WA.photo.inset : `${WA.bubblePadTop}px ${WA.bubblePadX}px ${WA.bubblePadBottom}px`,
-          color: "var(--ui-label)",
-          fontSize: WA.bubbleText,
+          color: "var(--wa-android-on-surface)",
+          fontSize: 16,
           lineHeight: `${WA.bubbleLine}px`,
-          letterSpacing: "var(--type-body-tracking)",
           whiteSpace: "pre-wrap",
           overflowWrap: "anywhere",
         }}

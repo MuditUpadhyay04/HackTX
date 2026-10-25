@@ -44,15 +44,15 @@ export type GalaxyFoldProps = {
   cover?: ReactNode;
   /** the inner display (unfolded, one seamless screen), in an 822.5 x 573 pt viewport (GEOM.viewport.inner) */
   inner?: ReactNode;
-  /** @deprecated Phase 1 Duo name: alias of `cover` */
+  /** @deprecated Phase 1 name: alias of `cover` */
   right?: ReactNode;
-  /** @deprecated Phase 1 Duo name: alias of `inner` */
+  /** @deprecated Phase 1 name: alias of `inner` */
   spanning?: ReactNode;
   shadow?: "auto" | "none";
   reflection?: boolean;
   /** 0..1 position of the back-glass specular sweep; derived from openAngle unless set */
   specular?: number;
-  /** D10: natural titanium */
+  /** D10: Graphite aluminum */
   finish?: "natural";
   /** rendered centered on the hinge, in front of the device (the detent ripple) */
   hingeAccessory?: ReactNode;
@@ -76,8 +76,8 @@ function useAngle(openAngle: GalaxyFoldProps["openAngle"], fallback: number): Mo
 }
 
 /**
- * The iPhone Fold (docs/RULES.md D10; kept under the Phase 1 name GalaxyFold): a pure function of
- * openAngle. Two 590 x 830 x 18 titanium halves and a hinge spine in one preserve-3d scene; the
+ * The Galaxy Z Fold 8 (docs/RULES.md D10; kept under the Phase 1 name GalaxyFold): a pure function of
+ * openAngle. Two 590 x 830 x 18 aluminum halves and a hinge spine in one preserve-3d scene; the
  * left half folds inward around the hinge axis (rotateY 180 - a), the group recenters
  * (-295 * (1 - a/180)) and tilts a little mid-fold. Folded it is one short, wide slab showing the
  * cover display; flat it is one landscape slab with one seamless inner display. Every per-frame
@@ -136,7 +136,7 @@ export function GalaxyFold({
       data-device="galaxy-z-fold8"
       data-state={state}
       data-finish={finish}
-      data-duo-shadow={shadow}
+      data-fold-shadow={shadow}
       data-screen={on ? "on" : "off"}
       style={{
         position: "absolute",
@@ -262,7 +262,7 @@ function InnerContent({ angle, children }: { angle: MotionValue<number>; childre
       }}
     >
       <div
-        data-duo-viewport="inner"
+        data-fold-viewport="inner"
         style={{
           position: "absolute",
           left: 0,
@@ -277,6 +277,7 @@ function InnerContent({ angle, children }: { angle: MotionValue<number>; childre
         {children}
       </div>
       <GlassSheen width={d.width} height={d.height} />
+      <PunchHole display="inner" width={d.width} />
     </motion.div>
   );
 }
@@ -314,7 +315,7 @@ function CoverContent({ angle, children }: { angle: MotionValue<number>; childre
       }}
     >
       <div
-        data-duo-viewport="cover"
+        data-fold-viewport="cover"
         style={{
           position: "absolute",
           left: 0,

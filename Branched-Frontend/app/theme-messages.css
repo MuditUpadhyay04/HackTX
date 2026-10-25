@@ -1,3 +1,27 @@
 /* app/theme-messages.css: colors for the messages look-alike (Android). Owned by that app only. */
+/* Google Messages, Material 3 light (baseline blue scheme). */
 :root {
+  --gm-bg: #FFFFFF;
+  --gm-surface-high: #F0F4F9;
+  --gm-on-surface: #1F1F1F;
+  --gm-on-variant: #444746;
+  --gm-outline: #C4C7C5;
+  --gm-primary: #0B57D0;
+  --gm-on-primary: #FFFFFF;
+  --gm-primary-container: #D3E3FD;
+  --gm-on-primary-container: #041E49;
+  --gm-bubble-in: #E9EEF6;
+  --gm-bubble-out: #0B57D0;
+  --gm-selected: #D3E3FD;
+  --gm-pressed: #E8EBF0;
+
+  /* the shared --msg-* names, retuned to Google Messages */
+  --msg-blue: #0B57D0;
+  --msg-gray: #E9EEF6;
+  --msg-meta: #444746;
+  --msg-nav: #FFFFFF;
+  --msg-nav-material: #FFFFFF;
+  --msg-field-stroke: transparent;
+  --msg-failed: #B3261E;
+  --msg-green: #146C2E;
 }

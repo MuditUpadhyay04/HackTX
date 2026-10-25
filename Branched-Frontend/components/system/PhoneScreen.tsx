@@ -16,7 +16,7 @@ export type PhoneScreenProps = {
 };
 
 /**
- * One iOS screen on the cover display: the 402 x 573.1 pt viewport (GEOM.viewport.cover, D10) with
+ * One One UI screen on the cover display: the 402 x 573.1 pt viewport (GEOM.viewport.cover, D10) with
  * the status bar, the banner stack and the home indicator layered over the app.
  */
 export function PhoneScreen({

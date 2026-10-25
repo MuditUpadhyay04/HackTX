@@ -1,15 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { STATUS, WA } from "@/components/lookalike/metrics";
+import { STATUS } from "@/components/lookalike/metrics";
 import { Pressable } from "@/components/lookalike/shared/Pressable";
 import { Placeholder } from "@/components/Placeholder";
-import { ChevronBack, PhoneGlyph, VideoGlyph } from "./glyphs";
+import { WAA } from "./android";
+import { ArrowBack, MoreVert, PhoneGlyph, VideoGlyph } from "./glyphs";
 
 export type WhatsAppNavProps = {
   name: string;
   subtitle: string;
   avatar: string;
+  /** unread chats elsewhere, shown beside the back arrow */
   backCount?: number;
   backHref: string;
   /** in-phone navigation (the app's stack); falls back to the scene route */
@@ -19,45 +21,45 @@ export type WhatsAppNavProps = {
   onVoice?: () => void;
 };
 
-/** WhatsApp chat header (Phase 2 CHROME SPECS): white 96% with a hairline; back chevron + count in
- * iOS blue; 36 pt avatar; name 17 semibold; subtitle 12; video + phone glyphs. */
+/** WhatsApp for Android chat top app bar: white surface; back arrow (+ unread count); 38 dp
+ * avatar; name 18 medium and "online" 13; video call, voice call and the overflow menu. */
 export function WhatsAppNav({ name, subtitle, avatar, backCount, backHref, onBack, hideBack, onVideo, onVoice }: WhatsAppNavProps) {
   const router = useRouter();
+  const t = WAA.thread;
   return (
     <div
       style={{
-        height: STATUS.height + WA.navHeight,
+        height: STATUS.height + WAA.threadBar,
         paddingTop: STATUS.height,
-        background: "var(--wa-nav-material)",
-        backdropFilter: "var(--material-light-filter)",
-        WebkitBackdropFilter: "var(--material-light-filter)",
-        boxShadow: "inset 0 calc(-1 * var(--hairline)) 0 var(--ui-separator)",
+        background: "var(--wa-android-surface)",
+        color: "var(--wa-android-icon)",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", height: WA.navHeight, paddingInline: "var(--space-8)" }}>
-        {hideBack ? <span style={{ width: "var(--space-8)" }} /> : (
-        <Pressable
-          nav={backHref}
-          onPress={() => (onBack ? onBack() : router.push(backHref))}
-          label="Back"
-          style={{ display: "flex", alignItems: "center", gap: "var(--space-4)", color: "var(--ui-blue)", height: WA.navHeight, paddingRight: "var(--space-8)" }}
-        >
-          <ChevronBack width={WA.backChevron.width} height={WA.backChevron.height} />
-          {backCount ? <span style={{ fontSize: WA.nameSize, letterSpacing: "var(--type-body-tracking)" }}>{backCount}</span> : null}
-        </Pressable>
+      <div style={{ display: "flex", alignItems: "center", height: WAA.threadBar, paddingInline: 4 }}>
+        {hideBack ? (
+          <span style={{ width: 12 }} />
+        ) : (
+          <Pressable
+            nav={backHref}
+            onPress={() => (onBack ? onBack() : router.push(backHref))}
+            label="Back"
+            style={{ display: "flex", alignItems: "center", gap: 2, height: WAA.iconButton, minWidth: WAA.iconButton, paddingInline: 8, borderRadius: 20 }}
+          >
+            <ArrowBack size={WAA.icon} />
+            {backCount ? <span style={{ fontSize: 15, fontWeight: 500, color: "var(--wa-android-on-surface)" }}>{backCount}</span> : null}
+          </Pressable>
         )}
         <Placeholder id="whatsapp:contact-info" press="darken">
-          <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: "var(--space-8)" }}>
+          <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10, height: "100%" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={avatar} alt="" width={WA.avatar} height={WA.avatar} style={{ borderRadius: "50%", flexShrink: 0 }} />
+            <img src={avatar} alt="" width={t.avatar} height={t.avatar} style={{ borderRadius: "50%", flexShrink: 0 }} />
             <div style={{ minWidth: 0 }}>
               <div
                 style={{
-                  fontSize: WA.nameSize,
-                  fontWeight: 600,
-                  letterSpacing: "var(--type-headline-tracking)",
-                  lineHeight: "var(--type-headline-line-height)",
-                  color: "var(--ui-label)",
+                  fontSize: t.nameSize,
+                  fontWeight: 500,
+                  lineHeight: "23px",
+                  color: "var(--wa-android-on-surface)",
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -65,19 +67,24 @@ export function WhatsAppNav({ name, subtitle, avatar, backCount, backHref, onBac
               >
                 {name}
               </div>
-              <div style={{ fontSize: WA.subtitleSize, lineHeight: "var(--type-caption-1-line-height)", color: "var(--wa-meta)" }}>{subtitle}</div>
+              {subtitle ? <div style={{ fontSize: t.subtitleSize, lineHeight: "17px", color: "var(--wa-android-on-surface-variant)" }}>{subtitle}</div> : null}
             </div>
           </div>
         </Placeholder>
-        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-20)", color: "var(--ui-blue)", paddingRight: "var(--space-8)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <Placeholder id="whatsapp:call-start">
             <button type="button" aria-label="Video call" style={iconButton} onClick={onVideo ? (e) => (e.preventDefault(), onVideo()) : undefined}>
-              <VideoGlyph size={WA.composer.glyph} />
+              <VideoGlyph size={WAA.icon} />
             </button>
           </Placeholder>
           <Placeholder id="whatsapp:call-start">
             <button type="button" aria-label="Voice call" style={iconButton} onClick={onVoice ? (e) => (e.preventDefault(), onVoice()) : undefined}>
-              <PhoneGlyph size={WA.composer.glyph - 2} />
+              <PhoneGlyph size={WAA.icon - 1} />
+            </button>
+          </Placeholder>
+          <Placeholder id="whatsapp:menu">
+            <button type="button" aria-label="More options" style={iconButton}>
+              <MoreVert size={WAA.icon} />
             </button>
           </Placeholder>
         </div>
@@ -91,6 +98,9 @@ const iconButton = {
   border: 0,
   padding: 0,
   margin: 0,
+  width: WAA.iconButton + 4,
+  height: WAA.iconButton + 4,
+  borderRadius: "50%",
   background: "none",
   color: "inherit",
   display: "flex",

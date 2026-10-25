@@ -31,7 +31,7 @@ async function BoardFromUrl({ searchParams }: { searchParams: SearchParams }) {
 
 /* ---------- type + layout helpers (tokens only) ---------- */
 
-/** An iOS / Meta text style from app/tokens.css; `emphasized` = the style's semibold variant (600). */
+/** A system / Meta text style from app/tokens.css; `emphasized` = the style's semibold variant (600). */
 function textStyle(name: string, emphasized = false): CSSProperties {
   return {
     fontFamily: "var(--font-system)",
@@ -69,7 +69,7 @@ const glyphButton: CSSProperties = {
  * Inline SVG on a 24-unit grid, shown at size.glyphSmall (20) or size.glyphLarge (24).
  * Stroke tokens (size.glyphStroke*) are rendered weights: Glyph scales them into grid units,
  * so a 20 pt and a 24 pt glyph draw the same line and every host reads equally heavy at 2x.
- * Each shape follows its own app's glyph (SF Symbols for iOS / Messages / Photos; the
+ * Each shape follows its own app's glyph (Material symbols for One UI / Messages / Gallery; the
  * WhatsApp, Instagram, Facebook and Meta AI glyphs for theirs). Round caps and joins throughout.
  */
 
@@ -265,10 +265,10 @@ function Board({ pressed }: { pressed: boolean }) {
           rowGap: "var(--space-28)",
         }}
       >
-        {/* iOS: a search glyph button on the grouped background */}
-        <Tile name="iOS" id="ios:search" background="var(--ui-gray6)">
+        {/* One UI: a search glyph button on the grouped background */}
+        <Tile name="One UI" id="oneui:search" background="var(--ui-gray6)">
           <div style={{ display: "flex", justifyContent: "flex-end", paddingInline: "var(--space-8)" }}>
-            <Placeholder id="ios:search" pressed={pressed}>
+            <Placeholder id="oneui:search" pressed={pressed}>
               <button type="button" aria-label="Search" style={{ ...glyphButton, color: "var(--ui-blue)" }}>
                 <SearchGlyph />
               </button>
@@ -406,7 +406,7 @@ function Board({ pressed }: { pressed: boolean }) {
                 background: "var(--meta-ai-surface)",
               }}
             >
-              {/* 44 pt hit box (HIG) around the 32 pt disc; the disc sits 6 pt in from the well's edge */}
+              {/* 44 pt hit box  around the 32 pt disc; the disc sits 6 pt in from the well's edge */}
               <Placeholder id="meta-ai:send" pressed={pressed}>
                 <button type="button" aria-label="Send" style={{ ...glyphButton, color: ON_DARK }}>
                   <span
@@ -432,7 +432,7 @@ function Board({ pressed }: { pressed: boolean }) {
         <Tile name="Toast" id="host apps" background="var(--ui-wallpaper-base)">
           <Wallpaper variant="stage" />
           <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
-            <ConceptOnlyPill platform="ios" />
+            <ConceptOnlyPill platform="oneui" />
           </div>
         </Tile>
       </div>

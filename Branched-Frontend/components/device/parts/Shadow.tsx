@@ -9,9 +9,9 @@ import { GEOM, cornerRadiusCss, groupShift, silhouetteLeft, type FoldSide } from
  * the variant with no prop threading.
  */
 const SHADOW_CSS = [
-  '[data-duo-shadow="auto"] [data-duo-rim]{display:none}',
-  '[data-stage="black"] [data-duo-shadow="auto"] [data-duo-rim]{display:block}',
-  '[data-stage="black"] [data-duo-shadow="auto"] [data-duo-drop]{display:none}',
+  '[data-fold-shadow="auto"] [data-fold-rim]{display:none}',
+  '[data-stage="black"] [data-fold-shadow="auto"] [data-fold-rim]{display:block}',
+  '[data-stage="black"] [data-fold-shadow="auto"] [data-fold-drop]{display:none}',
 ].join("");
 
 const r3 = (n: number) => Math.round(n * 1000) / 1000;
@@ -56,8 +56,8 @@ export function HalfShadow({ side, angle }: { side: FoldSide; angle: MotionValue
   } as const;
   return (
     <>
-      <motion.div aria-hidden="true" data-duo-drop="" style={{ ...plane, boxShadow: "var(--shadow-device-drop)" }} />
-      <motion.div aria-hidden="true" data-duo-rim="" style={{ ...plane, boxShadow: "var(--shadow-device-rim-light)" }} />
+      <motion.div aria-hidden="true" data-fold-drop="" style={{ ...plane, boxShadow: "var(--shadow-device-drop)" }} />
+      <motion.div aria-hidden="true" data-fold-rim="" style={{ ...plane, boxShadow: "var(--shadow-device-rim-light)" }} />
     </>
   );
 }
@@ -82,7 +82,7 @@ export function ContactShadow({ angle }: { angle: MotionValue<number> }) {
       </style>
       <motion.div
         aria-hidden="true"
-        data-duo-drop=""
+        data-fold-drop=""
         data-fold-part="contact-shadow"
         style={{
           position: "absolute",

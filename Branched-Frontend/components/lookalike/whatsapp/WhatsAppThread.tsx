@@ -19,6 +19,7 @@ import { DatePill } from "./DatePill";
 import { DoodleWallpaper } from "./DoodleWallpaper";
 import { MissedCallRow } from "./MissedCallRow";
 import { WhatsAppNav } from "./WhatsAppNav";
+import { WAA } from "./android";
 
 export type WhatsAppThreadProps = {
   threadId?: ThreadId;
@@ -28,7 +29,7 @@ export type WhatsAppThreadProps = {
   /** in-phone navigation: back to the chat list, start a call */
   onBack?: () => void;
   onCall?: (kind: "voice" | "video") => void;
-  /** the number beside the back chevron (unread chats elsewhere); default: the story's BACK_COUNT */
+  /** the number beside the back arrow (unread chats elsewhere); default: the story's BACK_COUNT */
   backCount?: number;
   /** split view on the inner display: the chat list stays beside the thread, so no back button */
   hideBack?: boolean;
@@ -38,8 +39,8 @@ export type WhatsAppThreadProps = {
 const photoSrc = (id: string) => `/mock/photos/${id}.svg`;
 
 /**
- * The WhatsApp chat look-alike (Phase 2 STATE 1, Mom): doodle wallpaper, date pills, bubbles with
- * tails and ticks, missed-call rows, the composer and the keyboard. A working mock: focus the field,
+ * The WhatsApp for Android chat look-alike (Phase 2 STATE 1, Mom): doodle wallpaper, date pills,
+ * bubbles with tails and ticks, missed-call rows, the floating composer and the keyboard. A working mock: focus the field,
  * type (drawn keys or the physical keyboard), send; ticks go gray -> double -> blue.
  */
 export function WhatsAppThread({ threadId = "mom", seen = true, initialScroll = "bottom", onBack, onCall, backCount, hideBack }: WhatsAppThreadProps) {
@@ -74,7 +75,7 @@ export function WhatsAppThread({ threadId = "mom", seen = true, initialScroll = 
     rows.push(
       <motion.div
         key={m.id}
-        initial={fresh[m.id] && !reduced ? { y: WA.composer.height, opacity: 0 } : false}
+        initial={fresh[m.id] && !reduced ? { y: WAA.composer.height, opacity: 0 } : false}
         animate={{ y: 0, opacity: 1 }}
         transition={springSend}
         style={{ marginTop: (newDay ? 0 : gap) + WA.runGap }}
@@ -118,14 +119,14 @@ export function WhatsAppThread({ threadId = "mom", seen = true, initialScroll = 
             onVoice={onCall ? () => onCall("voice") : undefined}
           />
         }
-        navHeight={STATUS.height + WA.navHeight}
+        navHeight={STATUS.height + WAA.threadBar}
         backdrop={<DoodleWallpaper />}
         background="var(--wa-wallpaper)"
         composer={
           <Composer draft={thread.draft} focused={thread.keyboard} onFocus={() => focus(threadId)} onSend={() => send(threadId)} />
         }
-        composerHeight={WA.composer.height}
-        composerBackground="var(--wa-nav)"
+        composerHeight={WAA.composer.height}
+        composerBackground="transparent"
         keyboardOpen={thread.keyboard}
         keyboard={<Keyboard threadId={threadId} platform="whatsapp" />}
         initialScroll={initialScroll}
@@ -138,7 +139,7 @@ export function WhatsAppThread({ threadId = "mom", seen = true, initialScroll = 
           ))}
         </div>
       </ThreadFrame>
-      <CallActionSheet open={sheet} onClose={() => setSheet(false)} />
+      <CallActionSheet open={sheet} name={contact.name} onClose={() => setSheet(false)} />
     </>
   );
 }

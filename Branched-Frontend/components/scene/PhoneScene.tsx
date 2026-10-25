@@ -24,13 +24,13 @@ export type PhoneSceneProps = {
   statusTone?: "dark" | "light";
   indicatorTone?: "dark" | "light";
   indicator?: boolean;
-  /** the folded Duo asleep (state=off) */
+  /** the folded Fold asleep (state=off) */
   off?: boolean;
 };
 
 /**
  * Every Phase 2 app route: the Stage (studio off-white by default, D12; ?bg=black|white) with the
- * folded iPhone Fold, the app screen on its cover display (402 x 573.1 pt, D10).
+ * folded Galaxy Z Fold 8, the app screen on its cover display (402 x 573.1 pt, D10).
  *
  * URL: &bg= · &clock=frozen|HH:MM · &reset=1 · &replies=on · &banner=sarah|michael|unsaid
  * &banner-state=in|pressed (a static banner frame) · &notify=sarah|michael|unsaid (fires once after

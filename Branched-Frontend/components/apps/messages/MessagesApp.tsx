@@ -1,21 +1,23 @@
 "use client";
 
 /**
- * Messages (iMessage, iOS 18) look-alike that opens on the phone: the conversation list and Sarah's
- * thread. A working mock on the shared store (lib/store/messaging): type with the iOS keyboard, send,
- * "Delivered" -> "Read 9:41 PM", then her typing dots (RECEIPT_TIMING). Folded: one column with
- * push/pop. Unfolded: the iPad-style split. Copy: lib/mock/threads.ts (SARAH_SEED).
+ * Messages look-alike (Google Messages, Material 3, RCS chats) that opens on the phone: the
+ * conversation list and Sarah's thread. A working mock on the shared store (lib/store/messaging):
+ * type with the keyboard, send, "Delivered" -> "Read · 9:41 PM", then her typing dots
+ * (RECEIPT_TIMING). Folded: one column with push/pop. Unfolded: list pane + conversation pane.
+ * Copy: lib/mock/threads.ts (SARAH_SEED). Colors: app/theme-messages.css (--gm-*).
  */
 import { AnimatePresence, motion } from "framer-motion";
-import { Fragment, useEffect, type ReactNode } from "react";
-import { IMSG, STATUS } from "@/components/lookalike/metrics";
+import { Fragment, useEffect, type CSSProperties, type ReactNode } from "react";
+import { SAFE_BOTTOM, STATUS } from "@/components/lookalike/metrics";
 import { usePane } from "@/components/lookalike/shared/pane";
 import { ThreadFrame } from "@/components/lookalike/shared/ThreadFrame";
+import { Placeholder } from "@/components/Placeholder";
 import { Caret, CaretKeyframes } from "@/components/system/Caret";
 import { Keyboard } from "@/components/system/Keyboard";
 import type { AppScreenProps } from "@/lib/apps/registry";
 import { useMockClock } from "@/lib/mock/clock";
-import { imsgStampParts, minutesBetween, waListTime } from "@/lib/mock/format";
+import { minutesBetween, msgStampParts, waListTime } from "@/lib/mock/format";
 import { person } from "@/lib/mock/people";
 import { COMPOSER_PLACEHOLDER, type Message } from "@/lib/mock/threads";
 import { springSend, usePrefersReducedMotion } from "@/lib/motion";
@@ -27,16 +29,70 @@ type Route = { kind: "list" } | { kind: "thread"; id: ThreadId };
 /** Conversations in the list (newest first): Sarah, then the unread background chats. */
 const CONVERSATIONS: ThreadId[] = ["sarah", "ethan", "lena", "dad", "clinic"];
 
-/** iMessage shows a centered time stamp when more than an hour passes between messages. */
+/** A centered date line appears when more than an hour passes between messages. */
 const STAMP_GAP_MIN = 60;
+
+/** Google Messages metrics (dp). */
+const GM = {
+  navHeight: 64,
+  navAvatar: 36,
+  rowHeight: 72,
+  rowAvatar: 48,
+  search: 56,
+  bubbleText: 16,
+  bubbleLine: 22,
+  radius: 20,
+  joint: 4,
+  padX: 14,
+  padY: 9,
+  bubbleMax: 0.74,
+  inAvatar: 32,
+  sideInset: 12,
+  runGap: 2,
+  groupGap: 10,
+  composer: { height: 64, plus: 40, field: 44, action: 44, gap: 8, padX: 8 },
+} as const;
+
+/** Material Symbols (outlined) paths, 24-unit grid. */
+const ICON = {
+  back: "M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z",
+  video: "M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4zM15 16H5V8h10v8z",
+  more: "M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z",
+  search:
+    "M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z",
+  chat: "M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12zM7 9h10v2H7zm0-3h10v2H7zm0 6h7v2H7z",
+  add: "M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z",
+  emoji:
+    "M15.5 11a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-7 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm3.49-9C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm0-4c-1.48 0-2.75-.81-3.45-2H6.88a5.5 5.5 0 0 0 10.24 0h-1.67c-.7 1.19-1.97 2-3.45 2z",
+  gallery:
+    "M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4.86 8.86-3 3.87L9 13.14 6 17h12l-3.86-5.14z",
+  mic: "M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z",
+  send: "M3.4 20.4 20.85 12.92a1 1 0 0 0 0-1.84L3.4 3.6a.993.993 0 0 0-1.39.91L2 9.12c0 .5.37.93.87.99L17 12 2.87 13.88c-.5.07-.87.5-.87 1l.01 4.61c0 .71.73 1.2 1.39.91z",
+} as const;
+
+function Icon({ d, size = 24, style }: { d: string; size?: number; style?: CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" style={{ display: "block", flexShrink: 0, ...style }}>
+      <path d={d} fill="currentColor" />
+    </svg>
+  );
+}
+
+/** A round 48dp icon button (Material standard icon button touch target). */
+const iconButton: CSSProperties = { width: 48, height: 48, borderRadius: 24, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gm-on-variant)", cursor: "pointer" };
+
+/** "Today · 9:41 PM", "Sunday · 12:47 AM", "Sat, Oct 10 · 12:31 PM". */
+function chipText(at: Parameters<typeof msgStampParts>[0], now: Parameters<typeof msgStampParts>[1]): string {
+  const p = msgStampParts(at, now);
+  return `${p.day} · ${p.time.replace(/^at /, "")}`;
+}
 
 export function MessagesApp({ display }: AppScreenProps) {
   // shared with the other display's copy, so a fold/unfold keeps the open conversation
   const stack = useStack<Route>("messages", { kind: "list" });
   const thread = stack.routes.find((r): r is Extract<Route, { kind: "thread" }> => r.kind === "thread");
   const selected = thread?.id ?? null;
-  // the split view always shows a conversation; record it so folding lands in that chat (iOS shows
-  // the selected detail when a split view collapses)
+  // the split view always shows a conversation; record it so folding lands in that chat
   const { reset } = stack;
   useEffect(() => {
     if (display === "inner" && !selected) reset([{ kind: "list" }, { kind: "thread", id: CONVERSATIONS[0] }]);
@@ -53,13 +109,17 @@ export function MessagesApp({ display }: AppScreenProps) {
 
   if (display === "inner") {
     return (
-      <AppFrame display={display} background="var(--ui-bg)">
-        <Split list={<ConversationList onOpen={open} selected={selected} />} detail={selected ? <Thread key={selected} id={selected} /> : <div />} />
+      <AppFrame display={display} background="var(--gm-bg)">
+        <Split
+          divider="var(--gm-surface-high)"
+          list={<ConversationList onOpen={open} selected={selected} />}
+          detail={selected ? <Thread key={selected} id={selected} /> : <div />}
+        />
       </AppFrame>
     );
   }
   return (
-    <AppFrame display={display} background="var(--ui-bg)">
+    <AppFrame display={display} background="var(--gm-bg)">
       <StackView
         stack={stack}
         keyOf={(r, i) => `${r.kind}-${i}`}
@@ -74,32 +134,65 @@ export function MessagesApp({ display }: AppScreenProps) {
 // ---------------------------------------------------------------------------
 
 function ConversationList({ onOpen, selected }: { onOpen: (id: ThreadId) => void; selected: ThreadId | null }) {
+  const me = person("riley");
   return (
-    <Scroll top={TOP} bottom={30} style={{ background: "var(--ui-bg)" }}>
-      <div style={{ height: 44, display: "flex", alignItems: "center", justifyContent: "space-between", paddingInline: 16, color: "var(--msg-blue)" }}>
-        <Tap style={{ fontSize: 17 }}>Edit</Tap>
-        <Tap label="Compose" style={{ display: "flex" }}>
-          <ComposeGlyph />
-        </Tap>
-      </div>
-      <div style={{ paddingInline: 16, fontSize: 34, fontWeight: 700, letterSpacing: 0.37, lineHeight: "41px" }}>Messages</div>
-      <div style={{ paddingInline: 16, marginTop: 8, marginBottom: 8 }}>
-        <div style={{ height: 36, borderRadius: 10, background: "var(--ui-fill-tertiary)", display: "flex", alignItems: "center", gap: 6, paddingInline: 8, color: "var(--ui-gray)", fontSize: 17 }}>
-          <svg width={16} height={16} viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" strokeWidth="2.2" />
-            <path d="m15.5 15.5 4.5 4.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-          </svg>
-          <span style={{ flex: 1 }}>Search</span>
-          <svg width={14} height={18} viewBox="0 0 14 20" aria-hidden="true">
-            <rect x="3.5" y="0.8" width="7" height="12" rx="3.5" fill="currentColor" />
-            <path d="M1 9.5a6 6 0 0 0 12 0M7 15.5v3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-          </svg>
+    <div style={{ position: "absolute", inset: 0, background: "var(--gm-bg)" }}>
+      <Scroll top={TOP} bottom={GM.search + SAFE_BOTTOM + 40}>
+        <div style={{ padding: "8px 16px 8px" }}>
+          <Placeholder id="messages:search" press="darken">
+            <div
+              style={{
+                height: GM.search,
+                borderRadius: GM.search / 2,
+                background: "var(--gm-surface-high)",
+                display: "flex",
+                alignItems: "center",
+                gap: 16,
+                paddingLeft: 16,
+                paddingRight: 12,
+                color: "var(--gm-on-variant)",
+                cursor: "pointer",
+              }}
+            >
+              <Icon d={ICON.search} />
+              <span style={{ ...ellipsis, flex: 1, fontSize: 16, letterSpacing: 0.5 }}>Search conversations</span>
+              <Avatar src={me.avatar} size={32} />
+            </div>
+          </Placeholder>
         </div>
-      </div>
-      {CONVERSATIONS.map((id) => (
-        <ConversationRow key={id} id={id} onOpen={onOpen} selected={selected === id} />
-      ))}
-    </Scroll>
+        <div style={{ height: 4 }} />
+        {CONVERSATIONS.map((id) => (
+          <ConversationRow key={id} id={id} onOpen={onOpen} selected={selected === id} />
+        ))}
+      </Scroll>
+      <Placeholder id="messages:start-chat">
+        <div
+          style={{
+            position: "absolute",
+            right: 16,
+            bottom: SAFE_BOTTOM + 16,
+            height: 56,
+            borderRadius: 16,
+            background: "var(--gm-primary-container)",
+            color: "var(--gm-on-primary-container)",
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            paddingLeft: 16,
+            paddingRight: 20,
+            fontSize: 14,
+            fontWeight: 500,
+            letterSpacing: 0.1,
+            boxShadow: "0 1px 3px rgba(0,0,0,0.15), 0 4px 8px 3px rgba(0,0,0,0.08)",
+            cursor: "pointer",
+            zIndex: 2,
+          }}
+        >
+          <Icon d={ICON.chat} />
+          Start chat
+        </div>
+      </Placeholder>
+    </div>
   );
 }
 
@@ -109,49 +202,72 @@ function ConversationRow({ id, onOpen, selected }: { id: ThreadId; onOpen: (id: 
   const c = person(t.contactId);
   const last = t.messages[t.messages.length - 1];
   const unread = t.unread > 0;
+  const snippet = last ? `${last.from === "me" ? "You: " : ""}${last.text ?? ""}` : "";
   return (
-    <Tap
-      onPress={() => onOpen(id)} onLongPress={() => useMessaging.getState().toggleUnread(id)}
-      highlight="var(--ui-gray5)"
-      style={{ display: "flex", alignItems: "flex-start", width: "100%", height: 76, paddingTop: 10, background: selected ? "var(--msg-blue)" : undefined, color: selected ? "var(--on-accent)" : undefined }}
-    >
-      <span style={{ width: 22, display: "flex", justifyContent: "center", paddingTop: 18, flexShrink: 0 }}>
-        {unread ? <span style={{ width: 10, height: 10, borderRadius: 5, background: selected ? "var(--on-accent)" : "var(--msg-blue)" }} /> : null}
-      </span>
-      <Avatar src={c.avatar} size={44} style={{ marginTop: 2 }} />
-      <div style={{ flex: 1, minWidth: 0, height: 66, marginLeft: 12, paddingRight: 16, boxShadow: selected ? undefined : "inset 0 calc(-1 * var(--hairline)) 0 var(--ui-separator)" }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-          <span style={{ ...ellipsis, flex: 1, fontSize: 17, fontWeight: 600, letterSpacing: -0.4 }}>{c.name}</span>
-          <span style={{ fontSize: 15, color: selected ? "var(--on-accent-2)" : "var(--msg-meta)" }}>{last ? waListTime(last.at, now) : ""}</span>
-          <svg width={8} height={13} viewBox="0 0 8 14" aria-hidden="true" style={{ alignSelf: "center" }}>
-            <path d="M1.5 1.5 6.5 7l-5 5.5" fill="none" stroke={selected ? "var(--on-accent-2)" : "var(--ui-gray4)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+    <div style={{ paddingInline: selected ? 8 : 0 }}>
+      <Tap
+        onPress={() => onOpen(id)}
+        onLongPress={() => useMessaging.getState().toggleUnread(id)}
+        highlight="var(--gm-pressed)"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          width: "100%",
+          height: GM.rowHeight,
+          gap: 16,
+          paddingLeft: selected ? 8 : 16,
+          paddingRight: selected ? 16 : 24,
+          borderRadius: selected ? 28 : 0,
+          background: selected ? "var(--gm-selected)" : undefined,
+          textAlign: "left",
+        }}
+      >
+        <Avatar src={c.avatar} size={GM.rowAvatar} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+            <span style={{ ...ellipsis, flex: 1, fontSize: 16, lineHeight: "24px", fontWeight: unread ? 700 : 400, color: "var(--gm-on-surface)", letterSpacing: 0.15 }}>{c.name}</span>
+            <span style={{ fontSize: 12, fontWeight: unread ? 700 : 400, color: unread ? "var(--gm-on-surface)" : "var(--gm-on-variant)", flexShrink: 0 }}>
+              {last ? waListTime(last.at, now) : ""}
+            </span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span
+              style={{
+                ...ellipsis,
+                flex: 1,
+                fontSize: 14,
+                lineHeight: "20px",
+                letterSpacing: 0.25,
+                fontWeight: unread ? 700 : 400,
+                color: unread ? "var(--gm-on-surface)" : "var(--gm-on-variant)",
+              }}
+            >
+              {snippet}
+            </span>
+            {unread ? (
+              <span
+                style={{
+                  minWidth: 20,
+                  height: 20,
+                  borderRadius: 10,
+                  paddingInline: 6,
+                  background: "var(--gm-primary)",
+                  color: "var(--gm-on-primary)",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                {t.unread}
+              </span>
+            ) : null}
+          </div>
         </div>
-        <div
-          style={{
-            fontSize: 15,
-            lineHeight: "20px",
-            color: selected ? "var(--on-accent-2)" : "var(--msg-meta)",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-            marginTop: 1,
-          }}
-        >
-          {last?.text}
-        </div>
-      </div>
-    </Tap>
-  );
-}
-
-function ComposeGlyph() {
-  return (
-    <svg width={24} height={24} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M11 4H6.5A2.5 2.5 0 0 0 4 6.5v11A2.5 2.5 0 0 0 6.5 20h11a2.5 2.5 0 0 0 2.5-2.5V13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M18.6 3.4a1.7 1.7 0 0 1 2.4 2.4L12.4 14.4 9 15l.6-3.4 9-8.2Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-    </svg>
+      </Tap>
+    </div>
   );
 }
 
@@ -174,7 +290,7 @@ function Thread({ id, onBack }: { id: ThreadId; onBack?: () => void }) {
   const c = person(t.contactId);
   const msgs = t.messages;
   const lastMine = [...msgs].reverse().find((m) => m.from === "me");
-  const bubbleMax = Math.min(pane.width, 560) * IMSG.bubbleMax;
+  const bubbleMax = Math.min(pane.width, 560) * GM.bubbleMax;
 
   const rows: ReactNode[] = [];
   msgs.forEach((m, i) => {
@@ -182,13 +298,12 @@ function Thread({ id, onBack }: { id: ThreadId; onBack?: () => void }) {
     const next = msgs[i + 1];
     const stamp = !prev || minutesBetween(prev.at, m.at) > STAMP_GAP_MIN;
     const nextStamp = !next || minutesBetween(m.at, next.at) > STAMP_GAP_MIN;
-    const runStart = stamp || prev?.from !== m.from;
-    const tail = nextStamp || next?.from !== m.from;
+    const first = stamp || prev?.from !== m.from;
+    const last = nextStamp || next?.from !== m.from;
     if (stamp) {
-      const p = imsgStampParts(m.at, now);
       rows.push(
-        <div key={`s-${m.id}`} style={{ textAlign: "center", fontSize: IMSG.stampSize, color: "var(--msg-meta)", marginTop: i === 0 ? 8 : IMSG.stampGap, marginBottom: 6 }}>
-          <span style={{ fontWeight: 600 }}>{p.day}</span> {p.time}
+        <div key={`s-${m.id}`} style={{ display: "flex", justifyContent: "center", marginTop: i === 0 ? 12 : 20, marginBottom: 8 }}>
+          <span style={{ fontSize: 12, lineHeight: "16px", fontWeight: 500, letterSpacing: 0.4, color: "var(--gm-on-variant)" }}>{chipText(m.at, now)}</span>
         </div>,
       );
     }
@@ -198,21 +313,19 @@ function Thread({ id, onBack }: { id: ThreadId; onBack?: () => void }) {
         initial={fresh[m.id] && !reduced ? { y: 40, opacity: 0 } : false}
         animate={{ y: 0, opacity: 1 }}
         transition={springSend}
-        style={{ marginTop: runStart && !stamp ? IMSG.groupGap : IMSG.runGap }}
+        style={{ marginTop: first && !stamp ? GM.groupGap : GM.runGap }}
       >
-        <BubbleRow m={m} tail={tail} max={bubbleMax} />
+        <BubbleRow m={m} first={first} last={last} max={bubbleMax} avatar={c.avatar} />
       </motion.div>,
     );
     if (lastMine && m.id === lastMine.id && m.receipt && (m.receipt === "delivered" || m.receipt === "read")) {
       rows.push(
-        <div key="receipt" data-receipt={m.receipt} style={{ textAlign: "right", paddingRight: IMSG.sideInset + 4, marginTop: 3, fontSize: IMSG.receiptSize, color: "var(--msg-meta)" }}>
-          {m.receipt === "read" ? (
-            <>
-              <span style={{ fontWeight: 600 }}>Read</span> {imsgStampParts(m.at, now).time}
-            </>
-          ) : (
-            <span style={{ fontWeight: 600 }}>Delivered</span>
-          )}
+        <div
+          key="receipt"
+          data-receipt={m.receipt}
+          style={{ textAlign: "right", paddingRight: GM.sideInset + 4, marginTop: 4, fontSize: 12, lineHeight: "16px", letterSpacing: 0.4, color: "var(--gm-on-variant)" }}
+        >
+          {m.receipt === "read" ? `Read · ${msgStampParts(m.at, now).time.replace(/^at /, "")}` : "Delivered"}
         </div>,
       );
     }
@@ -223,21 +336,21 @@ function Thread({ id, onBack }: { id: ThreadId; onBack?: () => void }) {
       <CaretKeyframes />
       <ThreadFrame
         nav={<ThreadNav name={c.name} avatar={c.avatar} onBack={onBack} />}
-        navHeight={STATUS.height + IMSG.navHeight}
-        background="var(--ui-bg)"
-        composer={<IMessageComposer draft={t.draft} focused={t.keyboard} onFocus={() => focus(id)} onSend={() => send(id)} />}
-        composerHeight={IMSG.composer.height}
-        composerBackground="var(--ui-bg)"
+        navHeight={STATUS.height + GM.navHeight}
+        background="var(--gm-bg)"
+        composer={<Composer draft={t.draft} focused={t.keyboard} onFocus={() => focus(id)} onSend={() => send(id)} />}
+        composerHeight={GM.composer.height}
+        composerBackground="var(--gm-bg)"
         keyboardOpen={t.keyboard}
         keyboard={<Keyboard threadId={id} platform="messages" />}
         stickKey={`${msgs.length}-${t.theirTyping}`}
         onDismissKeyboard={() => blur(id)}
       >
-        <div style={{ paddingBottom: 10 }}>
+        <div style={{ paddingBottom: 12 }}>
           {rows.map((r, i) => (
             <Fragment key={i}>{r}</Fragment>
           ))}
-          <AnimatePresence>{t.theirTyping ? <TypingBubble key="typing" /> : null}</AnimatePresence>
+          <AnimatePresence>{t.theirTyping ? <TypingBubble key="typing" avatar={c.avatar} /> : null}</AnimatePresence>
         </div>
       </ThreadFrame>
     </>
@@ -249,126 +362,133 @@ function ThreadNav({ name, avatar, onBack }: { name: string; avatar: string; onB
   return (
     <div
       style={{
-        position: "relative",
-        height: STATUS.height + IMSG.navHeight,
+        height: STATUS.height + GM.navHeight,
         paddingTop: STATUS.height,
-        background: "var(--msg-nav-material)",
-        backdropFilter: "var(--material-light-filter)",
-        WebkitBackdropFilter: "var(--material-light-filter)",
-        boxShadow: "inset 0 calc(-1 * var(--hairline)) 0 var(--ui-separator)",
+        background: "var(--gm-bg)",
+        display: "flex",
+        alignItems: "center",
+        paddingLeft: onBack ? 4 : 16,
+        paddingRight: 4,
       }}
     >
       {onBack ? (
-        <Tap label="Back" onPress={onBack} style={{ position: "absolute", left: 8, top: STATUS.height + 14, display: "flex", alignItems: "center", gap: 4, color: "var(--msg-blue)" }}>
-          <svg width={12} height={21} viewBox="0 0 12 21" aria-hidden="true">
-            <path d="M10 2 2 10.5 10 19" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+        <Tap label="Back" onPress={onBack} style={{ ...iconButton, position: "relative", color: "var(--gm-on-surface)" }}>
+          <Icon d={ICON.back} />
           {others ? (
-            <span style={{ minWidth: IMSG.pill.minWidth, height: IMSG.pill.height, borderRadius: IMSG.pill.height / 2, background: "var(--msg-blue)", color: "var(--on-accent)", fontSize: IMSG.pill.size, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", paddingInline: 6 }}>
+            <span
+              style={{
+                position: "absolute",
+                top: 6,
+                right: 4,
+                minWidth: 16,
+                height: 16,
+                borderRadius: 8,
+                paddingInline: 4,
+                background: "var(--gm-primary)",
+                color: "var(--gm-on-primary)",
+                fontSize: 11,
+                fontWeight: 500,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               {others}
             </span>
           ) : null}
         </Tap>
       ) : null}
-      <Tap style={{ position: "absolute", left: "50%", top: STATUS.height + 6, transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-        <Avatar src={avatar} size={IMSG.avatar} />
-        <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: IMSG.nameSize, color: "var(--ui-label)" }}>
-          {name}
-          <svg width={6} height={10} viewBox="0 0 8 14" aria-hidden="true">
-            <path d="M1.5 1.5 6.5 7l-5 5.5" fill="none" stroke="var(--msg-meta)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+      <Placeholder id="messages:contact-details" press="darken">
+        <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 12, marginLeft: onBack ? 4 : 0, cursor: "pointer" }}>
+          <Avatar src={avatar} size={GM.navAvatar} />
+          <span style={{ ...ellipsis, fontSize: 20, lineHeight: "28px", color: "var(--gm-on-surface)" }}>{name}</span>
+        </div>
+      </Placeholder>
+      <Placeholder id="messages:video-call">
+        <span role="button" aria-label="Video call" style={iconButton}>
+          <Icon d={ICON.video} />
         </span>
-      </Tap>
-      <Tap label="FaceTime" style={{ position: "absolute", right: 16, top: STATUS.height + 18, color: "var(--msg-blue)", display: "flex" }}>
-        <svg width={IMSG.facetime.width} height={IMSG.facetime.height} viewBox="0 0 30 22" aria-hidden="true">
-          <rect x="1.5" y="3" width="19" height="16" rx="4" fill="none" stroke="currentColor" strokeWidth="2" />
-          <path d="M21 9.2 27.4 5c.5-.3 1.1 0 1.1.6v10.8c0 .6-.6.9-1.1.6L21 12.8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-        </svg>
-      </Tap>
+      </Placeholder>
+      <Placeholder id="messages:more">
+        <span role="button" aria-label="More options" style={iconButton}>
+          <Icon d={ICON.more} />
+        </span>
+      </Placeholder>
     </div>
   );
 }
 
-/** One bubble: gray in, blue out, radius 18, the curled tail on the last bubble of a run. */
-function BubbleRow({ m, tail, max }: { m: Message; tail: boolean; max: number }) {
+/** One bubble: pale blue-gray in, blue out, 20dp corners, tight joints on the sender side within a run. */
+function BubbleRow({ m, first, last, max, avatar }: { m: Message; first: boolean; last: boolean; max: number; avatar: string }) {
   const mine = m.from === "me";
-  const bg = mine ? "var(--msg-blue)" : "var(--msg-gray)";
+  const R = GM.radius;
+  const top = first ? R : GM.joint;
+  const bottom = last ? R : GM.joint;
+  const borderRadius = mine ? `${R}px ${top}px ${bottom}px ${R}px` : `${top}px ${R}px ${R}px ${bottom}px`;
   return (
-    <div style={{ display: "flex", justifyContent: mine ? "flex-end" : "flex-start", paddingInline: IMSG.sideInset }}>
+    <div style={{ display: "flex", alignItems: "flex-end", justifyContent: mine ? "flex-end" : "flex-start", paddingInline: GM.sideInset, gap: 8 }}>
+      {mine ? null : <span style={{ width: GM.inAvatar, flexShrink: 0 }}>{last ? <Avatar src={avatar} size={GM.inAvatar} /> : null}</span>}
       <div
         style={{
-          position: "relative",
           maxWidth: max,
-          padding: `${IMSG.bubblePadY}px ${IMSG.bubblePadX}px`,
-          borderRadius: IMSG.bubbleRadius,
-          background: bg,
-          color: mine ? "var(--on-accent)" : "var(--ui-label)",
-          fontSize: IMSG.bubbleText,
-          lineHeight: `${IMSG.bubbleLine}px`,
-          letterSpacing: -0.43,
+          padding: `${GM.padY}px ${GM.padX}px`,
+          borderRadius,
+          background: mine ? "var(--gm-bubble-out)" : "var(--gm-bubble-in)",
+          color: mine ? "var(--gm-on-primary)" : "var(--gm-on-surface)",
+          fontSize: GM.bubbleText,
+          lineHeight: `${GM.bubbleLine}px`,
+          letterSpacing: 0.1,
           whiteSpace: "pre-wrap",
           overflowWrap: "anywhere",
         }}
       >
         {m.text}
-        {tail ? <Tail mine={mine} color={bg} /> : null}
       </div>
     </div>
   );
 }
 
-/** The iMessage tail: a curl at the bottom corner on the sender's side. */
-function Tail({ mine, color }: { mine: boolean; color: string }) {
-  return (
-    <svg
-      width={IMSG.tail.width}
-      height={IMSG.tail.height}
-      viewBox="0 0 17 21"
-      aria-hidden="true"
-      style={{ position: "absolute", bottom: 0, [mine ? "right" : "left"]: -5, transform: mine ? undefined : "scaleX(-1)" }}
-    >
-      <path d="M0 0v12c0 4.8 3.4 8 8.4 8.6 3 .4 6.2-.2 8.6-1.6-3.4-.4-6-2.4-7-5.6C9.2 10.2 9 6 9 0H0Z" fill={color} />
-    </svg>
-  );
-}
-
-function TypingBubble() {
-  const d = IMSG.typing;
+/** Her typing indicator: three bouncing dots in an incoming bubble. */
+function TypingBubble({ avatar }: { avatar: string }) {
+  const reduced = usePrefersReducedMotion();
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.6 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.6 }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 8 }}
       transition={{ duration: 0.2 }}
-      style={{ display: "flex", paddingInline: IMSG.sideInset, marginTop: IMSG.groupGap, transformOrigin: "left bottom" }}
+      style={{ display: "flex", alignItems: "flex-end", gap: 8, paddingInline: GM.sideInset, marginTop: GM.groupGap }}
     >
-      <div style={{ position: "relative", width: d.width, height: d.height, borderRadius: d.height / 2, background: "var(--msg-gray)", display: "flex", alignItems: "center", justifyContent: "center", gap: d.gap }}>
+      <Avatar src={avatar} size={GM.inAvatar} />
+      <div style={{ height: 40, paddingInline: 16, borderRadius: GM.radius, background: "var(--gm-bubble-in)", display: "flex", alignItems: "center", gap: 5 }}>
         {[0, 1, 2].map((i) => (
           <motion.span
             key={i}
-            animate={{ opacity: [0.35, 1, 0.35] }}
-            transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2, ease: "easeInOut" }}
-            style={{ width: d.dot, height: d.dot, borderRadius: d.dot / 2, background: "var(--msg-meta)" }}
+            animate={reduced ? { opacity: [0.4, 1, 0.4] } : { y: [0, -5, 0, 0] }}
+            transition={{ duration: 1.1, repeat: Infinity, delay: i * 0.15, ease: "easeInOut", times: reduced ? undefined : [0, 0.25, 0.5, 1] }}
+            style={{ width: 8, height: 8, borderRadius: 4, background: "var(--gm-on-variant)", opacity: 0.7 }}
           />
         ))}
-        <span style={{ position: "absolute", left: -2, bottom: -2, width: 11, height: 11, borderRadius: 6, background: "var(--msg-gray)" }} />
-        <span style={{ position: "absolute", left: -7, bottom: -7, width: 5, height: 5, borderRadius: 3, background: "var(--msg-gray)" }} />
       </div>
     </motion.div>
   );
 }
 
-/** iOS 18 composer: gray "+" circle, the pill field ("iMessage" + mic), a blue up-arrow once there's text. */
-function IMessageComposer({ draft, focused, onFocus, onSend }: { draft: string; focused: boolean; onFocus: () => void; onSend: () => void }) {
-  const c = IMSG.composer;
+/** Composer: "+" circle, the pill field ("RCS message", emoji, gallery), a round mic that becomes send. */
+function Composer({ draft, focused, onFocus, onSend }: { draft: string; focused: boolean; onFocus: () => void; onSend: () => void }) {
+  const c = GM.composer;
   const has = draft.length > 0;
   return (
-    <div style={{ height: c.height, display: "flex", alignItems: "center", gap: c.gap, paddingInline: c.padX, background: "var(--ui-bg)" }}>
-      <Tap label="Apps" style={{ width: c.plus, height: c.plus, borderRadius: c.plus / 2, background: "var(--ui-gray6)", color: "var(--msg-meta)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-        <svg width={16} height={16} viewBox="0 0 16 16" aria-hidden="true">
-          <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-      </Tap>
+    <div style={{ height: c.height, display: "flex", alignItems: "center", gap: c.gap, paddingInline: c.padX, background: "var(--gm-bg)" }}>
+      <Placeholder id="messages:attach">
+        <span
+          role="button"
+          aria-label="Attach"
+          style={{ width: c.plus, height: c.plus, borderRadius: c.plus / 2, background: "var(--gm-surface-high)", color: "var(--gm-on-variant)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer" }}
+        >
+          <Icon d={ICON.add} />
+        </span>
+      </Placeholder>
       <div
         role="textbox"
         tabIndex={-1}
@@ -380,42 +500,56 @@ function IMessageComposer({ draft, focused, onFocus, onSend }: { draft: string; 
         style={{
           flex: 1,
           minWidth: 0,
-          minHeight: c.field,
+          height: c.field,
           borderRadius: c.field / 2,
-          boxShadow: "inset 0 0 0 1px var(--msg-field-stroke)",
+          background: "var(--gm-surface-high)",
           display: "flex",
           alignItems: "center",
-          paddingLeft: 14,
+          paddingLeft: 16,
           paddingRight: 4,
-          fontSize: 17,
+          fontSize: 16,
+          letterSpacing: 0.15,
           cursor: "text",
           outline: "none",
         }}
       >
-        <span style={{ flex: 1, minWidth: 0, ...ellipsis, color: has ? "var(--ui-label)" : "var(--msg-meta)" }}>
+        <span style={{ flex: 1, minWidth: 0, ...ellipsis, color: has ? "var(--gm-on-surface)" : "var(--gm-on-variant)" }}>
           {has ? draft : focused ? null : COMPOSER_PLACEHOLDER.messages}
-          {focused ? <Caret tint="var(--msg-blue)" /> : null}
-          {!has && focused ? <span style={{ color: "var(--msg-meta)" }}>{COMPOSER_PLACEHOLDER.messages}</span> : null}
+          {focused ? <Caret tint="var(--gm-primary)" /> : null}
+          {!has && focused ? <span style={{ color: "var(--gm-on-variant)" }}>{COMPOSER_PLACEHOLDER.messages}</span> : null}
         </span>
-        {has ? (
-          <Tap
-            label="Send"
-            onPress={() => onSend()}
-            style={{ width: c.send, height: c.send, borderRadius: c.send / 2, background: "var(--msg-blue)", color: "var(--on-accent)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
-          >
-            <svg width={14} height={16} viewBox="0 0 14 16" aria-hidden="true">
-              <path d="M7 14V2M2 7l5-5 5 5" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </Tap>
-        ) : (
-          <span style={{ color: "var(--msg-meta)", display: "flex", paddingRight: 8 }}>
-            <svg width={14} height={20} viewBox="0 0 14 20" aria-hidden="true">
-              <rect x="3.5" y="0.8" width="7" height="12" rx="3.5" fill="currentColor" />
-              <path d="M1 9.5a6 6 0 0 0 12 0M7 15.5v3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-            </svg>
+        <Placeholder id="messages:emoji">
+          <span role="button" aria-label="Emoji" style={{ ...iconButton, width: 36, height: 36 }}>
+            <Icon d={ICON.emoji} />
           </span>
+        </Placeholder>
+        {has ? null : (
+          <Placeholder id="messages:gallery">
+            <span role="button" aria-label="Gallery" style={{ ...iconButton, width: 36, height: 36 }}>
+              <Icon d={ICON.gallery} />
+            </span>
+          </Placeholder>
         )}
       </div>
+      {has ? (
+        <Tap
+          label="Send"
+          onPress={() => onSend()}
+          style={{ width: c.action, height: c.action, borderRadius: c.action / 2, background: "var(--gm-primary)", color: "var(--gm-on-primary)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+        >
+          <Icon d={ICON.send} size={22} style={{ marginLeft: 2 }} />
+        </Tap>
+      ) : (
+        <Placeholder id="messages:voice">
+          <span
+            role="button"
+            aria-label="Voice message"
+            style={{ width: c.action, height: c.action, borderRadius: c.action / 2, background: "var(--gm-primary-container)", color: "var(--gm-on-primary-container)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer" }}
+          >
+            <Icon d={ICON.mic} />
+          </span>
+        </Placeholder>
+      )}
     </div>
   );
 }

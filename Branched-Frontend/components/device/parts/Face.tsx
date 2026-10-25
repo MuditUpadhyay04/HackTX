@@ -75,7 +75,7 @@ export type FaceProps = {
 
 /**
  * One flat face of a half (front = inner display, back = cover display or glass back): the
- * natural-titanium frame band seen from the front, drawn as nested continuous-corner layers, a
+ * aluminum frame band seen from the front, drawn as nested continuous-corner layers, a
  * dark outer rim, a bright chamfer line, the brushed band, a dark seat line, then the black bezel
  * and the display (or the back glass). Hidden from behind.
  */

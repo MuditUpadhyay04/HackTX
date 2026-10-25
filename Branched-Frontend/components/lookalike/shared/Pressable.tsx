@@ -19,7 +19,7 @@ export type PressableProps = {
 };
 
 /**
- * A control with the iOS press state (section 5: 0.97 scale or a 15% darken in under 100 ms;
+ * A control with the press state (section 5: 0.97 scale or a 15% darken in under 100 ms;
  * list rows highlight; nav-bar buttons dim). Carries data-nav or data-action (rule 4).
  */
 export function Pressable({ children, onPress, nav, action, feedback = "opacity", highlight, style, label, as = "button" }: PressableProps) {

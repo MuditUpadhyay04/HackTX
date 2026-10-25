@@ -25,7 +25,7 @@ export const PLACEHOLDER_ID = new RegExp(
   `^(${PLACEHOLDER_PLATFORMS.join("|")}):[a-z0-9-]+$`,
 );
 
-/** The iOS press state (spec 5): a 0.97 scale, or a 15% darken for list rows. */
+/** The press state (spec 5): a 0.97 scale, or a 15% darken for list rows (Android ripple stand-in). */
 export type PressStyle = "scale" | "darken";
 
 const PRESS_SCALE = 0.97;
@@ -53,7 +53,7 @@ export function platformFromId(id: string): PlaceholderPlatform {
   const prefix = id.split(":")[0];
   return (PLACEHOLDER_PLATFORMS as readonly string[]).includes(prefix)
     ? (prefix as PlaceholderPlatform)
-    : "ios";
+    : "oneui";
 }
 
 type ChildProps = {

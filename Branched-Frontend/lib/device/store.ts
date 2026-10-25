@@ -1,5 +1,5 @@
 /**
- * lib/device/store.ts: the one source of truth for the Duo's hinge (spec Phase 1, FOLD CONTROL).
+ * lib/device/store.ts: the one source of truth for the Fold's hinge (spec Phase 1, FOLD CONTROL).
  *
  * Two layers, on purpose:
  *   - `angleValue`: a framer-motion MotionValue<number> holding the LIVE openAngle (0 folded ... 180 flat).

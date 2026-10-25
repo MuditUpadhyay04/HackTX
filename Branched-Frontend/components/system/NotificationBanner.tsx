@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
-import { BANNER } from "@/components/lookalike/metrics";
 import { BANNER_TIME } from "@/lib/mock/threads";
 import type { BannerApp } from "@/lib/store/banners";
 import { BannerAppIcon } from "@/components/lookalike/shared/BannerAppIcon";
@@ -16,11 +15,16 @@ export type NotificationBannerProps = {
   style?: CSSProperties;
 };
 
+/** App names in the notification header. */
+const APP_LABEL: Record<BannerApp, string> = { messages: "Messages", whatsapp: "WhatsApp", instagram: "Instagram", unsaid: "Un-Said" };
+
+/** One UI heads-up notification geometry (dp). */
+const HUN = { radius: 26, padX: 16, padY: 14, appIcon: 18, headerGap: 6, titleSize: 15, bodySize: 14, line: 19, metaSize: 12.5 } as const;
+
 /**
- * The iOS notification banner look-alike (Phase 2 CHROME SPECS): radius 24 continuous corners, the
- * light notification material (blur 30 + saturate 180%), 14 pt padding, a 38 pt app icon, title
- * 15 semibold (one line), body 15 regular (two lines max), "now" 13 secondary top right, a hairline
- * edge and the soft banner shadow. Pressed: 0.97 scale and 8% darker.
+ * The One UI heads-up notification: a white rounded card (26 dp corners) dropping in under the status
+ * bar. A header row with the small app icon, the app name and "now", then the title (bold, one line)
+ * and the message (two lines max). Pressed: slightly darker.
  */
 export function NotificationBanner({ app, title, body, time = BANNER_TIME, state = "in", onTap, style }: NotificationBannerProps) {
   const [down, setDown] = useState(false);
@@ -39,57 +43,43 @@ export function NotificationBanner({ app, title, body, time = BANNER_TIME, state
       style={{
         position: "relative",
         display: "flex",
-        alignItems: "center",
-        gap: BANNER.iconGap,
-        padding: BANNER.pad,
-        borderRadius: BANNER.radius,
-        cornerShape: "squircle",
-        background: "var(--material-light)",
-        backdropFilter: "var(--material-light-filter)",
-        WebkitBackdropFilter: "var(--material-light-filter)",
-        boxShadow: "var(--shadow-banner), inset 0 0 0 var(--hairline) var(--banner-stroke)",
-        scale: pressed ? "0.97" : "1",
-        filter: pressed ? "brightness(0.92)" : undefined,
-        transition: "scale var(--motion-press) var(--ease-std), filter var(--motion-press) var(--ease-std)",
+        flexDirection: "column",
+        gap: 6,
+        padding: `${HUN.padY}px ${HUN.padX}px`,
+        borderRadius: HUN.radius,
+        background: "var(--hun-fill)",
+        boxShadow: "var(--shadow-banner)",
+        filter: pressed ? "brightness(0.94)" : undefined,
+        transition: "filter var(--motion-press) var(--ease-std)",
         cursor: "pointer",
         color: "var(--ui-label)",
         ...style,
       } as CSSProperties}
     >
-      <BannerAppIcon app={app} size={BANNER.icon} />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: BANNER.iconGap }}>
-          <span
-            style={{
-              flex: 1,
-              minWidth: 0,
-              fontSize: BANNER.titleSize,
-              lineHeight: `${BANNER.line}px`,
-              fontWeight: 600,
-              letterSpacing: "var(--type-subheadline-tracking)",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {title}
-          </span>
-          <span
-            style={{
-              fontSize: BANNER.timeSize,
-              lineHeight: `${BANNER.line}px`,
-              color: "var(--ui-label-secondary)",
-              flexShrink: 0,
-            }}
-          >
-            {time}
-          </span>
+      <div style={{ display: "flex", alignItems: "center", gap: HUN.headerGap, fontSize: HUN.metaSize, lineHeight: 1, color: "var(--ui-label-secondary)" }}>
+        <BannerAppIcon app={app} size={HUN.appIcon} />
+        <span style={{ fontWeight: 500, color: "var(--ui-label)" }}>{APP_LABEL[app]}</span>
+        <span>·</span>
+        <span>{time}</span>
+      </div>
+      <div style={{ minWidth: 0 }}>
+        <div
+          style={{
+            fontSize: HUN.titleSize,
+            lineHeight: `${HUN.line}px`,
+            fontWeight: 600,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {title}
         </div>
         <div
           style={{
-            fontSize: BANNER.bodySize,
-            lineHeight: `${BANNER.line}px`,
-            letterSpacing: "var(--type-subheadline-tracking)",
+            fontSize: HUN.bodySize,
+            lineHeight: `${HUN.line}px`,
+            color: "var(--ui-label-secondary)",
             display: "-webkit-box",
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",

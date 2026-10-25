@@ -1,7 +1,7 @@
 /**
  * /test/tokens: the token swatch sheet (Phase 0). A fixed 1920x1080 artboard, no controls.
  *   (default)      ?state=palettes  every un-* token on un-bg + every look-alike palette on its own background
- *   ?state=scales  device colors + materials on the wallpaper, iOS materials, type, shadows, radius, space, blur
+ *   ?state=scales  device colors + materials on the wallpaper, UI materials, type, shadows, radius, space, blur
  * Every value is read from lib/tokens.ts / lib/unsaid-theme.json and painted with the CSS vars of
  * app/tokens.css / app/unsaid-theme.css, so a mismatch between the TS and CSS token files shows here.
  */
@@ -199,15 +199,15 @@ type Group = { title: string; names: string[]; background: string; tone: Tone; r
 const g = palettes as Record<string, Record<string, string>>;
 const keysOf = (group: string) => Object.keys(g[group]);
 const IG = "Instagram (light DMs, dark Reels)";
-const IOS = "iOS system (light, plus dark where used)";
+const IOS = "One UI system (light, plus dark where used)";
 const uiExtras = Object.keys(color).filter(
-  (k) => (k.startsWith("ios-") || k === "label-on-dark") && !keysOf(IOS).includes(k) && k !== "ui-wallpaper-base",
+  (k) => (k.startsWith("ui-") || k === "label-on-dark") && !keysOf(IOS).includes(k) && k !== "ui-wallpaper-base",
 );
 
 const ROW_1: Group[] = [
-  { title: "WhatsApp (iOS, light)", names: keysOf("WhatsApp (iOS, light)"), background: cssVar("wa-chat-bg"), tone: "light" },
+  { title: "WhatsApp (Android, light)", names: keysOf("WhatsApp (Android, light)"), background: cssVar("wa-chat-bg"), tone: "light" },
   { title: "WhatsApp calls (dark call screen)", names: keysOf("WhatsApp calls (dark call screen)"), background: cssVar("wa-call-bg"), tone: "dark" },
-  { title: "Messages / iMessage (iOS, light)", names: keysOf("Messages / iMessage (iOS, light)"), background: cssVar("stage-white"), tone: "light", rows: 4 },
+  { title: "Messages (Android, light)", names: keysOf("Messages (Android, light)"), background: cssVar("stage-white"), tone: "light", rows: 4 },
   { title: IG, names: keysOf(IG).filter((k) => k !== "ig-reels-bg"), background: cssVar("stage-white"), tone: "light", rows: 4 },
   { title: "dark Reels", names: ["ig-reels-bg"], background: cssVar("ig-reels-bg"), tone: "dark" },
 ];
@@ -357,7 +357,7 @@ function ScalesSheet() {
             <ColorRow key={name} name={name} label={strip(name)} tone="dark" />
           ))}
         </Panel>
-        <Panel title="iOS materials · blur" tone="dark" background={cssVar("ui-wallpaper-base")} rows={1} layer={<WallpaperLayer id="tokens-noise-b" />} style={{ flex: 1 }}>
+        <Panel title="materials · blur" tone="dark" background={cssVar("ui-wallpaper-base")} rows={1} layer={<WallpaperLayer id="tokens-noise-b" />} style={{ flex: 1 }}>
           {uiMaterials.map((name) => (
             <Tile
               key={name}
@@ -381,7 +381,7 @@ function ScalesSheet() {
         ))}
       </Panel>
       <div style={{ display: "flex", gap: space[16], alignItems: "stretch" }}>
-        <Panel title="type · iOS text styles + Meta sizes" tone="light" background={cssVar("stage-white")} rows={7}>
+        <Panel title="type · text styles + Meta sizes" tone="light" background={cssVar("stage-white")} rows={7}>
           {[...uiType, ...metaType].map((name) => {
             const t = type[name];
             const css = typeCssName(name);

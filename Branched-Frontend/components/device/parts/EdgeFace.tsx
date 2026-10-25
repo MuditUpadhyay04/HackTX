@@ -47,7 +47,7 @@ function strips(side: FoldSide): Strip[] {
 const STRIPS: Record<FoldSide, Strip[]> = { left: strips("left"), right: strips("right") };
 
 /**
- * The 18 px titanium side wall of one half: strips standing perpendicular to the front face along
+ * The 18 px aluminum side wall of one half: strips standing perpendicular to the front face along
  * the outline (corner curves split into facets), filled with the frame's cross-section gradient
  * (dark chamfers, bright flat), shaded top-lit. Each faces outward and hides its reverse.
  */

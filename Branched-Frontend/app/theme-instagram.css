@@ -1,3 +1,12 @@
-/* app/theme-instagram.css: colors for the instagram look-alike (Android). Owned by that app only. */
+/* app/theme-instagram.css: colors for the Instagram for Android look-alike. Owned by that app only.
+   Imported after tokens.css, so the --ig-* values here win. */
 :root {
+  /* the app's own surface (Android Instagram is plain white, independent of the system surface) */
+  --ig-bg: #FFFFFF;
+  --ig-text: #0C1014;
+  --ig-muted: #737373;
+  --ig-hairline: #E6E6E6;
+  --ig-dm-in: #EFEFEF;
+  /* Material-style row press (ripple tint) */
+  --ig-pressed: rgba(0, 0, 0, 0.08);
 }

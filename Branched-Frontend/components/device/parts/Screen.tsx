@@ -131,7 +131,7 @@ export function FoldContent({
 }
 
 /**
- * A display's glass: lit (the iOS-style wallpaper) or off (black glass with a faint reflection).
+ * A display's glass: lit (the One UI wallpaper) or off (black glass with a faint reflection).
  * `width` x `height` is the whole surface; `offsetX` shifts it so one surface can span both halves
  * of the inner display (each half shows its own slice, so the wallpaper is continuous).
  */
@@ -180,9 +180,9 @@ export function GlassSheen({ width, height, offsetX = 0 }: { width: number; heig
   );
 }
 
-/** The front camera punch-hole, top-right of the cover display (D11: the inner display has none). */
-export function PunchHole({ display, width }: { display: "cover"; width: number }) {
-  const c = punchCenter(width);
+/** A front camera punch-hole: centered on the cover display, over the right half of the inner one. */
+export function PunchHole({ display, width }: { display: "cover" | "inner"; width: number }) {
+  const c = punchCenter(width, display);
   const d = GEOM.punch[display].diameter;
   return (
     <div

@@ -28,9 +28,9 @@ export type SeedState = "read" | "history" | "compose" | "sent" | "read-receipt"
 export const RECEIPT_TIMING = {
   whatsappDelivered: 300,
   whatsappRead: 1200,
-  imessageRead: 1500,
-  imessageTypingIn: 1000,
-  imessageTypingFor: 2500,
+  rcsRead: 1500,
+  rcsTypingIn: 1000,
+  rcsTypingFor: 2500,
   instagramSeen: 2000,
 } as const;
 
@@ -124,11 +124,11 @@ export const useMessaging = create<State>()((set, get) => {
       later(id, RECEIPT_TIMING.whatsappDelivered, () => setReceipt(id, msg.id, "delivered"));
       if (thread.presence === "online") later(id, RECEIPT_TIMING.whatsappRead, () => setReceipt(id, msg.id, "read"));
     } else if (thread.app === "messages") {
-      later(id, RECEIPT_TIMING.imessageRead, () => {
+      later(id, RECEIPT_TIMING.rcsRead, () => {
         setReceipt(id, msg.id, "read");
         if (TYPING_AFTER_READ[id]) {
-          later(id, RECEIPT_TIMING.imessageTypingIn, () => patch(id, () => ({ theirTyping: true })));
-          later(id, RECEIPT_TIMING.imessageTypingIn + RECEIPT_TIMING.imessageTypingFor, () =>
+          later(id, RECEIPT_TIMING.rcsTypingIn, () => patch(id, () => ({ theirTyping: true })));
+          later(id, RECEIPT_TIMING.rcsTypingIn + RECEIPT_TIMING.rcsTypingFor, () =>
             patch(id, () => ({ theirTyping: false })),
           );
         }

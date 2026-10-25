@@ -32,9 +32,9 @@ export type HalfProps = {
 };
 
 /**
- * One half of the iPhone Fold as a closed 3D slab (590 x 830 x 18): the front face (its half of
+ * One half of the Galaxy Z Fold 8 as a closed 3D slab (590 x 830 x 18): the front face (its half of
  * the one inner display), the back face (left: the cover display; right: the glass back with the
- * camera plateau), the titanium side wall and, on the right half, the top buttons.
+ * camera plateau), the aluminum side wall and, on the right half, the top buttons.
  */
 export function Half({ side, transform, screenOn, gloss, angle, shadow, cover, inner, fill = "wallpaper" }: HalfProps) {
   const { width, height, thickness } = GEOM.panel;
@@ -122,7 +122,7 @@ function InnerFace({ side, screenOn, angle, fill, children }: FaceContentProps &
           inert
         >
           <div
-            data-duo-viewport={`inner-${side}`}
+            data-fold-viewport={`inner-${side}`}
             style={{
               position: "absolute",
               left: offsetX,
@@ -139,6 +139,11 @@ function InnerFace({ side, screenOn, angle, fill, children }: FaceContentProps &
         </FoldContent>
       ) : null}
       <GlassSheen width={inner.width} height={inner.height} offsetX={offsetX} />
+      {side === "right" ? (
+        <div aria-hidden="true" style={{ position: "absolute", left: offsetX, top: 0, width: inner.width, height: inner.height, pointerEvents: "none" }}>
+          <PunchHole display="inner" width={inner.width} />
+        </div>
+      ) : null}
     </Face>
   );
 }
@@ -165,7 +170,7 @@ function CoverFace({ screenOn, angle, fill, children }: FaceContentProps) {
       {screenOn && children != null ? (
         <FoldContent angle={angle} soften shade={{ swing: coverSwing, hinge: "left" }} width={c.width} height={c.height} inert>
           <div
-            data-duo-viewport="cover-face"
+            data-fold-viewport="cover-face"
             style={{
               position: "absolute",
               left: 0,

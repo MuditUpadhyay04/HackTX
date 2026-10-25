@@ -2,7 +2,7 @@
   "note": "BF-v2: Un-Said tokens (un-*) are NOT kept here. They come only from App-UI-Final (unsaid-tokens.json / unsaid-tokens.css), copied into lib/unsaid-theme.json by scripts/sync-theme.ts. This file holds the look-alike palettes, look-alike gradients and device colors (CLAUDE_PROMPT.md sections 4.2-4.3); motion is section 4.4 / lib/motion.ts.",
   "source": "Look-alike values sampled by eye from the real apps (Oct 24, 2026); approximate. Un-Said values: see note (App-UI-Final).",
   "lookalike": {
-    "WhatsApp (iOS, light)": {
+    "WhatsApp (Android, light)": {
       "wa-green": "#25D366",
       "wa-accent": "#1DAA61",
       "wa-chat-bg": "#EFEAE2",
@@ -21,12 +21,12 @@
       "wa-call-end": "#F15C6D",
       "wa-call-text": "#E9EDEF"
     },
-    "Messages / iMessage (iOS, light)": {
-      "msg-blue": "#007AFF",
+    "Messages (Android, light)": {
+      "msg-blue": "#0B57D0",
       "msg-gray": "#E9E9EB",
-      "msg-green": "#34C759",
+      "msg-green": "#1E8E3E",
       "msg-meta": "#8E8E93",
-      "msg-failed": "#FF3B30",
+      "msg-failed": "#D93025",
       "msg-nav": "#F9F9F9",
       "msg-field-stroke": "#C7C7CC"
     },
@@ -54,10 +54,10 @@
       "meta-ai-text": "#1C2B33",
       "meta-ai-surface": "#F1F4F7"
     },
-    "iOS system (light, plus dark where used)": {
-      "ui-blue": "#007AFF",
-      "ui-red": "#FF3B30",
-      "ui-green": "#34C759",
+    "One UI system (light, plus dark where used)": {
+      "ui-blue": "#3E91FF",
+      "ui-red": "#F2404C",
+      "ui-green": "#3DB86B",
       "ui-gray": "#8E8E93",
       "ui-gray4": "#D1D1D6",
       "ui-gray5": "#E5E5EA",

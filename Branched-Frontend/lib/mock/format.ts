@@ -55,8 +55,8 @@ export function waListTime(t: T, now: T = NOW): string {
   return `${v.mo}/${v.d}/${String(v.y).slice(2)}`;
 }
 
-/** iMessage timestamp, split so the day reads semibold: { day: "Sunday", time: "12:47 AM" }. */
-export function imsgStampParts(t: T, now: T = NOW): { day: string; time: string } {
+/** Messages date-chip stamp, split so the day can be styled: { day: "Sunday", time: "12:47 AM" }. */
+export function msgStampParts(t: T, now: T = NOW): { day: string; time: string } {
   const n = daysAgo(t, now);
   const time = time12(t);
   if (n === 0) return { day: "Today", time };
@@ -66,8 +66,8 @@ export function imsgStampParts(t: T, now: T = NOW): { day: string; time: string 
 }
 
 /** "Today 9:41 PM", "Yesterday 1:12 AM", "Sunday 12:47 AM", "Sat, Oct 10 at 12:31 PM". */
-export function imsgStamp(t: T, now: T = NOW): string {
-  const p = imsgStampParts(t, now);
+export function msgStamp(t: T, now: T = NOW): string {
+  const p = msgStampParts(t, now);
   return `${p.day} ${p.time}`;
 }
 

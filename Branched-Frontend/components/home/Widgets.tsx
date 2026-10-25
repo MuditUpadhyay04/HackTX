@@ -9,9 +9,9 @@ import { useOpenApp } from "@/lib/apps/useOpenApp";
 import { ICON, WIDGET, type Rect } from "./layout";
 
 /**
- * The two home-screen widgets (static, deterministic: Saturday, Oct 24). Copy is word for word from
- * CLAUDE_PROMPT.md Phase 3 LAYOUT: Weather "Austin", "78°", "Sunny", "H:84° L:66°"; Calendar
- * "SATURDAY", "24", "HackTX demo · 11 AM" (shown as the event and its time) and "call Mom?".
+ * The One UI home-screen widgets (static, deterministic: Saturday, Oct 24): Samsung Weather, Samsung
+ * Calendar, a Gallery story, the media card (Now playing) and Samsung Reminder. Same story copy:
+ * Austin 78° sunny (84° / 66°), "HackTX demo · 11 AM" and "call Mom?".
  */
 
 const t = typeScale;
@@ -41,7 +41,7 @@ function WidgetFrame({
 }) {
   const onClick = useOpenApp(`widget-${id}` as WidgetTarget);
   return (
-    <Placeholder id={`ios:widget-${id}`} press="darken">
+    <Placeholder id={`oneui:widget-${id}`} press="darken">
       <button
         type="button"
         onClick={onClick}
@@ -70,46 +70,31 @@ function WidgetFrame({
             display: "flex",
             flexDirection: "column",
             padding: WIDGET.padding,
-            clipPath: squircleClipPath(rect.w, rect.h, radius[22]),
+            clipPath: squircleClipPath(rect.w, rect.h, WIDGET.radius),
             background,
             color,
           }}
         >
           {children}
         </span>
-        <span
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            top: rect.h + WIDGET.labelGap,
-            textAlign: "center",
-            color: "var(--label-on-dark)",
-            textShadow: "var(--shadow-icon-label)",
-            ...text(t.caption2, 500),
-          }}
-        >
-          {name}
-        </span>
       </button>
     </Placeholder>
   );
 }
 
-/** The iOS location arrow (filled), 9 pt. */
-function LocationArrow() {
+/** The Android location pin (filled). */
+function LocationPin() {
   return (
-    <svg width={ICON.labelHeight - 4} height={ICON.labelHeight - 4} viewBox="0 0 10 10" aria-hidden="true">
-      <path d="M9.6.4.9 4.3c-.5.2-.4.9.1 1L4.4 6l.7 3.4c.1.5.8.6 1 .1L9.6.4Z" fill="currentColor" />
+    <svg width={ICON.labelHeight - 4} height={ICON.labelHeight - 4} viewBox="0 0 10 12" aria-hidden="true">
+      <path d="M5 0a4 4 0 0 0-4 4c0 3 4 7.6 4 7.6S9 7 9 4a4 4 0 0 0-4-4Zm0 5.6A1.6 1.6 0 1 1 5 2.4a1.6 1.6 0 0 1 0 3.2Z" fill="currentColor" />
     </svg>
   );
 }
 
-/** The weather sun, 14 pt. */
-function Sun() {
+/** The weather sun. */
+function Sun({ size = t.subheadline.size - 1 }: { size?: number }) {
   return (
-    <svg width={t.subheadline.size - 1} height={t.subheadline.size - 1} viewBox="0 0 14 14" aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 14 14" aria-hidden="true">
       <g stroke="var(--widget-weather-sun)" strokeWidth="1.4" strokeLinecap="round">
         {Array.from({ length: 8 }, (_, i) => (
           <line key={i} x1="7" y1="1" x2="7" y2="2.6" transform={`rotate(${i * 45} 7 7)`} />
@@ -123,15 +108,19 @@ function Sun() {
 export function WeatherWidget({ rect }: { rect: Rect }) {
   return (
     <WidgetFrame id="weather" name="Weather" rect={rect} background="var(--widget-weather-fill)" color="var(--label-on-dark)">
-      <span style={{ display: "flex", alignItems: "center", gap: t.caption2.size / 3, ...text(t.footnote, emphasizedWeight) }}>
-        Austin
-        <LocationArrow />
+      <span style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <span style={{ fontFamily: "var(--font-display)", fontSize: 40, lineHeight: "44px", fontWeight: 300, letterSpacing: "-0.02em" }}>78°</span>
+        <span style={{ marginTop: 4 }}>
+          <Sun size={30} />
+        </span>
       </span>
-      <span style={{ ...text(t.largeTitle, 300), marginTop: -t.caption2.size / 4 }}>78°</span>
+      <span style={{ display: "flex", alignItems: "center", gap: 3, ...text(t.footnote, 500) }}>
+        <LocationPin />
+        Austin
+      </span>
       <span style={{ flex: 1 }} />
-      <Sun />
-      <span style={{ ...text(t.caption1, emphasizedWeight), marginTop: t.caption2.size / 4 }}>Sunny</span>
-      <span style={text(t.caption1, emphasizedWeight)}>H:84° L:66°</span>
+      <span style={text(t.caption1, 500)}>Sunny</span>
+      <span style={{ ...text(t.caption1, 400), opacity: 0.85 }}>84° / 66°</span>
     </WidgetFrame>
   );
 }
@@ -151,8 +140,13 @@ function Event({ title, time, bar }: { title: string; time?: string; bar: string
 export function CalendarWidget({ rect }: { rect: Rect }) {
   return (
     <WidgetFrame id="calendar" name="Calendar" rect={rect} background="var(--widget-calendar-bg)" color="var(--ui-label)">
-      <span style={{ ...text(t.caption2, emphasizedWeight), color: "var(--ui-red)", letterSpacing: t.caption2.size / 20 }}>SATURDAY</span>
-      <span style={{ ...text(t.largeTitle, 400), marginTop: -t.caption2.size / 4 }}>24</span>
+      <span style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+        <span style={{ fontFamily: "var(--font-display)", fontSize: 34, lineHeight: "38px", fontWeight: 400 }}>24</span>
+        <span style={{ display: "flex", flexDirection: "column" }}>
+          <span style={{ ...text(t.caption1, 600), color: "var(--widget-calendar-accent)" }}>Sat</span>
+          <span style={{ ...text(t.caption2, 400), color: "var(--ui-label-secondary)" }}>October</span>
+        </span>
+      </span>
       <span style={{ flex: 1 }} />
       <span style={{ display: "flex", flexDirection: "column", gap: t.caption2.size / 2 }}>
         <Event title="HackTX demo" time="11 AM" bar="var(--widget-event-blue)" />
@@ -163,7 +157,7 @@ export function CalendarWidget({ rect }: { rect: Rect }) {
 }
 
 /**
- * The iOS Photos "Featured Photo" widget (unfolded home only): one full-bleed photo of Riley and
+ * The Gallery story widget (unfolded home only): one full-bleed photo of Riley and
  * Sarah (public/mock/photos/widget-sarah-sunset.jpg, from the demo photo set), a soft scrim at the
  * bottom and the white two-line caption bottom-left. Static: no slideshow, no motion.
  */
@@ -171,7 +165,7 @@ export function PhotosWidget({ rect }: { rect: Rect }) {
   return (
     <WidgetFrame
       id="photos"
-      name="Photos"
+      name="Gallery"
       rect={rect}
       background="center / cover no-repeat url(/mock/photos/widget-sarah-sunset.jpg)"
       color="var(--label-on-dark)"
@@ -189,23 +183,40 @@ export function PhotosWidget({ rect }: { rect: Rect }) {
   );
 }
 
-/** iOS Music "Now Playing" (medium, unfolded home only): album art, track, artist and a progress bar. */
+/** Android media controls: previous, pause (playing), next. */
+function MediaControls() {
+  const g = 22;
+  return (
+    <span aria-hidden="true" style={{ display: "flex", alignItems: "center", gap: 18 }}>
+      <svg width={g} height={g} viewBox="0 0 24 24"><path d="M6 6h2v12H6zM9.5 12 18 6v12z" fill="currentColor" /></svg>
+      <span style={{ width: 40, height: 40, borderRadius: 14, background: "var(--label-on-dark)", color: "var(--widget-music-ink)", display: "grid", placeItems: "center" }}>
+        <svg width={g} height={g} viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor" /></svg>
+      </span>
+      <svg width={g} height={g} viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 18l8.5-6L6 6z" fill="currentColor" /></svg>
+    </span>
+  );
+}
+
+/**
+ * The media card (Now playing, unfolded home only): the album art blurred behind as the card's color,
+ * the art, track, artist, a squiggle-free progress line and the Android media controls.
+ */
 export function MusicWidget({ rect }: { rect: Rect }) {
   const art = rect.h - 2 * WIDGET.padding;
   return (
-    <WidgetFrame id="music" name="Music" rect={rect} background="var(--widget-music-fill)" color="var(--label-on-dark)">
+    <WidgetFrame id="music" name="Now playing" rect={rect} background="var(--widget-music-fill)" color="var(--label-on-dark)">
       <span style={{ display: "flex", gap: WIDGET.padding, height: "100%" }}>
         <span
           aria-hidden="true"
-          style={{ width: art, height: art, flexShrink: 0, borderRadius: radius[10], background: "var(--widget-music-art)" }}
+          style={{ width: art, height: art, flexShrink: 0, borderRadius: 16, background: "var(--widget-music-art)" }}
         />
         <span style={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>
-          <span style={{ ...text(t.caption2, emphasizedWeight), color: "var(--widget-music-accent)" }}>NOW PLAYING</span>
+          <span style={{ ...text(t.footnote, 600), overflow: "hidden", textOverflow: "ellipsis" }}>Mockingbird</span>
+          <span style={{ ...text(t.caption1), opacity: 0.75 }}>Eminem</span>
           <span style={{ flex: 1 }} />
-          <span style={{ ...text(t.footnote, emphasizedWeight), overflow: "hidden", textOverflow: "ellipsis" }}>Mockingbird</span>
-          <span style={{ ...text(t.caption1), opacity: 0.7 }}>Eminem</span>
-          <span style={{ marginTop: t.caption2.size / 2, height: 3, borderRadius: radius[2], background: "var(--widget-music-track)" }}>
-            <span style={{ display: "block", width: "38%", height: "100%", borderRadius: radius[2], background: "var(--label-on-dark)" }} />
+          <MediaControls />
+          <span style={{ marginTop: 10, height: 4, borderRadius: 2, background: "var(--widget-music-track)" }}>
+            <span style={{ display: "block", width: "38%", height: "100%", borderRadius: 2, background: "var(--label-on-dark)" }} />
           </span>
         </span>
       </span>
@@ -232,13 +243,13 @@ function Reminder({ title, done }: { title: string; done?: boolean }) {
   );
 }
 
-/** iOS Reminders (medium, unfolded home only): today's list. */
+/** Samsung Reminder (unfolded home only): today's list. */
 export function RemindersWidget({ rect }: { rect: Rect }) {
   return (
-    <WidgetFrame id="reminders" name="Reminders" rect={rect} background="var(--widget-calendar-bg)" color="var(--ui-label)">
+    <WidgetFrame id="reminders" name="Reminder" rect={rect} background="var(--widget-calendar-bg)" color="var(--ui-label)">
       <span style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <span style={{ ...text(t.footnote, emphasizedWeight), color: "var(--widget-reminders-accent)" }}>Today</span>
-        <span style={{ ...text(t.title2, 600), color: "var(--widget-reminders-accent)" }}>3</span>
+        <span style={{ ...text(t.footnote, 600), color: "var(--widget-reminders-accent)" }}>Reminder</span>
+        <span style={{ ...text(t.footnote, 600), color: "var(--widget-reminders-accent)" }}>3</span>
       </span>
       <span style={{ flex: 1 }} />
       <span style={{ display: "flex", flexDirection: "column", gap: t.caption2.size / 2.5 }}>

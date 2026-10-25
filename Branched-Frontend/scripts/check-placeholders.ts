@@ -24,18 +24,19 @@ import { scenes, sceneUrl } from "../lib/scenes";
 import { launchBrowser } from "./lib/browser";
 import { ROOT, withServer } from "./lib/server";
 
-const APPS = ["whatsapp", "messages", "instagram", "photos", "facebook", "meta-ai", "ios", "unsaid"] as const;
+const APPS = ["whatsapp", "messages", "instagram", "photos", "phone", "facebook", "meta-ai", "oneui", "unsaid"] as const;
 const APP_TITLES: Record<(typeof APPS)[number], string> = {
   whatsapp: "WhatsApp",
   messages: "Messages",
   instagram: "Instagram",
-  photos: "Photos",
+  photos: "Gallery",
+  phone: "Phone",
   facebook: "Facebook",
   "meta-ai": "Meta AI",
-  ios: "iOS",
+  oneui: "One UI",
   unsaid: "Un-Said",
 };
-const PLACEHOLDER_RE = /^(whatsapp|messages|instagram|photos|facebook|meta-ai|ios|unsaid):[a-z0-9-]+$/;
+const PLACEHOLDER_RE = /^(whatsapp|messages|instagram|photos|phone|facebook|meta-ai|oneui|unsaid):[a-z0-9-]+$/;
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
 
 type PageScan = {

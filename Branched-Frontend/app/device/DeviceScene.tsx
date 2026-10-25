@@ -16,7 +16,7 @@ const BACKGROUNDS: StageBackground[] = ["studio", "black", "white"];
 
 /**
  * /device?state=&bg=studio|black|white&scale=&reflection=1&debug=1&frame=bare&pattern=on
- * The iPhone Fold on the Stage with the iOS home screens on its displays (D12: the cover home folded,
+ * The Galaxy Z Fold 8 on the Stage with the One UI home screens on its displays (D12: the cover home folded,
  * the D8 inner home unfolded; both stay visible through the fold), the fold control below it and,
  * with debug=1, the spec overlay. pattern=on swaps the homes for the Phase 1 geometry test pattern.
  * Under reduced motion the hinge jumps and the previous pose fades out over the new one

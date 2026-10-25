@@ -1,5 +1,5 @@
 /**
- * lib/store/banners.ts: the iOS notification banner stack (Phase 2 NOTIFICATION BANNERS).
+ * lib/store/banners.ts: the heads-up notification stack (Phase 2 NOTIFICATION BANNERS).
  * Newest on top, max 3 visible then "+N more", auto-dismiss after 5 s unless held (?banner-hold=on).
  */
 import { create } from "zustand";

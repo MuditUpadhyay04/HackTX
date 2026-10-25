@@ -119,7 +119,7 @@ AVATARS = {
         "clinic",
         "UT Health Austin",
         ("#D8DCE2", "#A9AFB9"),
-        '<text x="120" y="142" text-anchor="middle" font-family="-apple-system, Helvetica, Arial, sans-serif" font-size="72" font-weight="600" fill="#FFFFFF">UH</text>',
+        '<text x="120" y="142" text-anchor="middle" font-family="Roboto, Helvetica, Arial, sans-serif" font-size="72" font-weight="600" fill="#FFFFFF">UH</text>',
     ),
     # Instagram
     "jess": person("jess", "Jess Nguyen", ("#FFE0EC", "#F6B3CC"), LIGHT, "#1C1714", "long", "#2B2B2B"),

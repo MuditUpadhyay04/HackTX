@@ -1,3 +1,24 @@
-/* app/theme-keyboard.css: colors for the keyboard look-alike (Android). Owned by that app only. */
+/* app/theme-keyboard.css: colors for the Samsung Keyboard look-alike (One UI 9 light theme).
+   Imported after tokens.css, so the --ui-kb-* / --kb-label values here win. Owned by the keyboard only. */
 :root {
+  --ui-kb-bg: #EEEFF3;
+  --ui-kb-key: #FFFFFF;
+  --ui-kb-key-special: #DCDEE5;
+  --kb-label: #1D1D20;
+  --kb-special-label: #1D1D20;
+  /* a pressed key */
+  --kb-key-pressed: #D2D4DB;
+  --kb-key-special-pressed: #C6C9D2;
+  /* the return key: a light blue-tinted special key */
+  --kb-return-bg: #D5E2FB;
+  --kb-return-label: #1A5FD8;
+  /* shift on, the active toolbar icon */
+  --kb-accent: #2E7CF6;
+  /* toolbar icons, long-press hints, the space bar label */
+  --kb-icon: #5F6168;
+  --kb-hint: #8A8C93;
+  --kb-divider: #C9CBD2;
+  /* the key preview bubble */
+  --kb-pop-bg: #FFFFFF;
+  --kb-pop-shadow: rgba(0, 0, 0, 0.18);
 }

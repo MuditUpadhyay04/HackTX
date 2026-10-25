@@ -11,9 +11,10 @@ export const PLACEHOLDER_PLATFORMS = [
   "messages",
   "instagram",
   "photos",
+  "phone",
   "facebook",
   "meta-ai",
-  "ios",
+  "oneui",
   "unsaid",
 ] as const;
 
@@ -34,24 +35,21 @@ const PILL_BASE: CSSProperties = {
 };
 
 /**
- * Host apps get an iOS HUD: a compact pill in the light banner material
- * (ui-banner at 78% + blur 30 + saturate 1.8, spec 4.2), system font 15 semibold.
+ * Host apps get an Android toast: a compact dark-gray pill with white text (Roboto 14).
  */
 const PILL_HOST: CSSProperties = {
   ...PILL_BASE,
   borderRadius: "var(--radius-pill)",
-  background: "var(--material-light)",
-  WebkitBackdropFilter: "var(--material-light-filter)",
-  backdropFilter: "var(--material-light-filter)",
+  background: "var(--toast-fill)",
   boxShadow: "var(--shadow-hud)",
-  color: "var(--ui-label)",
-  font: "var(--type-subheadline-semibold)",
+  color: "var(--label-on-dark)",
+  font: "400 14px/20px var(--font-system)",
 };
 
 /**
  * Inside Un-Said (the slot placeholder): App-UI-Final's toast (DESIGN_SPEC 2.7):
  * un-surface-raised, radius 16, un-caption in un-text. No material, no shadow.
- * Bottom-centered like App-UI-Final (Gurneal's decision, P0-R1-11); host toasts stay top-center.
+ * Bottom-centered like App-UI-Final (Gurneal's decision, P0-R1-11); Android host toasts are bottom-center too.
  */
 const PILL_UNSAID: CSSProperties = {
   ...PILL_BASE,
@@ -63,7 +61,7 @@ const PILL_UNSAID: CSSProperties = {
 };
 
 /** The "concept only" pill itself (also used statically on /test/placeholder). */
-export function ConceptOnlyPill({ platform = "ios" }: { platform?: PlaceholderPlatform }) {
+export function ConceptOnlyPill({ platform = "oneui" }: { platform?: PlaceholderPlatform }) {
   return (
     <div
       data-concept-toast={platform === "unsaid" ? "unsaid" : "host"}
@@ -97,9 +95,9 @@ let seq = 0;
 
 /**
  * Shows the shared "concept only" toast. Never stacks: any toast on screen is
- * dismissed first. The platform picks the styling (iOS HUD or Un-Said toast).
+ * dismissed first. The platform picks the styling (Android toast or Un-Said toast).
  */
-export function toastConceptOnly(platform: PlaceholderPlatform = "ios"): void {
+export function toastConceptOnly(platform: PlaceholderPlatform = "oneui"): void {
   toast.dismiss();
   seq += 1;
   const reduced = prefersReducedMotion();
@@ -108,7 +106,7 @@ export function toastConceptOnly(platform: PlaceholderPlatform = "ios"): void {
     duration: CONCEPT_ONLY_DURATION,
     unstyled: true,
     dismissible: false,
-    position: platform === "unsaid" ? "bottom-center" : "top-center",
+    position: "bottom-center",
     className: reduced ? REDUCED_CLASS : undefined,
     style: TOAST_ITEM,
   });
@@ -125,7 +123,7 @@ export function PlaceholderToaster() {
     <>
       <style>{REDUCED_CSS}</style>
       <Toaster
-        position="top-center"
+        position="bottom-center"
         offset={{ top: "var(--space-24)", bottom: "var(--space-24)" }}
         mobileOffset={{ top: "var(--space-16)", bottom: "var(--space-16)" }}
         visibleToasts={1}

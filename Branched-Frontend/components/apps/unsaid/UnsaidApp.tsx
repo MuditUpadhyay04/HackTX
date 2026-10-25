@@ -7,7 +7,7 @@
  * baked into the build, UNSAID_API in the script). Because it is same-origin the phone can:
  *   - dress its window like a native app: no web scrollbars, no browser focus rings;
  *   - remember which Un-Said screen you are on (shared app stack), so a fold/unfold keeps it;
- *   - launch it like iOS: Un-Said's splash rides the icon zoom, the app appears once it is up and
+ *   - launch it like Android: Un-Said's splash rides the icon zoom, the app appears once it is up and
  *     the zoom has landed, and on close the splash comes back before the window shrinks, so the
  *     animation never drags a live web page through the clip.
  */
@@ -21,8 +21,8 @@ import { AppFrame, useStack } from "../kit";
 /** Where the Un-Said web build is served (same-origin by default). */
 const BASE = process.env.NEXT_PUBLIC_UNSAID_URL ?? "/unsaid";
 
-/** The home indicator's strip under the app (iOS bottom safe area). */
-const SAFE_BOTTOM = 20;
+/** The gesture handle's strip under the app (Android's bottom inset with gesture navigation). */
+const SAFE_BOTTOM = 18;
 
 /** Keep the splash up at least this long (ms): the launch zoom lands at about 0.5 s. */
 const SPLASH_MIN = 480;
@@ -147,7 +147,7 @@ function Splash() {
   return (
     <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "#FFFFFF" }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/brand/unsaid-app-icon.png" alt="" width={96} height={96} style={{ borderRadius: 22 }} />
+      <img src="/brand/unsaid-app-icon.png" alt="" width={96} height={96} style={{ borderRadius: 96 * 0.34 }} />
     </div>
   );
 }

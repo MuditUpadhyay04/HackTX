@@ -6,7 +6,7 @@ import { SCREEN } from "@/components/lookalike/metrics";
 /**
  * The size of the pane a look-alike app is drawn in (pt). On the folded cover display that is the
  * whole 402 x 573 screen; on the unfolded inner display an app splits into a list pane and a detail
- * pane (iPad-style), and each part reads its own width from here instead of SCREEN.
+ * pane (two-pane), and each part reads its own width from here instead of SCREEN.
  */
 export type Pane = { width: number; height: number; display: "cover" | "inner" };
 

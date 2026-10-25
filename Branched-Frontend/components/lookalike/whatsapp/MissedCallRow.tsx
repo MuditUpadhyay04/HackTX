@@ -6,9 +6,9 @@ import { MissedCallGlyph } from "./glyphs";
 import { WaTime } from "./Bubble";
 
 /**
- * A missed-call row in the chat (Phase 2 CHROME SPECS): an incoming-side compact bubble with a red
- * phone glyph in a soft red circle, "Missed voice call" (15 semibold), "Tap to call back"
- * (13 secondary), the time at the right. Tapping opens the call action sheet.
+ * A missed-call row in the chat: an incoming-side compact bubble with a red phone glyph in a soft
+ * red circle, "Missed voice call" (15 medium), "Tap to call back" (13 secondary), the time at the
+ * right. Tapping opens the call dialog.
  */
 export function MissedCallRow({ label, sub, time, tail, onPress }: { label: string; sub: string; time: string; tail: boolean; onPress: () => void }) {
   return (
@@ -60,10 +60,10 @@ export function MissedCallRow({ label, sub, time, tail, onPress }: { label: stri
           <MissedCallGlyph size={WA.missed.glyph * 0.6} />
         </span>
         <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-          <span style={{ fontSize: WA.missed.title, fontWeight: 600, lineHeight: "var(--type-subheadline-line-height)", color: "var(--ui-label)", letterSpacing: "var(--type-subheadline-tracking)" }}>
+          <span style={{ fontSize: WA.missed.title, fontWeight: 500, lineHeight: "20px", color: "var(--wa-android-on-surface)" }}>
             {label}
           </span>
-          <span style={{ fontSize: WA.missed.sub, lineHeight: "var(--type-footnote-line-height)", color: "var(--wa-meta)" }}>
+          <span style={{ fontSize: WA.missed.sub, lineHeight: "18px", color: "var(--wa-meta)" }}>
             {sub}
           </span>
         </span>

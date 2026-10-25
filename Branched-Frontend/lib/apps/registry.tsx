@@ -22,6 +22,7 @@ import { UnsaidApp } from "@/components/apps/unsaid/UnsaidApp";
 import { PhotosApp } from "@/components/apps/photos/PhotosApp";
 import { MessagesApp } from "@/components/apps/messages/MessagesApp";
 import { WhatsAppApp } from "@/components/apps/whatsapp/WhatsAppApp";
+import { PhoneApp } from "@/components/apps/phone/PhoneApp";
 
 export type WidgetTarget = "widget-weather" | "widget-calendar" | "widget-photos" | "widget-music" | "widget-reminders";
 export type HardwareTarget = "hw-volume-up" | "hw-volume-down" | "hw-side-key";
@@ -59,6 +60,8 @@ const EMPTY = Object.fromEntries(ALL.map((t) => [t, null])) as Record<AppTarget,
 export const APP_SCREENS: Record<AppTarget, Screen> = {
   ...EMPTY,
   // The story's look-alike apps (CLAUDE_PROMPT.md Phase 2)
+  // Samsung Phone (dialer): the dock's first icon
+  phone: PhoneApp,
   whatsapp: WhatsAppApp,
   messages: MessagesApp,
   instagram: InstagramApp,
