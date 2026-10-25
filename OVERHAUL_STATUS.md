@@ -3,6 +3,7 @@
 Branch: `unsaid-overhaul`, off `main` at `c32f7ee`. Mobile, plus a small backend addition for video (Pass 5): `POST /api/cards/{id}/video`, `video_url` on cards and the public card, a `<video>` in `backend/web/card.js`, and one test.
 
 - Pass 1 (Grok, stopped at Gurneal's request 11:19 PM CDT Oct 24): restyle of every screen. See "Done, by screen".
+- Audit pass + no Dad + real demo photos (Grok, Oct 25, 1:35 AM CDT, `5f694a0`): Compose, Edit as a draft, Keep this moment, self note, Connect photos + faces demo, Delivered; Dad removed (existing DBs too); QA fixes on 26a3688; fictional demo photos and headshot avatars.
 - People tab + "Un-said" tab label (Grok, Oct 25, 1:05 AM CDT, `26a3688`): new bottom tab grouping people by relationship with their photos (`GET /api/people/groups`, `app/groups.py`, seeded demo JPEGs), person page with Talk / Write / Photo or video / Your words; the Letters tab label and title read "Un-said" (route unchanged).
 - No lines under paragraphs (Grok, Oct 25, 12:41 AM CDT, `04b0ce9`): removed the letter card swoosh, the Pile header/line rules, the Preview delivery-box rule, the You row dividers, the Talk tools hairline, and the Pile/Preview dock top borders. Tab bar and outer card/input borders kept.
 - QA fixes 2 (Grok, Oct 25, 12:30 AM CDT, `b62a45e`):
@@ -29,6 +30,7 @@ The app is for a **local demo**, not a hosted deployment. See "Local demo" below
 ## Commits
 
 - App overhaul: `259c00bc8e13d5fa552f7829d4841245ed852435`
+- Audit pass, no Dad, real demo photos: `5f694a0`
 - Handoff document: `4cf607183f6a5a4d2fd956360d363173bce6fead`, `13abbe4`, `6703bf4`
 - Pass 2 (phone portrait): `938b7cf`
 - Pass 4 (light theme): `14611e9`

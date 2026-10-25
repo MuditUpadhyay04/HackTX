@@ -2,6 +2,16 @@
 
 Running log of every change Grok Bot makes. Times are America/Chicago (CDT). Newest entries are at the top. Updated after every message Gurneal sends to Grok Bot.
 
+## Oct 25, 2026, 1:35 AM CDT
+
+Nick: check the context docs for anything we said we'd add that isn't there, and add it. Then: delete Dad completely, fold in the QA findings on `26a3688`, and wire the real demo photos and headshots. One commit on `unsaid-overhaul`, `5f694a0` (mobile + backend):
+- Built: Compose (draft, save, channel pick, dictate -> Talk, attach, Preview), Edit as a draft, Keep this moment (vault), the self note, the home "For you, later" row, Connect photos (Photos / Instagram / Facebook demo imports) with the faces flow (popup, accept, name this person, not them, dismiss; no face recognition, no Graph API), the Delivered beat.
+- Fixed: channel pick persists, pronoun release label, Write back / hero -> Compose, server-side drafts.
+- Dad removed from the cast and from existing databases on start (`seed.retire_people`).
+- QA: person-page Talk/Write attach to that person (sort hint), Photo or video carries the person, tappable person photos, `aria-selected` chips, Talk typing box placeholder + style, no progress line on the waiting strip, Android channel "Un-said", gallery back arrow on the "Library" row.
+- Real fictional demo photos (20 seed + 17 imports, 1280 px q80) with captions; headshot avatars for Riley, Mom, Sarah, Michael; existing databases swap the drawn ones on start. Home's lane shows the newest 10.
+- Checks: tsc clean, lint clean, expo export ios/android/web OK, pytest 79 passed.
+
 ## Oct 25, 2026, 1:05 AM CDT
 
 Nick: a People tab that groups photos of people by who they are to him, sorted with tabs, one tap to reach them; and the "Letters" tab reads "Un-said". One commit on `unsaid-overhaul`, `26a3688` (mobile + a small additive backend change):
