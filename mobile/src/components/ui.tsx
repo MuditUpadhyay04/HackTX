@@ -236,7 +236,8 @@ export function Sheet({ visible, onClose, children }: { visible: boolean; onClos
   const insets = useSafeAreaInsets();
   return (
     <Modal transparent visible={visible} animationType="slide" supportedOrientations={ALL_ORIENTATIONS} onRequestClose={onClose}>
-      <Pressable style={{ flex: 1, backgroundColor: color.scrim }} onPress={onClose} />
+      {/* no dimming scrim: tapping outside still closes the sheet */}
+      <Pressable style={{ flex: 1 }} onPress={onClose} />
       {/* On a wide screen the sheet stays phone-width and centered instead of spanning the window. */}
       <View style={[styles.sheet, { paddingBottom: insets.bottom + space.s16, paddingLeft: space.s16 + insets.left, paddingRight: space.s16 + insets.right }]}>
         <View style={styles.grabber} />
