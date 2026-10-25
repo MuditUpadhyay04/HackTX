@@ -64,8 +64,12 @@ class RealtimeSession:
         self._ws = await websockets.connect(url, open_timeout=15, max_size=None)
         await self._ws.send(json.dumps(_handshake(self.language_bias, self.keywords)))
         ack = json.loads(await asyncio.wait_for(self._ws.recv(), timeout=15))
-        if "sessionId" not in ack:
-            raise TranscribeError(f"handshake failed: {ack}")
+        # A rejected key still carries a sessionId: {"type": "error", "errorCode": "invalid_api_key", "sessionId": ...},
+        # then a 1008 close. Only a plain {"sessionId": ...} acknowledgement is success.
+        if ack.get("type") == "error" or "errorCode" in ack or "sessionId" not in ack:
+            await self._ws.close()
+            reason = ack.get("message") or ack.get("errorCode") or ack
+            raise TranscribeError(f"handshake failed: {reason}")
         self._reader = asyncio.create_task(self._read())
 
     async def send_audio(self, pcm: bytes) -> None:
