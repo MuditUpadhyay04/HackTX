@@ -240,3 +240,15 @@ Nick: "get rid of the line under the paragraphs throughout the whole app." Every
 - Talk (`app/talk.tsx`): the hairline under the tools row.
 - Kept on purpose: the tab bar's top border, outer borders of rows/cards/inputs/sheets, the photo viewer's round buttons and reply field, the video tile border, Talk's vertical panel border on wide screens, and Home's hold progress track (a progress bar, not a rule).
 - Copy for Gurneal: none.
+
+## Pass 8: People tab, and "Un-said" (Oct 25, 2026)
+
+Nick: a bottom tab that groups photos of people (mom, dad, brother, sister, best friend, girlfriend...), sorted with tabs, so on a bad day he can tap one and reach them. Also: the "Letters" tab label reads "Un-said".
+
+- Tabs: Home · People · Un-said · You. `(tabs)/people.tsx` (icon `people`). The `letters` route is unchanged; its tab label and the screen's big title read "Un-said".
+- Grouping (backend): there is no face recognition anywhere in Un-Said, so the backend doesn't infer people from photo pixels. A photo belongs to a person through the existing links: `photos.person_id` (photos he attached for them) and `photo_links` (gallery asset ids he talked about them on or sent them; returned as `asset_ids`). The relationship is the existing `people.relation` column (no schema change), mapped by `app/groups.py` to `mom | dad | brother | sister | best_friend | partner | other`; family = mom, dad, brother, sister. Seed relations as they already were: Mom = mother, Dad = father, Sarah (`jordan`) = girlfriend -> Partner, Michael (`priya`) = best friend (the seed says best friend, so not brother). No sibling in the cast, so Brother/Sister chips don't show.
+- `GET /api/people/groups` -> `{groups, has_family, people: [{person, group, family, photos, asset_ids}]}`. Test: `tests/test_people_groups.py`.
+- Demo photos: 9 drawn JPEGs in `backend/app/seed_media/` (2-3 per person, no faces, no hotlinks), added by `seed.ensure_people_photos()` on every start (insert-if-missing, never touches his photos). Home's "Your lane" still hides seed photos (`/photos/seed_`), as it hides the SVG placeholders.
+- People tab: chips (All, Family, then only the groups that have people), a card per person with up to 6 photos; phone = one column, wide (Duo/unfolded) = two. The group label is hidden when it only repeats the name ("Mom").
+- Person page `app/person/[id].tsx`: avatar, time, four one-tap actions into existing flows (Talk -> `/talk` addressed to them; Write -> `/talk` in its typed mode via `typing=1`; Photo or video -> `/gallery`, whose photo -> Talk -> pile -> Preview flow also has "Add a video"; Your words -> `/pile/[person]`), then their photos. Wide: person + actions left, photos right.
+- New strings for Gurneal: "People", "All", "Family", "Mom", "Dad", "Brother", "Sister", "Best friend", "Partner", "Other", "Talk", "Write", "Photo or video", "Un-said" (Nick's), and the seed photo captions ("her garden", "chai, sunday", "dad on the porch", "his old bat", "two cups", "our cafe", "acl, night two", "the court", "road trip"). "Your words" is reused.

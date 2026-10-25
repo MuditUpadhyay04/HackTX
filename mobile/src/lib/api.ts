@@ -128,6 +128,11 @@ export type Reminder = { id: string; person_id: string; person_name: string; cha
 
 export type LanePhoto = { id: string; person_id: string; url: string; caption: string; taken_at: string | null };
 
+/** GET /api/people/groups: who each person is to him, and the photos he has given them (no face recognition). */
+export type PeopleGroup = "mom" | "dad" | "brother" | "sister" | "best_friend" | "partner" | "other";
+export type PersonPhotos = { person: Person; group: PeopleGroup; family: boolean; photos: LanePhoto[]; asset_ids: string[] };
+export type PeopleGroups = { groups: PeopleGroup[]; has_family: boolean; people: PersonPhotos[] };
+
 export type Nudge = { kind: "reply" | "ready"; id: string; person_id: string; title: string; body: string };
 
 export type SelfNote = { id: string; url: string; created_at: string; mime?: string; label?: string };
@@ -215,6 +220,7 @@ export const api = {
   typedRant: (text: string, assetId?: string | null) => call<Rant>("/api/rants/text", post({ text, asset_id: assetId ?? null })),
   sortRant: (rantId: string) => call<SortResult>(`/api/rants/${rantId}/sort`, post()),
 
+  peopleGroups: () => call<PeopleGroups>("/api/people/groups"),
   pieces: (personId: string) => call<Piece[]>(`/api/people/${personId}/pieces`),
 
   memory: (assetId: string) => call<PhotoMemory>(`/api/memory/photo?asset_id=${encodeURIComponent(assetId)}`),

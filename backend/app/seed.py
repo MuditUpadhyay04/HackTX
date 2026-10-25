@@ -13,6 +13,7 @@ reseeds them.
 import json
 import os
 from datetime import datetime, timedelta
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from . import db, store
@@ -36,6 +37,7 @@ def seed_if_empty() -> None:
     ensure_cast()
     if fresh:
         seed_photos()
+    ensure_people_photos()
     seed_fixtures()
 
 
@@ -95,6 +97,42 @@ def seed_photos() -> None:
                 "INSERT OR IGNORE INTO photos (id, person_id, path, caption, taken_at, created_at) VALUES (?, ?, ?, ?, ?, ?)",
                 (pid, person, path, caption, taken, db.iso(datetime.now(CDT))),
             )
+
+
+SEED_MEDIA = Path(__file__).parent / "seed_media"
+
+# A few photos of each person for the People tab: simple drawn JPEGs from app/seed_media
+# (no real photos, no faces). Insert-if-missing on every start, like the cast.
+PEOPLE_PHOTOS = [
+    ("photo_seed_mom_garden", "mom", "seed_mom_garden.jpg", "her garden", "2026-04-12T09:30:00+05:30"),
+    ("photo_seed_mom_chai", "mom", "seed_mom_chai.jpg", "chai, sunday", "2026-01-04T08:00:00+05:30"),
+    ("photo_seed_dad_porch", "dad", "seed_dad_porch.jpg", "dad on the porch", "2026-05-02T18:00:00+05:30"),
+    ("photo_seed_dad_cricket", "dad", "seed_dad_cricket.jpg", "his old bat", "2025-12-30T16:00:00+05:30"),
+    ("photo_seed_dad_tea", "dad", "seed_dad_tea.jpg", "two cups", "2025-08-08T07:00:00+05:30"),
+    ("photo_seed_sarah_cafe", "jordan", "seed_sarah_cafe.jpg", "our cafe", "2026-09-06T10:00:00-05:00"),
+    ("photo_seed_sarah_lights", "jordan", "seed_sarah_lights.jpg", "acl, night two", "2026-10-11T21:00:00-05:00"),
+    ("photo_seed_michael_court", "priya", "seed_michael_court.jpg", "the court", "2026-08-15T19:00:00-05:00"),
+    ("photo_seed_michael_road", "priya", "seed_michael_road.jpg", "road trip", "2026-07-03T12:00:00-05:00"),
+]
+
+
+def ensure_people_photos() -> list[str]:
+    """Adds the People-tab demo photos that are missing (row or file). Never touches his own photos."""
+    added = []
+    with db.tx() as c:
+        for pid, person, filename, caption, taken in PEOPLE_PHOTOS:
+            if not c.execute("SELECT 1 FROM people WHERE id = ?", (person,)).fetchone():
+                continue
+            rel = f"photos/{filename}"
+            if not store.media_path(rel).exists():
+                store.save_media("photos", filename, (SEED_MEDIA / filename).read_bytes())
+            inserted = c.execute(
+                "INSERT OR IGNORE INTO photos (id, person_id, path, caption, taken_at, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+                (pid, person, rel, caption, taken, db.iso(datetime.now(CDT))),
+            ).rowcount
+            if inserted:
+                added.append(pid)
+    return added
 
 
 def seed_fixtures() -> None:

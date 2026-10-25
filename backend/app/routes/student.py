@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field
 
-from .. import attention, audio, db, delivery, memory, rants, safety, seed, store, timeutil
+from .. import attention, audio, db, delivery, groups, memory, rants, safety, seed, store, timeutil
 from ..ai import transcribe
 from ..auth import require_key
 from ..config import settings
@@ -135,6 +135,13 @@ class PersonPatch(BaseModel):
 def people() -> list[dict]:
     now = timeutil.now_utc()
     return [store.person_out(p, now) for p in store.list_people(include_self=True)]
+
+
+@router.get("/people/groups")
+def people_groups() -> dict:
+    """The People tab: everyone, grouped by who they are to him (mom, dad, brother, sister,
+    best friend, partner, other), with the photos he has given each of them. No face recognition."""
+    return groups.people_groups(timeutil.now_utc())
 
 
 @router.patch("/people/{person_id}")

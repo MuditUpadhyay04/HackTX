@@ -61,8 +61,8 @@ export default function Home() {
   const held = home?.cards.filter((c) => c.status === "held") ?? [];
   const ready = home?.cards.filter((c) => c.status === "ready") ?? [];
   const arrived = (home?.nudges ?? []).filter((n) => n.kind === "reply");
-  // The seed fixtures are drawn SVG placeholders; the lane only shows photos he actually attached.
-  const lane = (home?.photos ?? []).filter((p) => !/\.svg($|\?)/i.test(p.url ?? ""));
+  // The seed fixtures (SVG placeholders, and the People tab's drawn seed_*.jpg) aren't his; the lane only shows photos he actually attached.
+  const lane = (home?.photos ?? []).filter((p) => !/\.svg($|\?)|\/photos\/seed_/i.test(p.url ?? ""));
   const loading = !home && !error;
 
   const cancel = async (card: Card) => {

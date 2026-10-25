@@ -30,7 +30,7 @@ export default function Letters() {
     <View style={ui.screen}>
       <ScrollView contentContainerStyle={{ ...layout.column(), paddingTop: insets.top + space.s8, paddingBottom: space.s48 }}>
         <T v="display" style={{ marginHorizontal: inset.text }}>
-          Letters
+          Un-said
         </T>
 
         {loading ? (

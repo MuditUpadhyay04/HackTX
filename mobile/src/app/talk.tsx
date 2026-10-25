@@ -22,7 +22,8 @@ export default function Talk() {
   const layout = useLayout();
   // Wide (unfolded, landscape): transcript on the left, the mic and tools in a side panel.
   const wide = layout.expanded;
-  const { photo, toName, channel } = useLocalSearchParams<{ photo?: string; toName?: string; channel?: string }>();
+  // typing=1: opened as "Write" from a person page; starts in the typed mode (same flow).
+  const { photo, toName, channel, typing: startTyping } = useLocalSearchParams<{ photo?: string; toName?: string; channel?: string; typing?: string }>();
   const title = toName ? `To ${toName}` : "Say it out loud";
   const channelLine = (() => {
     if (!toName || !channel || channel === "self") return null;
@@ -35,7 +36,7 @@ export default function Talk() {
   // Data wiring (mobile/src/lib/memory.ts): what he said on this photo before, and his voice back.
   const { memory } = usePhotoMemory(photo);
   const voiceBack = useVoiceBack();
-  const [typing, setTyping] = useState(false);
+  const [typing, setTyping] = useState(startTyping === "1");
   const [typed, setTyped] = useState("");
   const [sorting, setSorting] = useState(false);
   const [result, setResult] = useState<SortResult | null>(null);
