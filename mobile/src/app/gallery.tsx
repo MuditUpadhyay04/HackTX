@@ -10,6 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AppIcon, PrimaryPill } from "../components/ui";
 import { haptics } from "../lib/haptics";
 import { type GalleryPhoto, SERVER_LIBRARY, loadPhotos } from "../lib/photos";
+import { TRY_MODE } from "../lib/try";
 import { useLayout } from "../lib/useLayout";
 import { color, space } from "../theme/tokens";
 
@@ -66,6 +67,7 @@ export default function Gallery() {
 
   const header = (
     <View style={[styles.header, { paddingTop: insets.top + space.s4, paddingLeft: space.s16 + insets.left, paddingRight: space.s16 + insets.right }]}>
+      {TRY_MODE ? null : (
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Back"
@@ -79,7 +81,14 @@ export default function Gallery() {
       >
         <Ionicons name="chevron-back" size={24} color={color.text} />
       </Pressable>
-      <Text style={[styles.title, { flex: 1 }]}>Library</Text>
+      )}
+      {/* TRY (needs Gurneal's OK): "Memory Lane" and "Privacy" */}
+      <Text style={[styles.title, { flex: 1 }]}>{TRY_MODE ? "Memory Lane" : "Library"}</Text>
+      {TRY_MODE ? (
+        <Pressable accessibilityRole="link" hitSlop={12} onPress={() => router.push("/privacy")}>
+          <Text style={styles.sub}>Privacy</Text>
+        </Pressable>
+      ) : (
       <Pressable
         testID="overlay-open-home"
         accessibilityLabel="Open Un-Said"
@@ -91,6 +100,7 @@ export default function Gallery() {
       >
         <AppIcon size={36} />
       </Pressable>
+      )}
       <Text style={[styles.sub, styles.count]}>{photos.length ? `${photos.length}${done ? "" : "+"} photos` : " "}</Text>
     </View>
   );

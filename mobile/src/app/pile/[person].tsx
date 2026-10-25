@@ -12,6 +12,7 @@ import { Avatar, Chip, NavBar, OutlinePill, Overline, PrimaryPill, Sheet, styles
 import { api, type Piece, type SortGroup } from "../../lib/api";
 import { haptics } from "../../lib/haptics";
 import { type App, APP_CHANNEL, APP_LABEL, callPerson, CHANNEL_APP } from "../../lib/handoff";
+import { TRY_MODE } from "../../lib/try";
 import { useHome } from "../../lib/useHome";
 import { SPLIT_MAX, useLayout } from "../../lib/useLayout";
 import { color, inset, pillGradient, radius, space } from "../../theme/tokens";
@@ -186,6 +187,7 @@ export default function Pile() {
         You decide when it leaves.
       </T>
       {/* Secondary (DESIGN_SPEC 3.8): opens Compose pre-filled with the lines that are on. */}
+      {TRY_MODE ? null : (
       <View style={{ alignItems: "center" }}>
         <TextButton
           featureId="draft-edit"
@@ -196,6 +198,7 @@ export default function Pile() {
           }}
         />
       </View>
+      )}
     </>
   );
 

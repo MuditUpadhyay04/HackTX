@@ -162,6 +162,7 @@ cat <<EOF
  Backend   https://$DOMAIN
  Phone     $PHONE_URL
            (device frame: https://$PHONE_DOMAIN/device)
+ Try it    https://try.$DOMAIN   (judges' phones: put this in the QR code)
 ============================================================================
 EOF
 exit "$phone_status"

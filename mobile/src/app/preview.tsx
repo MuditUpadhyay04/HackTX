@@ -14,6 +14,7 @@ import { type App, handOff } from "../lib/handoff";
 import { uploadGalleryPhoto } from "../lib/photos";
 import { needsHisTap, useHeadsUpAsk } from "../lib/push";
 import { toast } from "../lib/toast";
+import { TRY_MODE } from "../lib/try";
 import { useHome } from "../lib/useHome";
 import { SPLIT_MAX, useLayout } from "../lib/useLayout";
 import { color, inset, radius, space } from "../theme/tokens";
@@ -135,7 +136,18 @@ export default function Preview() {
     </>
   );
 
-  const choices = (
+  // Try mode (judges' phones): the preview is the end. Nothing sends. TRY (needs Gurneal's OK)
+  const tryClosing = (
+    <View style={styles.held}>
+      <Ionicons name="moon" size={24} color={color.accent} />
+      <T v="rowName" style={{ textAlign: "center" }}>
+        {`In Un-Said, this goes to ${person.name} on ${CHANNEL_LABEL[person.channel] ?? "their app"} at ${morningLabel(person.morning)} ${pos} time.`}
+      </T>
+      <T v="caption" style={{ textAlign: "center" }}>{"This preview doesn't send anything."}</T>
+    </View>
+  );
+
+  const choices = TRY_MODE ? tryClosing : (
     <>
       {!held ? <VideoAttach video={video} onChange={setVideo} disabled={sending} /> : null}
       {holdable && !held ? (
@@ -175,7 +187,14 @@ export default function Preview() {
     </>
   );
 
-  const dockContent = (
+  const dockContent = TRY_MODE ? (
+    <>
+      <PrimaryPill featureId="try-another-photo" label="Try another photo" onPress={() => router.dismissTo("/gallery")} />
+      <View style={{ alignItems: "center" }}>
+        <TextButton label="Keep editing" onPress={() => router.back()} />
+      </View>
+    </>
+  ) : (
     <>
       <PrimaryPill featureId="unsend-queue-send" label={holding ? "Send when they're ready" : "Send now"} disabled={sending || pieces.length === 0} onPress={send} />
       <View style={{ alignItems: "center" }}>
@@ -213,6 +232,8 @@ export default function Preview() {
     </View>
   );
 }
+
+const CHANNEL_LABEL: Record<string, string> = { whatsapp: "WhatsApp", imessage: "Messages", instagram: "Instagram" };
 
 function Choice({ label, on, onPress, featureId }: { label: string; on: boolean; onPress: () => void; featureId?: string }) {
   return (

@@ -1,7 +1,7 @@
 // Talk: "Say it out loud" (DESIGN_SPEC 3.7). Live transcript, then the split into people.
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { ActionSheetIOS, Alert, Animated, KeyboardAvoidingView, Platform, ScrollView, type StyleProp, StyleSheet, TextInput, View, type ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -13,6 +13,7 @@ import { api, type Channel, mediaUrl, type SortResult } from "../lib/api";
 import { APP_LABEL, CHANNEL_APP } from "../lib/handoff";
 import { usePhotoMemory, useVoiceBack } from "../lib/memory";
 import { toast } from "../lib/toast";
+import { TRY_MODE } from "../lib/try";
 import { useLiveRant } from "../lib/useLiveRant";
 import { READING_MAX, useLayout } from "../lib/useLayout";
 import { color, inset, radius, shadow, space, spring, type } from "../theme/tokens";
@@ -46,11 +47,39 @@ export default function Talk() {
   const [transcript, setTranscript] = useState("");
   const [showTranscript, setShowTranscript] = useState(false);
 
+  // Web has no Alert (react-native-web's does nothing), so problems show inline, with a way forward.
+  const [problem, setProblem] = useState<{ text: string; retry?: () => void; label?: string } | null>(null);
+  const busy = useRef(false); // one Done / one sort at a time, however fast the taps
+  const [elapsed, setElapsed] = useState(0); // seconds of sorting, shown in try mode (Vultr Inference can take 5-20 s)
+  useEffect(() => {
+    if (!TRY_MODE || !sorting) return;
+    const started = Date.now();
+    const t = setInterval(() => setElapsed(Math.round((Date.now() - started) / 1000)), 1000);
+    return () => {
+      clearInterval(t);
+      setElapsed(0);
+    };
+  }, [sorting]);
+  const say = (title: string, e: unknown, retry?: () => void, label = "Try again") => {
+    const text = (e as Error)?.message || String(e);
+    if (Platform.OS === "web") setProblem({ text, retry, label });
+    else Alert.alert(title, text);
+  };
+
   const recording = live.state === "recording" || live.state === "starting";
+
+  // Try mode: the server takes up to 60 s of audio, so stop at 55 s and sort what was said.
+  const stopRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    if (!TRY_MODE || live.state !== "recording") return;
+    const t = setTimeout(() => stopRef.current(), 55_000);
+    return () => clearTimeout(t);
+  }, [live.state]);
   const spoken = [...live.turns, live.partial].filter(Boolean).join(" ");
 
   const sort = async (rantId: string) => {
     setSorting(true);
+    setProblem(null);
     try {
       const res = await api.sortRant(rantId, person || null);
       setTranscript(res.rant.transcript);
@@ -61,13 +90,14 @@ export default function Talk() {
       await new Promise((r) => setTimeout(r, 600)); // the 600 ms hold before Un-Said speaks
       setResult(res);
     } catch (e) {
-      Alert.alert("That didn't go through", (e as Error).message);
+      say("That didn't go through", e, () => sort(rantId));
     } finally {
       setSorting(false);
     }
   };
 
   const toggleMic = async () => {
+    setProblem(null);
     try {
       if (live.state === "idle" || live.state === "error") {
         setResult(null);
@@ -77,17 +107,32 @@ export default function Talk() {
         await sort(rant.id);
       }
     } catch (e) {
-      Alert.alert("Couldn't hear that", (e as Error).message);
+      // TRY (needs Gurneal's OK): the "Type it instead" way out when the mic or the connection fails.
+      say("Couldn't hear that", e, () => {
+        live.cancel();
+        setTyping(true);
+      }, "Type it instead");
     }
   };
 
+  useEffect(() => {
+    stopRef.current = () => {
+      if (live.state === "recording") void toggleMic();
+    };
+  });
+
   const submitTyped = async () => {
+    if (busy.current) return;
+    busy.current = true;
+    setProblem(null);
     try {
       const rant = await api.typedRant(typed.trim(), photo ?? null);
       setTranscript(typed.trim());
       await sort(rant.id);
     } catch (e) {
-      Alert.alert("That didn't go through", (e as Error).message);
+      say("That didn't go through", e, submitTyped);
+    } finally {
+      busy.current = false;
     }
   };
 
@@ -212,7 +257,11 @@ export default function Talk() {
               <Ionicons name={recording ? "stop" : "mic"} size={tight ? 26 : 32} color={color.onAccent} />
             </Press>
           </View>
-          <T v="caption">{live.state === "finishing" || sorting ? "sorting it by person…" : recording ? "Tap to stop" : "Tap to talk"}</T>
+          <T v="caption">
+            {live.state === "finishing" || sorting
+              ? `sorting it by person…${TRY_MODE && elapsed > 0 ? ` ${elapsed} s` : ""}`
+              : recording ? "Tap to stop" : "Tap to talk"}
+          </T>
           {!tight || spoken ? <TextButton featureId="rant-discard" label="Start over" tone="text3" onPress={startOver} /> : null}
         </View>
       )}
@@ -289,6 +338,22 @@ export default function Talk() {
                 <Skeleton height={112} />
               </View>
             ) : null}
+            {problem ? (
+              <View accessibilityRole="alert" style={styles.problem}>
+                <T v="rowPreview">{problem.text}</T>
+                {problem.retry ? (
+                  <TextButton
+                    tone="text"
+                    label={problem.label ?? "Try again"}
+                    onPress={() => {
+                      const retry = problem.retry;
+                      setProblem(null);
+                      retry?.();
+                    }}
+                  />
+                ) : null}
+              </View>
+            ) : null}
             <T v="caption" style={{ marginTop: space.s16 }}>Nothing leaves without you.</T>
             {live.provider === "mock" ? <T v="meta" style={{ marginTop: space.s8, color: color.text4 }}>mock transcription (no Muse key on the server)</T> : null}
           </View>
@@ -345,6 +410,7 @@ function SelfNoteCard() {
 }
 
 const styles = StyleSheet.create({
+  problem: { marginTop: space.s16, padding: space.s12, borderRadius: radius.row, backgroundColor: color.surface, gap: space.s4, alignItems: "flex-start" },
   // Typed mode: a visible box (tinted surface, rounded, a soft accent edge), not bare text on the page.
   typeBox: {
     marginTop: space.s16,

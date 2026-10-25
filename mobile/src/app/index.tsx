@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { AccessibilityInfo, Animated, StyleSheet, Text, View } from "react-native";
 
 import { AppIcon } from "../components/ui";
+import { accepted, TRY_MODE } from "../lib/try";
 import { color } from "../theme/tokens";
 
 export default function Launch() {
@@ -18,7 +19,7 @@ export default function Launch() {
     let timer: ReturnType<typeof setTimeout> | undefined;
     const go = (delay: number) => {
       timer = setTimeout(() => {
-        if (!cancelled) router.replace("/home");
+        if (!cancelled) router.replace(TRY_MODE ? (accepted() ? "/gallery" : "/privacy") : "/home");
       }, delay);
     };
     AccessibilityInfo.isReduceMotionEnabled()

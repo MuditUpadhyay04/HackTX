@@ -18,6 +18,9 @@ const nextConfig: NextConfig = {
       fallback: [
         { source: "/unsaid", destination: "/unsaid/index.html" },
         { source: "/unsaid/:path*", destination: "/unsaid/index.html" },
+        // "Try Un-Said" for judges (Dockerfile stage 1b): the same app in try mode under /try.
+        { source: "/try", destination: "/try/index.html" },
+        { source: "/try/:path*", destination: "/try/index.html" },
       ],
     };
   },

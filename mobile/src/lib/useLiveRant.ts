@@ -7,9 +7,11 @@ import {
   useAudioStream,
   type AudioStreamBuffer,
 } from "expo-audio";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Platform } from "react-native";
 
 import { api, wsUrl, type Rant } from "./api";
+import { openWebMic, type WebMic } from "./webMic";
 
 const TARGET_RATE = 24000;
 const BARS = 24; // the waveform's bar count (DESIGN_SPEC 3.7)
@@ -58,8 +60,9 @@ export function useLiveRant() {
   const asset = useRef<string | null>(null);
   const settle = useRef<{ resolve: (r: Rant) => void; reject: (e: Error) => void } | null>(null);
 
-  const onBuffer = useCallback((buffer: AudioStreamBuffer) => {
-    const pcm = toPcm24k(buffer);
+  const mic = useRef<WebMic | null>(null); // the web build's microphone (lib/webMic.ts)
+
+  const sendPcm = useCallback((pcm: ArrayBuffer) => {
     const level = rms(pcm);
     setLevels((prev) => [...prev.slice(1), level]);
     const socket = ws.current;
@@ -67,20 +70,53 @@ export function useLiveRant() {
     else queue.current.push(pcm);
   }, []);
 
+  const onBuffer = useCallback((buffer: AudioStreamBuffer) => sendPcm(toPcm24k(buffer)), [sendPcm]);
+
+  // Web: if the page is hidden or closed mid-recording, let go of the mic (iOS keeps the red dot otherwise).
+  useEffect(() => {
+    if (Platform.OS !== "web" || typeof document === "undefined") return;
+    const release = () => {
+      if (!mic.current || (document.visibilityState === "visible" && !document.hidden)) return;
+      mic.current.stop().catch(() => {});
+      mic.current = null;
+      ws.current?.close();
+      ws.current = null;
+      setLevels(QUIET);
+      setState("idle");
+    };
+    const onHide = () => {
+      if (mic.current) {
+        mic.current.stop().catch(() => {});
+        mic.current = null;
+      }
+    };
+    document.addEventListener("visibilitychange", release);
+    window.addEventListener("pagehide", onHide);
+    return () => {
+      document.removeEventListener("visibilitychange", release);
+      window.removeEventListener("pagehide", onHide);
+    };
+  }, []);
+
   const { stream } = useAudioStream({ sampleRate: TARGET_RATE, channels: 1, encoding: "int16", onBuffer });
 
   /** assetId: the gallery photo he's looking at, so the photo remembers what he said. */
   const start = useCallback(async (assetId?: string | null) => {
+    // Web: open the mic before any await, inside the tap, or iOS Safari keeps audio suspended.
+    const webMic = Platform.OS === "web" ? openWebMic(sendPcm) : null;
+    webMic?.catch(() => {}); // awaited below; this only stops an unhandled-rejection warning
     asset.current = assetId ?? null;
     setTurns([]);
     setPartial("");
     setState("starting");
-    const permission = await requestRecordingPermissionsAsync();
-    if (!permission.granted) {
-      setState("error");
-      throw new Error("Microphone access is off for Expo Go. Turn it on in Settings.");
+    if (!webMic) {
+      const permission = await requestRecordingPermissionsAsync();
+      if (!permission.granted) {
+        setState("error");
+        throw new Error("Microphone access is off for Expo Go. Turn it on in Settings.");
+      }
+      await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
     }
-    await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
 
     ready.current = false;
     queue.current = [];
@@ -114,6 +150,18 @@ export function useLiveRant() {
       settle.current = null;
     };
 
+    if (webMic) {
+      try {
+        mic.current = await webMic;
+      } catch (e) {
+        socket.close();
+        ws.current = null;
+        setState("error");
+        throw e;
+      }
+      setState("recording");
+      return;
+    }
     await stream.start();
     try {
       await stream.startFileRecordingAsync({ format: "wav" });
@@ -122,19 +170,27 @@ export function useLiveRant() {
       fileRecording.current = false;
     }
     setState("recording");
-  }, [stream]);
+  }, [stream, sendPcm]);
 
   /** Stops, waits for the saved rant. Falls back to uploading the WAV. */
   const stop = useCallback(async (): Promise<Rant> => {
     setState("finishing");
     let wav: { uri: string; sampleRate: number } | null = null;
-    if (fileRecording.current) {
+    let webWav: Blob | null = null;
+    if (mic.current) {
       try {
-        wav = await stream.stopFileRecordingAsync();
+        webWav = await mic.current.stop();
       } catch {}
-      fileRecording.current = false;
+      mic.current = null;
+    } else {
+      if (fileRecording.current) {
+        try {
+          wav = await stream.stopFileRecordingAsync();
+        } catch {}
+        fileRecording.current = false;
+      }
+      stream.stop();
     }
-    stream.stop();
     setLevels(QUIET);
 
     const socket = ws.current;
@@ -150,13 +206,14 @@ export function useLiveRant() {
       return rant;
     } catch (liveError) {
       socket?.close();
-      if (!wav || wav.sampleRate !== TARGET_RATE) {
+      const upload = webWav && webWav.size > 44 ? webWav : wav && wav.sampleRate === TARGET_RATE ? wav.uri : null;
+      if (!upload) {
         setState("error");
         throw liveError;
       }
       let rant: Rant;
       try {
-        rant = await api.uploadRant(wav.uri, asset.current);
+        rant = await api.uploadRant(upload, asset.current);
       } catch (uploadError) {
         setState("error"); // never leave the mic stuck on "sorting"
         throw uploadError;
@@ -170,9 +227,14 @@ export function useLiveRant() {
   }, [stream]);
 
   const cancel = useCallback(() => {
-    try {
-      stream.stop();
-    } catch {}
+    if (mic.current) {
+      mic.current.stop().catch(() => {});
+      mic.current = null;
+    } else {
+      try {
+        stream.stop();
+      } catch {}
+    }
     ws.current?.close();
     ws.current = null;
     setTurns([]);

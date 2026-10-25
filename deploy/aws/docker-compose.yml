@@ -41,6 +41,7 @@ services:
     environment:
       DOMAIN: ${DOMAIN:?set DOMAIN in /srv/unsaid/.env}
       PHONE_DOMAIN: phone.${DOMAIN} # sslip.io resolves any subdomain to the same IP
+      TRY_DOMAIN: try.${DOMAIN} # "Try Un-Said" for judges' phones (the QR code)
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data # certificates: keep this volume, or Let's Encrypt limits can bite

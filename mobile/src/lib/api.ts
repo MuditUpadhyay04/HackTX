@@ -1,6 +1,8 @@
 // Client for the Un-Said backend in ../backend (FastAPI). Shapes mirror backend/README.md.
 import { Platform } from "react-native";
 
+import { TRY_MODE, guestId, newGuestId } from "./try";
+
 export const API_URL = (process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8000").replace(/\/$/, "");
 export const APP_KEY = process.env.EXPO_PUBLIC_APP_KEY ?? "";
 
@@ -189,8 +191,11 @@ export type Home = {
 export const mediaUrl = (path: string | null) => (path ? `${API_URL}${path}` : null);
 
 /** For /api URLs played or loaded outside fetch (audio players): the key rides in the query. */
-export const authedUrl = (path: string | null | undefined) =>
-  path ? `${API_URL}${path}${APP_KEY ? `${path.includes("?") ? "&" : "?"}key=${encodeURIComponent(APP_KEY)}` : ""}` : null;
+export const authedUrl = (path: string | null | undefined) => {
+  if (!path) return null;
+  const query = [APP_KEY ? `key=${encodeURIComponent(APP_KEY)}` : "", TRY_MODE ? `guest=${guestId()}` : ""].filter(Boolean).join("&");
+  return `${API_URL}${path}${query ? `${path.includes("?") ? "&" : "?"}${query}` : ""}`;
+};
 
 const norm = (text: string) => text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
 
@@ -210,11 +215,24 @@ export function letterLines(pieces: Pick<Piece, "text">[]): string[] {
 
 export function wsUrl(path: string) {
   const base = API_URL.replace(/^http/, "ws");
-  return `${base}${path}${APP_KEY ? `?key=${encodeURIComponent(APP_KEY)}` : ""}`;
+  const query = [APP_KEY ? `key=${encodeURIComponent(APP_KEY)}` : "", TRY_MODE ? `guest=${guestId()}` : ""].filter(Boolean).join("&");
+  return `${base}${path}${query ? `?${query}` : ""}`;
 }
 
+// Fallbacks only, when the server sends no detail. TRY (needs Gurneal's OK)
+const TRY_ERRORS: Record<number, string> = {
+  411: "That recording didn't come through. Try again, or type it instead.",
+  413: "That's longer than this preview takes. Keep it under a minute.",
+  403: "This preview doesn't send anything. In Un-Said, it would go now.",
+  429: "That's a lot at once. Wait a minute, then try again.",
+  503: "Un-Said is busy right now. Try again in a moment.",
+};
+
+/** Try mode: every request names this browser's sandbox (lib/try.ts). */
+const guestHeader = (): Record<string, string> => (TRY_MODE ? { "X-Guest-Id": guestId() } : {});
+
 /** `ms` = 0 for uploads, which may take as long as the network needs. */
-async function call<T>(path: string, init: RequestInit = {}, ms = 45000): Promise<T> {
+async function call<T>(path: string, init: RequestInit = {}, ms = 45000, retried = false): Promise<T> {
   const ctrl = new AbortController();
   const timer = ms ? setTimeout(() => ctrl.abort(), ms) : null;
   let res: Response;
@@ -222,12 +240,25 @@ async function call<T>(path: string, init: RequestInit = {}, ms = 45000): Promis
     res = await fetch(`${API_URL}${path}`, {
       ...init,
       signal: ctrl.signal,
-      headers: { ...(APP_KEY ? { "X-App-Key": APP_KEY } : {}), ...(init.headers ?? {}) },
+      headers: { ...(APP_KEY ? { "X-App-Key": APP_KEY } : {}), ...guestHeader(), ...(init.headers ?? {}) },
     });
   } catch {
     throw new Error(ctrl.signal.aborted ? "Un-Said is taking too long. Try again." : "Can't reach Un-Said. Check your connection.");
   } finally {
     if (timer) clearTimeout(timer);
+  }
+  if (!res.ok && TRY_MODE) {
+    // Try mode (judges' phones): the server's detail is written for people; never show a code or JSON.
+    let detail: unknown = null;
+    try {
+      detail = (await res.json()).detail;
+    } catch {}
+    if (res.status === 400 && !retried && typeof detail === "string" && /guest/i.test(detail)) {
+      newGuestId(); // a bad or stale sandbox id: start fresh once
+      return call<T>(path, init, ms, true);
+    }
+    if (typeof detail === "string" && detail.trim()) throw new Error(detail);
+    throw new Error(TRY_ERRORS[res.status] ?? (res.status >= 500 ? TRY_ERRORS[503] : "That didn't go through. Try again."));
   }
   if (!res.ok) {
     let detail = `${res.status}`;
@@ -263,9 +294,11 @@ export const api = {
     }),
 
   // assetId: the gallery photo he was looking at, so the photo remembers what he said.
-  uploadRant: (wavUri: string, assetId?: string | null) => {
+  /** wav: a file uri (native) or a WAV Blob (the web recorder in lib/webMic.ts). */
+  uploadRant: (wav: string | Blob, assetId?: string | null) => {
     const form = new FormData();
-    form.append("file", file(wavUri, "rant.wav", "audio/wav"));
+    if (typeof wav === "string") form.append("file", file(wav, "rant.wav", "audio/wav"));
+    else form.append("file", wav, "rant.wav");
     if (assetId) form.append("asset_id", assetId);
     return call<Rant>("/api/rants/audio", { method: "POST", body: form }, 0);
   },

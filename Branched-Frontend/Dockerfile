@@ -38,6 +38,16 @@ RUN test -n "$EXPO_PUBLIC_API_URL" \
  && npx expo export --platform web --output-dir /unsaid-web --clear \
  && test -f /unsaid-web/index.html
 
+# ------------------------------------------------------------------ 1b. "Try Un-Said" for judges (/try)
+# The same app in try mode (EXPO_PUBLIC_TRY_MODE=1): a privacy page first, demo photos, a private
+# per-browser sandbox on the backend, and nothing is ever sent. Reuses stage 1's node_modules.
+FROM unsaid AS try
+ARG EXPO_PUBLIC_API_URL
+ARG EXPO_PUBLIC_APP_KEY=""
+# mobile/scripts/build-try.sh writes its own temporary app.config.js (base path /try) and patches
+# index.html for phones (title, safe areas, 100dvh, no zoom on inputs, inline splash).
+RUN rm -f app.config.js  && EXPO_PUBLIC_API_URL="$EXPO_PUBLIC_API_URL" EXPO_PUBLIC_APP_KEY="$EXPO_PUBLIC_APP_KEY" bash scripts/build-try.sh /try-web  && test -f /try-web/index.html && grep -q "Try Un-Said" /try-web/index.html
+
 # ------------------------------------------------------------------ 2. the phone (Next.js, standalone)
 FROM ${NODE_IMAGE} AS phone-build
 WORKDIR /app
@@ -48,6 +58,7 @@ RUN npm ci --no-audit --no-fund
 COPY Branched-Frontend/ ./
 # Copying the export in first also makes this stage wait for stage 1: one big build at a time on 2 GB.
 COPY --from=unsaid /unsaid-web ./public/unsaid
+COPY --from=try /try-web ./public/try
 RUN npm run build \
  && test -f .next/standalone/server.js
 
