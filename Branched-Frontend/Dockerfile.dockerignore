@@ -1,0 +1,24 @@
+# Ignore file for Branched-Frontend/Dockerfile, whose build context is the repo root.
+# BuildKit reads <Dockerfile>.dockerignore next to the Dockerfile (a Branched-Frontend/.dockerignore
+# would not apply to a repo-root context). Paths are relative to the repo root.
+# Send only mobile/ and Branched-Frontend/ sources: no dependencies, builds, secrets or backend data.
+*
+!mobile
+!Branched-Frontend
+
+**/node_modules
+**/.next
+**/.expo
+**/dist
+**/web-build
+**/.env*
+**/.git
+**/.claude
+**/*.tsbuildinfo
+**/npm-debug.log*
+Branched-Frontend/public/unsaid
+Branched-Frontend/screenshots
+Branched-Frontend/reference
+Branched-Frontend/test-results
+Branched-Frontend/playwright-report
+Branched-Frontend/Dockerfile*

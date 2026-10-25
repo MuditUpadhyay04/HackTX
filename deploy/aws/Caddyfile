@@ -9,3 +9,13 @@
 		stream_close_delay 5m
 	}
 }
+
+# The phone mock (Branched-Frontend + the Un-Said web build at /unsaid), with its own certificate.
+# PHONE_DOMAIN is phone.{$DOMAIN} (docker-compose.yml); sslip.io resolves it to this server too.
+# Un-Said inside it calls {$DOMAIN} cross-origin (CORS_ORIGINS=* allows X-App-Key).
+# Until update.sh has started the phone container this site answers 502; the backend is unaffected.
+# (The default only keeps the file valid if PHONE_DOMAIN is ever missing; it is never served.)
+{$PHONE_DOMAIN:phone.localhost} {
+	encode zstd gzip
+	reverse_proxy phone:3000
+}

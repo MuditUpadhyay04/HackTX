@@ -148,6 +148,27 @@ The same `bootstrap.sh` runs on a Vultr Ubuntu 24.04 VM. Use it as the one host 
 4. Put the keys in `/srv/unsaid/.env`, including `GEMINI_API_KEY` if you have one.
 5. In the Devpost write-up, say the API runs on that Vultr instance. One host only. Do not stand up a second box the morning of judging.
 
+## Phone demo on Vultr
+
+The same server also serves the Samsung phone mock (`Branched-Frontend/`) with the real Un-Said web build inside it, on its own name and certificate:
+
+**https://phone.45-32-200-63.sslip.io/phone**: full screen, no device frame, for a real phone. `/device` shows the phone in its device frame (for a laptop).
+
+- `update.sh` builds it (`Branched-Frontend/Dockerfile`, image `unsaid-phone:local`) after the backend is up, then swaps the `phone` container only if the build succeeded. A failed build leaves the backend and the old phone untouched. The first build takes 5–10 minutes. If the server has no swap, it adds 2 GB first.
+- Un-Said inside the phone calls `https://<DOMAIN>` with `APP_KEY` from `/srv/unsaid/.env`, with demo data on (`EXPO_PUBLIC_DEMO_DATA=1`). Both values are baked into the page's JavaScript, so anyone with the phone link can read the key, as with any Expo build. If you change `APP_KEY`, run `update.sh --no-pull`, which rebuilds the phone because the key changed.
+- `--no-phone` deploys only the backend.
+
+**First time on the existing server** (the running copy of `update.sh` predates the phone, so run it twice):
+
+```bash
+sudo /srv/unsaid/HackTX/deploy/aws/update.sh            # pulls main, restarts backend + Caddy (phone.… answers 502 for now)
+sudo /srv/unsaid/HackTX/deploy/aws/update.sh --no-pull  # builds and starts the phone, then prints its URL
+```
+
+**On the Galaxy Z Fold (Chrome):** open https://phone.45-32-200-63.sslip.io/phone, tap **⋮** → **Add to Home screen** → **Install** (or **Add**). Then open it from the home screen icon. It opens full screen, without Chrome's address bar. Allow the microphone when Un-Said asks.
+
+Logs: `sudo docker compose --env-file /srv/unsaid/.env -f /srv/unsaid/HackTX/deploy/aws/docker-compose.yml logs -f --tail 100 phone`
+
 ## Day of the demo
 
 | Task | Command (on the server) |
@@ -202,15 +223,18 @@ New accounts may get free usage through the AWS Free Tier. Check the console whe
 | Mom's "Hold to reply" does nothing | The page must be `https://`. On the phone, allow the microphone for the site. |
 | A WhatsApp link points at localhost | `PUBLIC_BASE_URL` in `.env` must be `https://<DOMAIN>`, then `update.sh --no-pull`. |
 | The build runs out of memory | The bootstrap adds 1 GB of swap. Or pick the 2 GB plan. |
+| `phone.…sslip.io` shows 502 | The phone container isn't running yet: `update.sh --no-pull` builds it. Then `… logs --tail 80 phone`. |
+| The phone build fails | The backend keeps running. Read the build error above the `FAILED` line. To retry: `update.sh --no-pull`. |
 
 ## Files here
 
 | File | What it is |
 |---|---|
 | `bootstrap.sh` | First install and re-runs: Docker, code, `.env`, build, start, HTTPS check |
-| `update.sh` | Pull + rebuild + restart the backend (`--no-pull` to apply `.env` only) |
-| `docker-compose.yml` | The backend (data on `/srv/unsaid/data`) behind Caddy on 80/443 |
-| `Caddyfile` | Automatic HTTPS for `{$DOMAIN}`; WebSockets pass through |
+| `update.sh` | Pull + rebuild + restart the backend, then build and swap the phone (`--no-pull` to apply `.env` only, `--no-phone` for the backend only) |
+| `docker-compose.yml` | The backend (data on `/srv/unsaid/data`) behind Caddy on 80/443, plus the `phone` service (profile `phone`) |
+| `Caddyfile` | Automatic HTTPS for `{$DOMAIN}` (WebSockets pass through) and `phone.{$DOMAIN}` |
+| `../../Branched-Frontend/Dockerfile` | The phone image: Un-Said web export → Next.js standalone on :3000 (build context: repo root) |
 | `env.template` | Every setting the backend reads. Copied once to `/srv/unsaid/.env`. |
 
 ## Sources

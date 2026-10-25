@@ -1,6 +1,9 @@
-# Un-Said on one instance: the backend behind Caddy (automatic HTTPS, WebSockets).
+# Un-Said on one instance: the backend behind Caddy (automatic HTTPS, WebSockets), plus the
+# phone mock (Branched-Frontend, with the Un-Said web build inside) at phone.${DOMAIN}.
 # Run through bootstrap.sh / update.sh, which pass --env-file /srv/unsaid/.env
 # (it supplies ${DOMAIN} here and the backend's keys via env_file).
+# The phone is in the "phone" profile: plain `up` skips it, so the backend never waits on it.
+# update.sh builds unsaid-phone:local and turns the profile on (COMPOSE_PROFILES=phone) once it exists.
 
 name: unsaid
 
@@ -37,6 +40,7 @@ services:
       - "443:443"
     environment:
       DOMAIN: ${DOMAIN:?set DOMAIN in /srv/unsaid/.env}
+      PHONE_DOMAIN: phone.${DOMAIN} # sslip.io resolves any subdomain to the same IP
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data # certificates: keep this volume, or Let's Encrypt limits can bite
@@ -45,6 +49,26 @@ services:
       backend:
         condition: service_healthy
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  phone:
+    image: unsaid-phone:local
+    profiles: ["phone"]
+    build: # update.sh runs the same build with `docker build` (the key is never printed)
+      context: ../..
+      dockerfile: Branched-Frontend/Dockerfile
+      args:
+        EXPO_PUBLIC_API_URL: https://${DOMAIN}
+        EXPO_PUBLIC_APP_KEY: ${APP_KEY:-}
+        EXPO_PUBLIC_DEMO_DATA: "1"
+    expose:
+      - "3000"
+    restart: unless-stopped
+    mem_limit: 768m # the phone never takes the backend's memory on a 2 GB box
     logging:
       driver: json-file
       options:
