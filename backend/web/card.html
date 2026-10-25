@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" style="background:#0F0D15">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -7,19 +7,26 @@
   <meta name="color-scheme" content="dark" />
   <meta name="robots" content="noindex" />
   <title>Un-Said</title>
+  <!-- Link preview (DESIGN_SPEC 3.9): never a sentence of the letter. The per-sender title
+       "A letter from Riley" needs the server to fill it in; until then it's generic. -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="unsaid.app" />
+  <meta property="og:title" content="A letter" />
+  <meta property="og:image" content="/app/icon-512.png" />
+  <meta name="twitter:card" content="summary" />
   <link rel="icon" href="/app/favicon.ico" sizes="any" />
   <link rel="icon" href="/app/icon-32.png" type="image/png" sizes="32x32" />
   <link rel="apple-touch-icon" href="/app/icon-180.png" />
   <link rel="stylesheet" href="/app/unsaid-tokens.css" />
   <link rel="stylesheet" href="/app/app.css" />
 </head>
-<body class="dusk">
-  <div class="phone" id="root">
-    <div class="topbar">
-      <div class="wordmark"><span class="mark" aria-hidden="true"></span>unsaid</div>
+<body>
+  <main class="phone" id="root">
+    <div class="splash">
+      <img class="splash-icon" src="/app/icon-512.png" alt="" />
+      <span class="splash-name">Un-Said</span>
     </div>
-    <div class="stack"><div class="shimmer"></div><div class="shimmer" style="width:70%"></div></div>
-  </div>
+  </main>
   <div class="toast hidden" id="toast"></div>
   <script type="module" src="/app/card.js"></script>
 </body>

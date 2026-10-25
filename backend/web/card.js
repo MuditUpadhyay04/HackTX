@@ -1,111 +1,218 @@
-// The page Mom opens from the WhatsApp link. No app, no account; the link is the key.
+// The page Mom (or Sarah) opens from the link: his letter on un-bg, then her way back to him.
+// No app, no account; the link is the key. (DESIGN_SPEC 3.10, FOR_MUDITS_CLAUDE.md 3.9)
 import { holdToTalk, startPcm, wavBlob } from "/app/audio.js";
-import { MARK_SVG, MIC_SVG, PLAY_SVG, PAUSE_SVG, esc, toast, wave } from "/app/ui.js";
+import { CHECK_SVG, PAUSE_SVG, PLAY_SVG, QUOTE_SVG, esc, toast, wave, waveFeeder } from "/app/ui.js";
 
 const token = location.pathname.split("/").filter(Boolean).pop();
 const root = document.getElementById("root");
+const replyUrl = `/api/public/cards/${encodeURIComponent(token)}/reply`;
 
-// A few words in her language, under the English, when we know it.
+// A few words in her language under the English, when we know it.
 const LOCAL = {
   hindi: { hold: "दबाकर रखें और बोलें", sent: "भेज दिया।", call: "कॉल करें" },
 };
 
+// A resting waveform, so the listen row reads as a voice before it plays.
+const RESTING = [6, 10, 14, 8, 18, 12, 20, 10, 16, 8, 12, 18, 10, 14, 6, 10, 16, 8, 12, 6];
+
+const header = `<header class="header"><span class="t-wordmark">Un-Said</span></header>`;
+
 async function load() {
-  document.querySelector(".mark").innerHTML = MARK_SVG;
   const res = await fetch(`/api/public/cards/${encodeURIComponent(token)}`);
   if (!res.ok) {
     const msg = res.status === 410 ? "this link has expired." : "this link isn't open yet.";
-    root.innerHTML = `${top()}<div class="card fade-in"><p class="reflection">${msg}</p></div>`;
+    root.innerHTML = `${header}<div class="card pad-card mt-24 plain-fade"><p class="t-name">${msg}</p></div>`;
     return;
   }
   render(await res.json());
 }
 
-function top() {
-  return `<div class="topbar"><div class="wordmark"><span class="mark">${MARK_SVG}</span>unsaid</div></div>`;
-}
-
 function render(c) {
   const local = LOCAL[(c.recipient_language || "").toLowerCase()] || null;
-  const lines = c.lines.map((l) => `<p class="hand-lg" style="margin:0 0 10px">${esc(l.text)}</p>`).join("");
+  const [first, ...rest] = c.lines.map((l) => l.text);
+  // The mock server returns a bracketed placeholder instead of a translation; never show that.
+  const translation = c.translation && !c.translation.startsWith("[") ? c.translation : "";
   root.innerHTML = `
-    ${top()}
-    ${c.photo_url ? `<img class="memory-photo fade-in" src="${esc(c.photo_url)}" alt="" />` : ""}
-    <p class="small fade-in d1" style="margin:22px 0 6px">from ${esc(c.sender_name)}</p>
-    ${c.audio_url ? `
-      <div class="card voice fade-in d1">
-        <button class="play" id="play" aria-label="play his voice">${PLAY_SVG}</button>
-        ${wave("w")}
-        <audio id="audio" src="${esc(c.audio_url)}" preload="auto"></audio>
-      </div>` : ""}
-    <div class="fade-in d2" style="margin-top:18px">${lines}</div>
-    ${c.translation ? `<p class="hand fade-in d2 muted" style="margin-top:4px">${esc(c.translation)}</p>` : ""}
-    <p class="small faint" style="text-align:center;margin-top:28px">sent with unsaid</p>
-    <div class="mic-wrap mic-dock">
-      <div class="row" style="gap:18px;justify-content:center">
-        <button class="mic" id="mic" aria-label="hold to reply">${MIC_SVG}</button>
-        ${c.call_url ? `<a class="btn dark" style="min-height:56px" href="${esc(c.call_url)}">call ${esc(c.sender_name)}${local ? ` · ${local.call}` : ""}</a>` : ""}
-      </div>
-      <div class="small" id="micLabel">hold to reply${local ? ` · ${local.hold}` : ""}</div>
-    </div>
-  `;
-  root.classList.add("has-dock");
+    ${header}
+    ${c.photo_url ? `<img class="photo pad-card mt-8 fade-in" src="${esc(c.photo_url)}" alt="" />` : ""}
+    <article class="letter pad-card mt-16 fade-in d1">
+      <span class="quote">${QUOTE_SVG}</span>
+      <p class="t-overline">For you</p>
+      ${first ? `<p class="hero-line" id="hero">${esc(first)}</p>` : ""}
+      ${rest.map((text) => `<p class="body-line">${esc(text)}</p>`).join("")}
+      ${c.audio_url ? `
+        <div class="listen" data-feature-id="unsend-play">
+          <button class="play" id="play" aria-label="listen">${PLAY_SVG}</button>
+          <span class="t-name">listen</span>
+          ${wave("lw", RESTING.length)}
+          <audio id="audio" src="${esc(c.audio_url)}" preload="auto"></audio>
+        </div>` : ""}
+      <p class="sig">${esc(c.sender_name)}</p>
+    </article>
+    ${translation ? `
+      <section class="pad-text mt-24 fade-in d2">
+        <p class="t-overline">${esc(c.recipient_language)}</p>
+        <p class="translation mt-8">${esc(translation)}</p>
+      </section>` : ""}
+    <section class="mt-24 fade-in d2" id="actions"></section>
+    <p class="t-caption center mt-32">sent with Un-Said</p>`;
+  const hero = document.getElementById("hero");
+  fitHero(hero);
+  window.addEventListener("resize", () => fitHero(hero));
   if (c.audio_url) wirePlayer();
-  wireReply(local, c.sender_name);
+  showActions(c, local);
+}
+
+/** The first line is the hero: 64 pt, stepping down to 48 and 36 so it fits. */
+function fitHero(el) {
+  if (!el) return;
+  const steps = [["", 72, 3], ["s48", 56, 4], ["s36", 42, Infinity]];
+  for (const [size, lineHeight, maxLines] of steps) {
+    el.classList.remove("s48", "s36");
+    if (size) el.classList.add(size);
+    if (Math.round(el.getBoundingClientRect().height / lineHeight) <= maxLines) return;
+  }
 }
 
 function wirePlayer() {
   const audio = document.getElementById("audio");
   const btn = document.getElementById("play");
-  const bars = document.querySelectorAll("#w i");
-  let raf = 0;
+  const w = document.getElementById("lw");
+  const bars = [...w.querySelectorAll("i")];
+  const rest = () => bars.forEach((b, i) => (b.style.height = `${RESTING[i]}px`));
+  let timer = 0;
   const animate = () => {
-    bars.forEach((b) => (b.style.height = `${20 + Math.random() * 80}%`));
-    raf = setTimeout(() => requestAnimationFrame(animate), 110);
+    bars.forEach((b) => (b.style.height = `${4 + Math.round(Math.random() * 20)}px`));
+    timer = setTimeout(animate, 120);
   };
+  rest();
   btn.onclick = () => (audio.paused ? audio.play() : audio.pause());
   audio.onplay = () => {
     btn.innerHTML = PAUSE_SVG;
-    document.getElementById("w").classList.add("on");
+    w.classList.add("on");
     animate();
   };
   audio.onpause = audio.onended = () => {
     btn.innerHTML = PLAY_SVG;
-    document.getElementById("w").classList.remove("on");
-    clearTimeout(raf);
+    w.classList.remove("on");
+    clearTimeout(timer);
+    rest();
   };
 }
 
-function wireReply(local, senderName) {
-  const mic = document.getElementById("mic");
-  const label = document.getElementById("micLabel");
+const callPill = (c, local) =>
+  c.call_url
+    ? `<div class="pad-card mt-16"><a class="outline-pill" href="${esc(c.call_url)}" data-feature-id="call-start">Call ${esc(c.sender_name)}</a></div>
+       ${local ? `<p class="t-caption center mt-8">${local.call}</p>` : ""}`
+    : "";
+
+// Letter state: Hold to reply (primary), Write back, Call.
+function showActions(c, local) {
+  const actions = document.getElementById("actions");
+  actions.innerHTML = `
+    <div class="pad-card"><button class="pill hold" id="hold" data-feature-id="reply-page-record"><span>Hold to reply</span></button></div>
+    ${local ? `<p class="t-caption center mt-8">${local.hold}</p>` : ""}
+    <p class="t-caption center mt-8 hidden" id="note"></p>
+    <div class="pad-card mt-16"><button class="outline-pill" id="write" data-feature-id="letter-write-back">Write back</button></div>
+    ${callPill(c, local)}`;
+  wireHold(c, local);
+  document.getElementById("write").onclick = () => showWrite(c, local);
+}
+
+// Reply-recording state: the pill shows her waveform and "Release to send".
+function wireHold(c, local) {
+  const btn = document.getElementById("hold");
+  const note = document.getElementById("note");
+  const say = (text) => {
+    note.textContent = text;
+    note.classList.toggle("hidden", !text);
+  };
+  const idle = () => {
+    btn.classList.remove("live");
+    btn.innerHTML = "<span>Hold to reply</span>";
+  };
   let rec = null;
   let starting = null;
-  holdToTalk(mic, {
-    onStart: () => {
-      mic.classList.add("live");
-      label.textContent = "listening… let go when you're done";
-      starting = startPcm().then((r) => (rec = r)).catch((err) => {
-        mic.classList.remove("live");
-        label.textContent = "the microphone isn't available";
+  holdToTalk(btn, {
+    toggle: false, // a press too short to say anything sends nothing
+    onStart() {
+      say("");
+      rec = null;
+      btn.classList.add("live");
+      btn.innerHTML = `${wave("rw", 16)}<span>Release to send</span>`;
+      const w = document.getElementById("rw");
+      w.classList.add("on");
+      const feed = waveFeeder(w);
+      starting = startPcm({ onLevel: feed }).then((r) => (rec = r)).catch((err) => {
+        idle();
+        say("the microphone isn't available");
         toast(err.message || "microphone blocked");
       });
     },
-    onStop: async () => {
-      mic.classList.remove("live");
+    async onCancel() {
+      await starting;
+      if (rec) await rec.stop();
+      rec = null;
+      idle();
+    },
+    async onStop() {
       await starting;
       if (!rec) return;
       const chunks = await rec.stop();
       rec = null;
-      label.textContent = "sending…";
+      btn.classList.remove("live");
+      btn.innerHTML = "<span>sending…</span>";
+      btn.disabled = true;
       const body = new FormData();
       body.append("file", wavBlob(chunks), "reply.wav");
       const res = await fetch(`/api/public/cards/${encodeURIComponent(token)}/reply`, { method: "POST", body });
-      label.textContent = res.ok
-        ? `sent. ${senderName} will hear it.${local ? ` · ${local.sent}` : ""}`
-        : "that didn't send. try again?";
+      if (res.ok) return showSent(c, local);
+      btn.disabled = false;
+      idle();
+      say("that didn't send. try again?");
     },
   });
+}
+
+// Write back: her words, typed, in the same heavy type as his draft.
+function showWrite(c, local) {
+  const actions = document.getElementById("actions");
+  actions.innerHTML = `
+    <div class="pad-text plain-fade">
+      <textarea class="compose-field" id="field" rows="4" maxlength="2000" aria-label="Write back"></textarea>
+    </div>
+    <p class="t-caption center mt-8 hidden" id="note"></p>
+    <div class="pad-card mt-24"><button class="pill" id="send" disabled>Send</button></div>
+    <div class="centered mt-8"><button class="text-btn quiet" id="cancel">Cancel</button></div>
+    ${callPill(c, local)}`;
+  const field = document.getElementById("field");
+  const send = document.getElementById("send");
+  const note = document.getElementById("note");
+  field.focus();
+  field.oninput = () => (send.disabled = !field.value.trim());
+  document.getElementById("cancel").onclick = () => showActions(c, local);
+  send.onclick = async () => {
+    send.disabled = true;
+    send.textContent = "sending…";
+    const body = new FormData();
+    body.append("text", field.value.trim());
+    const res = await fetch(replyUrl, { method: "POST", body });
+    if (res.ok) return showSent(c, local);
+    send.disabled = false;
+    send.textContent = "Send";
+    note.textContent = "that didn't send. try again?";
+    note.classList.remove("hidden");
+  };
+}
+
+// Reply-sent state: quiet, and the call is still one tap away.
+function showSent(c, local) {
+  document.getElementById("actions").innerHTML = `
+    <div class="pad-text flex gap-8 plain-fade">
+      <span class="c-violet">${CHECK_SVG}</span>
+      <p class="t-button">sent. ${esc(c.sender_name)} will hear it.${local ? ` · ${local.sent}` : ""}</p>
+    </div>
+    ${callPill(c, local)}`;
 }
 
 load();

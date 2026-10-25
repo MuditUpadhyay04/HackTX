@@ -58,7 +58,8 @@ export function wavBlob(chunks, rate = 24000) {
 }
 
 // Press and hold to talk; a quick tap toggles instead (easier on a desk).
-export function holdToTalk(button, { onStart, onStop }) {
+// With toggle: false it's strictly "hold": a press too short to say anything calls onCancel.
+export function holdToTalk(button, { onStart, onStop, onCancel, toggle = true }) {
   let active = false;
   let pressedAt = 0;
   let toggled = false;
@@ -78,7 +79,12 @@ export function holdToTalk(button, { onStart, onStop }) {
   const release = () => {
     if (!active || toggled) return;
     if (performance.now() - pressedAt < 450) {
-      toggled = true; // short tap: keep listening until the next tap
+      if (toggle) {
+        toggled = true; // short tap: keep listening until the next tap
+        return;
+      }
+      active = false;
+      (onCancel || onStop)();
       return;
     }
     active = false;
@@ -90,6 +96,10 @@ export function holdToTalk(button, { onStart, onStop }) {
   return {
     get toggled() {
       return toggled;
+    },
+    /** Forget any press in progress (after "Start over"). */
+    reset() {
+      active = toggled = false;
     },
   };
 }
