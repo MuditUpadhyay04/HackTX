@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field
 
-from .. import attention, audio, db, delivery, groups, memory, rants, safety, seed, store, timeutil, voice
+from .. import attention, audio, db, delivery, groups, guests, memory, rants, safety, seed, store, timeutil, voice
 from ..ai import gemini, spark, transcribe
 from ..auth import require_key
 from ..config import settings
@@ -57,15 +57,16 @@ def safety_resources() -> list[dict]:
 def home(request: Request) -> dict:
     """Everything the home screen needs in one call. Polled every few seconds."""
     base = str(request.base_url).rstrip("/")
-    if not settings.public_base_url and _seen.get("base") != base:
+    seen = _seen.setdefault(settings.guest or "", {})  # per database: a guest's poll never stands in for the main app
+    if not settings.public_base_url and seen.get("base") != base:
         db.kv_set("public_base_url", base)
-        _seen["base"] = base
+        seen["base"] = base
     now = timeutil.now_utc()
     # He's here; the weekly push waits for real quiet. A minute is precise enough, and skipping the
     # write on most polls keeps the database free for the requests that matter.
-    if _seen.get("activity") is None or abs(now - _seen["activity"]) >= timedelta(minutes=1):  # abs: the demo clock can jump back
+    if seen.get("activity") is None or abs(now - seen["activity"]) >= timedelta(minutes=1):  # abs: the demo clock can jump back
         db.kv_set("last_activity_at", db.iso(now))
-        _seen["activity"] = now
+        seen["activity"] = now
     with db.tx() as c:
         photos = c.execute(  # imported (Connect) photos only once he has said who they are
             "SELECT * FROM photos WHERE removed = 0 AND (cluster IS NULL OR person_id IS NOT NULL) "
@@ -312,10 +313,14 @@ async def rant_audio(file: UploadFile = File(...), asset_id: str = Form("")) -> 
         raise HTTPException(400, "send mono 16-bit WAV at 24 kHz")
     if rate != audio.RATE:
         raise HTTPException(400, "send 24 kHz audio")
+    if settings.guest and audio.duration_ms(pcm) > guests.MAX_GUEST_AUDIO_MS:
+        raise HTTPException(413, guests.TOO_LONG)
     if settings.muse_enabled:
         try:
             turns = await transcribe.transcribe_wav(wav, rants.language_bias())
         except transcribe.TranscribeError as exc:
+            if settings.guest:
+                raise HTTPException(503, guests.MODELS_DOWN)
             raise HTTPException(502, f"transcription failed: {exc}")
         provider = "meta"
     else:
@@ -346,6 +351,8 @@ async def sort_rant(rant_id: str, body: SortHint | None = None) -> dict:
         return await rants.sort_rant(rant_id, body.person_id if body else None)
     except KeyError:
         raise HTTPException(404, "no such rant")
+    except rants.GuestModelsDown:
+        raise HTTPException(503, guests.MODELS_DOWN)
 
 
 # ---------------------------------------------------------------- translation check (Gemini, fail-open)

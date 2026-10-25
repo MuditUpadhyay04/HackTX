@@ -1,11 +1,15 @@
 """Settings, read once from the environment (and backend/.env when present)."""
 
 import os
+from contextvars import ContextVar
 from dataclasses import dataclass
 from pathlib import Path
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 WEB_DIR = BACKEND_DIR / "web"
+
+# The try-it guest of the current request (set by app.guests.GuestMiddleware). None = the main app.
+GUEST: ContextVar[str | None] = ContextVar("unsaid_guest", default=None)
 
 
 def _load_dotenv(path: Path) -> None:
@@ -65,12 +69,24 @@ class Settings:
         return bool(self.whatsapp_token and self.whatsapp_phone_number_id and self.whatsapp_template)
 
     @property
+    def guest(self) -> str | None:
+        """The try-it guest this request belongs to (X-Guest-Id), or None for the main app."""
+        return GUEST.get()
+
+    @property
+    def main_media_dir(self) -> Path:
+        return self.data_dir / "media"
+
+    @property
     def db_path(self) -> Path:
-        return self.data_dir / "unsaid.db"
+        guest = GUEST.get()
+        return self.data_dir / "guests" / guest / "unsaid.db" if guest else self.data_dir / "unsaid.db"
 
     @property
     def media_dir(self) -> Path:
-        return self.data_dir / "media"
+        # Guests write their own files (rant audio, uploads) here; shared seed photos stay in main_media_dir.
+        guest = GUEST.get()
+        return self.data_dir / "guest_media" / guest if guest else self.main_media_dir
 
 
 GEMINI_FALLBACKS = ("gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-3.5-flash")

@@ -70,6 +70,10 @@ def get_rant(rant_id: str) -> dict:
     }
 
 
+class GuestModelsDown(RuntimeError):
+    """Every model was unavailable for a try-it guest's sort (the route answers 503)."""
+
+
 async def sort_rant(rant_id: str, for_person: str | None = None) -> dict:
     """for_person: he opened Talk/Write from that person's page. If the sort finds nobody in
     what he said, the words are filed under that person instead of being kept just for him."""
@@ -89,6 +93,9 @@ async def sort_rant(rant_id: str, for_person: str | None = None) -> dict:
             raw = await spark.sort_rant(segments, store.me(), people)
             sorted_by = spark.short_provider()
         except spark.SparkError as exc:
+            if settings.guest:  # a judge trying it: say so kindly, never sort with the labeled mock
+                log.warning("guest %s... sort failed: every model was unavailable", settings.guest[:6])
+                raise GuestModelsDown() from exc
             log.warning("spark sort failed, using mock: %s", exc)
     if raw is None:
         raw = sorting.mock_sort(segments, people)

@@ -16,6 +16,9 @@ _KNOCK_B_TAIL = "Some things are easier to say here first."
 KNOCK_DEMO = "You miss them, right?"
 TALK_DEMO = "Send the words you're keeping to yourself. They're waiting for your answer."
 
+# TRY (needs Gurneal's OK). The try-it web app judges open on their own phones: the knock after 5 s.
+KNOCK_TRY = "Let them know you're thinking about them."
+
 # After he records about someone he's held words for before. PROPOSED (Mudit's line).
 ENCOURAGE = "Tell them how you feel. Communication helps."
 

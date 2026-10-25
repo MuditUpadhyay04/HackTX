@@ -59,18 +59,48 @@ def person_out(p: dict, now: datetime) -> dict:
 
 
 def save_media(subdir: str, name: str, data: bytes) -> str:
-    folder = settings.media_dir / subdir
+    shared = settings.main_media_dir / subdir / name
+    if settings.guest and shared.exists() and shared.stat().st_size == len(data) and shared.read_bytes() == data:
+        return f"{subdir}/{name}"  # a seed file the main app already has: guests share it (/media/...)
+    folder = _checked(settings.media_dir, subdir)
+    _checked(folder, name)
     folder.mkdir(parents=True, exist_ok=True)
     (folder / name).write_bytes(data)
     return f"{subdir}/{name}"
 
 
+def _checked(base: Path, rel: str) -> Path:
+    path = base / rel
+    if settings.guest:  # try-it guests: never outside their own folder (or the shared one, for reading)
+        try:
+            path.resolve().relative_to(base.resolve())
+        except ValueError:
+            raise ValueError("media path outside its folder")
+    return path
+
+
 def media_path(rel: str) -> Path:
-    return settings.media_dir / rel
+    """Where a file is. A guest's own files first; the shared seed photos (main media) otherwise, read-only."""
+    own = _checked(settings.media_dir, rel)
+    if settings.guest and not own.exists():
+        shared = _checked(settings.main_media_dir, rel)
+        if shared.exists():
+            return shared
+    return own
+
+
+def delete_media(rel: str) -> None:
+    """Deletes only the caller's own copy: a guest can never remove a shared seed file."""
+    _checked(settings.media_dir, rel).unlink(missing_ok=True)
 
 
 def media_url(rel: str | None) -> str | None:
-    return f"/media/{rel}" if rel else None
+    if not rel:
+        return None
+    guest = settings.guest
+    if guest and (settings.media_dir / rel).exists():
+        return f"/guest-media/{guest}/{rel}"
+    return f"/media/{rel}"
 
 
 # ---------------------------------------------------------------- base url

@@ -54,7 +54,7 @@ def _drop_stale_imports(c) -> None:
     for row in c.execute("SELECT id, path FROM photos WHERE id LIKE 'photo_imp_%'").fetchall():
         if row["id"] not in current:
             c.execute("DELETE FROM photos WHERE id = ?", (row["id"],))
-            store.media_path(row["path"]).unlink(missing_ok=True)
+            store.delete_media(row["path"])
 
 
 def refresh_imports() -> None:

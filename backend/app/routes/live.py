@@ -17,7 +17,7 @@ import logging
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from .. import rants
+from .. import guests, rants
 from ..ai import transcribe
 from ..auth import key_ok
 from ..config import settings
@@ -72,7 +72,7 @@ async def live_rant(ws: WebSocket) -> None:
                 pcm += chunk
                 if session:
                     await session.send_audio(chunk)
-                if len(pcm) >= MAX_BYTES:
+                if len(pcm) >= (guests.MAX_GUEST_PCM_BYTES if settings.guest else MAX_BYTES):  # a minute for try-it guests
                     break
             elif msg.get("text") and json.loads(msg["text"]).get("type") == "stop":
                 break

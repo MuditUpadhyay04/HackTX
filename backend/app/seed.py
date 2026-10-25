@@ -88,7 +88,7 @@ def retire_people() -> list[str]:
                     c.execute(f"DELETE FROM {table} WHERE {col} = ?", (pid,))
             c.execute("DELETE FROM people WHERE id = ?", (pid,))
             for rel in paths:
-                store.media_path(rel).unlink(missing_ok=True)
+                store.delete_media(rel)
             removed.append(pid)
     return removed
 
@@ -220,7 +220,7 @@ def _drop_stale_seed_photos(c) -> None:
     for row in c.execute("SELECT id, path FROM photos WHERE id LIKE 'photo_seed_%'").fetchall():
         if row["id"] not in keep:
             c.execute("DELETE FROM photos WHERE id = ?", (row["id"],))
-            store.media_path(row["path"]).unlink(missing_ok=True)
+            store.delete_media(row["path"])
 
 
 def ensure_people_photos() -> list[str]:
