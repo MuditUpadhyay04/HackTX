@@ -32,8 +32,8 @@ from app.config import settings  # noqa: E402
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-CHECKS = ("spark", "transcribe", "realtime", "whatsapp")
-SECRETS = [s for s in (settings.model_api_key, settings.whatsapp_token) if s]
+CHECKS = ("spark", "transcribe", "realtime", "whatsapp", "gemini")
+SECRETS = [s for s in (settings.model_api_key, settings.whatsapp_token, settings.gemini_api_key) if s]
 results: list[tuple[str, str]] = []
 
 
@@ -250,6 +250,32 @@ async def check_whatsapp() -> None:
         report(tname, "PASS", f"'{settings.whatsapp_template}' ({settings.whatsapp_template_lang}) is APPROVED")
 
 
+# ------------------------------------------------------------------ Gemini (optional)
+
+
+async def check_gemini() -> None:
+    name = "Gemini echo"
+    if not settings.gemini_api_key:
+        report(name, "SKIP", "GEMINI_API_KEY is not set. The letter preview stays quiet, and Muse still translates.",
+               "Optional: a key from Google AI Studio, for the MLH Gemini track. It only reads Muse's translation back.")
+        return
+    body = {
+        "contents": [{"parts": [{"text": "Return JSON {\"reads_as\": \"ok\"}"}]}],
+        "generationConfig": {"temperature": 0, "maxOutputTokens": 20, "responseMimeType": "application/json"},
+    }
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{settings.gemini_model}:generateContent"
+    try:
+        async with httpx.AsyncClient(timeout=20) as client:
+            resp = await client.post(url, headers={"x-goog-api-key": settings.gemini_api_key}, json=body)
+    except httpx.HTTPError as exc:
+        report(name, "FAIL", f"can't reach Gemini: {exc.__class__.__name__}", "Check the network. The preview still sends without it.")
+        return
+    if resp.status_code != 200:
+        report(name, "FAIL", api_error(resp), "Check GEMINI_API_KEY and GEMINI_MODEL. The preview still sends without it.")
+        return
+    report(name, "PASS", f"{settings.gemini_model} answered")
+
+
 # ------------------------------------------------------------------ main
 
 
@@ -261,7 +287,13 @@ async def main() -> int:
 
     print(f"Un-Said key check · Model API {settings.model_api_base} · MODEL_API_KEY {'set' if settings.model_api_key else 'missing'}"
           f" · WhatsApp {'set' if settings.whatsapp_token else 'missing'}\n")
-    runners = {"spark": check_spark, "transcribe": check_transcribe, "realtime": check_realtime, "whatsapp": check_whatsapp}
+    runners = {
+        "spark": check_spark,
+        "transcribe": check_transcribe,
+        "realtime": check_realtime,
+        "whatsapp": check_whatsapp,
+        "gemini": check_gemini,
+    }
     for key in CHECKS:
         if key in skip:
             report(key, "SKIP", "skipped by --skip")

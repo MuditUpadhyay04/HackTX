@@ -123,3 +123,4 @@ Lessons we're copying from Nudge's write-up: a section titled "Why AI is essenti
    - the push permission line
    - Sarah's letter time: the copy file says 6:40 PM, but in our arc she writes after Mom's call, around 9:50 PM
    - Mom's city
+7. **Gemini is optional and already in the preview.** If `GEMINI_API_KEY` is set, the letter preview shows `she'll read:` — Gemini reading Muse's translation back into English. Send does not wait on it. No key means the line stays hidden. Do not let Gemini summarize the rant or replace Muse. See `docs/DEVPOST.md` for which other tracks to check. Host choice for Vultr vs AWS is in `deploy/aws/README.md`. One host only.

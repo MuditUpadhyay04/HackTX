@@ -141,7 +141,9 @@ We also knew what we didn't want to be. Phones already deliver about 63 notifica
 
 ## Built with
 
-`expo` · `react-native` · `expo-router` · `typescript` · `python` · `fastapi` · `uvicorn` · `websockets` · `sqlite` · `meta-model-api` · `muse-spark` · `muse-voice-transcribe` · `whatsapp-cloud-api` · `docker` · `render` · `aws` `[pending]` · `pytest` · `playwright` · `claude-code`
+`expo` · `react-native` · `expo-router` · `typescript` · `python` · `fastapi` · `uvicorn` · `websockets` · `sqlite` · `meta-model-api` · `muse-spark` · `muse-voice-transcribe` · `whatsapp-cloud-api` · `docker` · `caddy` · `pytest` · `playwright` · `claude-code` · `grok`
+
+`gemini` `[pending: only if GEMINI_API_KEY is set and a preview showed "she'll read"]` · `vultr` `[pending: only if that is the host]` · `unsaid.tech` `[pending: only if the A record is live]`
 
 ## Team
 
@@ -152,3 +154,18 @@ We also knew what we didn't want to be. Phones already deliver about 63 notifica
 - Code: https://github.com/MuditUpadhyay04/HackTX
 - Demo video: `[pending]`
 - Try it: `[pending: deployed URL and QR]`
+
+## Tracks to check on the Devpost form
+
+Opt in only where the bracket above is filled. Muse stays the model that hears, sorts, translates, and gates safety.
+
+- **Meta.** The product as described above.
+- **Best Overall.** Design system, the live backend, the safety eval numbers, one public URL.
+- **Best Pitch.** Someone is in the room. The film is Demo v3.
+- **Cursor + Grok (SpaceXSI).** Describe the tools that were actually used, then opt into the raffle. Grok reviewed the product in `docs/notes/claude-grok-collab.md` and this draft. Cursor counts only if it was the coding agent for a real change. Do not write that it was if the code came from Claude Code.
+- **.tech.** `unsaid.tech` pointed at the server. Say the name and that Mom's letter opens on it.
+- **Vultr.** One sentence: the FastAPI app, the WebSocket transcript, and Mom's reply page run on a Vultr Ubuntu VM behind Caddy. Skip this line if the host is AWS.
+- **Gemini.** One sentence: on the letter preview, Gemini reads Muse's Hindi translation back into English (`she'll read: …`). It cannot edit the letter, and Send works if Gemini is down. It does not summarize the rant.
+- **DEV writing.** After freeze, publish this draft. No code.
+
+Leave Snowflake, Tiger Data, Solana, and the hardware tracks unchecked. Moving off SQLite or adding a third model the night before puts the demo at risk.

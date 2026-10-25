@@ -739,6 +739,19 @@ function renderSorted() {
   };
 }
 
+// Gemini reads Muse's translation back into English. Missing key or a slow
+// answer leaves the line hidden. Sending never waits on it.
+async function showEcho(personId, pieceIds, view) {
+  try {
+    const res = await api("/api/letters/echo", { method: "POST", json: { recipient_id: personId, piece_ids: pieceIds } });
+    if (S.view !== view || !res.echo) return;
+    const slot = $("#echo");
+    if (!slot) return;
+    slot.textContent = `she'll read: ${res.echo}`;
+    slot.classList.remove("hidden");
+  } catch { /* the letter still sends */ }
+}
+
 // ------------------------------------------------------------------ Mom's preview: "Hold until her morning"
 
 function renderHold() {
@@ -750,6 +763,7 @@ function renderHold() {
     ${nav(`To ${p.name}`, "sorted", { label: "Edit" })}
     <div class="mt-16 ${fx()}">${letterHTML(g.pieces.map((pc) => pc.text), S.home.me.name)}</div>
     <p class="t-caption center mt-16">This is how ${esc(p.name)} will see it.</p>
+    <p class="t-caption center mt-8 hidden" id="echo"></p>
     <div class="card pad-card mt-24" id="delivery">
       <p class="t-name">${esc(p.name)}'s morning</p>
       <p class="t-preview">Arrives ${morningLabel(p)} ${pos} time</p>
@@ -765,6 +779,7 @@ function renderHold() {
   const mark = () => choices.forEach((c) => c.classList.toggle("on", c.dataset.when === when));
   choices.forEach((c) => (c.onclick = () => { when = c.dataset.when; mark(); }));
   mark();
+  showEcho(p.id, g.pieces.map((pc) => pc.id), "hold");
   $("#send").onclick = async () => {
     $("#send").disabled = true;
     let card;
@@ -851,9 +866,11 @@ function renderPreview() {
     ${nav(`To ${p.name}`, "stack", { label: "Edit", data: back })}
     <div class="mt-16 ${fx()}">${letterHTML(pieces.map((pc) => pc.text), S.home.me.name)}</div>
     <p class="t-caption center mt-16">This is how ${esc(p.name)} will see it.</p>
+    <p class="t-caption center mt-8 hidden" id="echo"></p>
     <div class="pad-card mt-24"><button class="pill" id="send" data-feature-id="${HANDOFF_ID[p.channel] || "unsend-queue-send"}">Send when they're ready</button></div>
     <div class="centered mt-8"><button class="text-btn" data-go="stack" ${back}>Keep editing</button></div>`;
   fitHeroes();
+  showEcho(p.id, pieces.map((pc) => pc.id), "preview");
   $("#send").onclick = async () => {
     const ids = pieces.map((pc) => pc.id);
     try {

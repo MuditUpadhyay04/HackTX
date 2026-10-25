@@ -127,7 +127,7 @@ export type Home = {
   replies: Reply[];
   reminders: Reminder[];
   self_notes: { id: string; url: string; created_at: string }[];
-  providers: { spark: string; transcribe: string; whatsapp: string };
+  providers: { spark: string; transcribe: string; whatsapp: string; gemini?: string };
   clock: { now: string };
 };
 
@@ -167,6 +167,8 @@ const file = (uri: string, name: string, type: string) => ({ uri, name, type }) 
 
 export const api = {
   home: () => call<Home>("/api/home"),
+  letterEcho: (recipientId: string, pieceIds: string[]) =>
+    call<{ echo: string | null; provider: string }>("/api/letters/echo", post({ recipient_id: recipientId, piece_ids: pieceIds })),
 
   // assetId: the gallery photo he was looking at, so the photo remembers what he said.
   uploadRant: (wavUri: string, assetId?: string | null) => {

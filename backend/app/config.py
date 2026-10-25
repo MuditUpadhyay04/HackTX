@@ -43,10 +43,16 @@ class Settings:
     public_base_url: str
     data_dir: Path
     cors_origins: list[str]
+    gemini_api_key: str
+    gemini_model: str
 
     @property
     def muse_enabled(self) -> bool:
         return bool(self.model_api_key)
+
+    @property
+    def gemini_enabled(self) -> bool:
+        return bool(self.gemini_api_key)
 
     @property
     def whatsapp_enabled(self) -> bool:
@@ -81,6 +87,8 @@ def load_settings() -> Settings:
         public_base_url=_env("PUBLIC_BASE_URL").rstrip("/"),
         data_dir=data_dir,
         cors_origins=origins or ["*"],
+        gemini_api_key=_env("GEMINI_API_KEY"),
+        gemini_model=_env("GEMINI_MODEL", "gemini-3.1-flash-lite"),
     )
 
 

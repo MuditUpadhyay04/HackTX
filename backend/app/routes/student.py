@@ -1,5 +1,6 @@
 """The student's side: home, people, photos, rants, pieces, cards, replies, notes, reminders."""
 
+import logging
 import re
 from typing import Literal
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -8,9 +9,11 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Uplo
 from pydantic import BaseModel, Field
 
 from .. import attention, audio, db, delivery, memory, rants, safety, seed, store, timeutil
-from ..ai import transcribe
+from ..ai import gemini, spark, transcribe
 from ..auth import require_key
 from ..config import settings
+
+log = logging.getLogger("unsaid.student")
 
 router = APIRouter(prefix="/api", dependencies=[Depends(require_key)])
 
@@ -27,6 +30,7 @@ def providers() -> dict:
         "spark": "meta" if settings.muse_enabled else "mock",
         "transcribe": "meta" if settings.muse_enabled else "mock",
         "whatsapp": "cloud_api" if settings.whatsapp_enabled else "share_sheet",
+        "gemini": "google" if settings.gemini_enabled else "off",
     }
 
 
@@ -283,6 +287,48 @@ async def sort_rant(rant_id: str) -> dict:
         return await rants.sort_rant(rant_id)
     except KeyError:
         raise HTTPException(404, "no such rant")
+
+
+# ---------------------------------------------------------------- translation check (Gemini, fail-open)
+
+
+class EchoIn(BaseModel):
+    recipient_id: str
+    piece_ids: list[str] = Field(..., min_length=1, max_length=20)
+
+
+@router.post("/letters/echo")
+async def letter_echo(body: EchoIn) -> dict:
+    """How Muse's translation will sound in English. Never blocks a send.
+
+    Quiet (echo null, provider off) when Gemini or Muse is unset, the person
+    reads English, or either model fails. The letter itself is still his words.
+    """
+    quiet = {"echo": None, "provider": "off"}
+    recipient = store.get_person(body.recipient_id)
+    if not recipient or recipient["id"] == "me":
+        raise HTTPException(404, "no such person")
+    with db.tx() as c:
+        marks = ",".join("?" * len(body.piece_ids))
+        rows = c.execute(f"SELECT * FROM pieces WHERE id IN ({marks})", body.piece_ids).fetchall()
+    if len(rows) != len(set(body.piece_ids)):
+        raise HTTPException(400, "some of those pieces don't exist")
+    for row in rows:
+        if row["person_id"] != body.recipient_id or row["status"] != "kept":
+            raise HTTPException(400, "those lines aren't yours to preview")
+    language = recipient["language"]
+    if language.lower() in ("english", "en") or not settings.muse_enabled or not settings.gemini_enabled:
+        return quiet
+    said = "\n".join(row["text"] for row in sorted(rows, key=lambda r: (r["created_at"], r["id"])))
+    try:
+        translation = await spark.translate(said, language)
+    except spark.SparkError as exc:
+        log.warning("echo translation failed: %s", exc)
+        return quiet
+    reading = await gemini.echo(said, translation, language)
+    if not reading:
+        return quiet
+    return {"echo": reading, "provider": "gemini"}
 
 
 # ---------------------------------------------------------------- cards

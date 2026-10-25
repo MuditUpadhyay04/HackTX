@@ -29,12 +29,22 @@ export default function Preview() {
   const [hold, setHold] = useState<boolean | null>(null);
   const [sending, setSending] = useState(false);
   const [held, setHeld] = useState<string | null>(null);
+  const [echo, setEcho] = useState<string | null>(null);
   // The one notification ask, at the moment it means something: once he's held a letter (lib/push.ts).
   const headsUp = useHeadsUpAsk(person?.name, person && home ? needsHisTap(person, home.providers) : false);
 
   const ids = useMemo(() => (params.pieces ?? "").split(",").filter(Boolean), [params.pieces]);
   useEffect(() => {
     api.pieces(params.person).then((all) => setPieces(all.filter((p) => ids.includes(p.id)))).catch(() => {});
+  }, [params.person, ids]);
+
+  useEffect(() => {
+    if (!ids.length) return;
+    let live = true;
+    api.letterEcho(params.person, ids).then((res) => {
+      if (live) setEcho(res.echo);
+    }).catch(() => {});
+    return () => { live = false; };
   }, [params.person, ids]);
 
   if (!person || !home) return <View style={ui.screen}><NavBar backLabel="Edit" /></View>;
@@ -80,6 +90,7 @@ export default function Preview() {
       <ScrollView contentContainerStyle={{ paddingTop: space.s16, paddingBottom: insets.bottom + 160 }}>
         <LetterCard lines={pieces.map((p) => p.text)} signature={home.me.name} />
         <T v="caption" style={{ textAlign: "center", marginTop: space.s16 }}>{`This is how ${person.name} will see it.`}</T>
+        {echo ? <T v="caption" style={{ textAlign: "center", marginTop: space.s8 }}>{`she'll read: ${echo}`}</T> : null}
 
         {holdable ? (
           <View style={styles.delivery}>

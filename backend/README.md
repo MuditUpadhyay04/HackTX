@@ -30,6 +30,7 @@ Keys go in `backend/.env` (copy [`.env.example`](.env.example)). Everything is o
 |---|---|
 | `MODEL_API_KEY` | Muse Voice Transcribe (live transcript) and Muse Spark (sorting, safety, translation). Without it: mock. |
 | `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TEMPLATE` | Mom's 8 AM arrives by itself on WhatsApp. Without them: the app asks *"it's 8:00 AM for Mom. send it now?"* and opens WhatsApp with the link. |
+| `GEMINI_API_KEY` | On the letter preview, Gemini reads Muse's translation back into English (`she'll read: …`). Without it, that line stays hidden. Send never waits on it. |
 | `APP_KEY` | Locks the student app and demo controls. **Set it on any public deploy.** Open the app once with `?key=<APP_KEY>`. Card links stay public by token. |
 | `SEED_*` | The cast's phone numbers and Instagram handle (or set them later in the demo panel). |
 | `PUSH_DRY_RUN` | `1` logs pushes instead of sending them to Expo (rehearsals). |
@@ -164,7 +165,7 @@ The app reports what happened with `POST /api/knock/{id}/outcome {outcome: opene
 ## Tests and the safety eval
 
 ```bash
-uv run pytest                        # 57 tests: sorting, time zones, safety, memory, knocks, push, the whole evening end to end
+uv run pytest                        # sorting, time zones, safety, memory, knocks, push, the translation check, the whole evening end to end
 uv run python scripts/eval_safety.py # 30 fixture rants through the gate
 ```
 

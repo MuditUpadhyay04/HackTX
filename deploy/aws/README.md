@@ -136,6 +136,18 @@ sudo DOMAIN=api.unsaid.app GIT_TOKEN="$GIT_TOKEN" bash bootstrap.sh
 
 A custom `DOMAIN` is kept on later runs. Update `EXPO_PUBLIC_API_URL` to match.
 
+For the MLH .tech prize, register `unsaid.tech` from the MLH link during the weekend and point its A record at this server's IP. Then `DOMAIN=unsaid.tech`. Mom's letter links pick up `PUBLIC_BASE_URL`.
+
+## Vultr instead of AWS
+
+The same `bootstrap.sh` runs on a Vultr Ubuntu 24.04 VM. Use it as the one host if AWS is not already the URL Mom has.
+
+1. Vultr → Deploy → Ubuntu 24.04, the $6 shared-CPU plan is enough. Enable IPv4.
+2. Firewall: TCP 22, 80, and 443.
+3. SSH in as root and run step 4 from Path A (`bootstrap.sh`).
+4. Put the keys in `/srv/unsaid/.env`, including `GEMINI_API_KEY` if you have one.
+5. In the Devpost write-up, say the API runs on that Vultr instance. One host only. Do not stand up a second box the morning of judging.
+
 ## Day of the demo
 
 | Task | Command (on the server) |
