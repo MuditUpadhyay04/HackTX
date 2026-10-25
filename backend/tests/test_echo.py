@@ -72,3 +72,30 @@ def test_echo_parses_a_reading_and_ignores_placeholders(monkeypatch):
         assert asyncio.run(gemini.echo("i just miss you", "[Hindi translation appears here]", "Hindi")) is None
     finally:
         object.__setattr__(settings, "gemini_api_key", "")
+
+
+def test_gemini_answers_when_spark_is_refused(monkeypatch):
+    """Meta refused Spark from our Vultr VM (model_not_found). Gemini takes the same call, and says so."""
+    import asyncio
+
+    from app.ai import spark
+
+    async def refused(*args, **kwargs):
+        raise spark.SparkError('spark 404: {"error":{"code":"model_not_found"}}')
+
+    async def gemini_sort(system, user, schema, max_tokens=4000):
+        assert schema["required"] == ["safety"]  # Gemini gets Spark's exact schema
+        return {"safety": "ok"}
+
+    monkeypatch.setattr(spark, "_muse", refused)
+    monkeypatch.setattr(gemini, "chat_json", gemini_sort)
+    object.__setattr__(settings, "gemini_api_key", "test-key")
+    try:
+        assert asyncio.run(spark.classify_safety("i miss home")) == "ok"
+        assert spark.served_by["spark"] == "gemini (fallback)"
+    finally:
+        object.__setattr__(settings, "gemini_api_key", "")
+        spark.served_by["spark"] = "meta"
+
+    with pytest.raises(spark.SparkError):  # no Gemini key: Spark's error stands
+        asyncio.run(spark.classify_safety("i miss home"))

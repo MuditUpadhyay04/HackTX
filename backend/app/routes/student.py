@@ -27,7 +27,7 @@ HHMM = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
 
 def providers() -> dict:
     return {
-        "spark": "meta" if settings.muse_enabled else "mock",
+        "spark": spark.served_by["spark"] if settings.muse_enabled else "mock",
         "transcribe": "meta" if settings.muse_enabled else "mock",
         "whatsapp": "cloud_api" if settings.whatsapp_enabled else "share_sheet",
         "gemini": "google" if settings.gemini_enabled else "off",
