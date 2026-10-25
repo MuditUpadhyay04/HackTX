@@ -33,7 +33,7 @@ Acceptance (spec Phase 0, adjusted for the open decisions):
 | `AGENTS.md` | Holds Next's "This is NOT the Next.js you know" block. **Every builder must read `node_modules/next/dist/docs/` before writing Next code.** |
 | App-UI-Final | **Not in the working tree. Not at `~/Desktop/Unsaid-Claude-Context/App-UI-Final/`.** It exists only on **`origin/app-ui-final`** (4dadc1e, built on fad6c78): README, DESIGN_SPEC, COPY_AND_NAMES, FEATURE_IDS, FOR_MUDITS_CLAUDE, `tokens/{unsaid-tokens.json,.css,unsaid-palette.png}`, `assets/{brand/*,ui-reference/*,wordmark.md,README.md}` |
 | Playwright | Chromium is not downloaded (`~/Library/Caches/ms-playwright` is empty) |
-| Mac mini | `ssh mini` **timed out**. Builds would run on the MacBook until it's back. |
+| Compute | Builds run on this MacBook. |
 
 ---
 
@@ -42,11 +42,11 @@ Acceptance (spec Phase 0, adjusted for the open decisions):
 | # | Decision | Recommended default | Why |
 |---|---|---|---|
 | D1 | **Branch base.** `branched-frontend` currently sits on Mudit's "backend finished" commit, so `git diff main` would list `backend/` and `render.yaml`, which fails acceptance 1. | **Re-point it at `origin/main` before the first commit:** `git switch -C branched-frontend origin/main`. The untracked `Branched-Frontend/` carries over. Mudit's commit stays on `origin/backend`, untouched. | The spec says the branch is created from main. The branch has no commits to lose. **Side effect:** the local working copies of `backend/` and `render.yaml` switch to main's version. That's a checkout, not an edit, and nothing on origin changes. Alternative: keep the base and measure the diff against `origin/backend`. |
-| D2 | **How the build reads App-UI-Final.** | **`scripts/sync-theme.ts` tries three sources in order:** (1) `../App-UI-Final`, (2) `~/Desktop/Unsaid-Claude-Context/App-UI-Final`, (3) the git ref `origin/app-ui-final`, read with `git show` / `git archive` into a temp dir. It never writes into App-UI-Final and never merges that branch. | Option 3 works today and also works on the mini, which mounts `~/Gurneal` but not `~/Desktop`. Merging `app-ui-final` would put `App-UI-Final/` paths in the branch diff, which breaks the workspace rule. |
+| D2 | **How the build reads App-UI-Final.** | **`scripts/sync-theme.ts` tries three sources in order:** (1) `../App-UI-Final`, (2) `~/Desktop/Unsaid-Claude-Context/App-UI-Final`, (3) the git ref `origin/app-ui-final`, read with `git show` / `git archive` into a temp dir. It never writes into App-UI-Final and never merges that branch. | Option 3 works today and needs nothing on `~/Desktop`. Merging `app-ui-final` would put `App-UI-Final/` paths in the branch diff, which breaks the workspace rule. |
 | D3 | **Where the spec lives.** Your kickoff says `docs/`. The spec's Step 1 and the reviewer text say `Branched-Frontend/CLAUDE_PROMPT.md`. | **One copy, in `docs/`** (`docs/CLAUDE_PROMPT.md`, `docs/CONTEXT.md`, `docs/GOAL_STATEMENT.txt`, `docs/paste/*`), refreshed from the Desktop. Each reviewer file is written word for word, plus **one added line**: "The spec is at Branched-Frontend/docs/CLAUDE_PROMPT.md." | Two copies would drift. One added line is the smallest change to "word for word". |
 | D4 | **Section 6 skill/plugin installs** (apple-hig clone + `./setup`, the apple-design-skill / ios-design-skills / liquid-glass plugins, `npx skills add …`) | **Not part of Phase 0.** You install the `/plugin …` ones yourself in an interactive `claude` terminal. I run the `git clone` / `npx skills add` ones only after you say yes. | They download and run third-party code. Phase 0 doesn't need them. They matter from Phase 1. |
 | D5 | **`npx playwright install chromium`** (about 150 MB from Microsoft's CDN, into `~/Library/Caches/ms-playwright`) | **Yes.** | `shoot.ts` and acceptance 3 need it |
-| D6 | **The mini is down** | **Run npm/build/shoot on this MacBook for Phase 0** and note it in BUILD_LOG. Switch back to `ssh mini …` as soon as it answers. | Your CLAUDE.md allows this ("ONLY if the mini is down, and say so") |
+| D6 | **Where builds run** | **Every npm/build/shoot/test runs on this MacBook.** | Gurneal's instruction |
 | D7 | **Keep the existing scaffold** (Next 16.4.3) instead of re-scaffolding | **Keep it.** Remove the Geist font + boilerplate. If Tailwind 4 isn't wired for `next build`, add `@tailwindcss/postcss` + `postcss.config.mjs` (no other new deps). | The spec's scaffold command is only for "if there's no package.json yet" |
 
 ---
@@ -143,7 +143,7 @@ No force-push, ever. The final Phase 0 commit is `branched-frontend: phase 0: re
 - **`FEATURE_IDS.md` in App-UI-Final** tells Mudit's app to use `data-feature-id`. This build bans that attribute (section 8.1). The sync does not copy `FEATURE_IDS.md`, and `check:placeholders` fails on it.
 - **Theme tokens.** Every token the spec names exists in App-UI-Final: `un-stage`, `un-bg`, `un-surface`, `un-violet` (#A890F6), `un-card-gradient`, `un-icon-gradient`, `un-shadow-hero`, `un-wordmark`. There's no `un-*` blur token, which is fine because the splash/slot don't need blur in Phase 0. **No THEME NEEDED so far.**
 - **COPY NEEDED.** Nothing in Phase 0 needs new user-facing copy beyond the concept label and "concept only", both written in the spec.
-- **Compute location.** The mini is down, so Phase 0 runs on the MacBook (D6), noted in BUILD_LOG.
+- **Compute location.** Everything runs on this MacBook (D6).
 - **The reviewers judge visuals from screenshots.** Haiku can only read PNGs via the Read tool, so each reviewer prompt includes the exact screenshot paths.
 - **The 10 reviewers only load natively after a restart** from inside `Branched-Frontend/` (`cd Branched-Frontend && claude --add-dir ..`). Until then they run as general-purpose Haiku agents.
 

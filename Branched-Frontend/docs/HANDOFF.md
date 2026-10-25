@@ -17,7 +17,7 @@ Gurneal's original kickoff is `docs/paste/START_HERE_paste_into_Claude_Code.txt`
 - Repo `~/Gurneal/HackTX` (remote `MuditUpadhyay04/HackTX`). Branch **`branched-frontend` only**. Folder **`Branched-Frontend/` only**.
 - Never touch `backend/`, `frontend/`, `ideas/`, App-UI-Final, root files, or Mudit's app. Stage with `git add Branched-Frontend/` only; before every commit `git branch --show-current` must print `branched-frontend` and `git diff --cached --name-only | grep -v '^Branched-Frontend/'` must print nothing. Never push to main; never force-push.
 - Never copy from any `private/` folder.
-- Compute: Gurneal's CLAUDE.md says builds/tests run on the Mac mini (`ssh mini 'export PATH=/opt/homebrew/bin:$PATH; cd /Users/gurneal/Gurneal/HackTX/Branched-Frontend && ...'`). **The mini was unreachable all session** (`ssh mini` timed out), so work ran on the MacBook (decision D6). Re-check the mini first; if it answers, run npm/build/playwright there.
+- Compute: every build, test and screenshot runs on this MacBook (D6).
 
 ## 3. Git state (nothing committed yet)
 - D1 done: `branched-frontend` was re-pointed with `git switch -C branched-frontend origin/main` (it used to sit on Mudit's fad6c78 "backend finished"). Upstream was unset on purpose. Local HEAD = `fd352fd` (origin/main).
@@ -63,7 +63,7 @@ Gurneal's original kickoff is `docs/paste/START_HERE_paste_into_Claude_Code.txt`
 - Illustrators must NOT edit `assets/README.md` (owned by tokens); add their rows afterwards.
 
 ## 7. Exactly what to do next (in order)
-1. `ssh mini` check (use the mini if up). `git -C ~/Gurneal/HackTX branch --show-current` → `branched-frontend`.
+1. `git -C ~/Gurneal/HackTX branch --show-current` → `branched-frontend`.
 2. Finish P0-B (tokens list above, consistency check, `assets/README.md`), mount DevPanel, fix the `200ms`, dedupe `--font-system`.
 3. Phase 0 integration from inside `Branched-Frontend/`: `npm run sync:theme && npm run build && npm run lint && npm run check:tokens && npm run check:placeholders`, then `npm run shoot` (tokens + placeholder) at 1x and `--hi`. LOOK at `screenshots/test__tokens__default.png` and `test__placeholder__default.png` side by side with `public/unsaid-theme/unsaid-palette.png` and `public/test/branched-frontend-palette.png`.
 4. Add BUILD_LOG entries: P0-A retire list ("BF-v2 retire", list in §5), P0-B/C/D/E summaries, the D6 MacBook note, COPY NEEDED items. Then first commit `branched-frontend: phase 0: workspace, scaffold, theme sync, tokens, rules, reviewers (pre-review)` and `git push -u origin branched-frontend`.
@@ -71,7 +71,7 @@ Gurneal's original kickoff is `docs/paste/START_HERE_paste_into_Claude_Code.txt`
 6. Phase 1 (`docs/plans/Phase1_plan.md`, 4 parallel packages: device core, fold, /device page, UnsaidLogo) → review loop → commit/push. Then Phase 2 (finish illustrations, Wave 1 data/stores + iOS chrome, Wave 2 seven app packages), Phase 3, 4, 5, 6 per their plans. `npm i remotion @remotion/player @remotion/cli` at the start of Phase 4.
 
 ## 8. Decisions in force (D1–D7, approved)
-D1 branch on main ✅ done · D2 App-UI-Final via sync script 3-source lookup (git ref) · D3 single spec copy in `docs/` (+ one path line in each reviewer) · D4 the section 6 third-party skills/plugins are NOT installed (Gurneal installs `/plugin` ones himself; `git clone`/`npx skills add` only with his yes) · D5 Playwright Chromium installed ✅ · D6 MacBook while the mini is down · D7 keep the existing Next 16.4.3 scaffold (Geist removed ✅).
+D1 branch on main ✅ done · D2 App-UI-Final via sync script 3-source lookup (git ref) · D3 single spec copy in `docs/` (+ one path line in each reviewer) · D4 the section 6 third-party skills/plugins are NOT installed (Gurneal installs `/plugin` ones himself; `git clone`/`npx skills add` only with his yes) · D5 Playwright Chromium installed ✅ · D6 builds run on this MacBook · D7 keep the existing Next 16.4.3 scaffold (Geist removed ✅).
 
 ## 9. Known gotchas
 - Next 16.4.3: read `node_modules/next/dist/docs/` before Next APIs; `searchParams` are Promises; cacheComponents → Suspense around search-param readers; `LayoutProps` type exists only after a build/dev generates it.

@@ -4,7 +4,7 @@ Times are America/Chicago. Newest entries at the bottom. Each entry: what change
 
 ## 2026-10-24 19:05 CDT · Phase 0 plan
 - `docs/plans/Phase0_plan.md` written by Opus (Fable was out of usage credits; Gurneal approved Opus). Gurneal approved the recommended defaults D1–D7 and said to build every phase without stopping.
-- Compute: the Mac mini (`ssh mini`) timed out, so builds run on the MacBook (D6). Will switch back when it answers.
+- Compute: every build runs on this MacBook (D6).
 
 ## 2026-10-24 19:20 CDT · Phase 0 Wave 0 (workspace)
 - D1: `git switch -C branched-frontend origin/main` (the branch had no commits of its own; it pointed at fad6c78 on origin/backend). Upstream unset so nothing ever pushes to main; first push will be `git push -u origin branched-frontend`.
@@ -20,8 +20,11 @@ Times are America/Chicago. Newest entries at the bottom. Each entry: what change
 - **P0-D stage-dev.** `lib/flags.ts`, `components/stage/Stage.tsx` (+ `Wallpaper`, `useStageScale`), `components/Placeholder.tsx`, `components/PlaceholderToast.tsx`, `components/ConceptLabel.tsx`, `components/dev/DevPanel.tsx` (press transition uses `var(--motion-press) var(--ease-ios)`, no raw ms), `app/test/placeholder/page.tsx`.
 - **P0-E docs-reviewers.** `docs/RULES.md` (16 rules + D1–D7), `REVIEW_FINDINGS.md`, the 10 Haiku reviewers and 10 Opus builders in `.claude/agents/`.
 - **Phase 2 started early (independent):** `assets/images/reel-goldenhour-pups.svg`, `reel-rec-league.svg`, `reel-dormlife.svg`.
-- **D6:** the mini still times out on `ssh mini` (re-checked 20:40 CDT); every build, lint, check and screenshot ran on the MacBook.
+- **D6:** every build, lint, check and screenshot ran on this MacBook.
 - **Integration:** `sync:theme` (up to date) → `next build` ✓ (5 routes) → `lint` ✓ → `check:tokens` OK (13 files) → `check:placeholders` OK (9 placeholder ids, 0 unmarked controls, 0 external requests, 0 console errors) → `shoot` and `shoot --hi`.
 - **Screenshots:** `screenshots/test__tokens__default.png` (+`@2x`), `screenshots/test__placeholder__default.png` (+`@2x`). Checked against `public/unsaid-theme/unsaid-palette.png` and `public/test/branched-frontend-palette.png`: Un-Said swatches match value for value.
 - **For Gurneal (spec conflict):** the Un-Said "concept only" toast follows App-UI-Final DESIGN_SPEC 2.7 (`un-surface-raised`, radius 16) rather than the plan's `un-surface`, and sits top-center where App-UI-Final puts it at the bottom.
 - **COPY NEEDED (dev/test only, placeholder text in use):** "Like" on the Facebook test tile; a11y labels Search, Camera, Share, Favorite, Delete, Send; dev-panel labels.
+
+## 2026-10-24 21:10 CDT · Compute note scrubbed (Gurneal)
+- Per Gurneal: all builds run on this MacBook only, and no file names any other machine. Removed every such mention from `BUILD_LOG.md`, `docs/RULES.md` (D6 now reads "Every npm/build/shoot/test runs on this MacBook"; D2 note reworded), `docs/plans/Phase0_plan.md` and `docs/HANDOFF.md`.
