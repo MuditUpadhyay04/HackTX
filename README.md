@@ -16,6 +16,7 @@ Gurneal owns all design, naming, palette, and copy. Mudit owns `backend/`. The n
 
 - [`grok.md`](grok.md) — running log of Grok Bot's changes. Updated after every message Gurneal sends to Grok Bot.
 - [`OVERHAUL_STATUS.md`](OVERHAUL_STATUS.md) — mirror of the `unsaid-overhaul` status.
+- [`MacMuditClaude.md`](MacMuditClaude.md) — running log of Claude Code's changes on `branched-frontend`. Updated after every message Gurneal sends to Claude Code.
 
 ## What belongs here
 
