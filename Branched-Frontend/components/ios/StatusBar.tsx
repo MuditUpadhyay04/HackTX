@@ -82,83 +82,50 @@ const timeStyle = (size: number): CSSProperties => ({
 });
 
 /**
- * The iOS 26 status bar.
- * - display "cover" (the folded display, 402 pt): "9:41" at the leading edge and cellular, Wi-Fi and
- *   battery on the right, all on the punch-hole's center line; the right cluster stops short of the
- *   punch-hole (top-right).
- * - display "inner" (the unfolded display, D8): the time with Wi-Fi under it, stacked at the top of the
- *   right rail above the dock (no camera cutout, D11).
+ * The status bar, iPhone Duo style: no bar across the top. "9:41", then Wi-Fi in a small round glass
+ * button, then the battery, stacked in the top-right corner of either display.
+ * - display "inner" (unfolded): at the top of the right rail, above the dock (no camera cutout, D11).
+ * - display "cover" (folded): centered under the punch-hole, top-right.
  */
 export function StatusBar({ display, tone = "light" }: { display: "cover" | "inner"; tone?: StatusTone }) {
   const { label } = useMockClock();
   const color = toneColor(tone);
-
-  if (display === "inner") {
-    const L = HOME_LAYOUT.inner;
-    return (
-      <div
-        data-status-bar="inner"
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          left: L.railX,
-          top: STATUS.railTimeTop,
-          transform: "translateX(-50%)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: STATUS.railWifiGap,
-          color,
-          pointerEvents: "none",
-        }}
-      >
-        <span style={timeStyle(STATUS.railTimeSize)}>{label}</span>
-        <WifiGlyph />
-      </div>
-    );
-  }
-
-  const clusterRight = PUNCH.fromRight + PUNCH.diameter / 2 + STATUS.holeGap;
+  const x = display === "inner" ? HOME_LAYOUT.inner.railX : HOME_LAYOUT.cover.width - PUNCH.fromRight;
+  const top = display === "inner" ? STATUS.railTimeTop : PUNCH.fromTop + PUNCH.diameter / 2 + STATUS.holeGap;
+  const r = STATUS.wifiButton;
   return (
     <div
-      data-status-bar="cover"
+      data-status-bar={display}
       aria-hidden="true"
       style={{
         position: "absolute",
-        left: 0,
-        top: 0,
-        right: 0,
-        height: STATUS.height,
+        left: x,
+        top,
+        transform: "translateX(-50%)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: STATUS.railWifiGap,
         color,
         pointerEvents: "none",
       }}
     >
+      <span style={timeStyle(STATUS.railTimeSize)}>{label}</span>
       <span
         style={{
-          position: "absolute",
-          left: STATUS.coverTimeLeft,
-          top: STATUS.coverCenter,
-          transform: "translateY(-50%)",
-          ...timeStyle(STATUS.timeSize),
-        }}
-      >
-        {label}
-      </span>
-      <div
-        style={{
-          position: "absolute",
-          right: clusterRight,
-          top: STATUS.coverCenter,
-          transform: "translateY(-50%)",
+          width: r,
+          height: r,
+          borderRadius: "50%",
           display: "flex",
           alignItems: "center",
-          gap: STATUS.clusterGap,
+          justifyContent: "center",
+          background: "var(--home-dock-fill)",
+          boxShadow: "var(--home-dock-stroke)",
         }}
       >
-        <CellularGlyph />
         <WifiGlyph />
-        <BatteryGlyph />
-      </div>
+      </span>
+      <BatteryGlyph />
     </div>
   );
 }

@@ -3,6 +3,9 @@
 import { motion, type MotionValue } from "framer-motion";
 import type { ReactNode } from "react";
 import { GEOM, type DuoSide } from "../geometry";
+import { appScreen, type HardwareTarget } from "@/lib/apps/registry";
+import { useAppStore } from "@/lib/apps/store";
+import { useFoldStore } from "@/lib/device/store";
 import { buttonShadow } from "../materials";
 import { EdgeFace } from "./EdgeFace";
 import { ALL_SIDES, Face, HINGE_BLEED } from "./Face";
@@ -70,7 +73,7 @@ export function Half({ side, transform, screenOn, gloss, angle, shadow, cover, i
         )}
       </div>
       <EdgeFace side={side} />
-      {side === "right" ? <TopButtons /> : null}
+      {side === "right" ? <Buttons /> : null}
     </motion.div>
   );
 }
@@ -160,9 +163,9 @@ function CoverFace({ screenOn, angle, fill, children }: FaceContentProps) {
     >
       <ScreenSurface on={screenOn && fill === "wallpaper"} width={c.width} height={c.height} />
       {screenOn && children != null ? (
-        <FoldContent angle={angle} soften shade={{ swing: coverSwing, hinge: "left" }} width={c.width} height={c.height}>
+        <FoldContent angle={angle} soften shade={{ swing: coverSwing, hinge: "left" }} width={c.width} height={c.height} inert>
           <div
-            data-duo-viewport="cover"
+            data-duo-viewport="cover-face"
             style={{
               position: "absolute",
               left: 0,
@@ -184,33 +187,85 @@ function CoverFace({ screenOn, angle, fill, children }: FaceContentProps) {
   );
 }
 
-/** Power and volume buttons standing on the right half's top edge (outer end). */
-function TopButtons() {
+/**
+ * The buttons on the right half (iPhone Duo as shipped): volume up/down standing on the top edge near the
+ * outer end, the Touch ID side button and Camera Control on the right side edge. Each is an
+ * outer surface plus front and back lips; the lips are pills shaded like the frame, overlapping the
+ * edge by 1 px so they read as part of it rather than slivers floating beside it.
+ */
+/** Opens a hardware button's app (lib/apps/registry.tsx) on the display facing the viewer. */
+function pressHardware(target: HardwareTarget): void {
+  const display = useFoldStore.getState().folded ? "cover" : "inner";
+  if (appScreen(target, display)) useAppStore.getState().openApp(target, display);
+}
+
+/** A click area a little larger than the button, so the 2.4 px lip is easy to hit. */
+const HIT = 10;
+
+function HitArea({ target, label, x, y, width, height }: { target: HardwareTarget; label: string; x: number; y: number; width: number; height: number }) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      data-hw-button={target}
+      onClick={() => pressHardware(target)}
+      style={{
+        position: "absolute",
+        left: 0,
+        top: 0,
+        width,
+        height,
+        padding: 0,
+        border: 0,
+        background: "none",
+        cursor: "pointer",
+        transform: `translate3d(${x}px, ${y}px, 1px)`,
+        pointerEvents: "auto",
+      }}
+    />
+  );
+}
+
+function Buttons() {
   const b = GEOM.buttons;
   const { width, thickness } = GEOM.panel;
   const zFront = -(thickness - b.depth) / 2;
+  const base = {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    borderRadius: b.radius,
+    background: "var(--device-ti-side)",
+    boxShadow: buttonShadow,
+    transformOrigin: "0 0",
+    pointerEvents: "none",
+  } as const;
+  const lip = { ...base, background: "var(--device-button-lip)" } as const;
   return (
     <>
-      {[b.power, b.volumeUp, b.volumeDown].map((btn) => {
+      {([[b.volumeUp, "hw-volume-up", "Volume up"], [b.volumeDown, "hw-volume-down", "Volume down"]] as const).map(([btn, target, label]) => {
         const x = width - btn.fromOuter - btn.length;
-        const common = {
-          position: "absolute",
-          left: 0,
-          top: 0,
-          width: btn.length,
-          borderRadius: b.radius,
-          background: "var(--device-ti-side)",
-          boxShadow: buttonShadow,
-          transformOrigin: "0 0",
-          pointerEvents: "none",
-        } as const;
+        const topLip = { ...lip, width: btn.length, height: b.protrude + 1, borderRadius: `${b.protrude}px ${b.protrude}px 0 0` };
         return (
-          <div key={btn.fromOuter} aria-hidden="true" data-duo-part="button">
+          <div key={`top-${btn.fromOuter}`} aria-hidden="true" data-duo-part="button">
             {/* top surface, in the x-z plane */}
-            <div style={{ ...common, height: b.depth, transform: `translate3d(${x}px, ${-b.protrude}px, ${zFront}px) rotateX(-90deg)` }} />
-            {/* front and back lips */}
-            <div style={{ ...common, height: b.protrude, transform: `translate3d(${x}px, ${-b.protrude}px, ${zFront}px)` }} />
-            <div style={{ ...common, height: b.protrude, transform: `translate3d(${x}px, ${-b.protrude}px, ${zFront - b.depth}px)` }} />
+            <div style={{ ...base, width: btn.length, height: b.depth, transform: `translate3d(${x}px, ${-b.protrude}px, ${zFront}px) rotateX(-90deg)` }} />
+            <div style={{ ...topLip, transform: `translate3d(${x}px, ${-b.protrude}px, ${zFront}px)` }} />
+            <div style={{ ...topLip, transform: `translate3d(${x}px, ${-b.protrude}px, ${zFront - b.depth}px)` }} />
+            <HitArea target={target} label={label} x={x} y={-b.protrude - HIT} width={btn.length} height={b.protrude + HIT + 2} />
+          </div>
+        );
+      })}
+      {([[b.power, "hw-touch-id", "Touch ID button"], [b.camera, "hw-camera", "Camera Control"]] as const).map(([btn, target, label]) => {
+        const y = btn.fromTop;
+        const sideLip = { ...lip, width: b.protrude + 1, height: btn.length, borderRadius: `0 ${b.protrude}px ${b.protrude}px 0` };
+        return (
+          <div key={`side-${btn.fromTop}`} aria-hidden="true" data-duo-part="button">
+            {/* outer surface, in the y-z plane */}
+            <div style={{ ...base, width: b.depth, height: btn.length, transform: `translate3d(${width + b.protrude}px, ${y}px, ${zFront}px) rotateY(90deg)` }} />
+            <div style={{ ...sideLip, transform: `translate3d(${width - 1}px, ${y}px, ${zFront}px)` }} />
+            <div style={{ ...sideLip, transform: `translate3d(${width - 1}px, ${y}px, ${zFront - b.depth}px)` }} />
+            <HitArea target={target} label={label} x={width - 2} y={y} width={b.protrude + HIT + 2} height={btn.length} />
           </div>
         );
       })}

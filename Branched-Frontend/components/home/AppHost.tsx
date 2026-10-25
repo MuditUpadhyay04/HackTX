@@ -9,15 +9,17 @@ import type { AppTarget } from "@/lib/apps/registry";
 import { HOME_LAYOUT, ICON, SEARCH, iconRectPt, type HomeAppId, type HomeDisplay, type Rect } from "./layout";
 
 /**
- * The open app on one display: grows out of its icon (springOpen), shrinks back into it on close
- * (springClose). A home bar at the bottom closes it, like swiping up on iOS.
+ * The open app on one display: grows out of its button (springOpen), shrinks back into it on close
+ * (springClose). A home bar at the bottom closes it, like swiping up on iOS. The same app stays open
+ * across fold/unfold: the cover and inner hosts both show it, each with its own display.
  */
 export function AppHost({ display }: { display: HomeDisplay }) {
   const state = useAppStore((s) => s.open);
   const close = useAppStore((s) => s.closeApp);
   const L = HOME_LAYOUT[display];
-  // an app shows on the display it was opened from
-  const open = state && state.display === display ? state.target : null;
+  // the open app shows on both displays (only the one facing the viewer is seen), so it carries over
+  // when the phone folds or unfolds with it open
+  const open = state ? state.target : null;
   const Screen = open ? appScreen(open, display) : undefined;
   // remember the last target so the close animation shrinks back into ITS button
   const last = useRef(open);
@@ -75,6 +77,7 @@ function targetRect(display: HomeDisplay, target: AppTarget): Rect | null {
   if (target === "search") {
     return { x: L.railX - SEARCH.size / 2, y: L.height - SEARCH.bottom - SEARCH.size, w: SEARCH.size, h: SEARCH.size };
   }
+  if (target.startsWith("hw-")) return null; // hardware buttons: the app grows from the middle
   if (target.startsWith("widget-")) {
     const key = target.slice("widget-".length) as keyof typeof L.widgets;
     return L.widgets[key] ?? null;

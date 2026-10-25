@@ -122,10 +122,12 @@ export const STATUS = {
   cellular: { width: 18, height: 12 },
   wifi: { width: 16, height: 12 },
   battery: { width: 26, height: 12.5, nub: 1.5, inset: 2, radius: 4, level: 0.72 },
-  /** inner (D8): time + Wi-Fi stacked at the top of the right rail */
+  /** both displays: time, Wi-Fi button and battery stacked top-right (iPhone Duo) */
   railTimeTop: 24,
   railTimeSize: 15,
   railWifiGap: 8,
+  /** the round glass button around the Wi-Fi glyph */
+  wifiButton: 28,
 } as const;
 
 /** Home indicator: 134 x 5 pt, 8 pt from the bottom (apps only; iOS hides it on the home screen). */

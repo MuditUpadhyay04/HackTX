@@ -16,7 +16,7 @@ import {
 import { ALL_SIDES, Face } from "./parts/Face";
 import { Half } from "./parts/Half";
 import { Reflection } from "./parts/Reflection";
-import { GlassSheen } from "./parts/Screen";
+import { GlassSheen, PunchHole } from "./parts/Screen";
 import { ContactShadow } from "./parts/Shadow";
 import { Spine } from "./parts/Spine";
 
@@ -215,6 +215,7 @@ function DeviceCore({
           fill={fill}
         />
         <OnePieceFront angle={angle} />
+        {screenOn && cover != null ? <CoverContent angle={angle}>{cover}</CoverContent> : null}
         {screenOn && inner != null ? (
           <InnerContent angle={angle}>
             {inner}
@@ -276,6 +277,59 @@ function InnerContent({ angle, children }: { angle: MotionValue<number>; childre
         {children}
       </div>
       <GlassSheen width={d.width} height={d.height} />
+    </motion.div>
+  );
+}
+
+/**
+ * The cover display's content, flat and in front, while the phone is folded shut: ONE interactive
+ * instance (the copy on the left half's back face is inert). Content drawn on that face sits inside
+ * two 180-degree flips and some browsers (the Claude app's) do not hit-test it, so taps went to the
+ * frame; this layer is never flipped. It lies exactly over the face copy, so swapping is invisible.
+ */
+const COVER_CLIP = (() => {
+  const c = GEOM.display.cover;
+  return continuousClip(c.width, c.height, { tl: c.radiusHinge, tr: c.radiusOuter, br: c.radiusOuter, bl: c.radiusHinge });
+})();
+
+/** openAngle up to which the flat cover layer is shown (the face copy takes over as it opens). */
+const COVER_FLAT_TO = 1;
+
+function CoverContent({ angle, children }: { angle: MotionValue<number>; children: ReactNode }) {
+  const visibility = useTransform(angle, (a) => (a <= COVER_FLAT_TO ? "visible" : "hidden"));
+  const vp = GEOM.viewport;
+  const c = GEOM.display.cover;
+  return (
+    <motion.div
+      data-duo-part="cover-content"
+      style={{
+        position: "absolute",
+        left: GEOM.group.hinge + GEOM.band.inset,
+        top: GEOM.band.inset,
+        width: c.width,
+        height: c.height,
+        clipPath: COVER_CLIP,
+        transform: `translateZ(${GEOM.panel.thickness + GEOM.z.content}px)`,
+        visibility,
+      }}
+    >
+      <div
+        data-duo-viewport="cover"
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          width: vp.cover.width,
+          height: vp.cover.height,
+          transform: `scale(${vp.scale})`,
+          transformOrigin: "0 0",
+          overflow: "hidden",
+        }}
+      >
+        {children}
+      </div>
+      <GlassSheen width={c.width} height={c.height} />
+      <PunchHole display="cover" width={c.width} />
     </motion.div>
   );
 }

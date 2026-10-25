@@ -100,6 +100,8 @@ export function FoldContent({
         height,
         overflow: "hidden",
         opacity: alpha,
+        // inert copies must not swallow clicks meant for the display facing the viewer
+        pointerEvents: inert ? "none" : undefined,
       }}
     >
       {/*

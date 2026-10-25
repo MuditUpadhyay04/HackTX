@@ -475,7 +475,9 @@
   --shadow-device-plateau: 0 1px 0 rgba(255,255,255,0.55) inset, 0 -1px 0 rgba(0,0,0,0.10) inset, 0 0 0 0.75px rgba(0,0,0,0.16), 0 3px 8px rgba(0,0,0,0.16);
   --shadow-device-lens-ring: 0 0 0 1px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.25);
   --shadow-device-lens-glass: inset 0 2px 6px rgba(0,0,0,0.8), inset 0 0 0 2px rgba(0,0,0,0.6);
-  --shadow-device-button: inset 0 1px 0 rgba(255,255,255,0.6), 0 0 0 0.5px rgba(0,0,0,0.25);
+  --shadow-device-button: inset 0 0.75px 0 rgba(255,255,255,0.85), inset 0 -0.75px 0 rgba(0,0,0,0.22), 0 0 0 0.5px rgba(70,68,63,0.45);
+  /* the buttons' visible lip: brushed titanium lit from above, like the frame band */
+  --device-button-lip: linear-gradient(180deg, #F6F4F0 0%, #D9D5CE 35%, #A9A49B 75%, #7C786F 100%);
   /* Phase 2 look-alike apps */
   --shadow-wa-bubble: 0 1px 0.5px rgba(11,20,26,0.13);
   --shadow-key-pop: 0 1px 1px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.12);

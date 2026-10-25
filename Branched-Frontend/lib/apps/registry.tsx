@@ -1,26 +1,32 @@
 /**
- * lib/apps/registry.tsx: THE place to link every home-screen button to an app.
+ * lib/apps/registry.tsx: THE place to link every button on the phone to an app.
  *
- * Two tables, one per display: `cover` (the outer screen, folded) and `inner` (the unfolded screen).
- * Every button on each has an entry: the grid and dock app icons (HomeAppId), the widgets
- * ("widget-weather", ...) and the Search button ("search"). Swap ExampleApp for your component:
+ * APP_SCREENS is ONE table for both displays: a button that exists on the outer (cover) screen and
+ * on the inner screen (the same app icon, widget, Search) opens the same app on either. Targets:
+ *   - app icons (grid + dock): HomeAppId, e.g. "facebook", "messages", "unsaid"
+ *   - widgets: "widget-weather", "widget-calendar", "widget-photos", "widget-music", "widget-reminders"
+ *   - the home Search button: "search"
+ *   - the hardware buttons: "hw-volume-up", "hw-volume-down", "hw-touch-id", "hw-camera"
  *
- *   import { MyInstagram } from "@/components/apps/MyInstagram";
- *   inner: { ...DEFAULTS, instagram: MyInstagram }
- *
+ * Swap ExampleApp for your component:  instagram: MyInstagram,
+ * Only if a button should do something different on one display, add it to DISPLAY_OVERRIDES.
  * Set an entry to `null` to make that button show the "concept only" toast instead.
- * The component fills the whole display (cover 402 x 573 pt, inner 822.5 x 573 pt).
+ *
+ * An app opened on one display carries over when the phone folds or unfolds (lib/apps/store.ts):
+ * the component is told which display it is on (cover 402 x 573 pt, inner 822.5 x 573 pt).
  */
 import type { ComponentType } from "react";
 import { APP_NAMES, type HomeAppId, type HomeDisplay } from "@/components/home/layout";
 import { ExampleApp } from "@/components/apps/ExampleApp";
 
 export type WidgetTarget = "widget-weather" | "widget-calendar" | "widget-photos" | "widget-music" | "widget-reminders";
-export type AppTarget = HomeAppId | WidgetTarget | "search";
+export type HardwareTarget = "hw-volume-up" | "hw-volume-down" | "hw-touch-id" | "hw-camera";
+export type AppTarget = HomeAppId | WidgetTarget | HardwareTarget | "search";
 
 export type AppScreenProps = {
   /** the button that opened it */
   target: AppTarget;
+  /** the display it is on right now (changes when the phone folds or unfolds with it open) */
   display: HomeDisplay;
   /** go back to the home screen */
   close: () => void;
@@ -36,24 +42,29 @@ export const TARGET_NAMES: Record<AppTarget, string> = {
   "widget-music": "Music",
   "widget-reminders": "Reminders",
   search: "Search",
+  "hw-volume-up": "Volume up",
+  "hw-volume-down": "Volume down",
+  "hw-touch-id": "Touch ID button",
+  "hw-camera": "Camera Control",
 };
 
 const ALL = Object.keys(TARGET_NAMES) as AppTarget[];
 const DEFAULTS = Object.fromEntries(ALL.map((t) => [t, ExampleApp])) as Record<AppTarget, Screen>;
 
-export const APP_SCREENS: Record<HomeDisplay, Record<AppTarget, Screen>> = {
-  // ---- outer (cover) screen ----
-  cover: {
-    ...DEFAULTS,
-    // facebook: MyFacebook,
-  },
-  // ---- inner (unfolded) screen ----
-  inner: {
-    ...DEFAULTS,
-    // facebook: MyFacebook,
-  },
+/** One app per button, the same on both displays. */
+export const APP_SCREENS: Record<AppTarget, Screen> = {
+  ...DEFAULTS,
+  // facebook: MyFacebook,
+  // "hw-camera": MyCamera,
+};
+
+/** Only for a button that should open something different on one display. */
+export const DISPLAY_OVERRIDES: Partial<Record<HomeDisplay, Partial<Record<AppTarget, Screen>>>> = {
+  cover: {},
+  inner: {},
 };
 
 export function appScreen(target: AppTarget, display: HomeDisplay): Screen | undefined {
-  return APP_SCREENS[display][target];
+  const override = DISPLAY_OVERRIDES[display];
+  return override && target in override ? override[target] : APP_SCREENS[target];
 }

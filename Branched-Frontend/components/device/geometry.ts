@@ -126,11 +126,16 @@ const PLATEAU = {
 const BUTTONS = {
   /** depth across the thickness and protrusion out of the edge */
   depth: 7,
-  protrude: 1.2,
+  protrude: 2.4,
   radius: 3,
-  power: { fromOuter: 96, length: 64 },
-  volumeUp: { fromOuter: 190, length: 52 },
-  volumeDown: { fromOuter: 252, length: 52 },
+  // As shipped (iPhone Duo, launched 2026-10-23): volume buttons on the top edge; the Touch ID side
+  // button and Camera Control on the right side; no Action button, nothing on the left.
+  /** top edge, measured from the right (outer) end */
+  volumeUp: { fromOuter: 96, length: 56 },
+  volumeDown: { fromOuter: 164, length: 56 },
+  /** right side edge, measured from the top */
+  power: { fromTop: 150, length: 84 },
+  camera: { fromTop: 560, length: 56 },
 } as const;
 
 /** z offsets (px) of layers that must never share a plane with a face. */

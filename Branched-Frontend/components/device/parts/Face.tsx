@@ -45,6 +45,9 @@ function Layer({ box, background, children, style }: { box: Box; background: str
         height: box.height,
         clipPath: continuousClip(box.width, box.height, box.radii),
         background,
+        // frame/bezel layers are decoration: let clicks through to the display (some engines
+        // hit-test them above the display layer inside a 3D-transformed face)
+        pointerEvents: children ? undefined : "none",
         ...style,
       }}
     >
