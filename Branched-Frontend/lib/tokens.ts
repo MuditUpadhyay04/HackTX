@@ -312,7 +312,7 @@ export const shadow = {
   // iOS keyboard key (Phase 2)
   key: "0 1px 0 rgba(0,0,0,0.3)",
   // home-screen icon label (Phase 3, text-shadow)
-  "icon-label": "0 1px 2px rgba(0,0,0,0.3)",
+  "icon-label": "0 0.5px 1px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.35)",
   // home-screen icon inner stroke (Phase 3)
   "icon-stroke": "inset 0 0 0 0.5px rgba(255,255,255,0.12)",
   // glass stroke for widgets / dock / pills (Phase 3)
