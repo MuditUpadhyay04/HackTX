@@ -2,6 +2,7 @@
 // Expo Go: the front camera records through the system camera (expo-image-picker), so the spec's
 // in-app ring/timer is the camera's own. Saved notes upload to POST /api/self-notes (private).
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useState } from "react";
@@ -33,7 +34,8 @@ export default function SelfNote() {
   const [take, setTake] = useState<PickedVideo | null>(null);
   const [saving, setSaving] = useState(false);
   const notes = home?.self_notes ?? [];
-  const frame = Math.min(layout.usableWidth - inset.card * 2, READING_MAX - inset.card * 2);
+  // fits the screen's height too, so the record button stays in view on a short (folded or wide) screen
+  const frame = Math.min(layout.usableWidth - inset.card * 2, READING_MAX - inset.card * 2, Math.round((layout.height * 0.55) / 1.1));
 
   const record = async () => {
     const v = await pickVideo("camera", true);
@@ -65,9 +67,12 @@ export default function SelfNote() {
           {take ? (
             <Preview uri={take.uri} />
           ) : (
-            <View style={styles.idle}>
-              <Ionicons name="person-circle-outline" size={96} color={color.violet} />
-              <T v="caption">for the next hard day</T>
+            // the front camera, framed on him, before he records (his headshot in the demo build)
+            <View style={StyleSheet.absoluteFill}>
+              <Image source={require("../../assets/people/son.jpg")} style={StyleSheet.absoluteFill} contentFit="cover" />
+              <View style={styles.idleCaption}>
+                <T v="caption" style={{ color: color.onAccent }}>for the next hard day</T>
+              </View>
             </View>
           )}
           {take?.duration ? (
@@ -117,7 +122,7 @@ export default function SelfNote() {
 
 const styles = StyleSheet.create({
   frame: { alignSelf: "center", marginTop: space.s12, borderRadius: radius.hero, overflow: "hidden", backgroundColor: color.surface },
-  idle: { flex: 1, alignItems: "center", justifyContent: "center", gap: space.s8 },
+  idleCaption: { position: "absolute", left: 0, right: 0, bottom: 0, alignItems: "center", paddingVertical: space.s16, backgroundColor: "rgba(0,0,0,0.28)" },
   timer: { position: "absolute", left: space.s16, bottom: space.s16, paddingHorizontal: space.s8, paddingVertical: 2, borderRadius: radius.pill, backgroundColor: color.scrim },
   ring: { width: 76, height: 76, borderRadius: 38, borderWidth: 4, borderColor: color.text4, alignItems: "center", justifyContent: "center", backgroundColor: color.bg },
   dot: { width: 56, height: 56, borderRadius: 28, backgroundColor: color.danger },

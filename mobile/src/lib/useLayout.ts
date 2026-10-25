@@ -28,6 +28,10 @@ export function useLayout() {
     width: "100%",
     maxWidth: max + insets.left + insets.right,
     alignSelf: "center",
+    // alignSelf alone doesn't center a ScrollView's content container on web (react-native-web);
+    // auto side margins do, on every platform
+    marginLeft: "auto",
+    marginRight: "auto",
     paddingLeft: insets.left,
     paddingRight: insets.right,
   });

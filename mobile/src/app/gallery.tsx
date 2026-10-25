@@ -9,7 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { AppIcon, PrimaryPill } from "../components/ui";
 import { haptics } from "../lib/haptics";
-import { type GalleryPhoto, loadPhotos } from "../lib/photos";
+import { type GalleryPhoto, WEB_LIBRARY, loadPhotos } from "../lib/photos";
 import { useLayout } from "../lib/useLayout";
 import { color, space } from "../theme/tokens";
 
@@ -27,7 +27,9 @@ export default function Gallery() {
   const { insets, usableWidth } = useLayout();
   const columns = Math.max(MIN_COLUMNS, Math.floor(usableWidth / TARGET_TILE));
   const tile = Math.floor((usableWidth - GAP * (columns - 1)) / columns);
-  const [permission, requestPermission] = usePermissions();
+  const [cameraRoll, requestPermission] = usePermissions();
+  // the web build reads the demo's photos from the server: nothing to ask permission for
+  const permission = WEB_LIBRARY ? { granted: true } : cameraRoll;
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
   const [done, setDone] = useState(false);
   const loading = useRef(false);
