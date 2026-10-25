@@ -32,8 +32,8 @@ from app.config import settings  # noqa: E402
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-CHECKS = ("spark", "transcribe", "realtime", "whatsapp", "gemini")
-SECRETS = [s for s in (settings.model_api_key, settings.whatsapp_token, settings.gemini_api_key) if s]
+CHECKS = ("gpu", "spark", "transcribe", "realtime", "whatsapp", "gemini")
+SECRETS = [s for s in (settings.model_api_key, settings.whatsapp_token, settings.gemini_api_key, settings.spark_gpu_key) if s]
 results: list[tuple[str, str]] = []
 
 
@@ -68,6 +68,43 @@ def model_api_fix(status: int) -> str:
     if status == 429:
         return "Rate limited. Wait a minute and run again."
     return "See the error above; https://dev.meta.ai/docs has the request shapes."
+
+
+# ------------------------------------------------------------------ Muse Spark Open on our Vultr GPU (optional)
+
+
+async def check_gpu() -> None:
+    """The same request the app sends (app.ai.spark._muse with gpu=True), so a PASS means sorting will use it."""
+    name = "Muse on Vultr GPU"
+    if not settings.spark_gpu_base:
+        report(name, "SKIP", "SPARK_GPU_BASE is not set. Sorting uses Meta's Model API, then Gemini.")
+        return
+    from app.ai import spark  # noqa: PLC0415  (after settings, like the app)
+
+    try:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(15, connect=5)) as client:
+            headers = {"Authorization": f"Bearer {settings.spark_gpu_key}"} if settings.spark_gpu_key else {}
+            resp = await client.get(f"{settings.spark_gpu_base}/models", headers=headers)
+        served = [m.get("id") for m in resp.json().get("data", [])] if resp.status_code == 200 else []
+    except (httpx.HTTPError, ValueError) as exc:
+        report(name, "FAIL", f"can't reach {settings.spark_gpu_base}: {exc.__class__.__name__}",
+               "Is the GPU server up, and is its port open to this server (Vultr firewall / VPC)?")
+        return
+    if resp.status_code != 200:
+        report(name, "FAIL", api_error(resp), "Check SPARK_GPU_KEY against the server's --api-key.")
+        return
+    if settings.spark_gpu_model not in served:
+        report(name, "FAIL", f"the server serves {served or 'nothing'}, not {settings.spark_gpu_model}",
+               "Set SPARK_GPU_MODEL to the served model name (vLLM --served-model-name).")
+        return
+    schema = {"type": "object", "properties": {"ok": {"type": "boolean"}}, "required": ["ok"], "additionalProperties": False}
+    started = time.monotonic()
+    try:
+        content = await spark._muse("Reply with ok=true.", "Are you there?", schema, "Check", "low", 1000, gpu=True)
+    except spark.SparkError as exc:
+        report(name, "FAIL", str(exc), "If it's a JSON error, start vLLM with structured outputs (the default xgrammar backend).")
+        return
+    report(name, "PASS", f"{settings.spark_gpu_model} answered {content} in {time.monotonic() - started:.1f}s; sorting will use it first")
 
 
 # ------------------------------------------------------------------ Muse Spark
@@ -294,6 +331,7 @@ async def main() -> int:
     print(f"Un-Said key check · Model API {settings.model_api_base} · MODEL_API_KEY {'set' if settings.model_api_key else 'missing'}"
           f" · WhatsApp {'set' if settings.whatsapp_token else 'missing'}\n")
     runners = {
+        "gpu": check_gpu,
         "spark": check_spark,
         "transcribe": check_transcribe,
         "realtime": check_realtime,

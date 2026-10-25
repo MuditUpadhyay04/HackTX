@@ -120,10 +120,45 @@ def test_a_refused_spark_is_skipped_for_a_while(monkeypatch):
     monkeypatch.setattr(gemini, "chat_json", gemini_answer)
     monkeypatch.setattr(spark, "_skip_meta_until", 0.0)
     object.__setattr__(settings, "gemini_api_key", "test-key")
+    object.__setattr__(settings, "model_api_key", "test-meta-key")
     try:
         asyncio.run(spark.classify_safety("i miss home"))
         asyncio.run(spark.classify_safety("i miss home"))
         assert calls["meta"] == 1
     finally:
         object.__setattr__(settings, "gemini_api_key", "")
+        object.__setattr__(settings, "model_api_key", "")
+        spark.served_by["spark"] = "not used yet"
+
+
+def test_the_vultr_gpu_answers_first_then_meta_then_gemini(monkeypatch):
+    """With SPARK_GPU_BASE set, our own Muse on the Vultr GPU sorts first; if it's down, Meta's API; then Gemini."""
+    import asyncio
+
+    from app.ai import spark
+
+    tried = []
+
+    async def muse(system, user, schema, name, effort, max_tokens, gpu=False):
+        tried.append("gpu" if gpu else "meta")
+        if gpu and down["gpu"]:
+            raise spark.SparkError("gpu spark unreachable: ConnectError")
+        return {"safety": "ok"}
+
+    down = {"gpu": False}
+    monkeypatch.setattr(spark, "_muse", muse)
+    monkeypatch.setattr(spark, "_skip_meta_until", 0.0)
+    object.__setattr__(settings, "spark_gpu_base", "http://gpu.test/v1")
+    object.__setattr__(settings, "model_api_key", "test-meta-key")
+    try:
+        assert asyncio.run(spark.classify_safety("i miss home")) == "ok"
+        assert tried == ["gpu"] and spark.served_by["spark"] == settings.spark_gpu_label
+        assert spark.short_provider() == "muse-gpu"
+        down["gpu"] = True
+        tried.clear()
+        asyncio.run(spark.classify_safety("i miss home"))
+        assert tried == ["gpu", "meta"] and spark.served_by["spark"] == "meta"
+    finally:
+        object.__setattr__(settings, "spark_gpu_base", "")
+        object.__setattr__(settings, "model_api_key", "")
         spark.served_by["spark"] = "not used yet"

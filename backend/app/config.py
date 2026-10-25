@@ -45,10 +45,16 @@ class Settings:
     cors_origins: list[str]
     gemini_api_key: str
     gemini_models: list[str]  # tried in order; a busy model (429/5xx) falls through to the next
+    # Our own copy of Muse Spark Open on a Vultr Cloud GPU (vLLM, OpenAI-compatible). Off when empty.
+    spark_gpu_base: str
+    spark_gpu_model: str
+    spark_gpu_key: str
+    spark_gpu_label: str  # what /api/health says when the GPU answered
+    spark_gpu_reasoning: bool  # send reasoning_effort to the GPU server (only if it accepts it)
 
     @property
     def muse_enabled(self) -> bool:
-        return bool(self.model_api_key)
+        return bool(self.model_api_key)  # Meta's Model API key: Voice Transcribe, and Spark behind the GPU
 
     @property
     def gemini_enabled(self) -> bool:
@@ -95,6 +101,11 @@ def load_settings() -> Settings:
         cors_origins=origins or ["*"],
         gemini_api_key=_env("GEMINI_API_KEY"),
         gemini_models=gemini_models,
+        spark_gpu_base=_env("SPARK_GPU_BASE").rstrip("/"),
+        spark_gpu_model=_env("SPARK_GPU_MODEL", "muse-spark-open"),
+        spark_gpu_key=_env("SPARK_GPU_KEY"),
+        spark_gpu_label=_env("SPARK_GPU_LABEL", "muse-spark-open (vultr gpu)"),
+        spark_gpu_reasoning=_env("SPARK_GPU_REASONING", "0") == "1",
     )
 
 

@@ -18,7 +18,8 @@ log = logging.getLogger("unsaid.spark")
 
 SAFETY_VALUES = ["ok", "self_harm", "harm_to_others", "abuse_or_control"]
 
-# Who answered the last Spark call: "meta", or "gemini (fallback)" when Meta refused this host.
+# Who answered the last Spark call: our Vultr GPU (settings.spark_gpu_label), "meta",
+# or "gemini (fallback)" when neither Muse endpoint answered.
 served_by = {"spark": "not used yet"}
 
 
@@ -33,24 +34,42 @@ REFUSAL_MEMORY = 600.0
 _skip_meta_until = 0.0
 
 
+def short_provider() -> str:
+    """What sorted the last rant, for the rants table: meta | muse-gpu | gemini."""
+    label = served_by["spark"]
+    return "gemini" if label.startswith("gemini") else "muse-gpu" if label == settings.spark_gpu_label else "meta"
+
+
 async def chat_json(system: str, user: str, schema: dict, name: str, effort: str = "low", max_tokens: int = 4000) -> dict:
-    """Muse Spark first. When Spark doesn't answer (refused from this host, down, or unreachable)
-    and a Gemini key is set, Gemini answers the same prompt and schema, and providers() says so."""
+    """Muse Spark, in order: our own copy of Muse Spark Open on a Vultr GPU (when SPARK_GPU_BASE is set),
+    then Meta's Model API, then Gemini with the same prompt and schema. providers() names whoever answered."""
     global _skip_meta_until
-    if settings.gemini_enabled and time.monotonic() < _skip_meta_until:
-        return await _fallback(system, user, schema, max_tokens, "spark was refused recently")
-    try:
-        result = await _muse(system, user, schema, name, effort, max_tokens)
-    except SparkError as exc:
-        if not settings.gemini_enabled:
-            raise
-        # Our Vultr VM gets model_not_found for Spark with a key that works from a laptop.
-        if exc.refused:
-            _skip_meta_until = time.monotonic() + REFUSAL_MEMORY
-        log.warning("%s; gemini is answering instead", exc)
-        return await _fallback(system, user, schema, max_tokens, str(exc))
-    served_by["spark"] = "meta"
-    return result
+    reasons = []
+    if settings.spark_gpu_base:
+        try:
+            result = await _muse(system, user, schema, name, effort, max_tokens, gpu=True)
+            served_by["spark"] = settings.spark_gpu_label
+            return result
+        except SparkError as exc:
+            log.warning("%s; trying Meta's API", exc)
+            reasons.append(str(exc))
+    if settings.model_api_key and time.monotonic() >= _skip_meta_until:
+        try:
+            result = await _muse(system, user, schema, name, effort, max_tokens)
+            served_by["spark"] = "meta"
+            return result
+        except SparkError as exc:
+            # Our Vultr VM gets model_not_found for Spark with a key that works from a laptop.
+            if exc.refused:
+                _skip_meta_until = time.monotonic() + REFUSAL_MEMORY
+            reasons.append(str(exc))
+    elif settings.model_api_key:
+        reasons.append("spark was refused recently")
+    why = "; ".join(reasons) or "no Muse endpoint is configured"
+    if not settings.gemini_enabled:
+        raise SparkError(why)
+    log.warning("%s; gemini is answering instead", why)
+    return await _fallback(system, user, schema, max_tokens, why)
 
 
 async def _fallback(system: str, user: str, schema: dict, max_tokens: int, why: str) -> dict:
@@ -62,33 +81,49 @@ async def _fallback(system: str, user: str, schema: dict, max_tokens: int, why: 
     return result
 
 
-async def _muse(system: str, user: str, schema: dict, name: str, effort: str, max_tokens: int) -> dict:
+async def _muse(system: str, user: str, schema: dict, name: str, effort: str, max_tokens: int, gpu: bool = False) -> dict:
+    """One OpenAI-compatible chat completion: Meta's Model API, or (gpu=True) our vLLM on the Vultr GPU."""
     body = {
-        "model": settings.spark_model,
+        "model": settings.spark_gpu_model if gpu else settings.spark_model,
         "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
         "response_format": {"type": "json_schema", "json_schema": {"name": name, "schema": schema}},
-        "reasoning_effort": effort,
         "max_tokens": max_tokens,
     }
-    headers = {"Authorization": f"Bearer {settings.model_api_key}"}
+    if not gpu or settings.spark_gpu_reasoning:
+        body["reasoning_effort"] = effort
+    base = settings.spark_gpu_base if gpu else settings.model_api_base
+    key = settings.spark_gpu_key if gpu else settings.model_api_key
+    headers = {"Authorization": f"Bearer {key}"} if key else {}
     try:
-        async with httpx.AsyncClient(timeout=httpx.Timeout(30, connect=5)) as client:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(45 if gpu else 30, connect=5)) as client:
             for attempt in range(2):
-                resp = await client.post(f"{settings.model_api_base}/chat/completions", json=body, headers=headers)
+                resp = await client.post(f"{base}/chat/completions", json=body, headers=headers)
                 if resp.status_code in (429, 500, 502, 503, 504) and attempt == 0:
                     log.warning("spark %s, retrying once", resp.status_code)
                     continue
                 break
     except httpx.HTTPError as exc:
-        raise SparkError(f"spark unreachable: {exc.__class__.__name__}") from exc
+        raise SparkError(f"{'gpu ' if gpu else ''}spark unreachable: {exc.__class__.__name__}") from exc
     if resp.status_code != 200:
         refused = resp.status_code in (401, 403, 404) or "model_not_found" in resp.text
-        raise SparkError(f"spark {resp.status_code}: {resp.text[:300]}", refused=refused)
+        raise SparkError(f"{'gpu ' if gpu else ''}spark {resp.status_code}: {resp.text[:300]}", refused=refused)
     try:
         content = resp.json()["choices"][0]["message"]["content"]
-        return json.loads(content)
-    except (KeyError, IndexError, TypeError, json.JSONDecodeError) as exc:
-        raise SparkError(f"unreadable spark response: {exc}") from exc
+        if not isinstance(content, str) or not content.strip():
+            # A reasoning model can spend every token thinking and return no answer at all.
+            raise SparkError(f"{'gpu ' if gpu else ''}spark returned no content (out of tokens?)")
+        return json.loads(_strip_fence(content))
+    except (KeyError, IndexError, TypeError, ValueError) as exc:
+        raise SparkError(f"unreadable {'gpu ' if gpu else ''}spark response: {exc}") from exc
+
+
+def _strip_fence(text: str) -> str:
+    """Self-hosted servers without strict JSON mode sometimes wrap JSON in ``` fences."""
+    t = text.strip()
+    if t.startswith("```"):
+        t = t.split("\n", 1)[1] if "\n" in t else t[3:]
+        t = t.rsplit("```", 1)[0]
+    return t.strip()
 
 
 def _people_block(me: dict, people: list[dict]) -> str:
