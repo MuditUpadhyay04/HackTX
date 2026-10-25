@@ -1,121 +1,120 @@
-# Un-Said mobile overhaul
+# Un-Said mobile overhaul — handoff
 
-Branch: `unsaid-overhaul` (off `main` at `c32f7ee`). Mobile only. Nothing under `backend/` is changed.
+Stopped at Gurneal's request, 11:19 PM CDT, Oct 24, 2026. No further design or feature work in this run.
 
-Last updated: Oct 24, 2026, 11:10 PM CDT.
+Branch: `unsaid-overhaul`, off `main` at `c32f7ee`. Mobile only. Nothing under `backend/` was changed.
+
+## Commits
+
+- App overhaul: `259c00bc8e13d5fa552f7829d4841245ed852435`
+- Handoff document: `4cf607183f6a5a4d2fd956360d363173bce6fead`
+- SHA line: `13abbe46112d9ed7b9758abc6ac69232adf916c9`
+- Last commit: the tip of `unsaid-overhaul` after this file was pushed. It is the child of `13abbe4`.
+
+Draft PR: https://github.com/MuditUpadhyay04/HackTX/pull/1
 
 ## API and feature map
 
-Read from `backend/app` on `main`. The app calls these. Shapes live in `mobile/src/lib/api.ts`.
+Read from `backend/app` on `main`. Client shapes are in `mobile/src/lib/api.ts`. The UI did not change request or response shapes.
 
 | Call | Used for |
 |---|---|
-| `GET /api/home` | Riley, people, cards (held/ready, `release_label`, `remind_at`, `remind_body`), replies, reminders, self notes, photos ("your lane"), nudges, providers, clock |
+| `GET /api/home` | Riley, people, cards (`release_label`, `remind_at`, `remind_body`, `release_at`, `created_at`), replies, reminders, self notes, `photos` (Your lane), `nudges`, providers, clock |
 | `GET /api/people/{id}/pieces` | Your words rows and the pile. Nothing is pre-selected |
-| `PATCH /api/people/{id}` | Time-zone chip. Body may include `timezone`, `morning`, `language` |
-| `POST /api/rants/audio` and live `ws` | Talk, mic. Falls back to the WAV upload |
+| `PATCH /api/people/{id}` | Time-zone chip. Body may include `timezone`, `morning`, `language`. No `channel` field |
+| `POST /api/rants/audio` and the live websocket | Talk. Falls back to the WAV upload |
 | `POST /api/rants/text` | Type instead |
-| `POST /api/rants/{id}/sort` | Split into person cards. `safety != ok` opens Safety with the returned resources |
+| `POST /api/rants/{id}/sort` | Person cards. `safety != ok` opens Safety with the resources in the response |
 | `GET /api/memory/photo?asset_id=` | "Said here before" on a photo |
-| `GET /api/pieces/{id}/audio` | Listen to his own line (`authedUrl`) |
+| `GET /api/pieces/{id}/audio` | His own line, via `authedUrl` |
 | `POST /api/photos` | Gallery photo attached when a letter is created |
 | `POST /api/cards` | Preview. `when` is `her_morning` or `now` |
-| `POST /api/cards/{id}/shared` | He handed off. Un-Said does not show a chat |
+| `POST /api/cards/{id}/shared` | Handoff. Un-Said does not show a chat |
 | `POST /api/cards/{id}/revoke` | Cancel on the waiting strip. Toast: "Kept as a draft." |
 | `POST /api/replies/{id}/heard` | Opening or playing a letter |
 | `POST /api/reminders/{id}/done` | Open Instagram / Messages / WhatsApp |
 | `POST /api/knock/check` | Photo knock. Usually no |
-| `POST /api/attention/{id}/outcome` | opened / dismissed / ignored |
+| `POST /api/attention/{id}/outcome` | opened, dismissed, or ignored |
 | `GET` and `PATCH /api/settings` | Knocks, quiet hours, push flag |
 | `POST /api/push/register` and `POST /api/push/permission` | After he holds a letter. Never at launch |
 | `GET /api/safety/resources` | Safety opened from You |
 
-Cast from the seed: Riley (`me`), Mom (`mom`, WhatsApp), Dad (`dad`, WhatsApp), Sarah (`jordan`, Messages), Michael (`priya`, Instagram). Display names are already Sarah and Michael. Inside Un-Said, Sarah has no hearts.
+Cast in the seed: Riley (`me`), Mom (`mom`, WhatsApp), Dad (`dad`, WhatsApp), Sarah (`jordan`, Messages), Michael (`priya`, Instagram). Inside Un-Said, Sarah has no hearts.
 
-`GET /api/home` also returns `photos` and `nudges`. The app shows them now.
+## Done, by screen
 
-## Done
+- **Launch** (`src/app/index.tsx`). `#0F0D15`, 120 pt icon, "Un-Said" 20 pt under it, then `router.replace("/home")`. Reduced motion is a short fade.
+- **Home**. Wordmark, portrait, headline, hero card, Your words from pieces, Say it out loud, Your photos, Your lane (`home.photos`), waiting strip with a progress line, ready-to-send, reply nudges, waiting on you. Pull to refresh. Loading and error. "+" opens "Who is this for?" then Talk or that pile.
+- **Letters**. Header, story rings (unread ring, tap opens the newest unheard), rows, empty state, loading and error.
+- **You**. 72 pt portrait, Riley, Notes, Connect photos, Safety and support, Settings, Your people, "powered by Meta AI".
+- **Settings** (new). Gentle / Off / Demo, three quiet-hour presets, push flag. Real `GET`/`PATCH /api/settings`. Server line kept at the bottom.
+- **Notes** (new). Lists `self_notes`. Watch opens the media URL. No recorder.
+- **Letter**. Shared lavender card, accent underline, listen row, translation under the card, Write back opens Talk as "To {name}". "Take your time." No "Keep this moment" (no API).
+- **Safety**. No gradient. Loads `GET /api/safety/resources` when opened from You. Rant path still uses the resources passed from sort. Link labels capitalized for display. Feature ids on the pills. Concern line when a rant sent him here.
+- **Connect**. Same three rows. The four privacy lines are split. Instagram and Facebook still only toggle on this phone.
+- **Shared UI**. Tokens unchanged in value. System font only. Illustrated portraits (Riley, Mom, Dad, Sarah, Michael). Press scale, haptics, tab haptic, stack slide from the right. Letter card underline. Sheet component.
+- **EAS**. `expo-updates` installed. `runtimeVersion.policy` is `appVersion` (`1.0.0`). `eas.json` preview profile has `channel: "preview"` and `environment: "preview"`. `slug` is still `unsaid`. No `owner`. Not configured with a project id and not published.
+- **Checks on `259c00b`**. `npx tsc --noEmit`, `npx expo lint`, `npx expo export` (iOS and Android), and `npx expo export --platform web` passed. Web packages added: `react-dom`, `react-native-web`.
 
-- Launch splash on `#0F0D15`: 120 pt icon, "Un-Said" underneath, then Home. Gallery stays a screen, opened from Your photos.
-- Tokens unchanged in value. System font only. Illustrated portraits for Riley, Mom, Dad, Sarah, Michael (icon palette, not initials, not photos).
-- Home: hero, Your words, Say it out loud, Your photos, Your lane, waiting strip with a progress line, ready-to-send, reply nudges, waiting on you. Pull to refresh. Loading and error. "+" asks who it's for, then Talk or that person's pile.
-- Letters: story rings open the newest unheard letter. Empty state. Loading and error.
-- You: Notes, Connect photos, Safety and support, Settings, Your people. Footer "powered by Meta AI".
-- Settings: gentle / off / demo, quiet hours, push flag. Calls the real settings API. Server line kept at the bottom.
-- Notes: lists `self_notes`. Watch opens the file URL.
-- Gallery, photo viewer, and the knock banner. Same knock API.
-- Talk: live transcript, mic, type instead, start over, split cards, "Keep it just for me", photo memory, voice back, app rail. Sorting shows skeletons. Write-back opens Talk titled "To {name}".
-- Pile: line toggles, channel sheet, time-zone sheet (`PATCH`), preview. Empty state.
-- Preview and hold-until-morning. Same `createCard` / handoff.
-- Letter: lavender card, underline, listen, translation, Write back, "Take your time."
-- Connect photos and Safety (no gradient). Safety from You loads `GET /api/safety/resources`.
-- Haptics on press, tabs, toggles, hold. Stack slides in from the right. Splash and photo fade.
-- EAS Update prep, not published. See below.
-- `npx tsc --noEmit`, `npx expo lint`, `npx expo export` (iOS and Android), and `npx expo export --platform web` pass. Web deps: `react-dom` and `react-native-web`.
+## Half-done
 
-## In progress
+- **Gallery** (`src/app/gallery.tsx`). Moved off the launch screen. Same grid, permission ask, and Un-Said icon back to Home. Not re-laid against a Photos reference beyond type color and a haptic.
+- **Photo + knock**. Same full-screen viewer and banner. Added a haptic when a knock drops in. Banner layout is the previous one.
+- **Talk**. Same record, type, split, private save, photo memory, voice playback, and app rail. Added write-back title and channel line, sorting skeletons, a mic ring, and the caption "sorting it by person…". Not matched side-by-side to the reference image.
+- **Pile**. Toggles, channel sheet, preview, and empty state work. Time-zone sheet calls `PATCH` and is the new part. Channel choice is not saved on the person. "Edit as a draft" is not a separate screen.
+- **Preview**. Same letter, hold-until-morning, send, and heads-up ask. Only a success haptic was added. The underline comes from the shared letter card.
+- **Screenshots**. Not saved. A headless capture was started and then this run was stopped. Do not treat any partial PNG as a review artifact.
+- **`updates.url` and `extra.eas.projectId`**. Still absent. `eas update:configure` has to be run by someone who is logged in.
 
-- Screenshots of Home, Talk, Pile, Preview, and Letters on Expo web.
+## What remains, in order
 
-## Still to do
-
-- Save those screenshots as artifacts.
-- Another pass on Gallery, Photo, and Talk spacing against the reference image.
-- Web presentation under `backend/web/` is out of scope. Do not edit it.
+1. **Gallery, Photo + knock, Talk, Pile, Preview.** Put them next to `design/assets/ui-reference/unsaid-ui-reference.png`. Gallery is no longer the first screen (splash goes to Home; Your photos opens the gallery). Decide if the demo should open on the gallery instead. Talk's side rail still overlaps the transcript. Pile channel does not persist. Preview was not re-laid.
+2. **Home, Letters, You.** Home is the most finished. Check the hero at 402 pt, the waiting-strip progress (it uses `created_at` and `release_at`), and empty copy. Letters has no replies in a fresh seed, so the empty state is what you will see. You is a row list, not a second visual pass.
+3. **Letter, Connect, Safety.** Letter has no "Keep this moment". Connect does not import Instagram or Facebook. Safety is calm and wired. None of the three were screenshot-checked.
+4. **Phone test.** See How to run and EAS below.
+5. **`backend/web/`**. Out of scope. Do not edit it.
 
 ## How to run
 
 ```bash
 cd mobile
 cp .env.example .env
-# Edit .env. The phone has to reach the API host. Do not commit .env.
+# Set the two vars below. Do not commit .env.
 npx expo start
 ```
 
-`EXPO_PUBLIC_API_URL` is the backend origin with no trailing slash (local default `http://localhost:8000`). `EXPO_PUBLIC_APP_KEY` must match the backend `APP_KEY`. Leave the key empty only when that server does not require one.
+- `EXPO_PUBLIC_API_URL` — backend origin, no trailing slash. Local default in code is `http://localhost:8000`. The phone must be able to reach that host. `npx expo start --tunnel` if it is not on the same network.
+- `EXPO_PUBLIC_APP_KEY` — must match the backend `APP_KEY`. Leave it empty only when that server does not require a key.
 
-Expo Go: scan the QR code from `npx expo start`. A tunnel (`npx expo start --tunnel`) is the way to reach a laptop from a phone that is not on the same network.
+Backend, from `backend/`: `uv run uvicorn app.main:app --reload --port 8000`. Without Muse keys it runs on mock transcription. Fresh seed shows Riley, Mom, Dad, Sarah, Michael, four lane photos, Sarah's line "I miss the way we used to talk.", Dad's "I never said thank you.", and Michael's reminder "3 reels this week".
 
-## EAS Update (do not publish from this VM)
+Expo Go loads the dev server. It does not load an EAS Update.
 
-Ready:
+## EAS Update (do not publish from a machine that is not logged in)
 
-- `expo-updates` installed
-- `runtimeVersion.policy` is `appVersion` (currently `1.0.0`)
-- `eas.json` has a `preview` build profile with `channel: "preview"` and `environment: "preview"`
-- `slug` is still `unsaid`. No `owner` field was added.
-
-Not written yet, because there is no Expo project id in the repo. While logged in, once:
+Once, while logged in:
 
 ```bash
 cd mobile && npx eas-cli update:configure
 ```
 
-That fills `updates.url` and `extra.eas.projectId`. Then publish:
+That writes `updates.url` and `extra.eas.projectId`. Then:
 
 ```bash
 cd mobile && npx eas-cli update --branch preview --message "Un-Said overhaul" --environment preview
 ```
 
-The two public env vars have to be present when the bundle is built. Either export them in the shell (`EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_APP_KEY`) or set them on the EAS `preview` environment. No secret values belong in the repo.
+`EXPO_PUBLIC_API_URL` and `EXPO_PUBLIC_APP_KEY` must be in the shell or in the EAS `preview` environment when the bundle is built. No secret values are in the repo.
 
-`expo-updates` is native. An existing Expo Go session loads the dev server. A phone only receives this update if it already has a preview build of this runtime (`npx eas-cli build --profile preview --platform ios` or `android`). This VM did not build or publish.
+`expo-updates` is native. The phone receives the update only from a preview build of runtime `1.0.0` (`npx eas-cli build --profile preview --platform ios` or `android`). This run did not build or publish.
 
-## Copy for Gurneal
+## Copy questions for Gurneal
 
-Used as written from `design/COPY_AND_NAMES.md`, including proposed lines ("Only you can hear this.", "Here's who that was for.", "Held for {name}'s morning.").
+Used as written from `design/COPY_AND_NAMES.md`, including proposed lines.
 
-Kept from the app or from `backend/web/COPY_NEEDED.md`:
+Kept from the existing app or from `backend/web/COPY_NEEDED.md`: "Your lane", "Your photos" / "Find the people you miss.", "Can't reach Un-Said's server.", "sorting it by person…", "Said here before", "nothing in that was about anyone yet. it's kept, just for you.", "we're not going to show memories right now.", "Library", "Allow photo access", and the app-rail sheet ("When you're ready, Un-Said opens {app} with your words ready. You tap send. It never reads your chats.").
 
-- "Your lane", "Your photos" / "Find the people you miss."
-- "Can't reach Un-Said's server."
-- "sorting it by person…"
-- "Said here before", "nothing in that was about anyone yet. it's kept, just for you."
-- "we're not going to show memories right now."
-- "Library", "Allow photo access"
-- App-rail sheet: "When you're ready, Un-Said opens {app} with your words ready. You tap send. It never reads your chats."
-
-New, where neither file had a line. Short stand-ins:
+Stand-ins, because neither copy file had a line:
 
 | Where | Line |
 |---|---|
@@ -126,18 +125,20 @@ New, where neither file had a line. Short stand-ins:
 | Notes, empty | Notes to yourself show up here. |
 | A saved note | Watch |
 | Pile, empty | Nothing in your words for them yet. |
-| Settings | Knocks · Gentle · A quiet knock, rarely. · Off · No knocks. · Demo · Knocks a little sooner, for showing the app. |
-| Settings | Quiet hours · 10:30 PM – 8:00 AM · 11:00 PM – 7:00 AM · 9:00 PM – 9:00 AM |
-| Settings | Heads-up · When a letter is ready · Un-Said asks once, after you hold one. |
-| Toast after settings | Saved. |
-| Time-zone sheet | Their time zone · Central · Eastern · Pacific · India · UK |
+| Settings | Knocks. Gentle: "A quiet knock, rarely." Off: "No knocks." Demo: "Knocks a little sooner, for showing the app." |
+| Settings | Quiet hours. "10:30 PM – 8:00 AM", "11:00 PM – 7:00 AM", "9:00 PM – 9:00 AM" |
+| Settings | Heads-up. "When a letter is ready". "Un-Said asks once, after you hold one." |
+| Toast | Saved. |
+| Time zone | Their time zone. Central, Eastern, Pacific, India, UK |
 | Time-zone error | That didn't save |
 
-Permission strings now say "Un-Said". Mic: "Un-Said listens only while you talk."
+Permission strings now say "Un-Said". Microphone: "Un-Said listens only while you talk."
 
-Not built, on purpose, because the control would do nothing. See `BACKEND_REQUESTS.md`.
+Not on screen, so they are not dead controls. See `mobile/BACKEND_REQUESTS.md`.
 
 - Keep this moment
 - Edit as a draft
-- Connect on Instagram or Facebook does not import photos. The checkmark is only on this phone.
-- Record a new note to yourself. The list can play ones the server already has.
+- Real Instagram or Facebook photo import, and face clustering
+- Recording a new note (`POST /api/self-notes` exists; the app does not capture video)
+- A "Delivered" beat on the waiting strip
+- `release_label` always says "her time", including for Dad
