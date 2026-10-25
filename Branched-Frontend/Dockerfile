@@ -18,7 +18,7 @@ ARG NODE_IMAGE=node:22-bookworm-slim
 FROM ${NODE_IMAGE} AS unsaid
 WORKDIR /src/mobile
 ENV CI=1 EXPO_NO_TELEMETRY=1 NODE_OPTIONS=--max-old-space-size=1536
-COPY mobile/package.json mobile/package-lock.json ./
+COPY mobile/package.json mobile/package-lock.json mobile/.npmrc ./
 RUN npm ci --no-audit --no-fund
 COPY mobile/ ./
 RUN test ! -e app.config.js || { echo "mobile/app.config.js exists; this build expects app.json only" >&2; exit 1; } \
