@@ -1,0 +1,56 @@
+# Un-Said on one instance: the backend behind Caddy (automatic HTTPS, WebSockets).
+# Run through bootstrap.sh / update.sh, which pass --env-file /srv/unsaid/.env
+# (it supplies ${DOMAIN} here and the backend's keys via env_file).
+
+name: unsaid
+
+services:
+  backend:
+    image: unsaid-backend:local
+    build:
+      context: ../../backend
+    env_file:
+      - ${UNSAID_ENV_FILE:-/srv/unsaid/.env}
+    environment:
+      DATA_DIR: /data # SQLite + photos + voice notes live on the host, below
+    volumes:
+      - ${UNSAID_DATA_DIR:-/srv/unsaid/data}:/data
+    expose:
+      - "8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=4)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  caddy:
+    image: caddy:2
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in /srv/unsaid/.env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data # certificates: keep this volume, or Let's Encrypt limits can bite
+      - caddy_config:/config
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  caddy_data:
+  caddy_config:

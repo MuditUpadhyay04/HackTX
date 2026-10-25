@@ -1,0 +1,11 @@
+# Caddy gets and renews the certificate for {$DOMAIN} by itself (Let's Encrypt, then ZeroSSL),
+# as long as the name points at this server and ports 80 and 443 are open.
+# reverse_proxy upgrades WebSockets (the live rant at /api/rants/live) with no extra config
+# and sets X-Forwarded-Proto, so the links the backend sends Mom start with https.
+
+{$DOMAIN} {
+	reverse_proxy backend:8000 {
+		# Keep a live rant connected for a while if Caddy's config is ever reloaded.
+		stream_close_delay 5m
+	}
+}
