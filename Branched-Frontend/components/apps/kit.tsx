@@ -14,10 +14,11 @@
  */
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { STATUS } from "@/components/lookalike/metrics";
+import { SCREEN, STATUS } from "@/components/lookalike/metrics";
 import { PaneContext, usePane, type Pane } from "@/components/lookalike/shared/pane";
 import { CoverStatusBar } from "@/components/scene/CoverStatusBar";
-import { GEOM } from "@/components/device/geometry";
+import { BannerHost } from "@/components/system/BannerHost";
+import { useDisplaySize } from "@/lib/device/viewport";
 import { useAppStore } from "@/lib/apps/store";
 import { usePrefersReducedMotion } from "@/lib/motion";
 import type { AppTarget } from "@/lib/apps/registry";
@@ -27,6 +28,12 @@ export type Tone = "dark" | "light";
 /** Android screen transition: 300 ms on the Material emphasized-decelerate curve. */
 const PUSH = { type: "tween", duration: 0.3, ease: [0.05, 0.7, 0.1, 1] } as const;
 /** How far (share of the pane) the incoming screen travels, and the outgoing one drifts. */
+// The scene director (lib/director): N/B/R/1-3 keys, touch gestures and the Un-Said bridge on the
+// phone routes. Loaded lazily on the client so it never sits in an import cycle with the apps.
+if (typeof window !== "undefined") {
+  void import("@/lib/director/director").then((m) => m.installDirector());
+}
+
 const SLIDE_IN = 0.18;
 const SLIDE_OUT = 0.06;
 
@@ -44,7 +51,7 @@ export function AppFrame({
   background: string;
   children: ReactNode;
 }) {
-  const vp = display === "cover" ? GEOM.viewport.cover : GEOM.viewport.inner;
+  const vp = useDisplaySize(display);
   const pane = useMemo<Pane>(() => ({ width: vp.width, height: vp.height, display }), [vp.width, vp.height, display]);
   // tell AppHost, so the home indicator over the app matches the status bar
   const setTone = useAppStore((s) => s.setTone);
@@ -66,6 +73,10 @@ export function AppFrame({
       >
         {children}
         <CoverStatusBar tone={tone} />
+        {/* heads-up notifications over the open app (lib/notify; the scene director drives them) */}
+        <div style={{ position: "absolute", top: 0, left: Math.max(0, (vp.width - SCREEN.width) / 2), width: SCREEN.width, height: 0, zIndex: 60 }}>
+          <BannerHost />
+        </div>
       </div>
     </PaneContext.Provider>
   );

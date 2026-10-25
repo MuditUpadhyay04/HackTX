@@ -57,6 +57,8 @@ type State = {
   /** inbox long-press: read → back to its seeded unread count (at least 1); unread → read */
   toggleUnread: (id: ThreadId) => void;
   setTyping: (id: ThreadId, on: boolean) => void;
+  /** sets one message's receipt (the scene director's scripted ticks) */
+  setReceipt: (id: ThreadId, msgId: string, receipt: Receipt) => void;
   seed: (id: ThreadId, state: SeedState, params?: { typed?: number }) => void;
   setReplies: (on: boolean) => void;
   reset: () => void;
@@ -81,8 +83,14 @@ function seedAll(): Record<ThreadId, Thread> {
 
 // timers per thread, cleared on seed/reset
 const timers = new Map<ThreadId, ReturnType<typeof setTimeout>[]>();
+/** The scene director turns the automatic receipts and typing off and runs them itself. */
+let autoReceipts = true;
+export function setAutoReceipts(on: boolean) {
+  autoReceipts = on;
+}
+
 function later(id: ThreadId, ms: number, fn: () => void) {
-  if (isDriven() || typeof window === "undefined") return;
+  if (!autoReceipts || isDriven() || typeof window === "undefined") return;
   const list = timers.get(id) ?? [];
   list.push(setTimeout(fn, ms));
   timers.set(id, list);
@@ -185,6 +193,7 @@ export const useMessaging = create<State>()((set, get) => {
     setUnread: (id, n) => patch(id, () => ({ unread: n })),
     toggleUnread: (id) => patch(id, (t) => ({ unread: t.unread > 0 ? 0 : Math.max(1, THREAD_META[id].unread) })),
     setTyping: (id, on) => patch(id, () => ({ theirTyping: on })),
+    setReceipt: (id, msgId, receipt) => setReceipt(id, msgId, receipt),
     seed: (id, state, params) => {
       clearTimers(id);
       const base = seedThread(id);

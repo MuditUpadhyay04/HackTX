@@ -16,6 +16,7 @@ import { STATUS } from "@/components/lookalike/metrics";
 import { usePane } from "@/components/lookalike/shared/pane";
 import type { AppScreenProps } from "@/lib/apps/registry";
 import { useAppStore } from "@/lib/apps/store";
+import { installUnsaidBridge } from "@/lib/director/bridge";
 import { AppFrame, useStack } from "../kit";
 
 /** Where the Un-Said web build is served (same-origin by default). */
@@ -38,6 +39,9 @@ const DRESSING = `
 `;
 
 export function UnsaidApp({ display }: AppScreenProps) {
+  // Un-Said's hand-offs to the phone ("Call on WhatsApp", "Reply to Michael on Instagram"):
+  // window.parent.postMessage({ type: "unsaid:call" | "unsaid:open", ... }) -> lib/director/bridge
+  useEffect(() => installUnsaidBridge(), []);
   return (
     <AppFrame display={display} background="#FFFFFF">
       <UnsaidWindow />

@@ -61,7 +61,7 @@ import { useMessaging, type ThreadId } from "@/lib/store/messaging";
 import { AppFrame, Avatar, Scroll, Split, StackView, TOP, Tap, ellipsis, resetButton, useStack, type Stack } from "../kit";
 
 type Tab = "chats" | "updates" | "communities" | "calls" | "settings";
-type Route = { kind: "home"; tab: Tab } | { kind: "chat"; id: ThreadId } | { kind: "call"; with: PersonId; video: boolean };
+type Route = { kind: "home"; tab: Tab } | { kind: "chat"; id: ThreadId } | { kind: "call"; with: PersonId; video: boolean; answer?: boolean };
 
 /** Chat list order (Phase 2 ROUTES: Mom first, then the unread background chats, then Fam, Roommates, Marfa Trip). */
 const CHATS: ThreadId[] = ["mom", "studygroup", "priya", "nani", "soccer", "masi", "fam", "roommates", "marfa"];
@@ -107,7 +107,7 @@ export function WhatsAppApp({ display }: AppScreenProps) {
             )
           }
         />
-        {call ? <CallScreen with={call.with} video={call.video} onEnd={stack.pop} /> : null}
+        {call ? <CallScreen with={call.with} video={call.video} answer={call.answer} onEnd={stack.pop} /> : null}
       </AppFrame>
     );
   }
@@ -141,7 +141,7 @@ function routeView(r: Route, stack: Stack<Route>, home: ReactNode, startCall: (p
         onCall={(k) => startCall(selectedContact(r.id), k === "video")}
       />
     );
-  return <CallScreen with={r.with} video={r.video} onEnd={stack.pop} />;
+  return <CallScreen with={r.with} video={r.video} answer={r.answer} onEnd={stack.pop} />;
 }
 
 // ---------------------------------------------------------------------------
@@ -725,14 +725,27 @@ function CallsTab({ onCall, onMenu }: { onCall: (p: PersonId, video: boolean) =>
 
 /** The WhatsApp for Android call screen (outgoing): dark teal gradient, avatar, name, "Calling…"
  * then "Ringing…", and the round controls on a rounded panel with the red end-call button. */
-function CallScreen({ with: withId, video, onEnd }: { with: PersonId; video: boolean; onEnd: () => void }) {
+function CallScreen({ with: withId, video, answer, onEnd }: { with: PersonId; video: boolean; answer?: boolean; onEnd: () => void }) {
   const p = person(withId);
   const { width } = usePane();
   const [ringing, setRinging] = useState(false);
+  // `answer` (the scene director's call): they pick up after a few rings and the timer runs
+  const [connectedAt, setConnectedAt] = useState<number | null>(null);
+  const [tick, setTick] = useState(0);
   useEffect(() => {
     const t = setTimeout(() => setRinging(true), 1600);
-    return () => clearTimeout(t);
-  }, []);
+    const a = answer ? setTimeout(() => setConnectedAt(Date.now()), 4200) : null;
+    return () => {
+      clearTimeout(t);
+      if (a) clearTimeout(a);
+    };
+  }, [answer]);
+  useEffect(() => {
+    if (connectedAt === null) return;
+    const id = setInterval(() => setTick(Math.floor((Date.now() - connectedAt) / 1000)), 250);
+    return () => clearInterval(id);
+  }, [connectedAt]);
+  const timer = `${String(Math.floor(tick / 60)).padStart(2, "0")}:${String(tick % 60).padStart(2, "0")}`;
   const b = WAA.call;
   const control = (id: string, label: string, glyph: ReactNode) => (
     <PButton id={id} label={label} style={{ width: b.button, height: b.button, borderRadius: "50%", background: "var(--wa-android-call-button)", color: "var(--wa-android-call-text)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -763,7 +776,7 @@ function CallScreen({ with: withId, video, onEnd }: { with: PersonId; video: boo
       </div>
       <div style={{ position: "absolute", top: TOP + 72, left: 0, width, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
         <div style={{ fontSize: 28, fontWeight: 500 }}>{p.name}</div>
-        <div style={{ fontSize: 16, color: "var(--wa-android-call-sub)" }}>{ringing ? "Ringing…" : video ? "Video calling…" : "Calling…"}</div>
+        <div style={{ fontSize: 16, color: "var(--wa-android-call-sub)" }}>{connectedAt !== null ? timer : ringing ? "Ringing…" : video ? "Video calling…" : "Calling…"}</div>
         <div style={{ marginTop: 36 }}>
           <Avatar src={p.avatar} size={b.avatar} />
         </div>

@@ -113,6 +113,12 @@ export function setDriven(t: MockTime | string | null) {
   emit();
 }
 
+/** The scene director: restarts the live clock at `t` (it keeps ticking, receipts still run). */
+export function setLiveFrom(t: MockTime | string) {
+  state = { mode: "live", base: toMinutes(t), startedAt: Date.now() };
+  emit();
+}
+
 export function isDriven(): boolean {
   return state.mode === "driven";
 }

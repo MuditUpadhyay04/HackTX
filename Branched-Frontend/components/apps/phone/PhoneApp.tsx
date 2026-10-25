@@ -25,7 +25,9 @@ import { mockNowISO } from "@/lib/mock/clock";
 import { time12 } from "@/lib/mock/format";
 import { people, type PersonId } from "@/lib/mock/people";
 import { AppFrame, Avatar, Scroll, Split, TOP, Tap, ellipsis, resetButton, useStack } from "../kit";
-import { CallScreen, type CallRoute } from "./CallScreen";
+import { useAppStore } from "@/lib/apps/store";
+import { CallScreen, RING_MS, type CallRoute } from "./CallScreen";
+import { IncomingCall, type IncomingRoute } from "./IncomingCall";
 import {
   CONTACTS,
   KEYPAD,
@@ -61,7 +63,7 @@ type Tab = "keypad" | "recents" | "contacts";
 /** A person or number; `id` is the Recents row it was picked from (for the selection highlight). */
 type Who = { who: PersonId | null; number: string; id?: string };
 type HomeRoute = { kind: "home"; tab: Tab; dial: string; sel: Who | null; added: Recent[] };
-type Route = HomeRoute | CallRoute;
+type Route = HomeRoute | CallRoute | IncomingRoute;
 
 const ROOT: HomeRoute = { kind: "home", tab: "recents", dial: "", sel: null, added: [] };
 
@@ -76,6 +78,7 @@ export function PhoneApp({ display }: AppScreenProps) {
   const stack = useStack<Route>("phone", ROOT);
   const home = (stack.routes[0]?.kind === "home" ? stack.routes[0] : ROOT) as HomeRoute;
   const call = stack.routes.find((r): r is CallRoute => r.kind === "call");
+  const incoming = stack.routes.find((r): r is IncomingRoute => r.kind === "incoming");
   const log = [...home.added, ...RECENTS];
 
   const update = (patch: Partial<HomeRoute>) => stack.reset([{ ...home, ...patch }, ...(call ? [call] : [])]);
@@ -152,6 +155,7 @@ export function PhoneApp({ display }: AppScreenProps) {
       <AnimatePresence>
         {call ? <CallScreen key={`${call.number}-${call.startedAt}`} call={call} onEnd={endCall} /> : null}
       </AnimatePresence>
+      {incoming && !call ? <IncomingCall call={incoming} onAccept={acceptIncoming} onDecline={() => stack.reset([home])} /> : null}
     </AppFrame>
   );
 }
@@ -708,4 +712,18 @@ function TabBar({ tab, missed, onTab }: { tab: Tab; missed: number; onTab: (t: T
       })}
     </div>
   );
+}
+
+/**
+ * Answers the ringing incoming call (the green button, or the scene director). `elapsed` seconds
+ * start the timer part-way (the film's 35:40: they have been talking a while).
+ */
+export function acceptIncoming() {
+  const st = useAppStore.getState();
+  const routes = (st.routes.phone as Route[] | undefined) ?? [ROOT];
+  const ring = routes.find((r): r is IncomingRoute => r.kind === "incoming");
+  if (!ring) return;
+  const home = (routes[0]?.kind === "home" ? routes[0] : ROOT) as HomeRoute;
+  const startedAt = clock() - RING_MS - (ring.elapsed ?? 0) * 1000;
+  st.setRoutes("phone", [home, { kind: "call", who: ring.who, number: ring.number, startedAt }]);
 }

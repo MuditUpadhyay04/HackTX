@@ -366,7 +366,7 @@ function Thread({ id, onBack, onReel }: { id: ThreadId; onBack?: () => void; onR
         composerBackground="var(--ig-bg)"
         keyboardOpen={t.keyboard}
         keyboard={<Keyboard threadId={id} platform="instagram" />}
-        stickKey={msgs.length}
+        stickKey={`${msgs.length}-${t.theirTyping}`}
         onDismissKeyboard={() => blur(id)}
       >
         <ProfileHeader name={c.name} handle={c.handle} avatar={c.avatar} />
@@ -374,6 +374,7 @@ function Thread({ id, onBack, onReel }: { id: ThreadId; onBack?: () => void; onR
           {rows.map((r, i) => (
             <Fragment key={i}>{r}</Fragment>
           ))}
+          {t.theirTyping ? <IgTyping avatar={c.avatar} /> : null}
         </div>
       </ThreadFrame>
     </>
@@ -593,5 +594,29 @@ function Reels({ start, onBack }: { start: ReelId; onBack: () => void }) {
         </Placeholder>
       </div>
     </div>
+  );
+}
+
+/** Their typing indicator: a gray bubble with three pulsing dots under their avatar. */
+function IgTyping({ avatar }: { avatar: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
+      style={{ display: "flex", alignItems: "flex-end", gap: 8, paddingInline: IG.sideInset, marginTop: IG.groupGap }}
+    >
+      <Avatar src={avatar} size={28} />
+      <div style={{ height: 38, paddingInline: 14, borderRadius: 22, background: "var(--ig-bubble-in, #efefef)", display: "flex", alignItems: "center", gap: 4 }}>
+        {[0, 1, 2].map((i) => (
+          <motion.span
+            key={i}
+            animate={{ opacity: [0.35, 1, 0.35] }}
+            transition={{ duration: 1, repeat: Infinity, delay: i * 0.18, ease: "easeInOut" }}
+            style={{ width: 7, height: 7, borderRadius: 4, background: "var(--ig-muted, #8e8e8e)" }}
+          />
+        ))}
+      </div>
+    </motion.div>
   );
 }

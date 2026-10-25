@@ -32,7 +32,7 @@ import {
 export type CallRoute = { kind: "call"; who: PersonId | null; number: string; startedAt: number };
 
 /** How long "Calling…" shows before the call connects (ms). */
-const RING_MS = 2600;
+export const RING_MS = 2600;
 const ENDED_MS = 1100;
 
 const mmss = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
