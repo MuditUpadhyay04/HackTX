@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
   column: { paddingHorizontal: inset.text, marginTop: space.s24 },
   memory: { marginBottom: space.s24, gap: space.s12, backgroundColor: color.surface, borderRadius: radius.row, padding: space.s16 },
   compose: { marginTop: space.s16, minHeight: 168 },
-  tools: { alignSelf: "stretch", flexDirection: "row", alignItems: "center", paddingHorizontal: inset.text, paddingBottom: space.s12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: color.hairline },
+  tools: { alignSelf: "stretch", flexDirection: "row", alignItems: "center", paddingHorizontal: inset.text, paddingBottom: space.s4 },
   micColumn: { alignItems: "center", gap: space.s8 },
   personCard: { backgroundColor: color.surface, borderRadius: radius.row, padding: space.s16 },
   wideRow: { flex: 1, flexDirection: "row" },

@@ -6,7 +6,7 @@ import { router } from "expo-router";
 import { type ReactNode, useState } from "react";
 import { Animated, Modal, Pressable, type StyleProp, StyleSheet, Text, type TextStyle, View, type ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, { Defs, LinearGradient as SvgLinear, Path, RadialGradient, Rect, Stop } from "react-native-svg";
+import Svg, { Defs, LinearGradient as SvgLinear, RadialGradient, Rect, Stop } from "react-native-svg";
 
 import { haptics } from "../lib/haptics";
 import { color, inset, pillGradient, radius, shadow, space, spring, type } from "../theme/tokens";
@@ -216,19 +216,8 @@ export function LetterCard({ lines, signature, footer, minHeight, compact = fals
         <T v="overline" style={{ color: color.letterLabel, marginTop: space.s12 }}>For you</T>
         {first ? (
           <View style={{ marginTop: space.s16, alignSelf: "stretch" }}>
+            {/* No underline stroke under the first paragraph (Nick, Oct 25: no lines under paragraphs). */}
             <Text style={[type.letterHero, { color: color.letterInk, fontSize: heroSize, lineHeight: heroSize * 1.125 }]}>{first}</Text>
-            {/* Under the last line, from its start, as in the reference ("you too."). */}
-            <View style={{ alignSelf: "flex-start", marginTop: -2, marginLeft: space.s4 }}>
-              <Svg width={arcWidth(first)} height={14}>
-                <Path
-                  d={`M2 10 Q ${arcWidth(first) / 2} 1 ${arcWidth(first) - 2} 8`}
-                  stroke={color.letterAccent}
-                  strokeWidth={4}
-                  strokeLinecap="round"
-                  fill="none"
-                />
-              </Svg>
-            </View>
           </View>
         ) : null}
         {rest.map((line, i) => (
@@ -242,9 +231,6 @@ export function LetterCard({ lines, signature, footer, minHeight, compact = fals
   );
 }
 
-function arcWidth(line: string) {
-  return Math.max(88, Math.min(200, Math.round(line.length * 7)));
-}
 
 export function Sheet({ visible, onClose, children }: { visible: boolean; onClose: () => void; children: ReactNode }) {
   const insets = useSafeAreaInsets();

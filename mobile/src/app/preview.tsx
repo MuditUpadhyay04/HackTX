@@ -135,7 +135,7 @@ export default function Preview() {
               <T v="rowPreview">{`Arrives ${morningLabel(person.morning)} ${pos} time`}</T>
             </View>
           </View>
-          <View style={styles.rule} />
+          <View style={styles.gap} />
           <Choice featureId="unsend-hold-until-morning" label={`Hold until ${pos} morning`} on={holding} onPress={() => setHold(true)} />
           <Choice label="Send now" on={!holding} onPress={() => setHold(false)} />
         </View>
@@ -212,12 +212,12 @@ function Choice({ label, on, onPress, featureId }: { label: string; on: boolean;
 const styles = StyleSheet.create({
   delivery: { marginHorizontal: inset.card, marginTop: space.s24, backgroundColor: color.surface, borderRadius: radius.row, padding: space.s16, gap: space.s4 },
   well: { width: 36, height: 36, borderRadius: 18, backgroundColor: color.surfaceRaised, alignItems: "center", justifyContent: "center" },
-  rule: { height: StyleSheet.hairlineWidth, backgroundColor: color.hairline, marginVertical: space.s8 },
+  gap: { height: space.s12 },
   choice: { flexDirection: "row", alignItems: "center", gap: space.s12, paddingVertical: space.s8, minHeight: 44 },
   held: { marginHorizontal: inset.card, marginTop: space.s24, alignItems: "center", gap: space.s8, backgroundColor: color.surface, borderRadius: radius.row, padding: space.s24 },
   split: { flex: 1, flexDirection: "row", gap: space.s8 },
   main: { flex: 3 },
   side: { flex: 2 },
   sideDock: { gap: space.s4, marginTop: space.s24 },
-  dock: { position: "absolute", left: 0, right: 0, bottom: 0, paddingTop: space.s16, backgroundColor: color.bg, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.hairline },
+  dock: { position: "absolute", left: 0, right: 0, bottom: 0, paddingTop: space.s16, backgroundColor: color.bg },
 });

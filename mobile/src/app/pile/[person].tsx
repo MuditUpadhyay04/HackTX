@@ -106,7 +106,6 @@ export default function Pile() {
             </View>
             <TextButton featureId="delivery-channel-pick" tone="text" label="Change" onPress={() => setPicking(true)} />
           </View>
-          <View style={styles.headerRule} />
           <Pressable testID="recipient-timezone-set" onPress={() => setZones(true)} hitSlop={8} style={{ alignSelf: "flex-start" }}>
             <Chip icon={person.is_asleep ? "moon" : "time-outline"} label={`${person.local_time} for ${person.name}`} />
           </Pressable>
@@ -141,7 +140,7 @@ export default function Pile() {
             accessibilityRole="checkbox"
             accessibilityState={{ checked: active }}
             onPress={() => { haptics.select(); toggle(p.id); }}
-            style={[styles.line, i > 0 && styles.lineRule]}
+            style={styles.line}
           >
             <View style={{ flex: 1 }}>
               <T v="words" style={{ color: active ? color.text : color.text4 }}>{p.text}</T>
@@ -218,12 +217,11 @@ export default function Pile() {
 
 const styles = StyleSheet.create({
   header: { marginHorizontal: inset.card, marginTop: space.s8, backgroundColor: color.surface, borderRadius: radius.row, padding: space.s16, gap: space.s12 },
-  headerRule: { height: StyleSheet.hairlineWidth, backgroundColor: color.hairline },
   empty: { marginHorizontal: inset.card, backgroundColor: color.surface, borderRadius: radius.row, padding: space.s16, gap: space.s4, alignItems: "flex-start" },
-  line: { flexDirection: "row", alignItems: "center", gap: space.s16, marginHorizontal: inset.text, paddingVertical: space.s16 },
-  lineRule: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.hairline },
+  // No rule between lines; a little more air does the separating.
+  line: { flexDirection: "row", alignItems: "center", gap: space.s16, marginHorizontal: inset.text, paddingVertical: space.s16, marginBottom: space.s4 },
   toggle: { width: 28, height: 28, borderRadius: 14, alignItems: "center", justifyContent: "center" },
-  dock: { gap: space.s12, paddingTop: space.s16, backgroundColor: color.bg, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.hairline },
+  dock: { gap: space.s12, paddingTop: space.s16, backgroundColor: color.bg },
   split: { flex: 1, flexDirection: "row", gap: space.s8 },
   side: { flex: 2 },
   sideDock: { gap: space.s12, marginTop: space.s24 },

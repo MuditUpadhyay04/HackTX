@@ -19,8 +19,8 @@ export default function You() {
   const notes = home?.self_notes.length ?? 0;
   const [peopleOpen, setPeopleOpen] = useState(true);
 
-  const link = (icon: keyof typeof Ionicons.glyphMap, label: string, onPress: () => void, featureId?: string, meta?: string, first?: boolean) => (
-    <Row featureId={featureId} onPress={onPress} style={[styles.groupRow, !first && styles.rule]}>
+  const link = (icon: keyof typeof Ionicons.glyphMap, label: string, onPress: () => void, featureId?: string, meta?: string) => (
+    <Row featureId={featureId} onPress={onPress} style={styles.groupRow}>
       <View style={styles.well}>
         <Ionicons name={icon} size={22} color={color.text} />
       </View>
@@ -62,9 +62,9 @@ export default function You() {
         {home ? (
           <>
             <View style={styles.group}>
-              {link("albums-outline", "Notes to yourself", () => router.push("/notes"), undefined, notes ? `${notes}` : undefined, true)}
+              {link("albums-outline", "Notes to yourself", () => router.push("/notes"), undefined, notes ? `${notes}` : undefined)}
               {/* Spec 3.12: "Your people" is row 2 of this group; its people open under it. */}
-              <Row featureId="you-people" onPress={() => setPeopleOpen((o) => !o)} style={[styles.groupRow, styles.rule]}>
+              <Row featureId="you-people" onPress={() => setPeopleOpen((o) => !o)} style={styles.groupRow}>
                 <View style={styles.well}>
                   <Ionicons name="people-outline" size={22} color={color.text} />
                 </View>
@@ -76,7 +76,7 @@ export default function You() {
               </Row>
               {peopleOpen
                 ? home.people.map((p) => (
-                    <Row key={p.id} style={[styles.groupRow, styles.rule, styles.personRow]} onPress={() => router.push({ pathname: "/pile/[person]", params: { person: p.id } })}>
+                    <Row key={p.id} style={[styles.groupRow, styles.personRow]} onPress={() => router.push({ pathname: "/pile/[person]", params: { person: p.id } })}>
                       <Avatar name={p.name} />
                       <View style={{ flex: 1 }}>
                         <T v="rowName">{p.name}</T>
@@ -102,10 +102,9 @@ export default function You() {
 }
 
 const styles = StyleSheet.create({
-  // One grouped un-surface block with hairline dividers (DESIGN_SPEC 3.12).
-  group: { marginHorizontal: inset.card, marginTop: space.s16, backgroundColor: color.surface, borderRadius: radius.row, overflow: "hidden" },
+  // One grouped surface block (DESIGN_SPEC 3.12), no dividers between rows (Nick, Oct 25); a little padding spaces them.
+  group: { marginHorizontal: inset.card, marginTop: space.s16, backgroundColor: color.surface, borderRadius: radius.row, overflow: "hidden", paddingVertical: space.s4 },
   groupRow: { borderRadius: 0, backgroundColor: "transparent", borderWidth: 0, minHeight: 64 },
   personRow: { paddingLeft: space.s32 },
-  rule: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.hairline },
   well: { width: 44, height: 44, borderRadius: 22, backgroundColor: color.surfaceRaised, alignItems: "center", justifyContent: "center" },
 });

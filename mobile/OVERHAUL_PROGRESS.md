@@ -228,3 +228,15 @@ QA (HackTx2) on 1843560. Items 7 and 8 are copy and wait for Gurneal; 14 needed 
 - Letters (QA 10): the avatar strip only shows with 2+ senders.
 - Settings debug lines (QA 14): already inside `__DEV__`, so hidden in release builds. Left as is.
 - Copy for Gurneal: none new. The awake case hides the hold box instead of inventing an "Arrives now" line; the send pill reuses "Send now".
+
+## Pass 7: no lines under paragraphs (Oct 25, 2026)
+
+Nick: "get rid of the line under the paragraphs throughout the whole app." Every horizontal rule under or between text is gone; spacing does the separating.
+
+- Letter card (`components/ui.tsx LetterCard`, Preview and the letter view): the violet swoosh under the first paragraph is removed (`arcWidth` and the `Path` import went with it).
+- Pile (`app/pile/[person].tsx`): the hairline under the header card (`headerRule`), the rules between lines (`lineRule`, lines get `marginBottom 4`), and the dock's top border.
+- Preview (`app/preview.tsx`): the rule inside the delivery box (now a 12pt gap) and the dock's top border.
+- You (`app/(tabs)/you.tsx`): the dividers between grouped rows (group gets `paddingVertical 4`).
+- Talk (`app/talk.tsx`): the hairline under the tools row.
+- Kept on purpose: the tab bar's top border, outer borders of rows/cards/inputs/sheets, the photo viewer's round buttons and reply field, the video tile border, Talk's vertical panel border on wide screens, and Home's hold progress track (a progress bar, not a rule).
+- Copy for Gurneal: none.
