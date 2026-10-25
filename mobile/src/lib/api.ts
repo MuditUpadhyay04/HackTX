@@ -1,4 +1,5 @@
 // Client for the Un-Said backend in ../backend (FastAPI). Shapes mirror backend/README.md.
+import { Platform } from "react-native";
 
 export const API_URL = (process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8000").replace(/\/$/, "");
 export const APP_KEY = process.env.EXPO_PUBLIC_APP_KEY ?? "";
@@ -101,6 +102,8 @@ export type Card = {
   release_label: string | null;
   delivered_via: string | null;
   audio_url: string | null;
+  /** A video he attached (POST /api/cards/{id}/video); her card page plays it. */
+  video_url?: string | null;
   share?: Share;
   /** /api/home, held letters that will need his tap: when the app may remind him, and what it says. */
   remind_at?: string;
@@ -212,6 +215,18 @@ export const api = {
   createCard: (recipientId: string, pieceIds: string[], when: "her_morning" | "now", photoId?: string | null) =>
     call<Card>("/api/cards", post({ recipient_id: recipientId, piece_ids: pieceIds, when, photo_id: photoId ?? null })),
   markShared: (cardId: string) => call<Card>(`/api/cards/${cardId}/shared`, post()),
+  uploadCardVideo: async (cardId: string, uri: string, mime: string) => {
+    const ext = mime === "video/quicktime" ? "mov" : mime === "video/webm" ? "webm" : "mp4";
+    const form = new FormData();
+    if (Platform.OS === "web") {
+      // On web the picker hands back a blob: URL; FormData needs the actual bytes.
+      const blob = await (await fetch(uri)).blob();
+      form.append("file", new Blob([blob], { type: mime }), `video.${ext}`);
+    } else {
+      form.append("file", file(uri, `video.${ext}`, mime));
+    }
+    return call<Card>(`/api/cards/${cardId}/video`, { method: "POST", body: form });
+  },
   revoke: (cardId: string) => call<Card>(`/api/cards/${cardId}/revoke`, post()),
 
   heard: (replyId: string) => call<Reply>(`/api/replies/${replyId}/heard`, post()),

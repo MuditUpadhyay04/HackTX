@@ -55,7 +55,16 @@
         }
       ],
       "expo-font",
-      "expo-asset"
+      "expo-asset",
+      "expo-video",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Un-Said lets you pick a video from your library to send with a letter.",
+          "cameraPermission": "Un-Said uses the camera so you can record a video to send with a letter.",
+          "microphonePermission": "Un-Said records sound with your video so they can hear you."
+        }
+      ]
     ],
     "scheme": "unsaid",
     "backgroundColor": "#FFFFFF"

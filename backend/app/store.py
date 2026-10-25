@@ -143,6 +143,7 @@ def card_out(row, now: datetime, with_share: bool = True) -> dict:
         "translation": card["translation"],
         "photo_id": card["photo_id"],
         "audio_url": media_url(card["audio_path"]),
+        "video_url": media_url(card.get("video_path")),
         "status": card["status"],
         "release_at": card["release_at"],
         "release_label": (

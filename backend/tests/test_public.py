@@ -56,3 +56,21 @@ def test_a_typed_reply_in_mock_mode_gets_no_canned_caption(client):
 def test_safety_resources_are_served(client):
     resources = client.get("/api/safety/resources").json()
     assert any("988" in r["detail"] for r in resources)
+
+
+def test_a_video_rides_with_the_letter_to_her_page(client):
+    sent = _card(client, "jordan", "Sarah, here's the lake from today.", "now")
+    token = sent["share"]["url"].rsplit("/", 1)[1]
+    assert sent["video_url"] is None
+
+    bad = client.post(f"/api/cards/{sent['id']}/video", files={"file": ("v.txt", b"nope", "text/plain")})
+    assert bad.status_code == 415
+    assert client.post("/api/cards/card_nope/video", files={"file": ("v.mp4", b"x", "video/mp4")}).status_code == 404
+
+    up = client.post(f"/api/cards/{sent['id']}/video", files={"file": ("v.mp4", b"\x00\x00\x00\x18ftypmp42", "video/mp4")})
+    assert up.status_code == 200
+    url = up.json()["video_url"]
+    assert url and url.startswith("/media/videos/") and url.endswith(".mp4")
+    assert client.get(f"/api/cards/{sent['id']}").json()["video_url"] == url
+    assert client.get(f"/api/public/cards/{token}").json()["video_url"] == url
+    assert client.get(url).content == b"\x00\x00\x00\x18ftypmp42"

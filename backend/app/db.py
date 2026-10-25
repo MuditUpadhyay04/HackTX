@@ -155,6 +155,7 @@ CREATE TABLE IF NOT EXISTS pushes (          -- queued so they can wait for his 
 # Columns added after the first deploy. Existing databases get them on start.
 MIGRATIONS = {
     "rants": {"asset_id": "TEXT", "encourage_person": "TEXT"},
+    "cards": {"video_path": "TEXT"},  # a video he attached to the letter
 }
 
 INDEXES = """

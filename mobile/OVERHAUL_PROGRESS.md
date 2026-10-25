@@ -1,11 +1,12 @@
 # Un-Said mobile overhaul — handoff
 
-Branch: `unsaid-overhaul`, off `main` at `c32f7ee`. Mobile only. Nothing under `backend/` (or `backend/web/`) was changed.
+Branch: `unsaid-overhaul`, off `main` at `c32f7ee`. Mobile only until Pass 5, which adds the card-video endpoint in `backend/` and one line in `backend/web/card.js`.
 
 - Pass 1 (Grok, stopped at Gurneal's request 11:19 PM CDT Oct 24): restyle of every screen. See "Done, by screen".
 - Pass 3 (Grok, Oct 24): every screen re-lays out live for any window size and orientation (the iPhone Duo foldable's outer and inner displays, landscape, half-open, Split View). See "Pass 3".
 - Pass 2 (Grok, Oct 24): phone-portrait finish of the demo path (Talk, Gallery, Photo + knock, Pile, Preview), second pass on Home / Letters / You, Android adaptive icon, web-build fix, verification and screenshots. See "Pass 2".
 
+- Pass 5 (Grok, Oct 25): **video sending.** See "Pass 5: video with a letter".
 - Pass 4 (Grok, Oct 24, ~11:55 PM CDT): **no dark mode.** Nick asked for white with light accents. See "Pass 4: light theme".
 
 The app is for a **local demo**, not a hosted deployment. See "Local demo" below.
@@ -35,6 +36,7 @@ Read from `backend/app` on `main`. Client shapes are in `mobile/src/lib/api.ts`.
 | `GET /api/pieces/{id}/audio` | His own line, via `authedUrl` |
 | `POST /api/photos` | Gallery photo attached when a letter is created |
 | `POST /api/cards` | Preview. `when` is `her_morning` or `now` |
+| `POST /api/cards/{id}/video` | Preview "Add a video" (multipart `file`, mp4/mov/webm, 80 MB cap). Sent after the card is made, before the handoff. Card JSON gains `video_url` |
 | `POST /api/cards/{id}/shared` | Handoff. Un-Said does not show a chat |
 | `POST /api/cards/{id}/revoke` | Cancel on the waiting strip. Toast: "Kept as a draft." |
 | `POST /api/replies/{id}/heard` | Opening or playing a letter |
@@ -202,3 +204,13 @@ Nick: "no dark mode, get rid of the black and change to white with light accents
 - Contrast (WCAG AA, 4.5:1) checked for every text token on bg, surface and surfaceRaised: text 14.2+, text2 9.2+, text3 5.5+, text4 4.6+, accent 5.4+. White on the pill gradient is 4.8 to 6.3 except the violet end.
 - Hard-coded dark colors removed: portrait backdrop, sheet scrims, gallery and photo viewer (`#000` -> white, Photos-style light chrome; the photo's top fade is now white), hero "+" tile, Photos glyph wells. Shadows softened to indigo at low opacity.
 - `app.json`: `userInterfaceStyle: "light"`, splash/Android icon/background `#FFFFFF`. Root `StatusBar style="dark"`.
+
+## Pass 5: video with a letter (Oct 25, 2026)
+
+Nick asked for a video-sending feature. This is the first backend change on the branch (additive only).
+
+- Mobile: `src/components/video.tsx` (`VideoAttach`, `pickVideo`). Preview shows "Add a video" -> a sheet with "Record a video" (camera) or "Choose from library". `expo-image-picker` with `mediaTypes: ["videos"]`, `videoMaxDuration: 60`, medium quality; iOS library picks can be trimmed. Attached: a muted `expo-video` thumbnail, the length, and Remove. On send, `api.uploadCardVideo` posts it to the new card before `markShared`/`handOff`, so the link in WhatsApp / Messages / Instagram opens a page that plays it. If the upload fails the letter still goes (toast).
+- Packages (via `npx expo install`, SDK 58): `expo-image-picker ~58.0.10`, `expo-video ~58.0.12`. Both are in Expo Go.
+- `app.json`: `expo-image-picker` plugin with camera, microphone and photo-library usage strings (NSCameraUsageDescription, NSMicrophoneUsageDescription, NSPhotoLibraryUsageDescription); `expo-video` plugin.
+- Backend: `POST /api/cards/{card_id}/video` in `routes/student.py` (reuses `VIDEO_TYPES`, `MAX_VIDEO`, `_read_limited`; 415 / 404 / 409 for a revoked card), file saved to `media/videos/{card_id}.{ext}`, new `cards.video_path` column via `db.MIGRATIONS`. `video_url` is returned by `GET /api/cards/{id}` (`store.card_out`) and `GET /api/public/cards/{token}`. `web/card.js` renders a `<video controls playsinline>` under the photo (one line). Test: `tests/test_public.py::test_a_video_rides_with_the_letter_to_her_page`.
+- Not done: attaching the video file itself to the native share sheet. The handoff opens WhatsApp/Messages with the link (the link plays the video); a file attach would replace that deep link with the generic share sheet.

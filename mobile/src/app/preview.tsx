@@ -7,11 +7,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Skeleton } from "../components/motion";
 import { Chip, LetterCard, NavBar, PrimaryPill, styles as ui, T, TextButton } from "../components/ui";
+import { type PickedVideo, VideoAttach } from "../components/video";
 import { api, type Piece } from "../lib/api";
 import { haptics } from "../lib/haptics";
 import { type App, handOff } from "../lib/handoff";
 import { uploadGalleryPhoto } from "../lib/photos";
 import { needsHisTap, useHeadsUpAsk } from "../lib/push";
+import { toast } from "../lib/toast";
 import { useHome } from "../lib/useHome";
 import { SPLIT_MAX, useLayout } from "../lib/useLayout";
 import { color, inset, radius, space } from "../theme/tokens";
@@ -35,6 +37,7 @@ export default function Preview() {
   const [hold, setHold] = useState<boolean | null>(null);
   const [sending, setSending] = useState(false);
   const [held, setHeld] = useState<string | null>(null);
+  const [video, setVideo] = useState<PickedVideo | null>(null);
   // The one notification ask, at the moment it means something: once he's held a letter (lib/push.ts).
   const headsUp = useHeadsUpAsk(person?.name, person && home ? needsHisTap(person, home.providers) : false);
 
@@ -73,6 +76,14 @@ export default function Preview() {
         }
       }
       const card = await api.createCard(person.id, ids, holding ? "her_morning" : "now", photoId);
+      if (video) {
+        // Before the handoff, so the link she opens already plays it.
+        try {
+          await api.uploadCardVideo(card.id, video.uri, video.mime);
+        } catch {
+          toast("The video didn't upload. Your letter still goes.");
+        }
+      }
       if (card.status === "held") {
         haptics.success();
         setHeld(card.release_label);
@@ -106,6 +117,7 @@ export default function Preview() {
 
   const choices = (
     <>
+      {!held ? <VideoAttach video={video} onChange={setVideo} disabled={sending} /> : null}
       {holdable && !held ? (
         <View style={styles.delivery}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: space.s12 }}>

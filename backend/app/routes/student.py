@@ -317,6 +317,26 @@ def card_shared(card_id: str) -> dict:
     return delivery.mark_shared(card_id)
 
 
+@router.post("/cards/{card_id}/video")
+async def card_video(card_id: str, file: UploadFile = File(...)) -> dict:
+    """A video he recorded or picked to go with the letter. Played on her card page."""
+    mime = (file.content_type or "").split(";")[0]
+    ext = VIDEO_TYPES.get(mime)
+    if not ext:
+        raise HTTPException(415, "video must be webm, mp4, or mov")
+    with db.tx() as c:
+        card = c.execute("SELECT id, status FROM cards WHERE id = ?", (card_id,)).fetchone()
+    if not card:
+        raise HTTPException(404, "no such card")
+    if card["status"] == "revoked":
+        raise HTTPException(409, "this letter was taken back")
+    data = await _read_limited(file, MAX_VIDEO)
+    path = store.save_media("videos", f"{card_id}.{ext}", data)
+    with db.tx() as c:
+        c.execute("UPDATE cards SET video_path = ? WHERE id = ?", (path, card_id))
+    return delivery.get_card(card_id)
+
+
 @router.post("/cards/{card_id}/revoke")
 def card_revoke(card_id: str) -> dict:
     return delivery.revoke(card_id)

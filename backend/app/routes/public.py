@@ -75,6 +75,7 @@ def public_card(token: str) -> dict:
         "translation": card["translation"],
         "photo_url": photo,
         "audio_url": store.media_url(card["audio_path"]),
+        "video_url": store.media_url(card["video_path"]),
         "call_url": call,
         "replied": replied > 0,
     }
