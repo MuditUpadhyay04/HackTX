@@ -3,6 +3,7 @@
 Branch: `unsaid-overhaul`, off `main` at `c32f7ee`. Mobile, plus a small backend addition for video (Pass 5): `POST /api/cards/{id}/video`, `video_url` on cards and the public card, a `<video>` in `backend/web/card.js`, and one test.
 
 - Pass 1 (Grok, stopped at Gurneal's request 11:19 PM CDT Oct 24): restyle of every screen. See "Done, by screen".
+- No lines under paragraphs (Grok, Oct 25, 12:41 AM CDT, `04b0ce9`): removed the letter card swoosh, the Pile header/line rules, the Preview delivery-box rule, the You row dividers, the Talk tools hairline, and the Pile/Preview dock top borders. Tab bar and outer card/input borders kept.
 - QA fixes 2 (Grok, Oct 25, 12:30 AM CDT, `b62a45e`):
   - Preview: the hold choice shows only while they're asleep, for every channel (was WhatsApp only), and Hold is the default then. Awake: no hold box, Send now. The pill reads "Send when they're ready" while holding, else "Send now".
   - Preview: the dock no longer covers "Send now"; the scroll pads by the dock height.
@@ -33,6 +34,7 @@ The app is for a **local demo**, not a hosted deployment. See "Local demo" below
 - Pass 5 (video): `c468021`
 - QA fixes: `1843560`
 - QA fixes 2: `b62a45e`
+- No lines under paragraphs: `04b0ce9`
 - Pass 3 (foldable / any window size): the commit that adds the "Pass 3" section (see `git log`)
 
 Draft PR: https://github.com/MuditUpadhyay04/HackTX/pull/1 (not merged).

@@ -2,6 +2,17 @@
 
 Running log of every change Grok Bot makes. Times are America/Chicago (CDT). Newest entries are at the top. Updated after every message Gurneal sends to Grok Bot.
 
+## Oct 25, 2026, 12:41 AM CDT
+
+Nick: no lines under the paragraphs anywhere. One commit on `unsaid-overhaul`, `04b0ce9` (mobile only):
+
+- Letter card (Preview, letter view): the violet swoosh under the first paragraph is gone.
+- Pile: no rule under the header card, none between lines, no top border on the dock. Lines get a little extra space instead.
+- Preview: no rule inside the delivery box (a 12pt gap instead), no top border on the dock.
+- You: no dividers between the grouped rows.
+- Talk: no hairline under the tools row.
+- Kept: tab bar border, outer borders of rows/cards/inputs, photo viewer controls, video tile, Talk's vertical side-panel border, Home's hold progress bar. No new copy.
+
 ## Oct 25, 2026, 12:30 AM CDT
 
 QA on `1843560` (HackTx2). One commit on `unsaid-overhaul`, `b62a45e`:
