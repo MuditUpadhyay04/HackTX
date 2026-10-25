@@ -95,6 +95,10 @@ export type DeviceTransform = {
 };
 
 const ramp = (a: number, from: number, to: number) => Math.min(1, Math.max(0, (a - from) / (to - from)));
+const smoothRamp = (a: number, from: number, to: number) => {
+  const k = ramp(a, from, to);
+  return k * k * (3 - 2 * k);
+};
 
 /** The device at `openAngle`, plus the pose of `state` (folded-angled, back) when given. */
 export function deviceTransform(openAngle: number, state?: DuoState): DeviceTransform {
@@ -109,7 +113,8 @@ export function deviceTransform(openAngle: number, state?: DuoState): DeviceTran
     tiltRotateY: GEOM.tilt.rotateYPeak * wave + pose.rotateY,
     tiltRotateX: GEOM.tilt.rotateXPeak * wave + pose.rotateX,
     specular: folded + (flat - folded) * (a / 180),
-    contentOpacity: ramp(a, GEOM.contentFade.from, GEOM.contentFade.to),
+    // smoothstepped so the flat layer eases in with no visible start or finish
+    contentOpacity: smoothRamp(a, GEOM.contentFade.from, GEOM.contentFade.to),
   };
 }
 

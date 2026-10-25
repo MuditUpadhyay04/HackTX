@@ -5,6 +5,7 @@ import { Placeholder } from "@/components/Placeholder";
 import { AppGlyph } from "@/components/icons/AppGlyph";
 import { APP_NAMES, ICON, type HomeAppId } from "@/components/home/layout";
 import { type as typeScale } from "@/lib/tokens";
+import { useOpenApp } from "@/lib/apps/useOpenApp";
 
 const label = typeScale.caption2;
 
@@ -31,6 +32,8 @@ export function AppIcon({
   pressed?: boolean;
 }) {
   const name = APP_NAMES[app];
+  // opens this icon's app from lib/apps/registry.tsx (for the display it is on)
+  const onClick = useOpenApp(app);
   const labelWidth = ICON.pitchX - label.size / 2;
   const button: CSSProperties = {
     position: "absolute",
@@ -50,7 +53,7 @@ export function AppIcon({
   };
   return (
     <Placeholder id={`ios:app-${app}`} pressed={pressed}>
-      <button type="button" aria-label={name} data-app-icon={app} style={button}>
+      <button type="button" aria-label={name} data-app-icon={app} style={button} onClick={onClick}>
         <AppGlyph app={app} size={size} />
         {showLabel ? (
           <span

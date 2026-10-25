@@ -3,8 +3,8 @@
 import { useSearchParams } from "next/navigation";
 import { Stage, type StageBackground } from "@/components/stage/Stage";
 import { IPhoneDuo } from "@/components/device/IPhoneDuo";
+import { AngleSlider } from "@/components/device/AngleSlider";
 import { FoldControl } from "@/components/device/FoldControl";
-import { HingeRipple } from "@/components/device/HingeRipple";
 import { TestPattern } from "@/components/device/TestPattern";
 import { CoverHome, InnerHome } from "@/components/home/HomeScreen";
 import { DebugOverlay } from "@/components/device/DebugOverlay";
@@ -38,13 +38,13 @@ export function DeviceScene() {
   const crossfade = useFoldCrossfade();
   const view = state === "back" ? "back" : STATE_ANGLES[state] >= 90 ? "unfolded" : "folded";
 
-  const device = (openAngle: typeof angle | number, accessory: boolean) => (
+  // No hinge "click" ring: it read as a pop at the end of the unfold (the fold should just settle).
+  const device = (openAngle: typeof angle | number) => (
     <IPhoneDuo
       state={state as DuoState}
       openAngle={openAngle}
       scale={scale}
       reflection={reflection}
-      hingeAccessory={accessory ? <HingeRipple /> : undefined}
       cover={pattern ? <TestPattern display="cover" /> : <CoverHome />}
       inner={pattern ? <TestPattern display="inner" /> : <InnerHome />}
       screenFill={pattern ? "wallpaper" : "dark"}
@@ -53,7 +53,7 @@ export function DeviceScene() {
 
   return (
     <Stage background={bg} data-scene={`device-${state}-${bg}`}>
-      {device(angle, true)}
+      {device(angle)}
       {crossfade ? (
         <div
           key={crossfade.key}
@@ -66,10 +66,11 @@ export function DeviceScene() {
             animation: "device-crossfade-out var(--motion-reduced-fold) var(--ease-soft) forwards",
           }}
         >
-          {device(crossfade.from, false)}
+          {device(crossfade.from)}
         </div>
       ) : null}
       <FoldControl tone={bg === "black" ? "dark" : "light"} hidden={bare} />
+      {bare ? null : <AngleSlider />}
       {debug ? <DebugOverlay view={view} /> : null}
     </Stage>
   );

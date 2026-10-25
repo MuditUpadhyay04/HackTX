@@ -425,7 +425,7 @@ export const foldMotion = {
   /** blur radius (px) at the middle of the fold */
   blurPeak: 9,
   /** below this radius the blur is dropped (lands sharp, no filter at rest) */
-  blurFloor: 0.35,
+  blurFloor: 0.05,
   /** the curve of the blur over the fold: (sin(pi a / 180)) ^ blurCurve */
   blurCurve: 0.8,
   /** the cover home fades to this opacity as it swings edge-on (90 degrees) */

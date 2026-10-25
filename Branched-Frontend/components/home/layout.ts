@@ -93,6 +93,8 @@ export const ICON = {
 /** Small widget: two columns by two rows minus the label line. */
 export const WIDGET = {
   size: ICON.pitchX + ICON.size, // 128
+  /** medium widget: four columns wide */
+  mediumWidth: 3 * ICON.pitchX + ICON.size, // 280
   radius: 24,
   padding: 14,
   labelGap: 5,
@@ -130,12 +132,13 @@ export const STATUS = {
 export const HOME_INDICATOR = { width: 134, height: 5, radius: 2.5, bottom: 8 } as const;
 
 /** Vertical dock (Liquid Glass capsule). */
+/** The iOS 26 side dock: a frosted capsule hugging a column of icons, gaps ~1/3 of an icon. */
 export const DOCK = {
-  padding: 7,
-  gap: 10,
-  width: ICON.dockSize + 2 * 7, // 60
-  height: 4 * ICON.dockSize + 3 * 10 + 2 * 7, // 228
-  radius: 30,
+  padding: 8,
+  gap: 14,
+  width: ICON.dockSize + 2 * 8, // 62
+  height: 4 * ICON.dockSize + 3 * 14 + 2 * 8, // 242
+  radius: 26,
 } as const;
 
 export const SEARCH = { size: 36, glyph: 15, bottom: 20 } as const;
@@ -152,7 +155,7 @@ type ScreenLayout = {
   rows: number[];
   /** slot (col, row) of every grid app */
   slots: Record<string, { col: number; row: number }>;
-  widgets: { weather: Rect; calendar: Rect; photos?: Rect };
+  widgets: { weather: Rect; calendar: Rect; photos?: Rect; music?: Rect; reminders?: Rect };
   /** center x of the right rail (dock, search, D8 status) */
   railX: number;
   dockTop: number;
@@ -214,6 +217,9 @@ const innerLayout: ScreenLayout = {
     calendar: { x: INNER_LEFT + 2 * ICON.pitchX, y: INNER_TOP, w: WIDGET.size, h: WIDGET.size },
     // Photos (Featured Photo) widget: left block, cols 0-1, rows 3-4 (below the icon rows)
     photos: { x: INNER_LEFT, y: INNER_TOP + 3 * ICON.pitchY, w: WIDGET.size, h: WIDGET.size },
+    // Medium (4 x 2) widgets fill the right block's empty rows 2-5
+    music: { x: INNER_RIGHT_BLOCK, y: INNER_TOP + 2 * ICON.pitchY, w: WIDGET.mediumWidth, h: WIDGET.size },
+    reminders: { x: INNER_RIGHT_BLOCK, y: INNER_TOP + 4 * ICON.pitchY, w: WIDGET.mediumWidth, h: WIDGET.size },
   },
   railX: inner.width - 48,
   dockTop: 190,

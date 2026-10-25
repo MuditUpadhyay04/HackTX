@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { GEOM, type DuoSide } from "../geometry";
 import { buttonShadow } from "../materials";
 import { EdgeFace } from "./EdgeFace";
-import { ALL_SIDES, Face } from "./Face";
+import { ALL_SIDES, Face, HINGE_BLEED } from "./Face";
 import { GlassBack } from "./GlassBack";
 import { FoldContent, GlassSheen, PunchHole, ScreenSurface, coverSwing, innerSwing } from "./Screen";
 import { HalfShadow } from "./Shadow";
@@ -93,7 +93,8 @@ function InnerFace({ side, screenOn, angle, fill, children }: FaceContentProps &
   const inner = GEOM.display.inner;
   const vp = GEOM.viewport;
   const half = width - GEOM.band.inset; // 577
-  const offsetX = side === "left" ? 0 : -half;
+  // the right half's display box starts HINGE_BLEED left of its face (Face), so its slice shifts back
+  const offsetX = side === "left" ? 0 : -half + HINGE_BLEED;
   const moving = side === "left";
   return (
     <Face
@@ -108,9 +109,12 @@ function InnerFace({ side, screenOn, angle, fill, children }: FaceContentProps &
       {screenOn && children != null ? (
         <FoldContent
           angle={angle}
+          // only the swinging half blurs, ramping in from the crease (the still half stays sharp)
           soften={moving}
           shade={moving ? { swing: innerSwing, hinge: "right" } : undefined}
-          width={half}
+          // each half's display box runs HINGE_BLEED past the hinge (Face), so neither slice's edge
+          // lies on the crease
+          width={half + HINGE_BLEED}
           height={inner.height}
           inert
         >

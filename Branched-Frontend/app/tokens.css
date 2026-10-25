@@ -367,7 +367,7 @@
   --kb-label: #000000;
   --kb-special-label: #000000;
   --icon-messages-fill: linear-gradient(180deg, #5CF777 0%, #0EBE2C 100%);
-  --icon-photos-fill: linear-gradient(180deg, #FFFFFF 0%, #ECECEC 100%);
+  --icon-photos-fill: #FFFFFF;
 
   /* Phase 3 home screen (home-screen builder; lib/tokens.ts homeWallpaper / homeColor / homeGradient).
      D9 tiles are sampled from the official Meta files in public/brand/meta/. */
@@ -407,11 +407,20 @@
   --widget-weather-bottom: #7EC3F8;
   --widget-weather-sun: #FFD60A;
   --widget-calendar-bg: #FFFFFF;
+  --widget-music-fill: linear-gradient(160deg, #3A2A4F 0%, #1C1626 100%);
+  --widget-music-art: linear-gradient(135deg, #FF5E7E 0%, #A44CF0 55%, #3F7BF5 100%);
+  --widget-music-accent: #FF5E7E;
+  --widget-music-track: rgba(255,255,255,0.25);
+  --widget-reminders-accent: #FF9500;
+  --home-wallpaper-dim: rgba(0,0,0,0.38);
+  /* iOS 26 dock glass: a light frosted capsule (white veil over the wallpaper) with a soft lit rim */
+  --home-dock-fill: linear-gradient(180deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.20) 100%);
+  --home-dock-stroke: inset 0 0 0 0.75px rgba(255,255,255,0.35), inset 0 1px 1px rgba(255,255,255,0.35), 0 4px 14px rgba(0,0,0,0.18);
   --widget-event-blue: #007AFF;
   --widget-event-purple: #AF52DE;
   --home-dot-inactive: rgba(255,255,255,0.4);
   --home-glass-edge: rgba(255,255,255,0.55);
-  --icon-green-fill: linear-gradient(180deg, #54EF6D 0%, #25C040 100%);
+  --icon-green-fill: linear-gradient(180deg, #5DF576 0%, #0BBD29 100%);
   --widget-weather-fill: linear-gradient(180deg, #3C8CE7 0%, #7EC3F8 100%);
   --home-glass-sheen: linear-gradient(160deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.10) 40%, rgba(255,255,255,0.16) 100%);
 }

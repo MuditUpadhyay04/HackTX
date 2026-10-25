@@ -160,7 +160,7 @@ const REFLECTION = { gap: 14, opacity: 0.1 } as const;
 const SPECULAR = { folded: 0.15, flat: 0.85, sweepFrom: -150, sweepTo: 150 } as const;
 
 /** Spanning inner content fades in over this openAngle range (it is flat; the halves are not). */
-const CONTENT_FADE = { from: 177, to: 180 } as const;
+const CONTENT_FADE = { from: 168, to: 180 } as const;
 
 /** Whole-device tilt peaks (deg) at 90 degrees open; 0 at 0 and 180 (D8: flat straight-on). */
 const TILT = { rotateYPeak: -8, rotateXPeak: 3 } as const;

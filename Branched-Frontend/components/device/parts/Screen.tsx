@@ -44,6 +44,16 @@ const smooth = (k: number) => {
 export const coverSwing = (openAngle: number) => smooth(clampAngle(openAngle) / 90);
 export const innerSwing = (openAngle: number) => smooth((180 - clampAngle(openAngle)) / 90);
 
+/** The blurred copy's mask: clear at the hinge, opaque at the far edge (edge^1.35). */
+function hingeMask(hinge: "left" | "right") {
+  const to = hinge === "left" ? "right" : "left";
+  const m = `linear-gradient(to ${to}, transparent 0%, rgba(0,0,0,0.11) 20%, rgba(0,0,0,0.29) 40%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.74) 80%, #000 100%)`;
+  return { maskImage: m, WebkitMaskImage: m };
+}
+
+/** How far the blurred layer overhangs its clip (well past 2x the peak blur radius). */
+const BLUR_BLEED = 24;
+
 const blurCss = (r: number) => (r > 0 ? `blur(${r}px)` : "none");
 
 /**
@@ -89,12 +99,28 @@ export function FoldContent({
         width,
         height,
         overflow: "hidden",
-        filter,
         opacity: alpha,
-        willChange: soften ? "filter, opacity" : undefined,
       }}
     >
-      {children}
+      {/*
+        iphone-duo blur: sharp at the hinge, growing toward the far edge. A sharp copy underneath
+        and a blurred copy on top, masked in from the hinge (blurGradient^1.35), so the swinging
+        half meets the still half at the crease with no hard edge. The blurred copy overhangs the
+        clip by BLUR_BLEED so its fringe falls outside the display.
+      */}
+      {shade && soften ? <div style={{ position: "absolute", inset: 0 }}>{children}</div> : null}
+      <motion.div
+        style={{
+          position: "absolute",
+          inset: -BLUR_BLEED,
+          padding: BLUR_BLEED,
+          filter,
+          willChange: soften ? "filter" : undefined,
+          ...(shade && soften ? hingeMask(shade.hinge) : null),
+        }}
+      >
+        <div style={{ position: "relative", width, height }}>{children}</div>
+      </motion.div>
       {shade ? (
         <motion.div
           aria-hidden="true"

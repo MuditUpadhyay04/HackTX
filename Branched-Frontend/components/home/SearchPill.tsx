@@ -1,5 +1,6 @@
 "use client";
 
+import { useOpenApp } from "@/lib/apps/useOpenApp";
 import { Placeholder } from "@/components/Placeholder";
 import { HOME_LAYOUT, SEARCH, type HomeDisplay } from "./layout";
 
@@ -9,10 +10,12 @@ import { HOME_LAYOUT, SEARCH, type HomeDisplay } from "./layout";
  */
 export function SearchPill({ display }: { display: HomeDisplay }) {
   const L = HOME_LAYOUT[display];
+  const onClick = useOpenApp("search");
   return (
     <Placeholder id="ios:search">
       <button
         type="button"
+        onClick={onClick}
         aria-label="Search"
         data-home-search={display}
         style={{

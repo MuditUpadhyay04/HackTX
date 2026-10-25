@@ -137,9 +137,10 @@ export function HomeWallpaper({ display, style }: { display: "cover" | "inner"; 
         position: "absolute",
         inset: 0,
         backgroundColor: "var(--home-wallpaper-ink)",
-        backgroundImage: WALLPAPER_URL,
-        backgroundSize: "cover",
-        backgroundPosition: CROP[display],
+        // dimmed so the white icon labels read clearly
+        backgroundImage: `linear-gradient(var(--home-wallpaper-dim), var(--home-wallpaper-dim)), ${WALLPAPER_URL}`,
+        backgroundSize: "cover, cover",
+        backgroundPosition: `0 0, ${CROP[display]}`,
         backgroundRepeat: "no-repeat",
         pointerEvents: "none",
         ...style,

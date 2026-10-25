@@ -4,6 +4,8 @@ import type { CSSProperties, ReactNode } from "react";
 import { Placeholder } from "@/components/Placeholder";
 import { squircleClipPath } from "@/lib/squircle";
 import { emphasizedWeight, radius, type as typeScale } from "@/lib/tokens";
+import type { WidgetTarget } from "@/lib/apps/registry";
+import { useOpenApp } from "@/lib/apps/useOpenApp";
 import { ICON, WIDGET, type Rect } from "./layout";
 
 /**
@@ -37,10 +39,12 @@ function WidgetFrame({
   color: string;
   children: ReactNode;
 }) {
+  const onClick = useOpenApp(`widget-${id}` as WidgetTarget);
   return (
     <Placeholder id={`ios:widget-${id}`}>
       <button
         type="button"
+        onClick={onClick}
         aria-label={name}
         data-widget={id}
         style={{
@@ -180,6 +184,67 @@ export function PhotosWidget({ rect }: { rect: Rect }) {
       <span style={{ position: "relative", display: "flex", flexDirection: "column" }}>
         <span style={text(t.footnote, emphasizedWeight)}>With Sarah</span>
         <span style={{ ...text(t.caption2, 500), opacity: 0.85 }}>Sep 14, 2026</span>
+      </span>
+    </WidgetFrame>
+  );
+}
+
+/** iOS Music "Now Playing" (medium, unfolded home only): album art, track, artist and a progress bar. */
+export function MusicWidget({ rect }: { rect: Rect }) {
+  const art = rect.h - 2 * WIDGET.padding;
+  return (
+    <WidgetFrame id="music" name="Music" rect={rect} background="var(--widget-music-fill)" color="var(--label-on-dark)">
+      <span style={{ display: "flex", gap: WIDGET.padding, height: "100%" }}>
+        <span
+          aria-hidden="true"
+          style={{ width: art, height: art, flexShrink: 0, borderRadius: radius[10], background: "var(--widget-music-art)" }}
+        />
+        <span style={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>
+          <span style={{ ...text(t.caption2, emphasizedWeight), color: "var(--widget-music-accent)" }}>NOW PLAYING</span>
+          <span style={{ flex: 1 }} />
+          <span style={{ ...text(t.footnote, emphasizedWeight), overflow: "hidden", textOverflow: "ellipsis" }}>Late Night Drive</span>
+          <span style={{ ...text(t.caption1), opacity: 0.7 }}>Austin Lights</span>
+          <span style={{ marginTop: t.caption2.size / 2, height: 3, borderRadius: radius[2], background: "var(--widget-music-track)" }}>
+            <span style={{ display: "block", width: "38%", height: "100%", borderRadius: radius[2], background: "var(--label-on-dark)" }} />
+          </span>
+        </span>
+      </span>
+    </WidgetFrame>
+  );
+}
+
+function Reminder({ title, done }: { title: string; done?: boolean }) {
+  return (
+    <span style={{ display: "flex", alignItems: "center", gap: t.caption2.size / 2 }}>
+      <span
+        aria-hidden="true"
+        style={{
+          width: t.caption1.size,
+          height: t.caption1.size,
+          borderRadius: "50%",
+          flexShrink: 0,
+          border: "1.5px solid var(--widget-reminders-accent)",
+          background: done ? "var(--widget-reminders-accent)" : "none",
+        }}
+      />
+      <span style={{ ...text(t.caption1, 500), opacity: done ? 0.45 : 1 }}>{title}</span>
+    </span>
+  );
+}
+
+/** iOS Reminders (medium, unfolded home only): today's list. */
+export function RemindersWidget({ rect }: { rect: Rect }) {
+  return (
+    <WidgetFrame id="reminders" name="Reminders" rect={rect} background="var(--widget-calendar-bg)" color="var(--ios-label)">
+      <span style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+        <span style={{ ...text(t.footnote, emphasizedWeight), color: "var(--widget-reminders-accent)" }}>Today</span>
+        <span style={{ ...text(t.title2, 600), color: "var(--widget-reminders-accent)" }}>3</span>
+      </span>
+      <span style={{ flex: 1 }} />
+      <span style={{ display: "flex", flexDirection: "column", gap: t.caption2.size / 2.5 }}>
+        <Reminder title="Practice demo pitch" />
+        <Reminder title="Charge the Fold" />
+        <Reminder title="Text Sarah back" />
       </span>
     </WidgetFrame>
   );

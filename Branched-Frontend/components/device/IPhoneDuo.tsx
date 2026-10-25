@@ -13,6 +13,7 @@ import {
   type DuoPose,
   type DuoState,
 } from "@/lib/device/angle";
+import { ALL_SIDES, Face } from "./parts/Face";
 import { Half } from "./parts/Half";
 import { Reflection } from "./parts/Reflection";
 import { GlassSheen } from "./parts/Screen";
@@ -201,6 +202,7 @@ function DeviceCore({
       >
         <Half side="right" angle={angle} screenOn={screenOn} gloss={gloss} shadow={shadow} inner={inner} fill={fill} />
         <Spine angle={angle} />
+        <HingeBacking angle={angle} />
         <Half
           side="left"
           angle={angle}
@@ -212,6 +214,7 @@ function DeviceCore({
           inner={inner}
           fill={fill}
         />
+        <OnePieceFront angle={angle} />
         {screenOn && inner != null ? (
           <InnerContent angle={angle}>
             {inner}
@@ -226,7 +229,7 @@ function DeviceCore({
 // ---------------------------------------------------------------------------
 // The inner display's content: ONE interactive instance across both halves, shown flat only. While
 // the device moves, each half shows its own inert slice of the same content (Half.tsx, D12), so the
-// screen stays visible through the whole fold; this flat layer takes over at 177-180 for crisp,
+// screen stays visible through the whole fold; this flat layer eases in over 168-180 for crisp,
 // seamless, tappable content.
 // ---------------------------------------------------------------------------
 
@@ -273,6 +276,74 @@ function InnerContent({ angle, children }: { angle: MotionValue<number>; childre
         {children}
       </div>
       <GlassSheen width={d.width} height={d.height} />
+    </motion.div>
+  );
+}
+
+/**
+ * Flat, the inner side is ONE frame and ONE glass across both halves (no seam at the hinge): this
+ * full-width front face lies over the two half faces once flat (ONE_PIECE_FROM), just behind the flat
+ * content layer, so the open device reads as a single piece rather than two slabs side by side.
+ */
+/**
+ * A dark strip just behind the hinge line, spanning both faces' edges: the two halves are separate
+ * 3D planes whose anti-aliased edges never quite meet, so without it the light stage showed through
+ * as a white hairline at the crease mid-fold.
+ */
+function HingeBacking({ angle }: { angle: MotionValue<number> }) {
+  // only near flat, where the two faces meet edge to edge; with the left half swung away it would
+  // show as a dark line along the crease
+  const visibility = useTransform(angle, (a) => (a >= HINGE_BACKING_FROM ? "visible" : "hidden"));
+  const w = 4;
+  return (
+    <motion.div
+      aria-hidden="true"
+      data-duo-part="hinge-backing"
+      style={{
+        position: "absolute",
+        left: GEOM.group.hinge - w / 2,
+        top: GEOM.band.inset,
+        width: w,
+        height: GEOM.panel.height - 2 * GEOM.band.inset,
+        transform: "translateZ(-0.5px)",
+        background: "var(--device-bezel)",
+        pointerEvents: "none",
+        visibility,
+      }}
+    />
+  );
+}
+
+/** openAngle from which the hinge backing shows. */
+const HINGE_BACKING_FROM = 100;
+
+/** openAngle from which the one-piece front shows (the spring/tween lands on 180 exactly). */
+const ONE_PIECE_FROM = 179.5;
+
+function OnePieceFront({ angle }: { angle: MotionValue<number> }) {
+  // Only when (all but) exactly flat: while the left half is still tilted the flat face would cut
+  // through it. Flat, it matches the two half faces pixel for pixel, so the swap is invisible.
+  const visibility = useTransform(angle, (a) => (a >= ONE_PIECE_FROM ? "visible" : "hidden"));
+  const r = GEOM.panel.radius;
+  return (
+    <motion.div
+      data-duo-part="front-one-piece"
+      style={{
+        position: "absolute",
+        inset: 0,
+        transform: `translateZ(${GEOM.z.content / 2}px)`,
+        visibility,
+        pointerEvents: "none",
+      }}
+    >
+      <Face
+        part="front-flat"
+        width={GEOM.group.width}
+        height={GEOM.group.height}
+        radii={{ tl: r, tr: r, br: r, bl: r }}
+        sides={ALL_SIDES}
+        variant="screen"
+      />
     </motion.div>
   );
 }

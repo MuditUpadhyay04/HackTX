@@ -22,8 +22,8 @@ export function Dock({ display }: { display: HomeDisplay }) {
           width: DOCK.width,
           height: DOCK.height,
           borderRadius: DOCK.radius,
-          background: "var(--home-glass-sheen), var(--material-glass)",
-          boxShadow: "var(--shadow-glass-stroke)",
+          background: "var(--home-dock-fill)",
+          boxShadow: "var(--home-dock-stroke)",
           pointerEvents: "none",
         }}
       />

@@ -12,13 +12,16 @@ export type BandSides = { top: boolean; right: boolean; bottom: boolean; left: b
 
 export const ALL_SIDES: BandSides = { top: true, right: true, bottom: true, left: true };
 
+/** How far the bezel and display run past an open (hinge) side. */
+export const HINGE_BLEED = 2;
+
 type Box = { x: number; y: number; width: number; height: number; radii: CornerRadii };
 
 /** The face outline shrunk by `d` on the banded sides (corners shrink with it, square stays square). */
-function insetBox(width: number, height: number, outer: CornerRadii, sides: BandSides, d: number): Box {
-  const l = sides.left ? d : 0;
+function insetBox(width: number, height: number, outer: CornerRadii, sides: BandSides, d: number, open = 0): Box {
+  const l = sides.left ? d : open;
   const t = sides.top ? d : 0;
-  const r = sides.right ? d : 0;
+  const r = sides.right ? d : open;
   const b = sides.bottom ? d : 0;
   const shrink = (v: number) => (v === 0 ? 0 : Math.max(0, v - d));
   return {
@@ -79,8 +82,10 @@ export function Face({ width, height, radii, sides, variant, innerRadii, childre
   const chamfer = insetBox(width, height, radii, sides, b.rim);
   const band = insetBox(width, height, radii, sides, b.rim + b.chamfer);
   const seat = insetBox(width, height, radii, sides, b.frame - b.seat);
-  const bezel = insetBox(width, height, radii, sides, b.frame);
-  const content = insetBox(width, height, radii, sides, variant === "screen" ? b.inset : b.frame);
+  // Bezel and display run HINGE_BLEED past an open (hinge) side, so their anti-aliased edge falls
+  // outside the face instead of letting the bright frame layers show as a white hairline at the crease.
+  const bezel = insetBox(width, height, radii, sides, b.frame, -HINGE_BLEED);
+  const content = insetBox(width, height, radii, sides, variant === "screen" ? b.inset : b.frame, -HINGE_BLEED);
   if (innerRadii) content.radii = innerRadii;
   return (
     <div
