@@ -7,7 +7,7 @@ import { HomeWallpaper } from "./HomeWallpaper";
 import { GRID_APPS, HOME_LAYOUT, iconRectPt, type HomeAppId, type HomeDisplay } from "./layout";
 import { PageDots } from "./PageDots";
 import { SearchPill } from "./SearchPill";
-import { CalendarWidget, WeatherWidget } from "./Widgets";
+import { CalendarWidget, PhotosWidget, WeatherWidget } from "./Widgets";
 
 export type HomeScreenProps = {
   display: HomeDisplay;
@@ -41,6 +41,7 @@ export function HomeScreen({ display, pressed }: HomeScreenProps) {
       <HomeWallpaper display={display} />
       <WeatherWidget rect={L.widgets.weather} />
       <CalendarWidget rect={L.widgets.calendar} />
+      {L.widgets.photos ? <PhotosWidget rect={L.widgets.photos} /> : null}
       {GRID_APPS.map((app) => {
         const r = iconRectPt(display, app);
         return r ? <AppIcon key={app} app={app} x={r.x} y={r.y} pressed={pressed === app} /> : null;

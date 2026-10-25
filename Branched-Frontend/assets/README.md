@@ -17,6 +17,7 @@ Repo home: **`Branched-Frontend/assets/`** on branch `branched-frontend`. All pa
 | `assets/icons/README.md` | look-alike notes | Specs for drawn Apple/Meta look-alike icons; no files. | SVG/CSS components |
 | `assets/images/README.md` | placeholder spec | Mock illustrations to make (dal, sunrise, reels, avatars, the Photos library). | `public/mock/...` once made |
 | `assets/images/reel-goldenhour-pups.svg`, `reel-rec-league.svg`, `reel-dormlife.svg` | drawn for this build (Phase 2, P2-I2) | Instagram Reels frames: golden-hour puppies, rec-league game, dorm life. Original semi-flat SVG, no text, logos or real people. | `public/mock/` (Phase 2) |
+| *(public only)* `public/mock/photos/widget-sarah-sunset.jpg` | demo photo set (`sarah-sunset.jpg`, generated fictional cast: Riley + Sarah), square crop, 512 px | Photos "Featured Photo" widget on the unfolded home ("With Sarah") | `PhotosWidget` in `components/home/Widgets.tsx` |
 | *(synced, not in `assets/`)* `public/unsaid-theme/**`, `lib/unsaid-theme.json`, `app/unsaid-theme.css` | `App-UI-Final/` via `npm run sync:theme` | The Un-Said theme: tokens, brand files, palette sheet. Regenerated on every `dev`/`build`; never edited by hand. | splash, `UnsaidSlot`, Un-Said toast |
 
 The UI reference used to check the UnsaidSlot placeholder is `App-UI-Final/assets/ui-reference/unsaid-ui-reference.png` (read only).

@@ -157,3 +157,30 @@ export function CalendarWidget({ rect }: { rect: Rect }) {
     </WidgetFrame>
   );
 }
+
+/**
+ * The iOS Photos "Featured Photo" widget (unfolded home only): one full-bleed photo of Riley and
+ * Sarah (public/mock/photos/widget-sarah-sunset.jpg, from the demo photo set), a soft scrim at the
+ * bottom and the white two-line caption bottom-left. Static: no slideshow, no motion.
+ */
+export function PhotosWidget({ rect }: { rect: Rect }) {
+  return (
+    <WidgetFrame
+      id="photos"
+      name="Photos"
+      rect={rect}
+      background="center / cover no-repeat url(/mock/photos/widget-sarah-sunset.jpg)"
+      color="var(--label-on-dark)"
+    >
+      <span
+        aria-hidden="true"
+        style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: rect.h / 2, background: "linear-gradient(180deg, transparent 0%, var(--ios-scrim) 100%)" }}
+      />
+      <span style={{ flex: 1 }} />
+      <span style={{ position: "relative", display: "flex", flexDirection: "column" }}>
+        <span style={text(t.footnote, emphasizedWeight)}>With Sarah</span>
+        <span style={{ ...text(t.caption2, 500), opacity: 0.85 }}>Sep 14, 2026</span>
+      </span>
+    </WidgetFrame>
+  );
+}

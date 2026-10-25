@@ -152,7 +152,7 @@ type ScreenLayout = {
   rows: number[];
   /** slot (col, row) of every grid app */
   slots: Record<string, { col: number; row: number }>;
-  widgets: { weather: Rect; calendar: Rect };
+  widgets: { weather: Rect; calendar: Rect; photos?: Rect };
   /** center x of the right rail (dock, search, D8 status) */
   railX: number;
   dockTop: number;
@@ -208,10 +208,12 @@ const innerLayout: ScreenLayout = {
   height: inner.height,
   cols: [...range(4, INNER_LEFT, ICON.pitchX), ...range(4, INNER_RIGHT_BLOCK, ICON.pitchX)],
   rows: range(6, INNER_TOP, ICON.pitchY),
-  slots: fill(8, 6, (c, r) => c < 4 && r < 2),
+  slots: fill(8, 6, (c, r) => (c < 4 && r < 2) || (c < 2 && r >= 3 && r < 5)),
   widgets: {
     weather: { x: INNER_LEFT, y: INNER_TOP, w: WIDGET.size, h: WIDGET.size },
     calendar: { x: INNER_LEFT + 2 * ICON.pitchX, y: INNER_TOP, w: WIDGET.size, h: WIDGET.size },
+    // Photos (Featured Photo) widget: left block, cols 0-1, rows 3-4 (below the icon rows)
+    photos: { x: INNER_LEFT, y: INNER_TOP + 3 * ICON.pitchY, w: WIDGET.size, h: WIDGET.size },
   },
   railX: inner.width - 48,
   dockTop: 190,
