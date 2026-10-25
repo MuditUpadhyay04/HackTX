@@ -60,11 +60,13 @@ We also knew what we didn't want to be. Phones already deliver about 63 notifica
 ## How we built it
 
 - **App:** Expo SDK 58 with Expo Router, running on a Samsung Galaxy Z Fold 8 through Expo Go, in a demo-data mode that never reads the phone's own photos or contacts (the phone is borrowed).
-- **Phone demo:** a Next.js mock of the Fold 8 (One UI home, look-alike WhatsApp, Google Messages, Instagram, Phone and Gallery) with the real Un-Said app running inside it. The film is recorded on it.
-  - `expo-media-library` (the SDK 58 `Query` API) reads his gallery on the device.
+  - `expo-media-library` (the SDK 58 `Query` API) reads his gallery on his own phone.
   - `expo-audio`'s **AudioStream** captures 16-bit PCM, resampled to 24 kHz, and streams it over a WebSocket.
   - `expo-image-manipulator` turns the one photo he sends into a 1200 px JPEG.
   - `react-native-svg` and `expo-linear-gradient` carry Gurneal's three gradients.
+- **Phone demo:** a Next.js mock of the Fold 8 (One UI home, look-alike WhatsApp, Google Messages, Instagram, Phone and Gallery) with the real Un-Said web build running inside it, against the real backend.
+  - `/phone` fills a real Fold's screen and switches between the cover and inner layouts when the phone folds, keeping the open app.
+  - A scene director plays the film's look-alike-app beats one tap at a time. Un-Said itself is never scripted: its buttons tell the mock which look-alike app to open.
 - **Backend:** FastAPI and Uvicorn, with SQLite.
   - A WebSocket relay to Muse Voice Transcribe realtime, with the handshake authenticated on the server.
   - Turn timestamps, so his audio can be cut per person: Mom never hears the sentence he said about Sarah.
@@ -75,7 +77,7 @@ We also knew what we didn't want to be. Phones already deliver about 63 notifica
 - **Design:** Gurneal's Un-Said system: a white, light theme with a blue → violet → lilac gradient family, heavy rounded system type, and no handwriting fonts or Meta logos anywhere.
 - **AI tools we used to build it:** Claude Code wrote much of the code from our specs. Grok reviewed the product and wrote the first Gemini echo. Every change was reviewed and tested by us.
 - **Testing:**
-  - 84 backend tests, including the whole evening end to end on labeled mock AI. A test asserts that every card line is a substring of what he said, and one checks the Gemini fallback.
+  - 92 backend tests, including the whole evening end to end on labeled mock AI. A test asserts that every card line is a substring of what he said; others check the Gemini fallback and that each of Un-Said's own lines appears only under its rule.
   - A Playwright walk of the web client with a fake mic and camera: 15 screenshots across the whole flow, zero console errors.
   - A 30-rant safety eval.
 - **Deploy:** a **Vultr** Cloud Compute VM in Dallas (Ubuntu, Docker Compose) running the FastAPI backend behind Caddy with automatic HTTPS, at https://45-32-200-63.sslip.io. Live transcription, the letter pages and her replies run there. One script updates it from `main`.
@@ -107,7 +109,7 @@ We also knew what we didn't want to be. Phones already deliver about 63 notifica
 - Mom's letter page with her voice reply or a written one
 - Letters
 
-**The video** is generated and animated by our team to tell the story. It isn't a screen recording. Everything it shows the app doing, the app does.
+**The video** mixes scenes our team generated with screen recordings of the Fold 8 phone mock. The WhatsApp, Messages and Instagram screens there are look-alikes with scripted data, because the phone is borrowed. The Un-Said screens are the real app talking to the real backend. Everything the video shows Un-Said doing, Un-Said does.
 
 **What needs Meta (our Round 2 ask):**
 - the knock on photos people already scroll in Instagram and Facebook memories, not only inside Un-Said
