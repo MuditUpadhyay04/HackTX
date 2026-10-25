@@ -199,9 +199,15 @@ export function NavBar({ title, trailing, onBack, backLabel }: { title?: string;
 // ------------------------------------------------------------------ letter card
 
 /** The lavender letter card: reserved for letters only. */
-export function LetterCard({ lines, signature, footer, minHeight = 420 }: { lines: string[]; signature: string; footer?: ReactNode; minHeight?: number }) {
+export function LetterCard({ lines, signature, footer, minHeight, compact = false }: { lines: string[]; signature: string; footer?: ReactNode; minHeight?: number; compact?: boolean }) {
   const [first, ...rest] = lines;
-  const heroSize = first && first.length > 60 ? 36 : first && first.length > 28 ? 48 : 64;
+  const n = first?.length ?? 0;
+  // Smaller steps for long first lines; `compact` (Preview) caps the card so the Hold/Send choice stays on screen.
+  const heroSize = compact
+    ? n > 140 ? 24 : n > 90 ? 28 : n > 50 ? 32 : n > 28 ? 40 : 52
+    : n > 140 ? 28 : n > 60 ? 36 : n > 28 ? 48 : 64;
+  const bodySize = compact ? 18 : 22;
+  minHeight = minHeight ?? (compact ? 240 : 420);
   return (
     // Phone width on a phone; on a big or unfolded screen the card keeps letter proportions, centered.
     <View style={styles.letterWrap}>
@@ -226,7 +232,7 @@ export function LetterCard({ lines, signature, footer, minHeight = 420 }: { line
           </View>
         ) : null}
         {rest.map((line, i) => (
-          <Text key={i} style={[type.letterBody, { color: color.letterInk, marginTop: space.s16 }]}>{line}</Text>
+          <Text key={i} style={[type.letterBody, { color: color.letterInk, marginTop: compact ? space.s12 : space.s16, fontSize: bodySize, lineHeight: Math.round(bodySize * 1.27) }]}>{line}</Text>
         ))}
         {footer}
         <View style={{ flex: 1, minHeight: space.s24 }} />

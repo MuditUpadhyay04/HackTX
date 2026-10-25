@@ -1,6 +1,7 @@
 // You (DESIGN_SPEC 3.12).
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -16,6 +17,7 @@ export default function You() {
   const { home, error, refresh } = useHome(15000);
   const loading = !home && !error;
   const notes = home?.self_notes.length ?? 0;
+  const [peopleOpen, setPeopleOpen] = useState(true);
 
   const link = (icon: keyof typeof Ionicons.glyphMap, label: string, onPress: () => void, featureId?: string, meta?: string, first?: boolean) => (
     <Row featureId={featureId} onPress={onPress} style={[styles.groupRow, !first && styles.rule]}>
@@ -61,25 +63,32 @@ export default function You() {
           <>
             <View style={styles.group}>
               {link("albums-outline", "Notes to yourself", () => router.push("/notes"), undefined, notes ? `${notes}` : undefined, true)}
+              {/* Spec 3.12: "Your people" is row 2 of this group; its people open under it. */}
+              <Row featureId="you-people" onPress={() => setPeopleOpen((o) => !o)} style={[styles.groupRow, styles.rule]}>
+                <View style={styles.well}>
+                  <Ionicons name="people-outline" size={22} color={color.text} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <T v="rowName">Your people</T>
+                  <T v="rowPreview">{`${home.people.length}`}</T>
+                </View>
+                <Ionicons name={peopleOpen ? "chevron-up" : "chevron-down"} size={16} color={color.text3} />
+              </Row>
+              {peopleOpen
+                ? home.people.map((p) => (
+                    <Row key={p.id} style={[styles.groupRow, styles.rule, styles.personRow]} onPress={() => router.push({ pathname: "/pile/[person]", params: { person: p.id } })}>
+                      <Avatar name={p.name} />
+                      <View style={{ flex: 1 }}>
+                        <T v="rowName">{p.name}</T>
+                        <T v="rowPreview">{p.time_label}</T>
+                      </View>
+                      <Ionicons name="chevron-forward" size={16} color={color.text3} />
+                    </Row>
+                  ))
+                : null}
               {link("images-outline", "Connect photos", () => router.push("/connect"), "photo-connectors-open")}
               {link("shield-checkmark-outline", "Safety and support", () => router.push("/safety"))}
               {link("options-outline", "Settings", () => router.push("/settings"))}
-            </View>
-
-            <T v="section" style={{ marginHorizontal: inset.text, marginTop: space.s32 }}>
-              Your people
-            </T>
-            <View style={styles.group}>
-              {home.people.map((p, i) => (
-                <Row key={p.id} style={[styles.groupRow, i > 0 && styles.rule]} onPress={() => router.push({ pathname: "/pile/[person]", params: { person: p.id } })}>
-                  <Avatar name={p.name} />
-                  <View style={{ flex: 1 }}>
-                    <T v="rowName">{p.name}</T>
-                    <T v="rowPreview">{p.time_label}</T>
-                  </View>
-                  <Ionicons name="chevron-forward" size={16} color={color.text3} />
-                </Row>
-              ))}
             </View>
           </>
         ) : null}
@@ -95,7 +104,8 @@ export default function You() {
 const styles = StyleSheet.create({
   // One grouped un-surface block with hairline dividers (DESIGN_SPEC 3.12).
   group: { marginHorizontal: inset.card, marginTop: space.s16, backgroundColor: color.surface, borderRadius: radius.row, overflow: "hidden" },
-  groupRow: { borderRadius: 0, backgroundColor: "transparent", minHeight: 64 },
+  groupRow: { borderRadius: 0, backgroundColor: "transparent", borderWidth: 0, minHeight: 64 },
+  personRow: { paddingLeft: space.s32 },
   rule: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.hairline },
   well: { width: 44, height: 44, borderRadius: 22, backgroundColor: color.surfaceRaised, alignItems: "center", justifyContent: "center" },
 });

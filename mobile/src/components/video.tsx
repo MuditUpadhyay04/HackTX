@@ -40,7 +40,8 @@ export async function pickVideo(source: "camera" | "library"): Promise<PickedVid
   const result = source === "camera" ? await ImagePicker.launchCameraAsync(options) : await ImagePicker.launchImageLibraryAsync(options);
   const asset = result.canceled ? null : result.assets[0];
   if (!asset) return null;
-  const seconds = asset.duration ? asset.duration / 1000 : null; // web reports 0 when it doesn't know
+  // Native reports milliseconds; web reads <video>.duration, which is seconds (0 when unknown).
+  const seconds = asset.duration ? (Platform.OS === "web" ? asset.duration : asset.duration / 1000) : null;
   if (seconds != null && seconds > MAX_VIDEO_SECONDS + 1) {
     Alert.alert("That one's long", "Pick a video that's a minute or shorter.");
     return null;

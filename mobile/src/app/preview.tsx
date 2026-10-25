@@ -61,7 +61,8 @@ export default function Preview() {
   }
 
   const holdable = person.channel === "whatsapp";
-  const holding = holdable && (hold ?? person.is_asleep);
+  // Spec 3.9: Hold is the default for a letter that can be held; he can switch to Send now.
+  const holding = holdable && (hold ?? true);
   const pos = POSSESSIVE[person.pronoun];
 
   const send = async () => {
@@ -90,7 +91,9 @@ export default function Preview() {
         if (!headsUp.question) setTimeout(() => router.dismissTo("/home"), 1800); // else wait for his answer
         return;
       }
-      if (card.status === "released") {
+      // Only skip the handoff when the server actually delivered it (WhatsApp Cloud API).
+      // "released" via "share" still needs him to tap Send in the app.
+      if (card.status === "released" && card.delivered_via && card.delivered_via !== "share") {
         router.dismissTo("/home");
         return;
       }
@@ -107,7 +110,7 @@ export default function Preview() {
   const letter = (
     <>
       {pieces.length || loaded ? (
-        <LetterCard lines={pieces.map((p) => p.text)} signature={home.me.name} />
+        <LetterCard compact lines={pieces.map((p) => p.text)} signature={home.me.name} />
       ) : (
         <Skeleton height={420} r={radius.hero} style={{ marginHorizontal: inset.card }} />
       )}

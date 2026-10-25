@@ -1,8 +1,8 @@
-// "For Mom": his own lines for one person (DESIGN_SPEC 3.8). Nothing is pre-picked.
+// "For Mom": his own lines for one person (DESIGN_SPEC 3.8). Every line starts picked; he unticks what he wants to keep back.
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -31,6 +31,8 @@ export default function Pile() {
   const [picking, setPicking] = useState(false);
   const [zones, setZones] = useState(false);
   const [seenPerson, setSeenPerson] = useState(personId);
+  // Until he touches a line, every line he has for them is picked (and new ones join on refocus).
+  const touched = useRef<string | null>(null); // the person whose lines he has ticked or unticked
   if (personId !== seenPerson) {
     setSeenPerson(personId);
     setPieces(null);
@@ -42,7 +44,9 @@ export default function Pile() {
       let alive = true;
       api.pieces(personId)
         .then((list) => {
-          if (alive) setPieces(list);
+          if (!alive) return;
+          setPieces(list);
+          if (touched.current !== personId) setOn(new Set(list.map((p) => p.id)));
         })
         .catch(() => {
           if (alive) setPieces([]);
@@ -54,13 +58,15 @@ export default function Pile() {
   );
 
   const channelApp = app ?? (person && person.channel !== "self" ? CHANNEL_APP[person.channel] : "messages");
-  const toggle = (id: string) =>
+  const toggle = (id: string) => {
+    touched.current = personId;
     setOn((s) => {
       const next = new Set(s);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
+  };
 
   const ZONES = [
     { id: "America/Chicago", label: "Central" },

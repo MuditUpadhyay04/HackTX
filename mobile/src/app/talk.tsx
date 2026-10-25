@@ -40,6 +40,7 @@ export default function Talk() {
   const [sorting, setSorting] = useState(false);
   const [result, setResult] = useState<SortResult | null>(null);
   const [transcript, setTranscript] = useState("");
+  const [showTranscript, setShowTranscript] = useState(false);
 
   const recording = live.state === "recording" || live.state === "starting";
   const spoken = [...live.turns, live.partial].filter(Boolean).join(" ");
@@ -131,15 +132,15 @@ export default function Talk() {
                       <Chip label={g.tone} />
                       <Ionicons name="chevron-forward" size={18} color={color.text3} />
                     </View>
-                    {/* Data wiring: at most one card, rarely (backend decides). Tapping the card opens their pile. */}
-                    {g.encourage ? <T v="caption" style={{ marginTop: space.s8, color: color.accent }}>{g.encourage}</T> : null}
+                    {/* Tapping the card opens their pile. No app-written line here: only his own words. */}
                     <View style={{ marginTop: space.s12, gap: space.s8 }}>
                       {g.pieces.slice(0, 3).map((p) => (
                         <T key={p.id} v="words" style={{ color: color.text2 }}>{`“${p.text}”`}</T>
                       ))}
                   </View>
-                  {g.kept_total > Math.min(3, g.pieces.length) ? (
-                    <T v="meta" style={{ marginTop: space.s8 }}>{`+${g.kept_total - Math.min(3, g.pieces.length)} more`}</T>
+                  {/* "+N more" counts this run's lines only, not everything kept for them before. */}
+                  {g.pieces.length > 3 ? (
+                    <T v="meta" style={{ marginTop: space.s8 }}>{`+${g.pieces.length - 3} more`}</T>
                   ) : null}
                 </Press>
               </CardIn>
@@ -155,7 +156,17 @@ export default function Talk() {
                 }}
               />
             </View>
-            <T v="caption" style={{ marginHorizontal: space.s8, marginTop: space.s16, color: color.text4 }}>{transcript}</T>
+            {transcript ? (
+              <View style={{ marginHorizontal: space.s8, marginTop: space.s16, alignItems: "flex-start" }}>
+                <TextButton
+                  featureId="rant-transcript-toggle"
+                  tone="text3"
+                  label={showTranscript ? "Hide transcript" : "Show transcript"}
+                  onPress={() => setShowTranscript((v) => !v)}
+                />
+                {showTranscript ? <T v="caption" style={{ color: color.text4 }}>{transcript}</T> : null}
+              </View>
+            ) : null}
           </View>
         </ScrollView>
       </View>

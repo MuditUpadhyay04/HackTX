@@ -18,11 +18,14 @@ export default function PhotoViewer() {
   const insets = useSafeAreaInsets();
   const { id, t } = useLocalSearchParams<{ id: string; t?: string }>();
   const [chrome, setChrome] = useState(true);
+  // While the knock banner is down, the top bar steps aside so the two never overlap.
+  const [knockGone, setKnockGone] = useState(false);
   const [knockY] = useState(() => new Animated.Value(-220));
   const [pulse] = useState(() => new Animated.Value(1));
   // Data wiring (mobile/src/lib/attention.ts): the backend's attention budget decides if and
   // what Un-Said knocks. Most photos never knock; at most once a session, twice a day.
   const { knock, onZoom, open, dismiss } = useKnock(id);
+  const knockShown = Boolean(knock) && !knockGone;
 
   const talk = () => router.push({ pathname: "/talk", params: { photo: id } });
 
@@ -41,7 +44,10 @@ export default function PhotoViewer() {
     }
   }, [knock, knockY]);
 
-  const hideKnock = () => Animated.spring(knockY, { toValue: -220, ...spring.banner, useNativeDriver: true }).start();
+  const hideKnock = () => {
+    setKnockGone(true);
+    Animated.spring(knockY, { toValue: -220, ...spring.banner, useNativeDriver: true }).start();
+  };
   const dismissKnock = () => {
     dismiss();
     hideKnock();
@@ -65,7 +71,7 @@ export default function PhotoViewer() {
         </Pressable>
       </ScrollView>
 
-      {chrome ? (
+      {chrome && !knockShown ? (
         <View style={[styles.top, { paddingTop: insets.top + space.s4, paddingLeft: space.s16 + insets.left, paddingRight: space.s16 + insets.right }]}>
           <LinearGradient pointerEvents="none" colors={["rgba(255,255,255,0.94)", "rgba(255,255,255,0)"]} style={StyleSheet.absoluteFill} />
           <Pressable

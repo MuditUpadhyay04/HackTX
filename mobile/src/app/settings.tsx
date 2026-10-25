@@ -121,12 +121,16 @@ export default function SettingsScreen() {
           </>
         ) : null}
 
-        <T v="caption" style={{ marginHorizontal: inset.text, marginTop: space.s32 }}>
-          {`Server ${API_URL}`}
-        </T>
-        <T v="caption" style={{ marginHorizontal: inset.text, marginTop: space.s4 }}>
-          {home ? `Transcription: ${home.providers.transcribe} · Sorting: ${home.providers.spark} · Delivery: ${home.providers.whatsapp}` : "Not connected"}
-        </T>
+        {__DEV__ ? (
+          <>
+            <T v="caption" style={{ marginHorizontal: inset.text, marginTop: space.s32 }}>
+              {`Server ${API_URL}`}
+            </T>
+            <T v="caption" style={{ marginHorizontal: inset.text, marginTop: space.s4 }}>
+              {home ? `Transcription: ${home.providers.transcribe} · Sorting: ${home.providers.spark} · Delivery: ${home.providers.whatsapp}` : "Not connected"}
+            </T>
+          </>
+        ) : null}
       </ScrollView>
     </View>
   );
