@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "Un-Said",
+    "slug": "unsaid",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/brand/icon-1024.png",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "app.unsaid.demo"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0F0D15",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-image",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Unsaid looks through your photos with you, on this phone, to find the people you miss.",
+          "savePhotosPermission": false
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Unsaid listens only while you hold the mic."
+        }
+      ],
+      "expo-font",
+      "expo-asset"
+    ],
+    "scheme": "unsaid",
+    "backgroundColor": "#0F0D15"
+  }
+}
