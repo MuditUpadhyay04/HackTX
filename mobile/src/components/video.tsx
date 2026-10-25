@@ -7,6 +7,7 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import { useState } from "react";
 import { Alert, Platform, Pressable, StyleSheet, View } from "react-native";
 
+import { DEMO_DATA } from "../lib/demo";
 import { color, radius, space } from "../theme/tokens";
 import { Sheet, T, TextButton } from "./ui";
 
@@ -24,6 +25,7 @@ function mimeOf(asset: ImagePicker.ImagePickerAsset) {
 }
 
 export async function pickVideo(source: "camera" | "library", front = false): Promise<PickedVideo | null> {
+  if (source === "library" && DEMO_DATA) return null; // demo data: the phone's own videos stay its own
   const options: ImagePicker.ImagePickerOptions = {
     ...(front ? { cameraType: ImagePicker.CameraType.front } : {}),
     mediaTypes: ["videos"],
@@ -116,12 +118,15 @@ export function VideoAttach({ video, onChange, disabled }: { video: PickedVideo 
           </View>
           <T v="rowName" style={{ flex: 1 }}>Record a video</T>
         </Pressable>
-        <Pressable testID="letter-video-library" onPress={() => choose("library")} style={styles.sheetRow}>
-          <View style={styles.well}>
-            <Ionicons name="film-outline" size={20} color={color.accent} />
-          </View>
-          <T v="rowName" style={{ flex: 1 }}>Choose from library</T>
-        </Pressable>
+        {/* Demo data: never the phone's own videos. Recording a new one stays. */}
+        {DEMO_DATA ? null : (
+          <Pressable testID="letter-video-library" onPress={() => choose("library")} style={styles.sheetRow}>
+            <View style={styles.well}>
+              <Ionicons name="film-outline" size={20} color={color.accent} />
+            </View>
+            <T v="rowName" style={{ flex: 1 }}>Choose from library</T>
+          </Pressable>
+        )}
       </Sheet>
     </>
   );

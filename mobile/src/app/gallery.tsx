@@ -9,7 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { AppIcon, PrimaryPill } from "../components/ui";
 import { haptics } from "../lib/haptics";
-import { type GalleryPhoto, WEB_LIBRARY, loadPhotos } from "../lib/photos";
+import { type GalleryPhoto, SERVER_LIBRARY, loadPhotos } from "../lib/photos";
 import { useLayout } from "../lib/useLayout";
 import { color, space } from "../theme/tokens";
 
@@ -27,9 +27,10 @@ export default function Gallery() {
   const { insets, usableWidth } = useLayout();
   const columns = Math.max(MIN_COLUMNS, Math.floor(usableWidth / TARGET_TILE));
   const tile = Math.floor((usableWidth - GAP * (columns - 1)) / columns);
-  const [cameraRoll, requestPermission] = usePermissions();
-  // the web build reads the demo's photos from the server: nothing to ask permission for
-  const permission = WEB_LIBRARY ? { granted: true } : cameraRoll;
+  // Demo data (and the web build) reads the demo's photos from the server: the camera roll is never
+  // asked for or even checked (get: false), so expo-media-library is never called.
+  const [cameraRoll, requestPermission] = usePermissions({ get: !SERVER_LIBRARY });
+  const permission = SERVER_LIBRARY ? { granted: true } : cameraRoll;
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
   const [done, setDone] = useState(false);
   const loading = useRef(false);
@@ -41,6 +42,8 @@ export default function Gallery() {
       const next = await loadPhotos(photos.length, PAGE);
       setPhotos((p) => dedupe([...p, ...next]));
       if (next.length < PAGE) setDone(true);
+    } catch {
+      // the next page waits for the next scroll
     } finally {
       loading.current = false;
     }
@@ -49,11 +52,13 @@ export default function Gallery() {
   useEffect(() => {
     if (!permission?.granted) return;
     let alive = true;
-    loadPhotos(0, PAGE).then((first) => {
-      if (!alive) return;
-      setPhotos(dedupe(first));
-      setDone(first.length < PAGE);
-    });
+    loadPhotos(0, PAGE)
+      .then((first) => {
+        if (!alive) return;
+        setPhotos(dedupe(first));
+        setDone(first.length < PAGE);
+      })
+      .catch(() => {});
     return () => {
       alive = false;
     };

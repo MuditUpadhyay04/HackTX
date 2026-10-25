@@ -14,12 +14,15 @@ import { NavBar, Overline, PrimaryPill, Sheet, styles as ui, T, TextButton } fro
 import { api, type Channel } from "../lib/api";
 import { type App, APP_CHANNEL, APP_LABEL, CHANNEL_APP } from "../lib/handoff";
 import { haptics } from "../lib/haptics";
+import { type GalleryPhoto, SERVER_LIBRARY, loadPhotos } from "../lib/photos";
 import { toast } from "../lib/toast";
 import { useHome } from "../lib/useHome";
 import { READING_MAX, useLayout } from "../lib/useLayout";
 import { color, inset, space, type } from "../theme/tokens";
 
 const SHEET_APPS: App[] = ["whatsapp", "messages", "instagram"];
+const LIBRARY_COLUMNS = 4;
+const LIBRARY_GAP = 2;
 
 export default function Compose() {
   const insets = useSafeAreaInsets();
@@ -34,6 +37,9 @@ export default function Compose() {
   const [busy, setBusy] = useState(false);
   const [boxH, setBoxH] = useState(0); // grows with the words (react-native-web's textarea doesn't on its own)
   const [photo, setPhoto] = useState<{ uri: string; assetId: string | null } | null>(null);
+  // Demo data: the paperclip picks from the demo's photos on the server, never the phone's library.
+  const [library, setLibrary] = useState<GalleryPhoto[] | null>(null);
+  const libraryTile = Math.floor((Math.min(layout.usableWidth, 560) - space.s16 * 2 - LIBRARY_GAP * (LIBRARY_COLUMNS - 1)) / LIBRARY_COLUMNS);
 
   // What's in the box when it opens: the pile lines he had on, or his saved draft, or nothing (reply).
   useEffect(() => {
@@ -94,6 +100,16 @@ export default function Compose() {
   };
 
   const attach = async () => {
+    if (SERVER_LIBRARY) {
+      setLibrary([]);
+      try {
+        setLibrary(await loadPhotos(0, 60));
+      } catch (e) {
+        setLibrary(null);
+        Alert.alert("Couldn't open the library", (e as Error).message);
+      }
+      return;
+    }
     const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.82 });
     if (res.canceled || !res.assets?.[0]) return;
     const a = res.assets[0];
@@ -187,6 +203,25 @@ export default function Compose() {
         <T v="caption" style={{ textAlign: "center" }}>You decide when it leaves.</T>
       </View>
 
+      <Sheet visible={library !== null} onClose={() => setLibrary(null)}>
+        <T v="section" style={{ marginBottom: space.s8 }}>Library</T>
+        <ScrollView contentContainerStyle={styles.libraryGrid}>
+          {(library ?? []).map((p) => (
+            <Pressable
+              key={p.id}
+              accessibilityRole="imagebutton"
+              onPress={() => {
+                haptics.select();
+                setPhoto({ uri: p.id, assetId: p.id }); // the server photo's URL is its id
+                setLibrary(null);
+              }}
+            >
+              <Image source={{ uri: p.id }} style={{ width: libraryTile, height: libraryTile, backgroundColor: color.surface }} contentFit="cover" recyclingKey={p.id} />
+            </Pressable>
+          ))}
+        </ScrollView>
+      </Sheet>
+
       <Sheet visible={picking} onClose={() => setPicking(false)}>
         {SHEET_APPS.map((a) => (
           <Pressable key={a} onPress={() => pickApp(a)} style={styles.sheetRow}>
@@ -216,4 +251,5 @@ const styles = StyleSheet.create({
   recipient: { flexDirection: "row", alignItems: "center", gap: space.s8, marginHorizontal: inset.text },
   tools: { flexDirection: "row", gap: space.s24, marginHorizontal: inset.text, paddingVertical: space.s4 },
   sheetRow: { flexDirection: "row", alignItems: "center", gap: space.s12, paddingVertical: space.s12 },
+  libraryGrid: { flexDirection: "row", flexWrap: "wrap", gap: LIBRARY_GAP, paddingBottom: space.s8 },
 });

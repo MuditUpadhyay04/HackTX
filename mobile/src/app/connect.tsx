@@ -13,6 +13,7 @@ import { AppGlyph } from "../components/AppRail";
 import { FacesSheet } from "../components/faces";
 import { NavBar, PillGradientFill, Press, styles as ui, T, TextButton } from "../components/ui";
 import { api, type FaceCluster, type PhotoSource } from "../lib/api";
+import { DEMO_DATA } from "../lib/demo";
 import { haptics } from "../lib/haptics";
 import { color, inset, radius, space } from "../theme/tokens";
 import { useLayout } from "../lib/useLayout";
@@ -20,7 +21,9 @@ import { useLayout } from "../lib/useLayout";
 export default function Connect() {
   const insets = useSafeAreaInsets();
   const layout = useLayout();
-  const [permission, requestPermission] = usePermissions();
+  // Demo data: Connect imports the demo photos on the server only, so the phone's photo permission
+  // is never checked (get: false) or asked for.
+  const [permission, requestPermission] = usePermissions({ get: !DEMO_DATA });
   const [connected, setConnected] = useState<Record<PhotoSource, boolean>>({ photos: false, instagram: false, facebook: false });
   const [pending, setPending] = useState<FaceCluster[]>([]);
   const [total, setTotal] = useState(0);
@@ -43,7 +46,7 @@ export default function Connect() {
 
   const connect = async (source: PhotoSource) => {
     try {
-      if (source === "photos" && Platform.OS !== "web" && !permission?.granted) {
+      if (source === "photos" && Platform.OS !== "web" && !DEMO_DATA && !permission?.granted) {
         const res = await requestPermission();
         if (!res.granted) return;
       }
@@ -56,7 +59,7 @@ export default function Connect() {
   };
 
   const rows = [
-    { key: "photos" as const, title: "Photos", sub: "on this iPhone", id: "camera-roll-scan", glyph: null },
+    { key: "photos" as const, title: "Photos", sub: "on this phone", id: "camera-roll-scan", glyph: null },
     { key: "instagram" as const, title: "Instagram photos", sub: "your posts and tagged photos", id: "graph-api-photo-import", glyph: "instagram" as const },
     { key: "facebook" as const, title: "Facebook photos", sub: "albums and tagged photos", id: "graph-api-photo-import", glyph: "facebook" as const },
   ];
