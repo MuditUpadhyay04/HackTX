@@ -28,6 +28,10 @@ import websockets  # noqa: E402
 from app.audio import RATE, pcm_to_wav  # noqa: E402
 from app.config import settings  # noqa: E402
 
+# Windows consoles default to cp1252; print the separators as written.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 CHECKS = ("spark", "transcribe", "realtime", "whatsapp")
 SECRETS = [s for s in (settings.model_api_key, settings.whatsapp_token) if s]
 results: list[tuple[str, str]] = []

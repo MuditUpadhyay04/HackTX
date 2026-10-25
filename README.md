@@ -16,6 +16,7 @@ HackTX 2026 · Meta track: *Bringing People Closer Together with AI* · Gurneal 
 | [`backend/`](backend/) | FastAPI: the Muse relay and sorting, the safety gate, hold until her morning, Mom's letter page, the demo panel | Mudit |
 | [`design/`](design/) | Gurneal's design system: tokens, cast, copy, icon, reference screens | Gurneal |
 | [`docs/`](docs/) | Product spec, demo scripts, team notes, archive | Everyone |
+| [`deploy/aws/`](deploy/aws/) | AWS deploy: one Lightsail instance, Docker Compose, Caddy HTTPS on `<ip>.sslip.io` | Mudit |
 | [`render.yaml`](render.yaml) | Render blueprint for the backend | Mudit |
 
 ## Run it
@@ -42,6 +43,10 @@ npx expo start --lan     # then scan the QR code with the iPhone camera
 ```
 
 Expo Go needs the Expo CLI signed in as the same account as the phone. If `npx expo login` can't open a browser, create a token at expo.dev → Settings → Access tokens and set `EXPO_TOKEN` in that terminal.
+
+**Check the keys** before any demo: `cd backend && uv run python scripts/check_keys.py` (PASS/FAIL per key, secrets never printed).
+
+**Deploy** with HTTPS, which Mom's "Hold to reply" mic needs: [`deploy/aws/README.md`](deploy/aws/README.md) (about 15 minutes, $7/month), or `render.yaml` on a paid plan with a disk.
 
 More: [`backend/README.md`](backend/README.md) · [`mobile/README.md`](mobile/README.md)
 
