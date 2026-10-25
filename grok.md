@@ -2,6 +2,19 @@
 
 Running log of every change Grok Bot makes. Times are America/Chicago (CDT). Newest entries are at the top. Updated after every message Gurneal sends to Grok Bot.
 
+## Oct 25, 2026, 12:30 AM CDT
+
+QA on `1843560` (HackTx2). One commit on `unsaid-overhaul`, `b62a45e`:
+
+- Preview hold follows sleep, not channel. While the person is asleep (any channel: WhatsApp, iMessage, Instagram), "Hold until her morning" is offered and is the default. Awake, the hold box is hidden and the letter goes now. The pill says "Send when they're ready" while holding and "Send now" otherwise. The backend's release time was already channel-agnostic; a test now covers Sarah (iMessage) being held while asleep.
+- Preview: the dock sits over the scroll's bottom padding (dock height), so "Send now" isn't hidden at 402 wide.
+- Settings Switch: theme track/thumb colors, no react-native-web teal.
+- Letter de-dupe: a selected piece whose words are already inside another selected piece is left out of the letter, in the app preview and in the card the backend builds. Sarah's seeded "I miss the way we used to talk." no longer repeats.
+- Home reply title wraps to 2 lines; Talk's wide (Duo) side panel is top-aligned; Letters hides the avatar strip with a single sender. The settings debug line was already `__DEV__`-only.
+- Skipped: QA 7 and 8 (copy, Gurneal). No new copy was written; the awake case hides the hold box rather than adding a line.
+
+Checks: tsc and expo lint clean; expo export for iOS, Android and web works; backend pytest 64 passing.
+
 ## Oct 25, 2026, 12:07 AM CDT
 
 Nick asked for no dark mode, a way to send a video with a letter, and a reminder that the goal is the new frontend running on the existing backend. Three commits are on `unsaid-overhaul`:

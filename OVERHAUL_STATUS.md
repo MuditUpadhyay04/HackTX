@@ -3,6 +3,12 @@
 Branch: `unsaid-overhaul`, off `main` at `c32f7ee`. Mobile, plus a small backend addition for video (Pass 5): `POST /api/cards/{id}/video`, `video_url` on cards and the public card, a `<video>` in `backend/web/card.js`, and one test.
 
 - Pass 1 (Grok, stopped at Gurneal's request 11:19 PM CDT Oct 24): restyle of every screen. See "Done, by screen".
+- QA fixes 2 (Grok, Oct 25, 12:30 AM CDT, `b62a45e`):
+  - Preview: the hold choice shows only while they're asleep, for every channel (was WhatsApp only), and Hold is the default then. Awake: no hold box, Send now. The pill reads "Send when they're ready" while holding, else "Send now".
+  - Preview: the dock no longer covers "Send now"; the scroll pads by the dock height.
+  - Settings Switch uses theme colors on web (no teal).
+  - A line that repeats another selected line is dropped from the letter (app preview and backend card). Backend test `tests/test_hold_and_letter.py`.
+  - Home reply title wraps to 2 lines. Talk's wide side panel is top-aligned. Letters hides the avatar strip with one sender.
 - QA fixes (Grok, Oct 25, 12:07 AM CDT, `1843560`):
   - Preview: a shared card still hands off, Hold is on by default, and the card is compact.
   - Pile ticks every line.
@@ -26,6 +32,7 @@ The app is for a **local demo**, not a hosted deployment. See "Local demo" below
 - Pass 4 (light theme): `14611e9`
 - Pass 5 (video): `c468021`
 - QA fixes: `1843560`
+- QA fixes 2: `b62a45e`
 - Pass 3 (foldable / any window size): the commit that adds the "Pass 3" section (see `git log`)
 
 Draft PR: https://github.com/MuditUpadhyay04/HackTX/pull/1 (not merged).
