@@ -158,6 +158,53 @@ PEOPLE_PHOTOS = [
     ("photo_seed_michael_latenight", "priya", "seed_michael_latenight.jpg", "2am tacos", "2026-02-14T02:00:00-06:00"),
     ("photo_seed_michael_roadtrip", "priya", "seed_michael_roadtrip.jpg", "road trip", "2026-07-03T12:00:00-05:00"),
     ("photo_seed_michael_lake", "priya", "seed_michael_lake.jpg", "lake day", "2026-08-09T16:00:00-05:00"),
+    # batch 2 (same set, demo-photos branch: batch2/ and extras/). None = not in the cast: library only.
+    ("photo_seed_mom_son12_grocery", "mom", "seed_mom_son12_grocery.jpg", "h-e-b runs", "2018-07-14T11:00:00-05:00"),
+    ("photo_seed_mom_son12_homework", "mom", "seed_mom_son12_homework.jpg", "fractions at the table", "2018-10-02T19:30:00-05:00"),
+    ("photo_seed_son13_mom_kitchen", "mom", "seed_son13_mom_kitchen.jpg", "helping in the kitchen", "2019-11-28T15:00:00-06:00"),
+    ("photo_seed_mom_son13_bike", "mom", "seed_mom_son13_bike.jpg", "she fixed my chain", "2019-04-07T17:00:00-05:00"),
+    ("photo_seed_mom_son13_temple", "mom", "seed_mom_son13_temple.jpg", "temple, sunday morning", "2019-08-25T09:00:00-05:00"),
+    ("photo_seed_mom_son14_haircut", "mom", "seed_mom_son14_haircut.jpg", "kitchen haircut", "2020-04-18T14:00:00-05:00"),
+    ("photo_seed_son14_mom_aunty_carrom", "mom", "seed_son14_mom_aunty_carrom.jpg", "carrom with aunty", "2020-08-15T20:00:00-05:00"),
+    ("photo_seed_mom_son14_tv", "mom", "seed_mom_son14_tv.jpg", "her shows", "2020-11-07T21:00:00-06:00"),
+    ("photo_seed_son15_mom_sciencefair", "mom", "seed_son15_mom_sciencefair.jpg", "science fair", "2021-03-05T10:00:00-06:00"),
+    ("photo_seed_mom_son15_laundry", "mom", "seed_mom_son15_laundry.jpg", "she taught me laundry", "2021-06-12T11:00:00-05:00"),
+    ("photo_seed_mom_son16_sick", "mom", "seed_mom_son16_sick.jpg", "soup and vicks", "2022-01-20T13:00:00-06:00"),
+    ("photo_seed_mom_son16_snow", "mom", "seed_mom_son16_snow.jpg", "snow day", "2022-02-03T10:00:00-06:00"),
+    ("photo_seed_mom_son17_collegeapps", "mom", "seed_mom_son17_collegeapps.jpg", "college apps, 1am", "2022-11-01T01:00:00-05:00"),
+    ("photo_seed_son17_mom_driving", "mom", "seed_son17_mom_driving.jpg", "driving lessons", "2023-05-20T17:00:00-05:00"),
+    ("photo_seed_son18_mom_graduation", "mom", "seed_son18_mom_graduation.jpg", "her graduation saree", "2024-05-25T12:00:00-05:00"),
+    ("photo_seed_mom_son18_packing", "mom", "seed_mom_son18_packing.jpg", "packing for school", "2024-08-10T16:00:00-05:00"),
+    ("photo_seed_mom_son19_airport", "mom", "seed_mom_son19_airport.jpg", "the airport, waving", "2025-01-05T07:00:00-06:00"),
+    ("photo_seed_mom_son19_dishes", "mom", "seed_mom_son19_dishes.jpg", "dishes after diwali", "2025-10-21T22:00:00-05:00"),
+    ("photo_seed_mom_son20_walk", "mom", "seed_mom_son20_walk.jpg", "evening walk", "2026-06-20T19:30:00-05:00"),
+    ("photo_seed_son19_gf_campus_walk", "jordan", "seed_son19_gf_campus_walk.jpg", "the long way to class", "2025-09-20T12:00:00-05:00"),
+    ("photo_seed_sarah_bookstore", "jordan", "seed_sarah_bookstore.jpg", "bookpeople", "2025-10-04T15:00:00-05:00"),
+    ("photo_seed_sarah_pumpkins", "jordan", "seed_sarah_pumpkins.jpg", "pumpkin patch", "2025-10-25T16:00:00-05:00"),
+    ("photo_seed_sarah_boardgames", "jordan", "seed_sarah_boardgames.jpg", "she always wins", "2025-11-08T21:00:00-06:00"),
+    ("photo_seed_sarah_diner", "jordan", "seed_sarah_diner.jpg", "kerbey lane, 2am", "2025-12-13T02:00:00-06:00"),
+    ("photo_seed_sarah_iceskating", "jordan", "seed_sarah_iceskating.jpg", "she held me up", "2025-12-27T18:00:00-06:00"),
+    ("photo_seed_sarah_bowling", "jordan", "seed_sarah_bowling.jpg", "gutter balls", "2026-01-17T20:00:00-06:00"),
+    ("photo_seed_sarah_laundromat", "jordan", "seed_sarah_laundromat.jpg", "laundry night", "2026-02-26T21:00:00-06:00"),
+    ("photo_seed_sarah_movienight", "jordan", "seed_sarah_movienight.jpg", "movie night", "2026-03-28T22:00:00-05:00"),
+    ("photo_seed_sarah_thrift", "jordan", "seed_sarah_thrift.jpg", "thrift finds", "2026-04-04T14:00:00-05:00"),
+    ("photo_seed_son20_sarah_mom_dinner", "jordan", "seed_son20_sarah_mom_dinner.jpg", "sarah met mom", "2026-06-07T19:00:00-05:00"),
+    ("photo_seed_sarah_ikea", "jordan", "seed_sarah_ikea.jpg", "ikea date", "2026-08-15T13:00:00-05:00"),
+    ("photo_seed_son17_michael_coach_timeout", "priya", "seed_son17_michael_coach_timeout.jpg", "coach's timeout", "2023-02-10T20:00:00-06:00"),
+    ("photo_seed_michael_carwash", "priya", "seed_michael_carwash.jpg", "senior car wash", "2024-04-13T11:00:00-05:00"),
+    ("photo_seed_michael_bus", "priya", "seed_michael_bus.jpg", "the 801, every morning", "2024-09-10T08:00:00-05:00"),
+    ("photo_seed_michael_fishing", "priya", "seed_michael_fishing.jpg", "caught one, finally", "2025-06-21T07:00:00-05:00"),
+    ("photo_seed_michael_moving", "priya", "seed_michael_moving.jpg", "moving day", "2025-08-17T10:00:00-05:00"),
+    ("photo_seed_michael_arcade", "priya", "seed_michael_arcade.jpg", "air hockey rematch", "2025-09-27T21:00:00-05:00"),
+    ("photo_seed_michael_library", "priya", "seed_michael_library.jpg", "asleep at pcl", "2025-11-18T23:00:00-06:00"),
+    ("photo_seed_michael_airport", "priya", "seed_michael_airport.jpg", "waiting at abia", "2025-12-20T06:30:00-06:00"),
+    ("photo_seed_michael_pingpong", "priya", "seed_michael_pingpong.jpg", "basement ping pong", "2026-01-24T16:00:00-06:00"),
+    ("photo_seed_michael_soccer", "priya", "seed_michael_soccer.jpg", "sunday league", "2026-03-15T10:00:00-05:00"),
+    ("photo_seed_michael_tire", "priya", "seed_michael_tire.jpg", "flat on 71", "2026-05-09T18:00:00-05:00"),
+    ("photo_seed_son20_bff_videogames", "priya", "seed_son20_bff_videogames.jpg", "2k till sunrise", "2026-09-05T03:00:00-05:00"),
+    ("photo_seed_son19_priya_aunty_function", None, "seed_son19_priya_aunty_function.jpg", "priya's family function", "2025-07-19T19:00:00-05:00"),
+    ("photo_seed_son20_jake_dorm", None, "seed_son20_jake_dorm.jpg", "dorm with jake", "2026-01-30T22:00:00-06:00"),
+    ("photo_seed_son20_tasha_lab", None, "seed_son20_tasha_lab.jpg", "lab with tasha", "2026-09-17T14:00:00-05:00"),
 ]
 
 
@@ -176,7 +223,7 @@ def ensure_people_photos() -> list[str]:
     with db.tx() as c:
         _drop_stale_seed_photos(c)
         for pid, person, filename, caption, taken in PEOPLE_PHOTOS:
-            if not c.execute("SELECT 1 FROM people WHERE id = ?", (person,)).fetchone():
+            if person and not c.execute("SELECT 1 FROM people WHERE id = ?", (person,)).fetchone():
                 continue
             rel = f"photos/{filename}"
             src = (SEED_MEDIA / filename).read_bytes()
@@ -184,7 +231,7 @@ def ensure_people_photos() -> list[str]:
             if not dest.exists() or dest.stat().st_size != len(src):  # missing, or an older drawn version
                 store.save_media("photos", filename, src)
             c.execute(
-                "UPDATE photos SET path = ?, caption = ?, taken_at = ? WHERE id = ? AND person_id = ?",
+                "UPDATE photos SET path = ?, caption = ?, taken_at = ? WHERE id = ? AND person_id IS ?",
                 (rel, caption, taken, pid, person),
             )
             inserted = c.execute(
