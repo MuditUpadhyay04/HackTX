@@ -49,6 +49,17 @@ export const TAB_ICONS = {
   ],
 };
 
+/** A letter's first line is the hero: 64 pt, stepping down to 48 and 36 so it fits. */
+export function fitHero(el) {
+  if (!el) return;
+  const steps = [["", 72, 3], ["s48", 56, 4], ["s36", 42, Infinity]];
+  for (const [size, lineHeight, maxLines] of steps) {
+    el.classList.remove("s48", "s36");
+    if (size) el.classList.add(size);
+    if (Math.round(el.getBoundingClientRect().height / lineHeight) <= maxLines) return;
+  }
+}
+
 export function wave(id, bars = 24) {
   return `<div class="wave" id="${id}">${"<i></i>".repeat(bars)}</div>`;
 }

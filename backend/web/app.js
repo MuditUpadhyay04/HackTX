@@ -1,6 +1,10 @@
-// Unsaid, the student's side. Plain modules, no build step; served by the backend at /app/.
+// Un-Said, the student's side (web). Plain modules, no build step; served by the backend at /app/.
+// Styled with Gurneal's design (design/). Every API call, its order and its payload are unchanged.
 import { holdToTalk, startPcm, wavBlob } from "/app/audio.js";
-import { CHECK_SVG, MARK_SVG, MIC_SVG, PAUSE_SVG, PLAY_SVG, esc, toast, wave } from "/app/ui.js";
+import {
+  APP_GLYPH, CHECK_SVG, CHEVRON_LEFT, CHEVRON_RIGHT, MIC_SVG, MOON_SVG, PAUSE_SVG, PLAY_SVG, PLUS_SVG,
+  QUOTE_SVG, STOP_SVG, SUN_SVG, TAB_ICONS, VIDEO_SVG, appIcon, esc, fitHero, toast, wave, waveFeeder,
+} from "/app/ui.js";
 
 // ------------------------------------------------------------------ key + api
 
@@ -45,12 +49,14 @@ function wsUrl(path) {
 
 // ------------------------------------------------------------------ state + routing
 
-const S = { home: null, view: "home", params: {}, seen: new Set(), sort: null, rec: null, cleanup: null };
+const S = { home: null, view: "home", params: {}, seen: new Set(), sort: null, rec: null, cleanup: null, shown: null, pile: null, picked: new Set(), talk: null };
 const main = document.getElementById("view");
 const $ = (sel) => main.querySelector(sel);
+const TABS = ["home", "letters", "you"];
 
 function go(view, p = {}) {
   if (S.cleanup) { S.cleanup(); S.cleanup = null; }
+  closeSheet();
   // A nudge never follows you to another screen, and never sits over the safety resources.
   document.getElementById("sheet").classList.remove("show");
   S.view = view;
@@ -60,9 +66,18 @@ function go(view, p = {}) {
 }
 
 function render() {
-  const views = { home: renderHome, memory: renderMemory, sorted: renderSorted, hold: renderHold, stack: renderStack, safety: renderSafety, note: renderNote, demo: renderDemo, key: renderKey };
+  const views = {
+    home: renderHome, letters: renderLetters, letter: renderLetter, you: renderYou,
+    memory: renderMemory, sorted: renderSorted, hold: renderHold, stack: renderStack, preview: renderPreview,
+    safety: renderSafety, note: renderNote, demo: renderDemo, key: renderKey,
+  };
   (views[S.view] || renderHome)();
+  renderTabs();
+  S.shown = S.view;
 }
+
+// Entrance motion only when a screen first appears, not on the 4-second refresh.
+const fx = (delay = "") => (S.shown === S.view ? "" : `fade-in ${delay}`);
 
 async function refresh() {
   try {
@@ -72,7 +87,7 @@ async function refresh() {
     throw err;
   }
   showNudge();
-  if (S.view === "home") renderHome();
+  if (TABS.includes(S.view)) render();
 }
 
 setInterval(() => {
@@ -84,26 +99,59 @@ main.addEventListener("click", (e) => {
   if (target) go(target.dataset.go, { ...target.dataset });
 });
 
+// ------------------------------------------------------------------ tab bar (Home · Letters · You)
+
+function renderTabs() {
+  const bar = document.getElementById("tabbar");
+  const on = TABS.includes(S.view);
+  bar.classList.toggle("hidden", !on);
+  main.classList.toggle("with-tabs", on);
+  document.body.classList.toggle("tabs", on);
+  if (!on) return;
+  const label = { home: "Home", letters: "Letters", you: "You" };
+  bar.innerHTML = `<div class="inner">${TABS.map((t) => `
+    <button class="tab ${S.view === t ? "active" : ""}" data-tab="${t}">${TAB_ICONS[t][S.view === t ? 0 : 1]}<span>${label[t]}</span></button>`).join("")}</div>`;
+}
+
+document.getElementById("tabbar").addEventListener("click", (e) => {
+  const tab = e.target.closest("[data-tab]");
+  if (tab && tab.dataset.tab !== S.view) go(tab.dataset.tab);
+});
+
 // ------------------------------------------------------------------ helpers
 
 const person = (id) => S.home.people.find((p) => p.id === id) || (S.home.me.id === id ? S.home.me : null);
 const SUBJECT = { her: "she", him: "he", them: "they" };
 const POSSESSIVE = { her: "her", him: "his", them: "their" };
-const moon = (p) => (p.is_asleep ? "🌙 " : "");
-const back = (to = "home", label = "back") => `<button class="back" data-go="${to}">‹ ${label}</button>`;
-const top = () => `
-  <div class="topbar">
-    <div class="wordmark"><span class="mark">${MARK_SVG}</span>unsaid</div>
-    <div class="row">
-      ${S.home && Object.values(S.home.providers).includes("mock") ? `<span class="micro pill-mock" title="no MODEL_API_KEY: transcripts and sorting are mocked">mock ai</span>` : ""}
-      ${DEMO ? `<button class="link" data-go="demo">demo</button>` : ""}
-    </div>
-  </div>`;
+const CHANNEL = { whatsapp: "WhatsApp", imessage: "Messages", instagram: "Instagram" };
+const OPEN_IN = { whatsapp: "Open WhatsApp", imessage: "Open Messages", instagram: "Open Instagram" };
+const GLYPH_FOR = { whatsapp: APP_GLYPH.whatsapp, imessage: APP_GLYPH.messages, instagram: APP_GLYPH.instagram };
+const HANDOFF_ID = { whatsapp: "handoff-whatsapp", imessage: "unsend-share-sms", instagram: "handoff-instagram" };
+
+const initial = (name) => esc((name || "?").trim().charAt(0).toUpperCase());
+function avatar(name, size = "", ring = false) {
+  const a = `<span class="avatar ${size}">${initial(name)}</span>`;
+  return ring ? `<span class="ring"><span class="gap">${a}</span></span>` : a;
+}
+function nav(title = "", back = "home", { label = "", trail = "", data = "" } = {}) {
+  return `<nav class="nav">
+    <button class="back" data-go="${back}" ${data} aria-label="back">${CHEVRON_LEFT}${label ? `<span>${esc(label)}</span>` : ""}</button>
+    <span class="title t-nav">${esc(title)}</span>
+    <span class="trail">${trail}</span>
+  </nav>`;
+}
+const timeChip = (p) =>
+  `<span class="chip time-chip" data-feature-id="recipient-timezone-set">${p.is_asleep ? MOON_SVG : SUN_SVG}${esc(p.local_time)} for ${esc(p.name)}</span>`;
 
 function morningLabel(p) {
   const [h, m] = p.morning.split(":").map(Number);
-  const hour = h % 12 || 12;
-  return `${hour}${m ? `:${String(m).padStart(2, "0")}` : ""} ${h < 12 ? "AM" : "PM"}`;
+  return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
+}
+
+// When a letter came: "6:40 PM" today, else the server's own day phrase ("yesterday", "on tuesday").
+function arrivedLabel(r) {
+  if (r.day !== "today") return r.day;
+  return new Date(r.created_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: S.home.me.timezone });
 }
 
 function dateLabel(iso) {
@@ -112,6 +160,35 @@ function dateLabel(iso) {
   return fmt(iso) === fmt(S.home.clock.now) ? "tonight" : fmt(iso).toLowerCase();
 }
 
+/** The lavender letter card (letters only): his words, verbatim, and a signature. */
+function letterHTML(lines, signature, { extra = "", compact = false, underline = false, cls = "", meta = "" } = {}) {
+  const [first, ...rest] = lines;
+  let hero = esc(first || "");
+  const words = (first || "").split(" ");
+  if (underline && words.length > 2) {
+    hero = `${esc(words.slice(0, -2).join(" "))} <span class="uline">${esc(words.slice(-2).join(" "))}</span>`;
+  }
+  return `<article class="letter pad-card ${compact ? "compact" : ""} ${cls}">
+    <span class="quote">${QUOTE_SVG}</span>
+    <p class="t-overline">For you</p>
+    ${first ? `<p class="hero-line">${hero}</p>` : ""}
+    ${rest.map((text) => `<p class="body-line">${esc(text)}</p>`).join("")}
+    ${extra}
+    <p class="sig">${esc(signature)}${meta ? ` <span class="t-meta">· ${esc(meta)}</span>` : ""}</p>
+  </article>`;
+}
+const fitHeroes = () => main.querySelectorAll(".hero-line").forEach(fitHero);
+
+const listenRow = (url, id) => `
+  <div class="listen" data-feature-id="unsend-play">
+    <button class="play" aria-label="listen">${PLAY_SVG}</button>
+    <span class="t-name">listen</span>
+    ${wave(id, 20)}
+    <audio src="${esc(url)}" preload="auto"></audio>
+  </div>`;
+
+const RESTING = [6, 10, 14, 8, 18, 12, 20, 10, 16, 8, 12, 18, 10, 14, 6, 10, 16, 8, 12, 6];
+
 function wirePlayer(root, onFirstPlay) {
   const audio = root.querySelector("audio");
   const btn = root.querySelector(".play");
@@ -119,11 +196,13 @@ function wirePlayer(root, onFirstPlay) {
   if (!audio || !btn) return null;
   let timer = 0;
   let played = false;
-  const bars = waveEl ? waveEl.querySelectorAll("i") : [];
+  const bars = waveEl ? [...waveEl.querySelectorAll("i")] : [];
+  const rest = () => bars.forEach((b, i) => (b.style.height = `${RESTING[i % RESTING.length]}px`));
   const animate = () => {
-    bars.forEach((b) => (b.style.height = `${20 + Math.random() * 80}%`));
-    timer = setTimeout(animate, 110);
+    bars.forEach((b) => (b.style.height = `${4 + Math.round(Math.random() * 20)}px`));
+    timer = setTimeout(animate, 120);
   };
+  rest();
   btn.onclick = () => (audio.paused ? audio.play() : audio.pause());
   audio.onplay = () => {
     btn.innerHTML = PAUSE_SVG;
@@ -135,7 +214,7 @@ function wirePlayer(root, onFirstPlay) {
     btn.innerHTML = PLAY_SVG;
     waveEl && waveEl.classList.remove("on");
     clearTimeout(timer);
-    bars.forEach((b) => (b.style.height = "30%"));
+    rest();
   };
   return audio;
 }
@@ -147,7 +226,32 @@ async function shareCard(card) {
   location.href = link;
 }
 
-// ------------------------------------------------------------------ notification sheet
+// ------------------------------------------------------------------ sheets (bottom sheet, action sheet)
+
+function openSheet(html, onMount) {
+  closeSheet();
+  const backdrop = document.createElement("div");
+  backdrop.className = "backdrop";
+  backdrop.id = "backdrop";
+  const sheet = document.createElement("div");
+  sheet.className = "bottom-sheet";
+  sheet.id = "bottomSheet";
+  sheet.innerHTML = `<div class="grabber"></div>${html}`;
+  document.body.append(backdrop, sheet);
+  requestAnimationFrame(() => {
+    backdrop.classList.add("show");
+    sheet.classList.add("show");
+  });
+  backdrop.onclick = closeSheet;
+  if (onMount) onMount(sheet);
+}
+
+function closeSheet() {
+  document.getElementById("backdrop")?.remove();
+  document.getElementById("bottomSheet")?.remove();
+}
+
+// ------------------------------------------------------------------ the knock (notification banner)
 
 function showNudge() {
   const sheet = document.getElementById("sheet");
@@ -155,7 +259,11 @@ function showNudge() {
   const n = S.home.nudges.find((x) => !S.seen.has(x.kind + x.id));
   if (!n) return;
   S.seen.add(n.kind + n.id);
-  sheet.innerHTML = `<span class="mark">${MARK_SVG}</span><div class="grow"><b>${esc(n.title)}</b><span class="small">${esc(n.body)}</span></div><span class="ripple"></span>`;
+  sheet.innerHTML = `${appIcon(38)}<div class="grow">
+      <p class="t-meta">Un-Said</p>
+      <p class="t-name mt-4">${esc(n.title)}</p>
+      <p class="t-preview">${esc(n.body)}</p>
+    </div>`;
   requestAnimationFrame(() => sheet.classList.add("show"));
   const hide = setTimeout(() => sheet.classList.remove("show"), 9000);
   sheet.onclick = () => {
@@ -170,7 +278,7 @@ function showNudge() {
   };
 }
 
-// ------------------------------------------------------------------ home
+// ------------------------------------------------------------------ Home (tab)
 
 function renderHome() {
   const h = S.home;
@@ -178,52 +286,74 @@ function renderHome() {
   const order = Object.fromEntries(h.people.map((p, i) => [p.id, i]));
   const photos = [...h.photos].sort((a, b) => (order[a.person_id] ?? 9) - (order[b.person_id] ?? 9));
   const held = h.cards.filter((c) => c.status === "held");
+  const mock = Object.values(h.providers).includes("mock");
   main.innerHTML = `
-    ${top()}
-    <p class="title fade-in">hey. who's on your mind?</p>
-    <div class="section fade-in d1"><div class="people">
+    <header class="header">
+      <span class="t-wordmark">Un-Said</span>
+      <div class="flex">
+        ${mock ? `<span class="chip" title="no MODEL_API_KEY: transcripts and sorting are mocked">mock ai</span>` : ""}
+        ${DEMO ? `<button class="text-btn" data-go="demo">demo</button>` : ""}
+        <button data-go="you" aria-label="You">${avatar(h.me.name)}</button>
+      </div>
+    </header>
+    <h1 class="t-display pad-text mt-16 ${fx()}">Some words take a little longer.</h1>
+    <button class="hero pad-card mt-24 ${fx("d1")}" data-go="memory" data-feature-id="draft-new">
+      <span class="quote">${QUOTE_SVG}</span>
+      <span class="t-card-title">What have you been meaning to say?</span>
+      <span class="plus">${PLUS_SVG}</span>
+    </button>
+
+    <h2 class="t-section pad-text mt-24">Your people</h2>
+    <div class="pad-card stack-8 mt-8 ${fx("d2")}">
       ${h.people.map((p) => `
-        <div class="person"><span class="avatar">${esc(p.name[0])}</span>
-          <div><div style="font-weight:600;font-size:14px">${esc(p.name)}</div><div class="when">${moon(p)}${esc(p.local_time)}</div></div>
-        </div>`).join("")}
-    </div></div>
-    ${held.length ? `<div class="section"><h2>waiting for the right moment</h2><div class="stack">
-      ${held.map((c) => `
-        <div class="strip"><span class="dot"></span>
-          <div class="grow"><b>${esc(c.recipient_name)}</b> · waiting · ${esc(c.release_label || "")}</div>
-          <button class="link" data-revoke="${c.id}">cancel</button>
-        </div>`).join("")}
-    </div></div>` : ""}
-    ${h.reminders.length ? `<div class="section"><h2>waiting on you</h2><div class="stack">
-      ${h.reminders.map((r) => `
-        <div class="strip"><span class="avatar">${esc(r.person_name[0] || "?")}</span>
-          <div class="grow"><b>${esc(r.text)}</b></div>
-          ${r.handoff ? `<button class="btn outline" style="min-height:40px;padding:8px 14px;font-size:14px" data-handoff="${r.id}">open ${esc(r.channel === "imessage" ? "messages" : r.channel)}</button>` : ""}
-        </div>`).join("")}
-    </div></div>` : ""}
-    <div class="section"><h2>your lane</h2><div class="lane">
-      ${photos.map((ph, i) => `
-        <button class="tile fade-in d${Math.min(i, 3)}" data-go="memory" data-photo="${ph.id}" data-person="${ph.person_id}">
-          <img src="${esc(ph.url)}" alt="" loading="lazy" /><span class="cap">${esc(ph.caption)}</span>
+        <button class="row" data-go="stack" data-person="${p.id}" data-feature-id="pile-open">
+          ${avatar(p.name)}
+          <div class="grow"><p class="t-name">${esc(p.name)}</p><p class="t-preview">${esc(p.time_label)}</p></div>
+          ${CHEVRON_RIGHT}
         </button>`).join("")}
     </div>
-    <details style="margin-top:12px"><summary class="small" style="cursor:pointer">+ add a photo</summary>
-      <form id="addPhoto" class="card" style="margin-top:10px">
-        <div class="field"><label>who's in it</label><select name="person_id">${h.people.map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join("")}</select></div>
-        <div class="field"><label>caption</label><input name="caption" placeholder="kitchen, with mom" maxlength="120" /></div>
-        <div class="field"><input name="file" type="file" accept="image/jpeg,image/png,image/webp" required /></div>
-        <button class="btn dark block" style="margin-top:14px">add to the lane</button>
-      </form>
-    </details></div>
-    <div class="section">
-      <button class="strip" data-go="note" style="width:100%;text-align:left;cursor:pointer">
-        <span class="avatar" style="background:var(--accent-soft)">◐</span>
-        <div class="grow"><b>for the next hard day</b><div class="small">${h.self_notes.length ? `${h.self_notes.length} note${h.self_notes.length > 1 ? "s" : ""} to yourself` : "leave yourself a note"}</div></div>
+
+    ${photos.length ? `
+      <h2 class="t-section pad-text mt-24">your lane</h2>
+      <div class="lane mt-8">
+        ${photos.map((ph) => `
+          <button class="tile" data-go="memory" data-photo="${ph.id}" data-person="${ph.person_id}">
+            <img src="${esc(ph.url)}" alt="" loading="lazy" />
+            <p class="t-caption">${esc(ph.caption)}</p>
+          </button>`).join("")}
+      </div>` : ""}
+    <div class="pad-text"><button class="text-btn" id="addPhotoOpen">+ add a photo</button></div>
+
+    <div class="pad-card stack-8 mt-16">
+      <button class="row" data-go="memory">
+        <span class="mic-dot">${MIC_SVG}</span>
+        <div class="grow"><p class="t-name">Say it out loud</p><p class="t-preview">Only you can hear this.</p></div>
+      </button>
+      ${held.map((c) => `
+        <div class="strip">
+          ${avatar(c.recipient_name, "s32")}
+          <div class="grow"><p class="t-name">${esc(c.recipient_name)}</p><p class="t-meta c-violet">arrives ${esc(c.release_label || "")}</p></div>
+          <button class="text-btn quiet" data-revoke="${c.id}" data-feature-id="pending-unsend-cancel">Cancel</button>
+          <span class="progress"></span>
+        </div>`).join("")}
+      ${h.reminders.map((r) => `
+        <div class="card">
+          <div class="flex">
+            ${avatar(r.person_name)}
+            <div class="grow"><p class="t-name">${esc(r.person_name)} · waiting on you</p><p class="t-preview">${esc(r.text)}</p></div>
+          </div>
+          ${r.handoff ? `<button class="outline-pill mt-16" data-handoff="${r.id}" data-feature-id="${HANDOFF_ID[r.channel] || "handoff-instagram"}">${GLYPH_FOR[r.channel] || ""}${esc(OPEN_IN[r.channel] || "Open")}</button>` : ""}
+        </div>`).join("")}
+      <button class="row slim" data-go="note">
+        <span class="glyph-dot">${VIDEO_SVG}</span>
+        <div class="grow"><p class="t-name">for the next hard day</p><p class="t-preview">${h.self_notes.length ? `${h.self_notes.length} note${h.self_notes.length > 1 ? "s" : ""} to yourself` : "leave yourself a note"}</p></div>
+        ${CHEVRON_RIGHT}
       </button>
     </div>`;
 
   main.querySelectorAll("[data-revoke]").forEach((b) => (b.onclick = async () => {
     await api(`/api/cards/${b.dataset.revoke}/revoke`, { method: "POST" });
+    toast("Kept as a draft.");
     refresh();
   }));
   main.querySelectorAll("[data-handoff]").forEach((b) => (b.onclick = async () => {
@@ -231,48 +361,134 @@ function renderHome() {
     await api(`/api/reminders/${r.id}/done`, { method: "POST" });
     location.href = r.handoff;
   }));
-  const form = $("#addPhoto");
-  form.onsubmit = async (e) => {
-    e.preventDefault();
-    const data = new FormData(form);
-    try {
-      await api("/api/photos", { method: "POST", form: data });
-      toast("added to your lane");
-      refresh();
-    } catch (err) {
-      toast(err.message);
-    }
-  };
+  $("#addPhotoOpen").onclick = () => openAddPhoto(h);
 }
 
-// ------------------------------------------------------------------ memory + the live rant
+function openAddPhoto(h) {
+  openSheet(`
+    <form id="addPhoto">
+      <p class="t-section">+ add a photo</p>
+      <div class="field"><label>who's in it</label><select class="input" name="person_id">${h.people.map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join("")}</select></div>
+      <div class="field"><label>caption</label><input class="input" name="caption" placeholder="kitchen, with mom" maxlength="120" /></div>
+      <div class="field"><input class="input" name="file" type="file" accept="image/jpeg,image/png,image/webp" required /></div>
+      <button class="pill mt-24">add to the lane</button>
+    </form>`, (sheet) => {
+    const form = sheet.querySelector("#addPhoto");
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const data = new FormData(form);
+      try {
+        await api("/api/photos", { method: "POST", form: data });
+        toast("added to your lane");
+        closeSheet();
+        refresh();
+      } catch (err) {
+        toast(err.message);
+      }
+    };
+  });
+}
+
+// ------------------------------------------------------------------ Letters (tab) and a received letter
+
+function renderLetters() {
+  const replies = S.home ? S.home.replies : [];
+  const senders = replies.filter((r, i) => replies.findIndex((x) => x.from_person_id === r.from_person_id) === i); // newest per sender
+  main.innerHTML = `
+    <h1 class="t-display pad-text mt-16">Letters</h1>
+    ${senders.length ? `
+      <div class="rings mt-24">
+        ${senders.map((r) => `
+          <button class="who" data-go="letter" data-id="${r.id}">${avatar(r.from_name, "s56", !r.heard_at)}<span class="t-meta">${esc(r.from_name)}</span></button>`).join("")}
+      </div>` : ""}
+    <div class="pad-card stack-8 mt-24 ${fx()}">
+      ${replies.map((r) => `
+        <button class="row" data-go="letter" data-id="${r.id}" data-feature-id="letter-open">
+          ${avatar(r.from_name, "", !r.heard_at)}
+          <div class="grow"><p class="t-name">${esc(r.from_name)}</p><p class="t-preview">${r.audio_url ? "voice reply" : esc(r.transcript)}</p></div>
+          <span class="t-meta">${esc(arrivedLabel(r))}</span>
+        </button>`).join("")}
+    </div>`;
+}
+
+function renderLetter() {
+  const reply = S.home.replies.find((r) => r.id === S.params.id);
+  if (!reply) return go("letters");
+  main.innerHTML = `
+    ${nav(`From ${reply.from_name}`, "letters")}
+    <div class="mt-16 ${fx()}">
+      ${letterHTML(reply.audio_url ? [] : [reply.transcript], reply.from_name, {
+        extra: reply.audio_url ? listenRow(reply.audio_url, "lw") : "",
+        underline: !reply.audio_url,
+        cls: "letter-received",
+      })}
+    </div>
+    <p class="t-caption center mt-16">Take your time.</p>
+    <div class="pad-card mt-16"><button class="outline-pill" data-go="memory" data-person="${reply.from_person_id}" data-feature-id="letter-write-back">Write back</button></div>
+    <p class="t-caption center mt-24 c-text-4">about this letter · arrived ${esc(arrivedLabel(reply))}</p>`;
+  fitHeroes();
+  // Mark replies heard exactly as the Talk screen does.
+  wirePlayer(main, () => {
+    if (!reply.heard_at) api(`/api/replies/${reply.id}/heard`, { method: "POST" }).catch(() => {});
+  });
+  if (!reply.audio_url && !reply.heard_at) api(`/api/replies/${reply.id}/heard`, { method: "POST" }).catch(() => {});
+}
+
+// ------------------------------------------------------------------ You (tab)
+
+function renderYou() {
+  const me = S.home.me;
+  main.innerHTML = `
+    <div class="pad-text mt-24 ${fx()}">
+      ${avatar(me.name, "s72")}
+      <h1 class="t-display mt-12">${esc(me.name)}</h1>
+    </div>
+    <div class="pad-card stack-8 mt-24">
+      <button class="row slim" data-go="note"><p class="t-name grow">Notes to yourself</p>${CHEVRON_RIGHT}</button>
+      <button class="row slim" data-go="safety" data-from="you"><p class="t-name grow">Safety and support</p>${CHEVRON_RIGHT}</button>
+      ${DEMO ? `<button class="row slim" data-go="demo"><p class="t-name grow">Settings</p>${CHEVRON_RIGHT}</button>` : ""}
+    </div>
+    <p class="t-caption pad-text mt-32 c-text-4">powered by Meta AI</p>`;
+}
+
+// ------------------------------------------------------------------ Talk: "Say it out loud"
 
 function renderMemory() {
   const h = S.home;
   const photo = h.photos.find((ph) => ph.id === S.params.photo);
-  const p = person(S.params.person || (photo && photo.person_id)) || h.people[0];
-  const reply = h.replies.find((r) => r.from_person_id === p.id);
+  const p = S.params.person || photo ? person(S.params.person || photo.person_id) : null;
+  const reply = p ? h.replies.find((r) => r.from_person_id === p.id) : null;
   main.innerHTML = `
-    ${back()}
-    ${photo ? `<img class="memory-photo fade-in" src="${esc(photo.url)}" alt="" />` : ""}
-    <div class="row" style="margin-top:14px"><span class="chip">${moon(p)}${esc(p.time_label)}</span></div>
-    ${reply ? `
-      <div class="card fade-in d1" id="reply" style="margin-top:14px">
-        <div class="small" style="margin-bottom:10px">${esc(reply.from_name)} · ${esc(reply.day)}</div>
-        ${reply.audio_url ? `<div class="voice"><button class="play" aria-label="play">${PLAY_SVG}</button>${wave("rw")}<audio src="${esc(reply.audio_url)}" preload="auto"></audio></div>` : ""}
-        ${reply.transcript ? `<p class="hand" style="margin:12px 0 0">${esc(reply.transcript)}</p>` : ""}
-        ${reply.translation ? `<p class="small" style="margin:4px 0 0">${esc(reply.translation)}</p>` : ""}
-      </div>` : ""}
-    <div class="card transcript hidden" id="transcript" style="margin-top:14px"></div>
-    <div class="mic-wrap mic-dock" id="micWrap">
-      <button class="mic" id="mic" aria-label="hold to talk">${MIC_SVG}</button>
-      <div class="small" id="micLabel">hold to talk. nobody else hears this.</div>
-      <button class="link" id="typeInstead">type instead</button>
-    </div>
-    <form id="typed" class="hidden" style="margin-top:16px">
-      <textarea name="text" rows="5" class="card" style="width:100%;font:inherit;resize:vertical" placeholder="say it here." required></textarea>
-      <button class="btn primary block" style="margin-top:10px">done</button>
-    </form>`;
+    ${nav("Say it out loud")}
+    ${photo ? `<img class="photo pad-card mt-8 ${fx()}" src="${esc(photo.url)}" alt="" />` : ""}
+    ${p ? `<div class="pad-card mt-16">${timeChip(p)}</div>` : ""}
+    ${reply ? `<div class="mt-16 ${fx("d1")}" id="reply">
+      ${letterHTML([], reply.from_name, {
+        compact: true,
+        meta: reply.day,
+        extra: `${reply.audio_url ? listenRow(reply.audio_url, "rw") : ""}
+          ${reply.transcript ? `<p class="body-line heavy">${esc(reply.transcript)}</p>` : ""}
+          ${reply.translation ? `<p class="t-caption on-letter mt-8">${esc(reply.translation)}</p>` : ""}`,
+      })}
+    </div>` : ""}
+    <section class="pad-text mt-24" id="talkText">
+      <p class="t-overline">Only you can hear this</p>
+      <p class="t-compose mt-16" id="transcript"><span class="caret"></span></p>
+      <p class="t-caption mt-16" id="quiet">Nothing leaves without you.</p>
+    </section>
+    <form id="typed" class="hidden mt-24">
+      <div class="pad-text"><textarea class="compose-field" name="text" rows="5" placeholder="say it here." required></textarea></div>
+      <div class="pad-card mt-24"><button class="pill">done</button></div>
+    </form>
+    <div class="dock" id="micWrap">
+      ${wave("lw", 24)}
+      <button class="mic" id="mic" aria-label="Tap to talk" data-feature-id="rant-record">${MIC_SVG}</button>
+      <p class="t-caption" id="micLabel">Tap to talk</p>
+      <div class="flex gap-24">
+        <button class="text-btn" id="typeInstead" data-feature-id="rant-type">Type instead</button>
+        <button class="text-btn" id="startOver" data-feature-id="rant-discard">Start over</button>
+      </div>
+    </div>`;
 
   if (reply) {
     const audio = wirePlayer($("#reply"), () => {
@@ -285,8 +501,11 @@ function renderMemory() {
   $("#typeInstead").onclick = () => {
     $("#typed").classList.remove("hidden");
     $("#micWrap").classList.add("hidden");
+    $("#talkText").classList.add("hidden");
+    main.classList.remove("has-dock");
     $("#typed textarea").focus();
   };
+  $("#startOver").onclick = startOver;
   $("#typed").onsubmit = async (e) => {
     e.preventDefault();
     const text = new FormData(e.target).get("text");
@@ -298,25 +517,38 @@ function renderMemory() {
   };
 }
 
-function wireRant(p, photo) {
+function setMic(state) {
   const mic = $("#mic");
   const label = $("#micLabel");
+  const waveEl = $("#lw");
+  if (!mic) return;
+  const live = state === "live";
+  mic.classList.toggle("live", live);
+  mic.innerHTML = live ? STOP_SVG : MIC_SVG;
+  mic.dataset.featureId = live ? "rant-stop" : "rant-record";
+  mic.setAttribute("aria-label", live ? "Tap to stop" : "Tap to talk");
+  waveEl && waveEl.classList.toggle("on", live);
+  label.textContent = { live: "Tap to stop", sorting: "sorting it by person…", blocked: "the microphone isn't available here" }[state] || "Tap to talk";
+}
+
+function wireRant(p, photo) {
+  const mic = $("#mic");
   const box = $("#transcript");
+  const quiet = $("#quiet");
+  const feed = waveFeeder($("#lw"));
   let finished = [];
   let live = "";
   const paint = () => {
-    box.classList.remove("hidden");
-    box.innerHTML = `<span class="hand done">${esc(finished.join(" "))}</span> <span class="hand live">${esc(live)}</span>`;
+    box.innerHTML = `${esc(finished.join(" "))} <span class="c-text-2">${esc(live)}</span><span class="caret"></span>`;
     box.scrollIntoView({ block: "nearest", behavior: "smooth" });
   };
   main.classList.add("has-dock");
   S.cleanup = () => main.classList.remove("recording", "has-dock");
 
-  holdToTalk(mic, {
+  S.talk = holdToTalk(mic, {
     onStart() {
       main.classList.add("recording");
-      mic.classList.add("live");
-      label.textContent = "listening… let go when you're done";
+      setMic("live");
       finished = [];
       live = "";
       const rec = (S.rec = { ws: null, ready: false, queue: [], pcm: null, chunks: null, stopped: false, failed: false, finished: false });
@@ -360,9 +592,9 @@ function wireRant(p, photo) {
           if (rec.ready && rec.ws && rec.ws.readyState === WebSocket.OPEN) rec.ws.send(bytes);
           else rec.queue.push(bytes);
         },
+        onLevel: feed,
       }).then((r) => (rec.pcm = r)).catch((err) => {
-        mic.classList.remove("live");
-        label.textContent = "the microphone isn't available here";
+        setMic("blocked");
         toast(err.message || "microphone blocked");
         rec.finished = true;
         S.rec = null;
@@ -371,9 +603,9 @@ function wireRant(p, photo) {
     },
     async onStop() {
       const rec = S.rec;
-      mic.classList.remove("live");
       if (!rec) return;
-      label.textContent = "sorting it by person…";
+      setMic("sorting");
+      quiet.classList.add("hidden");
       await rec.starting;
       if (!rec.pcm) return;
       rec.chunks = await rec.pcm.stop();
@@ -390,6 +622,34 @@ function wireRant(p, photo) {
   });
 }
 
+// "Start over": an action sheet, then the recording is gone without a trace.
+function startOver() {
+  openSheet(`
+    <button class="sheet-action danger" id="deleteRecording">Delete recording</button>
+    <button class="sheet-action" id="keepRecording">Cancel</button>`, (sheet) => {
+    sheet.querySelector("#keepRecording").onclick = closeSheet;
+    sheet.querySelector("#deleteRecording").onclick = async () => {
+      closeSheet();
+      const rec = S.rec;
+      if (rec) {
+        rec.finished = true; // the socket closing now must not trigger the upload fallback
+        S.rec = null;
+        try { rec.ws && rec.ws.close(); } catch { /* already closed */ }
+        await rec.starting;
+        if (rec.pcm) await rec.pcm.stop();
+      }
+      if (S.talk) S.talk.reset();
+      main.classList.remove("recording");
+      setMic("idle");
+      const box = $("#transcript");
+      if (box) box.innerHTML = '<span class="caret"></span>';
+      $("#quiet") && $("#quiet").classList.remove("hidden");
+      const field = $("#typed textarea");
+      if (field) field.value = "";
+    };
+  });
+}
+
 // The live socket failed: upload the WAV we kept and transcribe it as a file.
 async function fallback(rec, photo) {
   if (!rec.stopped || rec.finished || rec.uploading) return;
@@ -403,8 +663,7 @@ async function fallback(rec, photo) {
   } catch (err) {
     toast(`couldn't hear that: ${err.message}`);
     main.classList.remove("recording");
-    const label = $("#micLabel");
-    if (label) label.textContent = "hold to talk. nobody else hears this.";
+    setMic("idle");
   }
 }
 
@@ -421,71 +680,111 @@ async function afterRant(rant, photo) {
   if (S.view === "sorted") go(S.sort.safety === "ok" ? "sorted" : "safety", S.params);
 }
 
-// ------------------------------------------------------------------ sorted
+// ------------------------------------------------------------------ Split: "Here's who that was for."
 
 function renderSorted() {
   const r = S.sort;
   if (!r) {
-    main.innerHTML = `${back()}<div class="stack" style="margin-top:30px"><p class="small">sorting it by person…</p><div class="shimmer"></div><div class="shimmer" style="width:75%"></div><div class="shimmer" style="width:55%"></div></div>`;
+    main.innerHTML = `
+      ${nav("Say it out loud")}
+      <div class="pad-card stack-8 mt-24">
+        <div class="skeleton" style="height:148px"></div>
+        <div class="skeleton" style="height:148px"></div>
+        <div class="skeleton" style="height:120px"></div>
+      </div>`;
     return;
   }
   if (r.safety !== "ok") return renderSafety();
   const by = r.rant.sorted_by === "meta" ? "muse spark" : "mock sorter";
   main.innerHTML = `
-    ${back()}
+    ${nav("Say it out loud")}
     ${r.self_note ? `
-      <div class="card fade-in" style="margin-bottom:16px">
-        <div class="small" style="margin-bottom:10px">you left yourself this, for a night like this.</div>
-        <video class="note" src="${esc(r.self_note.url)}" playsinline controls></video>
+      <div class="card big pad-card mt-8 card-in">
+        <p class="t-overline">For you, later</p>
+        <p class="t-preview mt-8">you left yourself this, for a night like this.</p>
+        <video class="saved mt-12" src="${esc(r.self_note.url)}" playsinline controls></video>
       </div>` : ""}
-    <p class="small fade-in" style="display:flex;gap:6px;align-items:center;margin:8px 0 14px">${CHECK_SVG} safe to hold · sorted by ${by}</p>
-    ${r.groups.length ? "" : `<p class="reflection">nothing in that was about anyone yet. it's kept, just for you.</p>`}
-    <div class="stack">
-      ${r.groups.map((g, i) => `
-        <button class="card person-card fade-in d${Math.min(i + 1, 3)}" data-person-card="${g.person.id}">
-          <header><span class="count">${esc(g.person.name)} · ${g.kept_total}</span><span class="chip">${esc(g.tone)}</span></header>
-          <div class="lines">${g.pieces.map((pc) => `<p class="hand" style="margin:0 0 6px">${esc(pc.text)}</p>`).join("")}</div>
-          ${g.kept_total > g.pieces.length ? `<div class="small">+ ${g.kept_total - g.pieces.length} from before</div>` : ""}
-        </button>`).join("")}
+    <h2 class="t-section pad-text mt-16">Here's who that was for.</h2>
+    ${r.groups.length ? "" : `<p class="t-preview pad-text mt-16">nothing in that was about anyone yet. it's kept, just for you.</p>`}
+    <div class="pad-card stack-8 mt-16">
+      ${r.groups.map((g, i) => {
+        const shown = g.pieces.slice(0, 3);
+        const more = g.kept_total - shown.length;
+        return `
+        <button class="person-card card-in" style="animation-delay:${i * 120}ms" data-person-card="${g.person.id}" data-feature-id="pile-open">
+          <div class="flex">
+            ${avatar(g.person.name, "", true)}
+            <p class="t-name grow">${esc(g.person.name)}</p>
+            <span class="chip">${esc(g.tone)}</span>
+            ${CHEVRON_RIGHT}
+          </div>
+          <div class="stack-8 mt-12">${shown.map((pc) => `<p class="t-words c-text-2">“${esc(pc.text)}”</p>`).join("")}</div>
+          ${more > 0 ? `<p class="t-meta mt-8">+${more} more</p>` : ""}
+        </button>`;
+      }).join("")}
     </div>
-    <details style="margin-top:20px"><summary class="small" style="cursor:pointer">what was heard</summary>
-      <p class="small">${esc(r.rant.transcript)}</p></details>`;
+    <div class="centered mt-24"><button class="text-btn" id="keepPrivate" data-feature-id="rant-save-private">Keep it just for me</button></div>
+    <details class="pad-text mt-24">
+      <summary class="t-caption">what was heard</summary>
+      <p class="t-caption mt-8">${esc(r.rant.transcript)}</p>
+      <p class="t-meta mt-8 flex gap-8">${CHECK_SVG}<span>safe to hold · sorted by ${by}</span></p>
+    </details>`;
   main.querySelectorAll("[data-person-card]").forEach((el) => (el.onclick = () => {
     const g = r.groups.find((x) => x.person.id === el.dataset.personCard);
     go(g.person.channel === "whatsapp" ? "hold" : "stack", { person: g.person.id });
   }));
+  $("#keepPrivate").onclick = () => {
+    toast("Saved. Only you can see it.");
+    go("home");
+  };
 }
 
-// ------------------------------------------------------------------ hold until her morning
+// ------------------------------------------------------------------ Mom's preview: "Hold until her morning"
 
 function renderHold() {
   const g = S.sort.groups.find((x) => x.person.id === S.params.person);
   const p = person(g.person.id);
   const pos = POSSESSIVE[p.pronoun] || "their";
-  const question = p.is_asleep
-    ? `hold this until ${pos} ${morningLabel(p)}?`
-    : `it's ${p.local_time} for ${p.name}. send it now?`;
+  let when = p.is_asleep ? "her_morning" : "now";
   main.innerHTML = `
-    ${back("sorted")}
-    <div class="card fade-in">${g.pieces.map((pc) => `<p class="hand" style="margin:0 0 8px">${esc(pc.text)}</p>`).join("")}</div>
-    <p class="reflection fade-in d1" style="margin:24px 4px">${esc(g.reflection)} ${esc(question)}</p>
-    <div id="after"></div>
-    <button class="btn primary block fade-in d2" id="send">${p.is_asleep ? `send when it's ${pos} morning` : "send it now"}</button>
-    <button class="btn ghost block" data-go="sorted" style="margin-top:6px">keep it for now</button>`;
+    ${nav(`To ${p.name}`, "sorted", { label: "Edit" })}
+    <div class="mt-16 ${fx()}">${letterHTML(g.pieces.map((pc) => pc.text), S.home.me.name)}</div>
+    <p class="t-caption center mt-16">This is how ${esc(p.name)} will see it.</p>
+    <div class="card pad-card mt-24" id="delivery">
+      <p class="t-name">${esc(p.name)}'s morning</p>
+      <p class="t-preview">Arrives ${morningLabel(p)} ${pos} time</p>
+      <div class="mt-8">
+        <button class="choice" data-when="her_morning" data-feature-id="unsend-hold-until-morning"><span class="dot"></span>Hold until ${pos} morning</button>
+        <button class="choice" data-when="now"><span class="dot"></span>Send now</button>
+      </div>
+    </div>
+    <div class="pad-card mt-24" id="sendWrap"><button class="pill" id="send" data-feature-id="unsend-queue-send">Send when they're ready</button></div>
+    <div class="centered mt-8" id="editWrap"><button class="text-btn" data-go="sorted">Keep editing</button></div>`;
+  fitHeroes();
+  const choices = [...main.querySelectorAll(".choice")];
+  const mark = () => choices.forEach((c) => c.classList.toggle("on", c.dataset.when === when));
+  choices.forEach((c) => (c.onclick = () => { when = c.dataset.when; mark(); }));
+  mark();
   $("#send").onclick = async () => {
     $("#send").disabled = true;
     let card;
     try {
       card = await api("/api/cards", {
         method: "POST",
-        json: { recipient_id: p.id, piece_ids: g.pieces.map((pc) => pc.id), photo_id: S.sortPhoto || null, when: p.is_asleep ? "her_morning" : "now" },
+        json: { recipient_id: p.id, piece_ids: g.pieces.map((pc) => pc.id), photo_id: S.sortPhoto || null, when },
       });
     } catch (err) {
       $("#send").disabled = false;
       return toast(err.message);
     }
     if (card.status === "held") {
-      $("#send").outerHTML = `<div class="strip fade-in" style="position:relative"><span class="dot"></span><div class="grow"><b>${esc(p.name)}</b> · waiting · ${esc(card.release_label)}</div><span class="ripple" style="left:22px;top:24px"></span></div>`;
+      $("#delivery").remove();
+      $("#editWrap").remove();
+      $("#sendWrap").outerHTML = `
+        <div class="pad-text mt-24 plain-fade">
+          <p class="t-name">Held for ${esc(p.name)}'s morning.</p>
+          <span class="chip time-chip mt-8">${MOON_SVG}arrives ${esc(card.release_label || "")}</span>
+        </div>`;
       setTimeout(() => { if (S.view === "hold") { refresh(); go("home"); } }, 2200);
     } else if (card.status === "released") {
       toast(`sent to ${p.name} on whatsapp`);
@@ -497,33 +796,69 @@ function renderHold() {
   };
 }
 
-// ------------------------------------------------------------------ the stack: choose what she hears
+// ------------------------------------------------------------------ Pile: "For Sarah", his own lines
 
 async function renderStack() {
   const p = person(S.params.person);
-  main.innerHTML = `${back(S.sort ? "sorted" : "home")}<div class="shimmer" style="margin-top:30px"></div>`;
+  const backTo = S.sort ? "sorted" : "home";
+  main.innerHTML = `
+    ${nav(`For ${p.name}`, backTo)}
+    <div class="pad-card stack-8 mt-16"><div class="skeleton" style="height:88px"></div><div class="skeleton" style="height:64px"></div></div>`;
   const pieces = await api(`/api/people/${p.id}/pieces`);
   if (S.view !== "stack") return;
-  const obj = p.pronoun || "them";
-  const subj = SUBJECT[obj] || "they";
-  const via = { imessage: "messages", instagram: "instagram", whatsapp: "whatsapp" }[p.channel] || "";
+  if (!S.pile || S.pile.personId !== p.id) S.picked = new Set(); // nothing is picked for you
+  S.pile = { personId: p.id, pieces };
+  const subj = SUBJECT[p.pronoun || "them"] || "they";
   main.innerHTML = `
-    ${back(S.sort ? "sorted" : "home")}
-    <p class="hand-lg fade-in" style="margin:8px 0 16px">${pieces.length} thing${pieces.length === 1 ? "" : "s"} you never told ${esc(obj)}.</p>
-    <div class="card fade-in d1">
-      ${pieces.map((pc) => `
-        <label class="check-row"><input type="checkbox" value="${pc.id}" />
-          <div><p class="hand" style="margin:0">${esc(pc.text)}</p><div class="small">${esc(dateLabel(pc.created_at))} · ${esc(pc.tone)}</div></div>
-        </label>`).join("")}
+    ${nav(`For ${p.name}`, backTo)}
+    <div class="card pad-card mt-8">
+      <div class="flex">
+        ${avatar(p.name)}
+        <div class="grow"><p class="t-name">${esc(p.name)}</p><p class="t-preview">Goes to ${esc(p.name)} on ${CHANNEL[p.channel] || "Messages"}</p></div>
+      </div>
+      ${p.is_asleep ? `<div class="mt-12">${timeChip(p)}</div>` : ""}
     </div>
-    <p class="small" style="margin:12px 4px">nothing is picked for you. choose what ${esc(subj)} hears.</p>
-    <button class="btn primary block" id="send" disabled>send to ${esc(p.name)}${via ? ` in ${via}` : ""}</button>`;
-  const boxes = [...main.querySelectorAll("input[type=checkbox]")];
-  boxes.forEach((b) => (b.onchange = () => ($("#send").disabled = !boxes.some((x) => x.checked))));
+    <p class="t-overline pad-text mt-24">In your words</p>
+    <div class="mt-8 ${fx()}">
+      ${pieces.map((pc) => `
+        <button class="line ${S.picked.has(pc.id) ? "on" : ""}" data-id="${pc.id}" data-feature-id="pile-line-toggle" aria-pressed="${S.picked.has(pc.id)}">
+          <div class="grow"><p class="t-words">${esc(pc.text)}</p><p class="t-meta mt-4">${esc(dateLabel(pc.created_at))} · ${esc(pc.tone)}</p></div>
+          <span class="toggle">${S.picked.has(pc.id) ? CHECK_SVG : ""}</span>
+        </button>`).join("")}
+    </div>
+    <p class="t-caption pad-text mt-16">nothing is picked for you. choose what ${esc(subj)} hears.</p>
+    <div class="pad-card mt-24"><button class="pill" id="preview" data-feature-id="letter-preview" ${S.picked.size ? "" : "disabled"}>Preview letter</button></div>`;
+  main.querySelectorAll(".line").forEach((row) => (row.onclick = () => {
+    const id = row.dataset.id;
+    if (S.picked.has(id)) S.picked.delete(id);
+    else S.picked.add(id);
+    const on = S.picked.has(id);
+    row.classList.toggle("on", on);
+    row.setAttribute("aria-pressed", String(on));
+    row.querySelector(".toggle").innerHTML = on ? CHECK_SVG : "";
+    $("#preview").disabled = S.picked.size === 0;
+  }));
+  $("#preview").onclick = () => go("preview", { person: p.id });
+}
+
+// Preview letter: exactly what she'll see, then the same send as before.
+function renderPreview() {
+  const p = person(S.params.person);
+  const pieces = (S.pile && S.pile.personId === p.id ? S.pile.pieces : []).filter((pc) => S.picked.has(pc.id));
+  if (!pieces.length) return go("stack", { person: p.id });
+  const back = `data-person="${p.id}"`;
+  main.innerHTML = `
+    ${nav(`To ${p.name}`, "stack", { label: "Edit", data: back })}
+    <div class="mt-16 ${fx()}">${letterHTML(pieces.map((pc) => pc.text), S.home.me.name)}</div>
+    <p class="t-caption center mt-16">This is how ${esc(p.name)} will see it.</p>
+    <div class="pad-card mt-24"><button class="pill" id="send" data-feature-id="${HANDOFF_ID[p.channel] || "unsend-queue-send"}">Send when they're ready</button></div>
+    <div class="centered mt-8"><button class="text-btn" data-go="stack" ${back}>Keep editing</button></div>`;
+  fitHeroes();
   $("#send").onclick = async () => {
-    const ids = boxes.filter((b) => b.checked).map((b) => b.value);
+    const ids = pieces.map((pc) => pc.id);
     try {
       const card = await api("/api/cards", { method: "POST", json: { recipient_id: p.id, piece_ids: ids, when: "now" } });
+      S.picked = new Set();
       if (card.status === "released") { toast(`sent to ${p.name}`); return go("home"); }
       await shareCard(card);
     } catch (err) {
@@ -532,48 +867,92 @@ async function renderStack() {
   };
 }
 
-// ------------------------------------------------------------------ safety
+// ------------------------------------------------------------------ Safety: calm, no gradient
 
-function renderSafety() {
-  const resources = (S.sort && S.sort.resources) || [];
-  main.innerHTML = `
-    ${back()}
-    <div class="safety fade-in" style="margin-top:8px">
-      <h3>we're not going to show memories right now.</h3>
-      <p style="margin:0 0 10px;opacity:.85">you deserve to feel safe. here's real help.</p>
-      ${resources.map((r) => `
-        <div class="row" style="display:block">
-          <b>${esc(r.name)}</b><div style="opacity:.85;font-size:14px">${esc(r.detail)}</div>
-          ${r.links.map((l) => `<a href="${esc(l.href)}">${esc(l.label)}</a>`).join("")}
-        </div>`).join("")}
-      <p style="margin:14px 0 0;opacity:.75;font-size:13px">unsaid isn't a crisis service. these people are.</p>
-    </div>
-    <button class="btn ghost block" data-go="home" style="margin-top:12px">back home</button>`;
+const DEFAULT_RESOURCES = [
+  { name: "988 Suicide & Crisis Lifeline", detail: "Call or text 988", links: [{ label: "call 988", href: "tel:988" }, { label: "text 988", href: "sms:988" }] },
+  {
+    name: "National Domestic Violence Hotline",
+    detail: "Call 1-800-799-7233 · Text START to 88788",
+    links: [{ label: "call 1-800-799-7233", href: "tel:18007997233" }, { label: "text START to 88788", href: "sms:88788?body=START" }],
+  },
+  { name: "Immediate danger", detail: "Call 911", links: [{ label: "call 911", href: "tel:911" }] },
+];
+
+function hotlineId(href) {
+  if (href.includes("988")) return href.includes("88788") ? "hotline-ndvh-text" : "hotline-988";
+  if (href.includes("18007997233")) return "hotline-ndvh-call";
+  return href.includes("911") ? "emergency-911" : "";
 }
 
-// ------------------------------------------------------------------ for the next hard day
+function renderSafety() {
+  const concern = S.params.from !== "you" && S.sort && S.sort.safety && S.sort.safety !== "ok";
+  const resources = concern && S.sort.resources.length ? S.sort.resources : DEFAULT_RESOURCES;
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+  main.innerHTML = `
+    ${nav("", S.params.from === "you" ? "you" : "home")}
+    <div class="plain-fade">
+      <h1 class="t-display pad-text mt-8">You deserve to feel safe. Here's real help.</h1>
+      ${concern ? `<p class="t-preview pad-text mt-16">we're not going to show memories right now.</p>` : ""}
+      <div class="pad-card stack-8 mt-24">
+        ${resources.map((r) => `
+          <div class="safety-row">
+            <p class="t-name">${esc(r.name)}</p>
+            <p class="t-preview">${esc(r.detail)}</p>
+            <div class="stack-8 mt-12">${r.links.map((l) => `<a class="outline-pill" href="${esc(l.href)}" data-feature-id="${hotlineId(l.href)}">${esc(cap(l.label))}</a>`).join("")}</div>
+          </div>`).join("")}
+      </div>
+      <p class="t-caption pad-text mt-24">Un-Said isn't a crisis service. These people are.</p>
+      ${concern ? `<div class="centered mt-16"><button class="text-btn" data-go="home">back home</button></div>` : ""}
+    </div>`;
+}
+
+// ------------------------------------------------------------------ Self note: "For you, later"
 
 function renderNote() {
   const notes = S.home.self_notes;
   main.innerHTML = `
-    ${back()}
-    <p class="hand-lg fade-in" style="margin:8px 0 16px">for the next hard day.</p>
-    <video class="note" id="preview" playsinline muted autoplay></video>
-    <button class="btn primary block" id="rec" style="margin-top:14px" disabled>record</button>
-    <p class="small" style="margin:10px 4px">only you see this. it comes back the next time a night sounds like tonight.</p>
-    ${notes.length ? `<div class="section"><h2>to: me</h2><div class="stack">${notes.map((n) => `<video class="note" src="${esc(n.url)}" playsinline controls></video>`).join("")}</div></div>` : ""}`;
+    ${nav("", "home")}
+    <p class="t-overline pad-text mt-8">For you, later</p>
+    <video class="note pad-card mt-16" id="preview" playsinline muted autoplay></video>
+    <div class="flex pad-text mt-24" id="recRow">
+      <button class="rec-btn" id="rec" data-feature-id="self-note-record" aria-label="record" disabled><i></i></button>
+      <span class="timer" id="timer">0:00</span>
+    </div>
+    <div class="hidden mt-24" id="review">
+      <div class="pad-card"><button class="pill" id="save" data-feature-id="self-note-save">Save for later</button></div>
+      <div class="centered mt-8"><button class="text-btn" id="retake">Retake</button></div>
+    </div>
+    <p class="t-caption pad-text mt-16">only you see this. it comes back the next time a night sounds like tonight.</p>
+    ${notes.length ? `
+      <h2 class="t-section pad-text mt-32">Notes to yourself</h2>
+      <div class="pad-card stack-8 mt-12">${notes.map((n) => `<video class="saved" src="${esc(n.url)}" playsinline controls></video>`).join("")}</div>` : ""}`;
 
   let stream = null;
   let recorder = null;
   let parts = [];
+  let blob = null;
+  let started = 0;
+  let tick = 0;
   const btn = $("#rec");
+  const preview = $("#preview");
+  const live = () => {
+    preview.removeAttribute("src");
+    preview.controls = false;
+    preview.muted = true;
+    preview.srcObject = stream;
+    preview.play().catch(() => {});
+  };
   navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true }).then((s) => {
     stream = s;
     if (S.view !== "note") return s.getTracks().forEach((t) => t.stop());
-    $("#preview").srcObject = s;
+    live();
     btn.disabled = false;
   }).catch((err) => toast(err.message || "camera blocked"));
-  S.cleanup = () => stream && stream.getTracks().forEach((t) => t.stop());
+  S.cleanup = () => {
+    clearInterval(tick);
+    if (stream) stream.getTracks().forEach((t) => t.stop());
+  };
 
   btn.onclick = () => {
     if (recorder && recorder.state === "recording") return recorder.stop();
@@ -581,81 +960,106 @@ function renderNote() {
     recorder = new MediaRecorder(stream, type ? { mimeType: type } : undefined);
     parts = [];
     recorder.ondataavailable = (e) => e.data.size && parts.push(e.data);
-    recorder.onstop = async () => {
-      btn.textContent = "saving…";
-      btn.disabled = true;
-      const blob = new Blob(parts, { type: recorder.mimeType || type || "video/webm" });
-      const form = new FormData();
-      form.append("file", blob, blob.type.includes("mp4") ? "note.mp4" : "note.webm");
-      form.append("label", "for the next hard day");
-      try {
-        await api("/api/self-notes", { method: "POST", form });
-        toast("saved. to: me");
-        await refresh();
-        go("note");
-      } catch (err) {
-        toast(err.message);
-        btn.textContent = "record";
-        btn.disabled = false;
-      }
+    recorder.onstop = () => {
+      clearInterval(tick);
+      btn.classList.remove("on");
+      blob = new Blob(parts, { type: recorder.mimeType || type || "video/webm" });
+      preview.srcObject = null;
+      preview.src = URL.createObjectURL(blob);
+      preview.muted = false;
+      preview.controls = true;
+      $("#recRow").classList.add("hidden");
+      $("#review").classList.remove("hidden");
     };
     recorder.start();
-    btn.textContent = "stop and save";
+    btn.classList.add("on");
+    started = Date.now();
+    tick = setInterval(() => {
+      const s = Math.floor((Date.now() - started) / 1000);
+      $("#timer").textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+    }, 250);
+  };
+
+  $("#retake").onclick = () => {
+    if (preview.src) URL.revokeObjectURL(preview.src);
+    blob = null;
+    $("#timer").textContent = "0:00";
+    $("#review").classList.add("hidden");
+    $("#recRow").classList.remove("hidden");
+    live();
+  };
+
+  $("#save").onclick = async () => {
+    if (!blob) return;
+    const save = $("#save");
+    save.disabled = true;
+    const form = new FormData();
+    form.append("file", blob, blob.type.includes("mp4") ? "note.mp4" : "note.webm");
+    form.append("label", "for the next hard day");
+    try {
+      await api("/api/self-notes", { method: "POST", form });
+      toast("saved. to: me");
+      await refresh();
+      go("note");
+    } catch (err) {
+      toast(err.message);
+      save.disabled = false;
+    }
   };
 }
 
-// ------------------------------------------------------------------ demo controls
+// ------------------------------------------------------------------ demo controls (not part of the design)
 
 async function renderDemo() {
-  main.innerHTML = `${back()}<div class="shimmer" style="margin-top:30px"></div>`;
+  main.innerHTML = `${nav("demo")}<div class="pad-card stack-8 mt-16"><div class="skeleton" style="height:120px"></div></div>`;
   const st = await api("/api/demo/state");
   if (S.view !== "demo") return;
   const latestReply = S.home.replies[0];
   main.innerHTML = `
-    ${back()}
-    <div class="demo-panel stack">
+    ${nav("demo")}
+    <div class="pad-card stack-8 mt-16">
       <div class="card">
-        <b>providers</b>
-        <p class="small">spark: ${esc(S.home.providers.spark)} · transcribe: ${esc(S.home.providers.transcribe)} · mom's 8 AM: ${esc(S.home.providers.whatsapp)}</p>
+        <p class="t-name">providers</p>
+        <p class="t-caption mt-4">spark: ${esc(S.home.providers.spark)} · transcribe: ${esc(S.home.providers.transcribe)} · mom's 8 AM: ${esc(S.home.providers.whatsapp)}</p>
       </div>
       <div class="card">
-        <b>clock</b>
-        <p class="small">you: ${esc(st.me_local.replace("T", " "))} · offset ${st.offset_minutes} min</p>
-        <p class="small">${st.people.filter((p) => p.channel !== "self").map((p) => esc(p.time_label)).join("<br>")}</p>
-        <div class="field"><label>set your time (Austin)</label><input type="datetime-local" id="setLocal" value="2026-10-24T18:32" /></div>
-        <div class="row wrap" style="margin-top:10px">
-          <button class="btn dark" id="setClock">set</button>
-          <button class="btn outline" id="plus3">+3 hours</button>
-          <button class="btn outline" id="realClock">real time</button>
+        <p class="t-name">clock</p>
+        <p class="t-caption mt-4">you: ${esc(st.me_local.replace("T", " "))} · offset ${st.offset_minutes} min</p>
+        <p class="t-caption">${st.people.filter((p) => p.channel !== "self").map((p) => esc(p.time_label)).join("<br>")}</p>
+        <div class="field"><label>set your time (Austin)</label><input class="input" type="datetime-local" id="setLocal" value="2026-10-24T18:32" /></div>
+        <div class="flex wrap gap-8 mt-12">
+          <button class="outline-pill small" id="setClock">set</button>
+          <button class="outline-pill small" id="plus3">+3 hours</button>
+          <button class="outline-pill small" id="realClock">real time</button>
         </div>
       </div>
       <div class="card">
-        <b>mom's voice note</b>
-        <p class="small">send this link to Mom. she holds to reply; it lands as "Mom left you a voice note".</p>
-        <input readonly value="${esc(st.mom_voice_note_link)}" id="momLink" />
-        <div class="row wrap" style="margin-top:10px">
-          <button class="btn outline" id="copyLink">copy</button>
-          <button class="btn outline" id="mockReply">mock reply</button>
-          ${latestReply ? `<button class="btn outline" id="backdate">make latest reply tuesday</button>` : ""}
+        <p class="t-name">mom's voice note</p>
+        <p class="t-caption mt-4">send this link to Mom. she holds to reply; it lands as "Mom left you a voice note".</p>
+        <input class="input mt-12" readonly value="${esc(st.mom_voice_note_link)}" id="momLink" />
+        <div class="flex wrap gap-8 mt-12">
+          <button class="outline-pill small" id="copyLink">copy</button>
+          <button class="outline-pill small" id="mockReply">mock reply</button>
+          ${latestReply ? `<button class="outline-pill small" id="backdate">make latest reply tuesday</button>` : ""}
         </div>
       </div>
       <div class="card">
-        <b>people</b>
+        <p class="t-name">people</p>
         ${st.people.map((p) => `
-          <form class="person-edit" data-id="${p.id}" style="margin-top:12px">
-            <div class="small" style="font-weight:600">${esc(p.name)} · ${esc(p.channel)}</div>
-            <div class="row" style="margin-top:6px">
-              <input name="handle" placeholder="${p.channel === "instagram" ? "instagram username" : "phone, +country code"}" />
-              <input name="timezone" value="${esc(p.timezone)}" />
+          <form class="person-edit mt-16" data-id="${p.id}">
+            <p class="t-caption">${esc(p.name)} · ${esc(p.channel)}</p>
+            <div class="stack-8 mt-8">
+              <input class="input" name="handle" placeholder="${p.channel === "instagram" ? "instagram username" : "phone, +country code"}" />
+              <input class="input" name="timezone" value="${esc(p.timezone)}" />
             </div>
-            <button class="btn ghost" style="padding-left:0">save ${esc(p.name)}</button>
+            <button class="text-btn">save ${esc(p.name)}</button>
           </form>`).join("")}
-        <p class="small">phone numbers aren't shown back here; ${st.people.filter((p) => p.has_handle).length} of ${st.people.length} are set.</p>
+        <p class="t-caption mt-8">phone numbers aren't shown back here; ${st.people.filter((p) => p.has_handle).length} of ${st.people.length} are set.</p>
       </div>
       <div class="card">
-        <b>reset</b>
-        <p class="small">clears rants, cards, replies, notes. keeps people, photos, and the clock.</p>
-        <button class="btn outline" id="reset">reset activity</button>
+        <p class="t-name">reset</p>
+        <p class="t-caption mt-4">clears rants, cards, replies, notes. keeps people, photos, and the clock.</p>
+        <div class="flex mt-12"><button class="outline-pill small" id="reset">reset activity</button></div>
       </div>
     </div>`;
 
@@ -684,15 +1088,15 @@ async function renderDemo() {
   }));
 }
 
-// ------------------------------------------------------------------ key prompt
+// ------------------------------------------------------------------ key prompt (not part of the design)
 
 function renderKey() {
   main.innerHTML = `
-    ${top()}
-    <form class="card" id="keyForm" style="margin-top:30px">
-      <p class="reflection" style="margin-top:0">this unsaid needs its key.</p>
-      <input name="key" type="password" autocomplete="off" class="card" style="width:100%;font:inherit" placeholder="APP_KEY" />
-      <button class="btn dark block" style="margin-top:12px">open</button>
+    <header class="header"><span class="t-wordmark">Un-Said</span></header>
+    <form class="card pad-card mt-32" id="keyForm">
+      <p class="t-name">this Un-Said needs its key.</p>
+      <input name="key" type="password" autocomplete="off" class="input mt-16" placeholder="APP_KEY" />
+      <button class="pill mt-16">open</button>
     </form>`;
   $("#keyForm").onsubmit = (e) => {
     e.preventDefault();

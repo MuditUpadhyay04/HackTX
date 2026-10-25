@@ -1,7 +1,7 @@
 // The page Mom (or Sarah) opens from the link: his letter on un-bg, then her way back to him.
 // No app, no account; the link is the key. (DESIGN_SPEC 3.10, FOR_MUDITS_CLAUDE.md 3.9)
 import { holdToTalk, startPcm, wavBlob } from "/app/audio.js";
-import { CHECK_SVG, PAUSE_SVG, PLAY_SVG, QUOTE_SVG, esc, toast, wave, waveFeeder } from "/app/ui.js";
+import { CHECK_SVG, PAUSE_SVG, PLAY_SVG, QUOTE_SVG, esc, fitHero, toast, wave, waveFeeder } from "/app/ui.js";
 
 const token = location.pathname.split("/").filter(Boolean).pop();
 const root = document.getElementById("root");
@@ -61,17 +61,6 @@ function render(c) {
   window.addEventListener("resize", () => fitHero(hero));
   if (c.audio_url) wirePlayer();
   showActions(c, local);
-}
-
-/** The first line is the hero: 64 pt, stepping down to 48 and 36 so it fits. */
-function fitHero(el) {
-  if (!el) return;
-  const steps = [["", 72, 3], ["s48", 56, 4], ["s36", 42, Infinity]];
-  for (const [size, lineHeight, maxLines] of steps) {
-    el.classList.remove("s48", "s36");
-    if (size) el.classList.add(size);
-    if (Math.round(el.getBoundingClientRect().height / lineHeight) <= maxLines) return;
-  }
 }
 
 function wirePlayer() {
