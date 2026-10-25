@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from .. import db, delivery, seed, store, timeutil
+from .. import attention, db, delivery, seed, store, timeutil
 from ..ai import transcribe
 from ..auth import require_key
 
@@ -105,3 +105,10 @@ def reset() -> dict:
     """Clears his rants, cards, replies, and notes. Keeps people, photos, and the clock."""
     seed.reset_activity()
     return _state()
+
+
+@router.post("/attention/reset")
+def attention_reset() -> dict:
+    """Forgets every knock, push and nudge so the gentle caps start fresh for a rehearsal."""
+    attention.reset()
+    return {"ok": True, "settings": attention.get_settings()}

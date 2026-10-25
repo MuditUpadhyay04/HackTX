@@ -53,3 +53,4 @@ For Gurneal. They are kept as-is until he writes the real ones.
 | Permissions | "Microphone access is off for Expo Go. Turn it on in Settings." |
 | Talk, on a photo he's spoken on before *(proposed)* | overline "Said here before" · "{name} · {day}" under each of his lines · "Listen" / "Pause" |
 | Split, on at most one card *(proposed, Mudit's line)* | "Tell them how you feel. Communication helps." |
+| The knock, when exactly two people reached out this week *(proposed variant of Gurneal's body B)* | "{A} and {B} both reached out this week. Some things are easier to say here first." |

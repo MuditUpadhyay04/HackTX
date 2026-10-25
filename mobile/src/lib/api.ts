@@ -65,6 +65,30 @@ export type SortResult = {
   self_note: { id: string; url: string } | null;
 };
 
+/** The server's answer to "may Un-Said knock on this photo now?" Almost always no. */
+export type KnockDecision =
+  | { knock: false; reason: string }
+  | {
+      knock: true;
+      id: string;
+      kind: "reply" | "linked" | "first";
+      title: string;
+      body: string;
+      person_id: string | null;
+      person_name: string | null;
+      reason: string;
+    };
+
+export type AttentionOutcome = "opened" | "dismissed" | "ignored";
+
+export type Settings = {
+  knock_mode: "gentle" | "off" | "demo";
+  quiet_start: string; // his quiet hours, HH:MM in his time zone
+  quiet_end: string;
+  push_enabled: boolean;
+  permission_asked: boolean;
+};
+
 export type Share = { url: string; text?: string; whatsapp?: string; sms_ios?: string; sms_android?: string; instagram?: string };
 
 export type Card = {
@@ -171,4 +195,13 @@ export const api = {
 
   heard: (replyId: string) => call<Reply>(`/api/replies/${replyId}/heard`, post()),
   reminderDone: (id: string) => call<{ ok: boolean }>(`/api/reminders/${id}/done`, post()),
+
+  // The attention budget (backend/app/attention.py decides; the app only asks).
+  knockCheck: (body: { asset_id: string; dwell_ms: number; zoomed: boolean; revisit: boolean; session_id: string }) =>
+    call<KnockDecision>("/api/knock/check", post(body)),
+  attentionOutcome: (id: string, outcome: AttentionOutcome) =>
+    call<{ ok: boolean }>(`/api/attention/${id}/outcome`, post({ outcome })),
+  settings: () => call<Settings>("/api/settings"),
+  patchSettings: (changes: Partial<Omit<Settings, "permission_asked">>) =>
+    call<Settings>("/api/settings", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(changes) }),
 };

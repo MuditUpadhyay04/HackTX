@@ -7,13 +7,9 @@ import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from "react-n
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppIcon } from "../../components/ui";
+import { useKnock } from "../../lib/attention";
 import { photoDate } from "../../lib/photos";
 import { color, space, spring, type } from "../../theme/tokens";
-
-const LINGER_MS = 3500;
-
-// The knock (DESIGN_SPEC 3.15, body A).
-const KNOCK_BODY = "We noticed you've been quieter with the people closest to you lately. Want to say what you haven't?";
 
 export default function PhotoViewer() {
   const insets = useSafeAreaInsets();
@@ -21,6 +17,9 @@ export default function PhotoViewer() {
   const [chrome, setChrome] = useState(true);
   const [knockY] = useState(() => new Animated.Value(-220));
   const [pulse] = useState(() => new Animated.Value(1));
+  // Data wiring (mobile/src/lib/attention.ts): the backend's attention budget decides if and
+  // what Un-Said knocks. Most photos never knock; at most once a session, twice a day.
+  const { knock, onZoom, open, dismiss } = useKnock(id);
 
   const talk = () => router.push({ pathname: "/talk", params: { photo: id } });
 
@@ -30,14 +29,17 @@ export default function PhotoViewer() {
       Animated.spring(pulse, { toValue: 1.12, ...spring.press, useNativeDriver: true }),
       Animated.spring(pulse, { toValue: 1, ...spring.press, useNativeDriver: true }),
     ]).start();
-    const timer = setTimeout(
-      () => Animated.spring(knockY, { toValue: 0, ...spring.banner, useNativeDriver: true }).start(),
-      LINGER_MS,
-    );
-    return () => clearTimeout(timer);
-  }, [knockY, pulse]);
+  }, [pulse]);
 
-  const dismissKnock = () => Animated.spring(knockY, { toValue: -220, ...spring.banner, useNativeDriver: true }).start();
+  useEffect(() => {
+    if (knock) Animated.spring(knockY, { toValue: 0, ...spring.banner, useNativeDriver: true }).start();
+  }, [knock, knockY]);
+
+  const hideKnock = () => Animated.spring(knockY, { toValue: -220, ...spring.banner, useNativeDriver: true }).start();
+  const dismissKnock = () => {
+    dismiss();
+    hideKnock();
+  };
 
   return (
     <View style={styles.black}>
@@ -46,6 +48,8 @@ export default function PhotoViewer() {
         contentContainerStyle={{ flex: 1 }}
         maximumZoomScale={4}
         minimumZoomScale={1}
+        scrollEventThrottle={100}
+        onScroll={(e) => (e.nativeEvent.zoomScale ?? 1) > 1.05 && onZoom()} // pinching in is lingering
         centerContent
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
@@ -70,14 +74,14 @@ export default function PhotoViewer() {
       ) : null}
 
       <Animated.View style={[styles.knockWrap, { paddingTop: insets.top + space.s8, transform: [{ translateY: knockY }] }]}>
-        <Pressable testID="drift-nudge-open" onPress={() => { dismissKnock(); talk(); }} style={styles.knock}>
+        <Pressable testID="drift-nudge-open" onPress={() => { open(); hideKnock(); talk(); }} style={styles.knock}>
           <AppIcon size={38} />
           <View style={{ flex: 1 }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-              <Text style={[type.rowName, { fontSize: 15 }]}>Un-Said</Text>
+              <Text style={[type.rowName, { fontSize: 15 }]}>{knock?.title ?? "Un-Said"}</Text>
               <Text style={type.meta}>now</Text>
             </View>
-            <Text style={[type.rowPreview, { marginTop: 2 }]}>{KNOCK_BODY}</Text>
+            <Text style={[type.rowPreview, { marginTop: 2 }]}>{knock?.body ?? ""}</Text>
           </View>
         </Pressable>
         <Pressable onPress={dismissKnock} hitSlop={8} style={styles.grabber} />
