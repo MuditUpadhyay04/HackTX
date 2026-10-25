@@ -202,8 +202,8 @@ export function MusicWidget({ rect }: { rect: Rect }) {
         <span style={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>
           <span style={{ ...text(t.caption2, emphasizedWeight), color: "var(--widget-music-accent)" }}>NOW PLAYING</span>
           <span style={{ flex: 1 }} />
-          <span style={{ ...text(t.footnote, emphasizedWeight), overflow: "hidden", textOverflow: "ellipsis" }}>Late Night Drive</span>
-          <span style={{ ...text(t.caption1), opacity: 0.7 }}>Austin Lights</span>
+          <span style={{ ...text(t.footnote, emphasizedWeight), overflow: "hidden", textOverflow: "ellipsis" }}>Mockingbird</span>
+          <span style={{ ...text(t.caption1), opacity: 0.7 }}>Eminem</span>
           <span style={{ marginTop: t.caption2.size / 2, height: 3, borderRadius: radius[2], background: "var(--widget-music-track)" }}>
             <span style={{ display: "block", width: "38%", height: "100%", borderRadius: radius[2], background: "var(--label-on-dark)" }} />
           </span>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <!-- Branched-Frontend: Ethan, illustrated avatar (our own art; no real person). -->
+  <defs>
+    <radialGradient id="bg-ethan" cx="0.3" cy="0.25" r="0.95"><stop offset="0" stop-color="#E6E4F8"/><stop offset="1" stop-color="#C3BEEA"/></radialGradient>
+  </defs>
+  <rect width="240" height="240" fill="url(#bg-ethan)"/>
+  <path d="M40 240c4-42 36-66 80-66s76 24 80 66z" fill="#C0392B"/>
+  <path d="M106 150h28v24c0 8-6 13-14 13s-14-5-14-13z" fill="#D9A887"/>
+  <ellipse cx="80" cy="116" rx="6" ry="9" fill="#D9A887"/><ellipse cx="160" cy="116" rx="6" ry="9" fill="#D9A887"/>
+  <ellipse cx="120" cy="114" rx="38" ry="44" fill="#F2C9AA"/>
+  <path d="M80 102c0-28 18-44 40-44s40 16 40 44z" fill="#B8823E"/><path d="M150 96c14 0 26 4 30 10H146z" fill="#B8823E"/>
+  <ellipse cx="105" cy="118" rx="3.4" ry="4.2" fill="#2E2218"/><ellipse cx="135" cy="118" rx="3.4" ry="4.2" fill="#2E2218"/>
+  <path d="M98 108c4-3 10-3 13-1M129 107c4-2 9-2 13 1" fill="none" stroke="#3A2A20" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M120 122c-1 5-2 8-5 10 2 1 5 1 7 0" fill="none" stroke="#D9A887" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M110 141c6 5 14 5 20 0" fill="none" stroke="#9C4E48" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="100" cy="132" rx="7" ry="4" fill="#EE9C91" opacity="0.35"/><ellipse cx="140" cy="132" rx="7" ry="4" fill="#EE9C91" opacity="0.35"/>
+</svg>

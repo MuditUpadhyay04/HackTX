@@ -8,7 +8,28 @@ import type { PersonId } from "./people";
 import type { ReelId } from "./reels";
 
 export type AppId = "whatsapp" | "messages" | "instagram";
-export type ThreadId = "mom" | "sarah" | "michael" | "fam" | "roommates" | "marfa";
+export type ThreadId =
+  | "mom"
+  | "sarah"
+  | "michael"
+  | "fam"
+  | "roommates"
+  | "marfa"
+  // unread background chats under the main threads
+  | "studygroup"
+  | "priya"
+  | "nani"
+  | "soccer"
+  | "masi"
+  | "dad"
+  | "ethan"
+  | "lena"
+  | "clinic"
+  | "jess"
+  | "marcus"
+  | "ava"
+  | "outdoors"
+  | "dani";
 
 export type Receipt = "sending" | "sent" | "delivered" | "read" | "seen" | null;
 
@@ -152,6 +173,85 @@ export const MARFA_SEED: Message[] = build("marfa", [
   ["2026-10-11T09:52", "them", "photo", { imageId: "lake" }],
 ]);
 
+/** Unread background chats that fill each inbox under the main thread (newest last in each). */
+const EXTRA_SEEDS = {
+  // WhatsApp
+  studygroup: build("studygroup", [
+    ["2026-10-24T19:58", "them", "text", { sender: "omar", text: "anyone figure out #14 on the problem set" }],
+    ["2026-10-24T20:03", "them", "photo", { sender: "priya", imageId: "roll-10" }],
+    ["2026-10-24T20:04", "them", "text", { sender: "priya", text: "my work, idk if it's right" }],
+    ["2026-10-24T20:31", "them", "text", { sender: "omar", text: "@Riley you coming to the review session?" }],
+    ["2026-10-24T20:47", "them", "text", { sender: "priya", text: "review session tmrw at 4 in WEL 2.224 🙏" }],
+  ]),
+  priya: build("priya", [
+    ["2026-10-20T14:10", "me", "text", read("can I borrow your notes from tuesday")],
+    ["2026-10-20T14:22", "them", "text", t("ya ofc sending now")],
+    ["2026-10-24T19:20", "them", "text", t("hey you weren't in lab again")],
+    ["2026-10-24T19:22", "them", "text", t("did you get the notes from thursday? I can send them")],
+  ]),
+  nani: build("nani", [
+    ["2026-10-19T10:02", "them", "text", t("Good morning beta 🌸🙏")],
+    ["2026-10-22T09:41", "them", "text", t("Happy Diwali in advance. Are you coming home?")],
+    ["2026-10-24T16:10", "them", "voice", { duration: "0:48" }],
+  ]),
+  soccer: build("soccer", [
+    ["2026-10-23T18:30", "them", "text", { sender: "ethan", text: "GG tonight boys 🔥" }],
+    ["2026-10-24T12:01", "them", "text", { sender: "ethan", text: "game moved to 7pm sunday, field 3" }],
+    ["2026-10-24T12:03", "them", "text", { sender: "omar", text: "need a keeper, who's in?" }],
+    ["2026-10-24T15:44", "them", "text", { sender: "ethan", text: "Riley you playing or nah" }],
+  ]),
+  masi: build("masi", [
+    ["2026-10-23T20:15", "them", "photo", { imageId: "roll-06" }],
+    ["2026-10-23T20:16", "them", "text", t("made extra for Diwali, come home and eat 🙂")],
+    ["2026-10-23T20:18", "them", "text", t("call your mom, she worries 🙂")],
+  ]),
+  // Messages
+  dad: build("dad", [
+    ["2026-10-17T08:12", "them", "text", t("Saw the Longhorns won. Did you go?")],
+    ["2026-10-24T17:45", "them", "text", t("Your mom says you haven't called.")],
+    ["2026-10-24T17:46", "them", "text", t("Call her when you can. Call me too, kiddo.")],
+  ]),
+  ethan: build("ethan", [
+    ["2026-10-22T22:10", "me", "text", { text: "nah next time", receipt: "read" }],
+    ["2026-10-24T20:28", "them", "text", t("yo watch party at my place tonight")],
+    ["2026-10-24T20:30", "them", "text", t("you coming? there's pizza 🍕")],
+  ]),
+  lena: build("lena", [
+    ["2026-10-23T11:05", "them", "text", t("hey are you coming to lab?")],
+    ["2026-10-24T18:12", "them", "text", t("did you finish the prelab? I'm stuck on #4")],
+    ["2026-10-24T18:13", "them", "text", t("also we have to turn in the report together monday")],
+  ]),
+  clinic: build("clinic", [
+    [
+      "2026-10-24T09:00",
+      "them",
+      "text",
+      t("UT Health Austin: Reminder of your appointment Mon 10/27 at 2:30 PM. Reply C to confirm or R to reschedule."),
+    ],
+  ]),
+  // Instagram
+  jess: build("jess", [
+    ["2026-10-24T17:02", "them", "reel", { reelId: "goldenhour" }],
+    ["2026-10-24T17:03", "them", "text", t("this is literally your dog lol")],
+  ]),
+  marcus: build("marcus", [
+    ["2026-10-21T13:40", "me", "text", { text: "bet", receipt: "seen" }],
+    ["2026-10-24T14:20", "them", "text", t("bro you still have my hoodie 😂")],
+  ]),
+  ava: build("ava", [
+    ["2026-10-23T22:15", "them", "photo", { imageId: "roll-08" }],
+    ["2026-10-23T22:16", "them", "text", t("are you coming saturday?? we have an extra ticket")],
+  ]),
+  outdoors: build("outdoors", [
+    ["2026-10-22T10:00", "them", "photo", { imageId: "lake" }],
+    ["2026-10-22T10:01", "them", "text", t("Enchanted Rock trip Nov 8! Spots are filling up. Want in? 🏕️")],
+  ]),
+  dani: build("dani", [
+    ["2026-10-20T21:30", "them", "text", t("miss you at practice!!")],
+    ["2026-10-20T21:31", "them", "text", t("you good?")],
+  ]),
+} satisfies Partial<Record<ThreadId, Message[]>>;
+
 export const SEEDS: Record<ThreadId, Message[]> = {
   mom: MOM_SEED,
   sarah: SARAH_SEED,
@@ -159,6 +259,7 @@ export const SEEDS: Record<ThreadId, Message[]> = {
   fam: FAM_SEED,
   roommates: ROOMMATES_SEED,
   marfa: MARFA_SEED,
+  ...EXTRA_SEEDS,
 };
 
 export const THREAD_META: Record<ThreadId, Omit<Thread, "messages" | "draft" | "keyboard" | "theirTyping">> = {
@@ -168,6 +269,20 @@ export const THREAD_META: Record<ThreadId, Omit<Thread, "messages" | "draft" | "
   fam: { id: "fam", app: "whatsapp", contactId: "fam", unread: 0, presence: "offline" },
   roommates: { id: "roommates", app: "whatsapp", contactId: "roommates", unread: 0, presence: "offline" },
   marfa: { id: "marfa", app: "whatsapp", contactId: "marfa", unread: 0, presence: "offline" },
+  studygroup: { id: "studygroup", app: "whatsapp", contactId: "studygroup", unread: 23, presence: "offline" },
+  priya: { id: "priya", app: "whatsapp", contactId: "priya", unread: 2, presence: "offline" },
+  nani: { id: "nani", app: "whatsapp", contactId: "nani", unread: 1, presence: "offline" },
+  soccer: { id: "soccer", app: "whatsapp", contactId: "soccer", unread: 7, presence: "offline" },
+  masi: { id: "masi", app: "whatsapp", contactId: "masi", unread: 3, presence: "offline" },
+  dad: { id: "dad", app: "messages", contactId: "dad", unread: 2, presence: "offline" },
+  ethan: { id: "ethan", app: "messages", contactId: "ethan", unread: 2, presence: "offline" },
+  lena: { id: "lena", app: "messages", contactId: "lena", unread: 2, presence: "offline" },
+  clinic: { id: "clinic", app: "messages", contactId: "clinic", unread: 1, presence: "offline" },
+  jess: { id: "jess", app: "instagram", contactId: "jess", unread: 2, presence: "active" },
+  marcus: { id: "marcus", app: "instagram", contactId: "marcus", unread: 1, presence: "offline" },
+  ava: { id: "ava", app: "instagram", contactId: "ava", unread: 2, presence: "active" },
+  outdoors: { id: "outdoors", app: "instagram", contactId: "outdoors", unread: 2, presence: "offline" },
+  dani: { id: "dani", app: "instagram", contactId: "dani", unread: 2, presence: "offline" },
 };
 
 // ---------------------------------------------------------------------------

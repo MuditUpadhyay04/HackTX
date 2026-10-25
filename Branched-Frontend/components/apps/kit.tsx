@@ -12,7 +12,7 @@
  * Sizes are pt inside the display's viewport (cover 402 x 573, inner 822.5 x 573).
  */
 import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { STATUS } from "@/components/lookalike/metrics";
 import { PaneContext, usePane, type Pane } from "@/components/lookalike/shared/pane";
 import { CoverStatusBar } from "@/components/scene/CoverStatusBar";
@@ -190,15 +190,30 @@ export function Tap({
   label,
   style,
   highlight,
+  onLongPress,
 }: {
   children: ReactNode;
   onPress?: () => void;
+  /** hold (or right-click): list rows use it to mark a chat read/unread */
+  onLongPress?: () => void;
   label?: string;
   style?: CSSProperties;
   /** row highlight color (lists); default: the button dims */
   highlight?: string;
 }) {
   const [down, setDown] = useState(false);
+  const hold = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const held = useRef(false);
+  const release = () => {
+    setDown(false);
+    if (hold.current) clearTimeout(hold.current);
+    hold.current = null;
+  };
+  const longPress = () => {
+    held.current = true;
+    release();
+    onLongPress?.();
+  };
   const look: CSSProperties = highlight
     ? { background: down ? highlight : style?.background }
     : { opacity: down ? 0.3 : 1, transition: down ? undefined : "opacity 0.2s ease-out" };
@@ -209,11 +224,27 @@ export function Tap({
       // project rule 4 (docs/RULES.md): every control says what it is. A wired tap is an action;
       // a decorative one (no handler) is marked "static" so it reads as intentional, not forgotten.
       data-action={onPress ? (label ? `tap:${label}` : "tap") : "static"}
-      onPointerDown={() => setDown(true)}
-      onPointerUp={() => setDown(false)}
-      onPointerLeave={() => setDown(false)}
-      onPointerCancel={() => setDown(false)}
-      onClick={onPress}
+      onPointerDown={(e) => {
+        setDown(true);
+        held.current = false;
+        if (onLongPress && e.button === 0) hold.current = setTimeout(longPress, 500);
+      }}
+      onPointerUp={release}
+      onPointerLeave={release}
+      onPointerCancel={release}
+      onContextMenu={
+        onLongPress
+          ? (e) => {
+              e.preventDefault();
+              longPress();
+            }
+          : undefined
+      }
+      onClick={() => {
+        // a hold already acted; don't also open the row
+        if (held.current) held.current = false;
+        else onPress?.();
+      }}
       style={{ ...resetButton, ...style, ...look }}
     >
       {children}

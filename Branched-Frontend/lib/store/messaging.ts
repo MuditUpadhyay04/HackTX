@@ -54,6 +54,8 @@ type State = {
   receive: (id: ThreadId, partial: Partial<Message> & Pick<Message, "kind">) => Message;
   markRead: (id: ThreadId) => void;
   setUnread: (id: ThreadId, n: number) => void;
+  /** inbox long-press: read → back to its seeded unread count (at least 1); unread → read */
+  toggleUnread: (id: ThreadId) => void;
   setTyping: (id: ThreadId, on: boolean) => void;
   seed: (id: ThreadId, state: SeedState, params?: { typed?: number }) => void;
   setReplies: (on: boolean) => void;
@@ -181,6 +183,7 @@ export const useMessaging = create<State>()((set, get) => {
     },
     markRead: (id) => patch(id, () => ({ unread: 0 })),
     setUnread: (id, n) => patch(id, () => ({ unread: n })),
+    toggleUnread: (id) => patch(id, (t) => ({ unread: t.unread > 0 ? 0 : Math.max(1, THREAD_META[id].unread) })),
     setTyping: (id, on) => patch(id, () => ({ theirTyping: on })),
     seed: (id, state, params) => {
       clearTimers(id);

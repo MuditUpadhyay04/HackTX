@@ -24,8 +24,8 @@ import { AppFrame, Avatar, Scroll, Split, StackView, TOP, Tap, ellipsis, useStac
 
 type Route = { kind: "list" } | { kind: "thread"; id: ThreadId };
 
-/** Conversations in the list (newest first). Only Sarah is on iMessage in Act 1. */
-const CONVERSATIONS: ThreadId[] = ["sarah"];
+/** Conversations in the list (newest first): Sarah, then the unread background chats. */
+const CONVERSATIONS: ThreadId[] = ["sarah", "ethan", "lena", "dad", "clinic"];
 
 /** iMessage shows a centered time stamp when more than an hour passes between messages. */
 const STAMP_GAP_MIN = 60;
@@ -111,7 +111,7 @@ function ConversationRow({ id, onOpen, selected }: { id: ThreadId; onOpen: (id: 
   const unread = t.unread > 0;
   return (
     <Tap
-      onPress={() => onOpen(id)}
+      onPress={() => onOpen(id)} onLongPress={() => useMessaging.getState().toggleUnread(id)}
       highlight="var(--ios-gray5)"
       style={{ display: "flex", alignItems: "flex-start", width: "100%", height: 76, paddingTop: 10, background: selected ? "var(--imsg-blue)" : undefined, color: selected ? "var(--on-accent)" : undefined }}
     >

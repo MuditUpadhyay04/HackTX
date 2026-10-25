@@ -39,8 +39,8 @@ import { AppFrame, Avatar, Scroll, Split, StackView, TOP, Tap, ellipsis, useStac
 type Tab = "updates" | "calls" | "communities" | "chats" | "settings";
 type Route = { kind: "home"; tab: Tab } | { kind: "chat"; id: ThreadId } | { kind: "call"; with: PersonId; video: boolean };
 
-/** Chat list order (Phase 2 ROUTES: Mom first, then Fam, Roommates, Marfa Trip). */
-const CHATS: ThreadId[] = ["mom", "fam", "roommates", "marfa"];
+/** Chat list order (Phase 2 ROUTES: Mom first, then the unread background chats, then Fam, Roommates, Marfa Trip). */
+const CHATS: ThreadId[] = ["mom", "studygroup", "priya", "nani", "soccer", "masi", "fam", "roommates", "marfa"];
 
 export function WhatsAppApp({ display }: AppScreenProps) {
   // shared with the other display's copy, so a fold/unfold keeps the open chat, call and tab
@@ -380,7 +380,7 @@ function ChatRow({ id, onOpen, selected }: { id: ThreadId; onOpen: (id: ThreadId
   const unread = t.unread > 0;
   return (
     <Tap
-      onPress={() => onOpen(id)}
+      onPress={() => onOpen(id)} onLongPress={() => useMessaging.getState().toggleUnread(id)}
       highlight="var(--ios-gray5)"
       style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", height: WA.chatList.rowHeight, paddingLeft: 16, background: selected ? "var(--wa-chip)" : undefined }}
     >

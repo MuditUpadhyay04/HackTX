@@ -426,7 +426,7 @@
   --widget-weather-sun: #FFD60A;
   --widget-calendar-bg: #FFFFFF;
   --widget-music-fill: linear-gradient(160deg, #3A2A4F 0%, #1C1626 100%);
-  --widget-music-art: linear-gradient(135deg, #FF5E7E 0%, #A44CF0 55%, #3F7BF5 100%);
+  --widget-music-art: center / cover no-repeat url(/mock/album-encore.jpg); /* Encore (Eminem), iTunes artwork */
   --widget-music-accent: #FF5E7E;
   --widget-music-track: rgba(255,255,255,0.25);
   --widget-reminders-accent: #FF9500;

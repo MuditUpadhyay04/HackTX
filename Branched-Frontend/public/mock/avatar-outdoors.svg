@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <!-- Branched-Frontend: UT Outdoors Club, illustrated avatar (our own art; no real person). -->
+  <defs>
+    <radialGradient id="bg-outdoors" cx="0.3" cy="0.25" r="0.95"><stop offset="0" stop-color="#FFE3C4"/><stop offset="1" stop-color="#F5B27A"/></radialGradient>
+  </defs>
+  <rect width="240" height="240" fill="url(#bg-outdoors)"/>
+  <circle cx="160" cy="78" r="22" fill="#FFF4DC"/><path d="M20 196l64-96 34 48 26-34 76 82z" fill="#2F5E4E"/><path d="M84 100l14 21-10-4-10 10-8-6z" fill="#F7F3EA"/><path d="M0 240v-40c40-14 80-14 120-4s80 10 120-2v46z" fill="#1E4438"/>
+</svg>

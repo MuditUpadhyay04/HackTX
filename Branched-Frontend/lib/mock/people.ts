@@ -14,7 +14,22 @@ export type PersonId =
   | "marfa"
   | "goldenhour"
   | "recleague"
-  | "dormlife";
+  | "dormlife"
+  // background chats that fill each inbox under the main threads
+  | "priya"
+  | "nani"
+  | "masi"
+  | "omar"
+  | "studygroup"
+  | "soccer"
+  | "ethan"
+  | "lena"
+  | "clinic"
+  | "jess"
+  | "marcus"
+  | "ava"
+  | "dani"
+  | "outdoors";
 
 export type Person = {
   id: PersonId;
@@ -44,6 +59,21 @@ export const people: Record<PersonId, Person> = {
   goldenhour: { id: "goldenhour", name: "goldenhour.pups", handle: "goldenhour.pups", avatar: avatar("goldenhour") },
   recleague: { id: "recleague", name: "rec.league.legends", handle: "rec.league.legends", avatar: avatar("recleague") },
   dormlife: { id: "dormlife", name: "dormlife.tx", handle: "dormlife.tx", avatar: avatar("dormlife") },
+  // background chats under the main threads (avatars: scripts/make-mock-avatars.py)
+  priya: { id: "priya", name: "Priya", avatar: avatar("priya") },
+  nani: { id: "nani", name: "Nani ❤️", avatar: avatar("nani") },
+  masi: { id: "masi", name: "Neha Masi", avatar: avatar("masi") },
+  omar: { id: "omar", name: "Omar", avatar: avatar("omar") },
+  studygroup: { id: "studygroup", name: "CH 301 Study Group", avatar: avatar("studygroup"), group: true },
+  soccer: { id: "soccer", name: "IM Soccer ⚽️", avatar: avatar("soccer"), group: true },
+  ethan: { id: "ethan", name: "Ethan", avatar: avatar("ethan") },
+  lena: { id: "lena", name: "Lena (Lab Partner)", avatar: avatar("lena") },
+  clinic: { id: "clinic", name: "UT Health Austin", avatar: avatar("clinic") },
+  jess: { id: "jess", name: "Jess Nguyen", handle: "jess.nguyenn", avatar: avatar("jess") },
+  marcus: { id: "marcus", name: "Marcus Webb", handle: "marcus.webb_", avatar: avatar("marcus") },
+  ava: { id: "ava", name: "Ava Lopez", handle: "avalopez.atx", avatar: avatar("ava") },
+  dani: { id: "dani", name: "Dani Reyes", handle: "dani.reyes", avatar: avatar("dani") },
+  outdoors: { id: "outdoors", name: "UT Outdoors Club", handle: "ut.outdoorsclub", avatar: avatar("outdoors") },
 };
 
 export function person(id: PersonId): Person {

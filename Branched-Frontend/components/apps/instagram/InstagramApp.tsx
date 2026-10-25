@@ -26,7 +26,7 @@ import { AppFrame, Avatar, Scroll, Split, StackView, TOP, Tap, ellipsis, useStac
 
 type Route = { kind: "inbox" } | { kind: "thread"; id: ThreadId } | { kind: "reels"; start: ReelId };
 
-const INBOX: ThreadId[] = ["michael"];
+const INBOX: ThreadId[] = ["michael", "jess", "marcus", "ava", "outdoors", "dani"];
 /** Instagram groups messages under one centered time stamp unless an hour passes. */
 const STAMP_GAP_MIN = 60;
 /** Riley's own handle (inbox header). COPY NEEDED: no handle is given for Riley in the spec. */
@@ -239,7 +239,7 @@ function InboxRow({ id, onOpen, selected }: { id: ThreadId; onOpen: (id: ThreadI
   const unread = t.unread > 0;
   const preview = last ? (last.from === "me" ? `You: ${previewText(last)}` : previewText(last)) : "";
   return (
-    <Tap onPress={() => onOpen(id)} highlight="var(--ig-pressed)" style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", height: 72, paddingInline: 16, background: selected ? "var(--ig-dm-in)" : undefined }}>
+    <Tap onPress={() => onOpen(id)} onLongPress={() => useMessaging.getState().toggleUnread(id)} highlight="var(--ig-pressed)" style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", height: 72, paddingInline: 16, background: selected ? "var(--ig-dm-in)" : undefined }}>
       <span style={{ position: "relative" }}>
         <Avatar src={c.avatar} size={56} />
         {t.presence === "active" ? <span style={{ position: "absolute", right: 1, bottom: 1, width: 14, height: 14, borderRadius: 7, background: "var(--ig-active)", border: "2.5px solid var(--ios-bg)" }} /> : null}

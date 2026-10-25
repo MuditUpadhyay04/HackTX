@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <!-- Branched-Frontend: CH 301 Study Group, illustrated avatar (our own art; no real person). -->
+  <defs>
+    <radialGradient id="bg-studygroup" cx="0.3" cy="0.25" r="0.95"><stop offset="0" stop-color="#E2F2EE"/><stop offset="1" stop-color="#A9D6CB"/></radialGradient>
+  </defs>
+  <rect width="240" height="240" fill="url(#bg-studygroup)"/>
+  <path d="M100 52h40v12h-6v44l42 72c6 10-2 22-14 22H78c-12 0-20-12-14-22l42-72V64h-6z" fill="#F7FBFA" stroke="#2F6F62" stroke-width="6" stroke-linejoin="round"/><path d="M86 142h68l22 38c6 10-2 22-14 22H78c-12 0-20-12-14-22z" fill="#3FB49A"/><circle cx="108" cy="172" r="7" fill="#E8FFF8" opacity="0.8"/><circle cx="132" cy="158" r="5" fill="#E8FFF8" opacity="0.8"/><circle cx="124" cy="186" r="4" fill="#E8FFF8" opacity="0.8"/>
+</svg>
