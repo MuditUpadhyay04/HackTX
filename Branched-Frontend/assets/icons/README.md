@@ -1,15 +1,9 @@
-# Look-alike app icons (notes, no files)
+# App icons (notes)
 
-Every Apple and Meta app icon in the build is a **look-alike recreated in SVG/CSS**: a brand-coloured tile plus a simple drawn glyph. **No official logo files, icons, screenshots or fonts are ever downloaded, traced or stored here or in `public/`.** The specs live in `CLAUDE_PROMPT.md` Phase 3 ("Meta family" / "Apple apps") and are implemented in `components/ios/AppIcon` (+ `components/meta/*`). This folder holds notes only; if an icon is ever exported for docs/slides, export it from our own SVG component and add a README row marked "generated look-alike".
+**Meta apps use their official app icons, 1:1 (decision D9, `docs/RULES.md`).** Each one is the exact official file, stored unmodified in `assets/brand/meta/` with a source row (URL, date, original size) in `assets/README.md`. Rendering only scales it uniformly and applies the iOS squircle mask; it is never redrawn, traced, recolored, cropped or stretched. **Apple apps stay look-alikes recreated in SVG/CSS**; no Apple logo or icon files are ever stored here or in `public/`. Icons are implemented in `components/ios/AppIcon` (+ `components/icons/apps/*`). The home screen follows D8: no Safari, Camera or Settings.
 
-| Icon | Recreation | Lands in |
+| Icon | Source | Lands in |
 |---|---|---|
-| Un-Said | **Not a look-alike: Gurneal's own art** `../brand/unsaid-app-icon.png`, masked to the iOS squircle (22.37%). Label "Un-Said". Same art as App-UI-Final. | home screen, dock/search, notification banner, splash |
-| Instagram | ig radial gradient tile, white rounded-square outline + circle + dot | home screen, banners |
-| WhatsApp | `#25D366` tile, white bubble outline with handset | home screen, banners |
-| Facebook | `#0866FF` tile, "f" built from paths (no font) | home screen |
-| Messenger | messenger-gradient tile, bubble with bolt cutout | home screen |
-| Threads | black tile, "@"-like spiral stroke | home screen |
-| Meta AI | white (dark #0B0B0F) tile, ring stroked with meta-ai-gradient | home screen, Meta AI shell (Phase 6) |
-| Edits | black tile, film-strip/scissor glyph, thin ig underline | home screen |
-| Apple apps | Weather, Calendar, Photos, Clock, Notes, Maps, Settings, Mail, Reminders, Health, Messages, Phone, Safari, Camera, App Store: simple gradient + glyph per Phase 3 | home screen, dock |
+| Un-Said | **Gurneal's own art** `../brand/unsaid-app-icon.png`, masked to the iOS squircle (22.37%). Label "Un-Said". Same art as App-UI-Final. | home screen, notification banner, splash |
+| Facebook, Instagram, WhatsApp, Messenger, Threads, Meta AI, Edits, Meta Horizon, WhatsApp Business, Meta Business Suite, Meta Ads Manager, Messenger Kids | **Official app icon, 1:1**, from `../brand/meta/` (added in Phase 2/3, each with its source row) | home screen, dock, banners, Meta app shells |
+| Apple apps | Messages, Photos, Phone: look-alike gradient + glyph per Phase 3 | home screen, dock |

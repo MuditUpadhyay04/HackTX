@@ -44,3 +44,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# personal session notes / chat logs (kept on disk, never committed)
+/docs/HANDOFF.md
+/reference/claude-grok-collab.md

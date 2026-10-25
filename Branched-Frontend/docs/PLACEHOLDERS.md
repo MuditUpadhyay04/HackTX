@@ -36,7 +36,7 @@ grouped by app. Each one is a pressable control that shows the "concept only" to
 
 ## Un-Said (`unsaid:`)
 
-- `unsaid:preview-letter`: `/test/placeholder`
+- none yet
 
 ## UnsaidSlot
 

@@ -16,6 +16,7 @@ import {
   palettes,
   radius,
   shadow,
+  size,
   space,
   type,
   typeCssName,
@@ -23,11 +24,16 @@ import {
   type TypeToken,
 } from "@/lib/tokens";
 
-/** Artboard and layout numbers (artboard px; numbers, not styling literals). */
+/** The 1920x1080 artboard (spec 4.3; same numbers as STAGE_WIDTH/HEIGHT in the client-only Stage module). */
 const ARTBOARD = { width: 1920, height: 1080 };
-const RAIL = 240;
-const LIST_COL = 160;
-const UN_CELL = 104;
+/** Layout widths of the sheet: `size` tokens (lib/tokens.ts, mirrored as --size-test-* in app/tokens.css). */
+const RAIL = size.testRail;
+const LIST_COL = size.testListCol;
+const SWATCH_WIDE = size.testSwatchWide;
+const SWATCH_NARROW = size.testSwatchNarrow;
+const TYPE_COL = size.testTypeCol;
+const SCALE_COL = size.testScaleCol;
+const UN_CELL = size.testUnCell;
 
 type Tone = "light" | "dark" | "un";
 const TONE: Record<Tone, { label: string; secondary: string; ring: string }> = {
@@ -228,11 +234,11 @@ const UN_TYPE_BIG = new Set(["un-letter-hero", "un-display", "un-compose", "un-c
 
 function UnBand() {
   return (
-    <div style={{ background: cssVar("un-bg"), padding: `${space[28]}px ${space[40]}px`, display: "flex", gap: space[32] }}>
+    <div style={{ background: cssVar("un-bg"), padding: `${cssVar("space-28")} ${cssVar("space-40")}`, display: "flex", gap: space[32] }}>
       <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: space[20] }}>
         <div>
           <SectionLabel tone="un">un-* · lib/unsaid-theme.json · app/unsaid-theme.css</SectionLabel>
-          <div style={{ display: "grid", gridTemplateColumns: `repeat(14, ${UN_CELL}px)`, columnGap: space[8], rowGap: space[12] }}>
+          <div style={{ display: "grid", gridTemplateColumns: `repeat(14, ${cssVar("size-test-un-cell")})`, columnGap: space[8], rowGap: space[12] }}>
             {Object.entries(un.color).map(([name, value]) => (
               <div key={name} style={{ display: "flex", flexDirection: "column", gap: space[6] }}>
                 <span style={{ height: space[36], borderRadius: radius[8], background: cssVar(name), boxShadow: ring("un") }} />
@@ -245,21 +251,21 @@ function UnBand() {
           {Object.entries(un.gradient).map(([name, value]) => {
             const shape: CSSProperties =
               name === "un-pill-gradient"
-                ? { width: 200, borderRadius: cssVar("un-r-pill") }
+                ? { width: SWATCH_WIDE, borderRadius: cssVar("un-r-pill") }
                 : name === "un-icon-gradient"
                   ? { width: space[56], borderRadius: cssVar("un-r-icon") }
-                  : { width: 200, borderRadius: cssVar("un-r-row") };
+                  : { width: SWATCH_WIDE, borderRadius: cssVar("un-r-row") };
             return (
-              <div key={name} style={{ display: "flex", flexDirection: "column", gap: space[6], width: name === "un-icon-gradient" ? 120 : 200 }}>
+              <div key={name} style={{ display: "flex", flexDirection: "column", gap: space[6], width: name === "un-icon-gradient" ? SWATCH_NARROW : SWATCH_WIDE }}>
                 <span style={{ height: space[56], background: cssVar(name), ...shape }} />
-                <Caption name={name} value={value} tone="un" width={name === "un-icon-gradient" ? 120 : 200} />
+                <Caption name={name} value={value} tone="un" width={name === "un-icon-gradient" ? SWATCH_NARROW : SWATCH_WIDE} />
               </div>
             );
           })}
           {Object.entries(un.shadow).map(([name, value]) => (
-            <div key={name} style={{ display: "flex", flexDirection: "column", gap: space[6], width: 120 }}>
+            <div key={name} style={{ display: "flex", flexDirection: "column", gap: space[6], width: SWATCH_NARROW }}>
               <span style={{ height: space[56], borderRadius: cssVar("un-r-row"), background: cssVar("un-surface"), boxShadow: cssVar(name) }} />
-              <Caption name={name} value={value} tone="un" width={120} />
+              <Caption name={name} value={value} tone="un" width={SWATCH_NARROW} />
             </div>
           ))}
           {Object.entries(un.radius).map(([name, value]) => (
@@ -287,7 +293,7 @@ function UnBand() {
         </div>
       </div>
       <div style={{ width: RAIL, flex: "none" }}>
-        <Reference src="/unsaid-theme/unsaid-palette.png" alt="App-UI-Final/tokens/unsaid-palette.png" width={RAIL} height={198} tone="un" />
+        <Reference src="/unsaid-theme/unsaid-palette.png" alt="App-UI-Final/tokens/unsaid-palette.png" width={RAIL} height={size.testRefUnPaletteHeight} tone="un" />
       </div>
     </div>
   );
@@ -297,7 +303,7 @@ function PalettesSheet() {
   return (
     <>
       <UnBand />
-      <div style={{ padding: `${space[24]}px ${space[40]}px`, display: "flex", gap: space[32] }}>
+      <div style={{ padding: `${cssVar("space-24")} ${cssVar("space-40")}`, display: "flex", gap: space[32] }}>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: space[12] }}>
           <SectionLabel tone="dark">look-alike palettes · assets/palettes/branched-tokens.json · app/tokens.css</SectionLabel>
           {[ROW_1, ROW_2].map((row, i) => (
@@ -313,7 +319,7 @@ function PalettesSheet() {
             src="/test/branched-frontend-palette.png"
             alt="assets/palettes/branched-frontend-palette.png"
             width={RAIL}
-            height={435}
+            height={size.testRefPaletteHeight}
             tone="dark"
           />
         </div>
@@ -331,7 +337,7 @@ const deviceMaterials = Object.keys(material).filter((k) => k.startsWith("device
 const iosMaterials = Object.keys(material).filter((k) => k.startsWith("material-") && !k.endsWith("-filter") && !k.endsWith("-stroke"));
 const strip = (k: string) => k.replace(/^device-/, "");
 
-function Tile({ name, value, fill, tone, extra, width = 112 }: { name: string; value: string; fill: string; tone: Tone; extra?: CSSProperties; width?: number }) {
+function Tile({ name, value, fill, tone, extra, width = size.testSwatchTile }: { name: string; value: string; fill: string; tone: Tone; extra?: CSSProperties; width?: number }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: space[6], width }}>
       <span style={{ height: space[44], borderRadius: radius[10], background: fill, ...extra }} />
@@ -344,7 +350,7 @@ function ScalesSheet() {
   const iosType = (Object.keys(type) as TypeToken[]).filter((k) => !k.startsWith("meta"));
   const metaType = (Object.keys(type) as TypeToken[]).filter((k) => k.startsWith("meta"));
   return (
-    <div style={{ padding: `${space[32]}px ${space[40]}px`, display: "flex", flexDirection: "column", gap: space[16] }}>
+    <div style={{ padding: `${cssVar("space-32")} ${cssVar("space-40")}`, display: "flex", flexDirection: "column", gap: space[16] }}>
       <div style={{ display: "flex", gap: space[16], alignItems: "stretch" }}>
         <Panel title="device-* · colors (section 4.3, Phase 1)" tone="dark" background={cssVar("ios-wallpaper-base")} rows={4} layer={<WallpaperLayer id="tokens-noise-a" />}>
           {deviceColors.map((name) => (
@@ -359,7 +365,7 @@ function ScalesSheet() {
               value={material[name as keyof typeof material]}
               fill={cssVar(name)}
               tone="dark"
-              width={128}
+              width={size.testMaterialTile}
               extra={{
                 backdropFilter: cssVar(name.startsWith("material-pill") ? "material-pill-filter" : `${name}-filter`),
                 boxShadow: name === "material-glass" ? cssVar("shadow-glass-stroke") : name === "material-light" ? cssVar("shadow-banner") : undefined,
@@ -380,7 +386,7 @@ function ScalesSheet() {
             const t = type[name];
             const css = typeCssName(name);
             return (
-              <div key={name} style={{ display: "flex", flexDirection: "column", width: 260 }}>
+              <div key={name} style={{ display: "flex", flexDirection: "column", width: TYPE_COL }}>
                 <span style={{ font: cssVar(`type-${css}`), letterSpacing: cssVar(`type-${css}-tracking`), color: cssVar("ios-label"), whiteSpace: "nowrap" }}>
                   {name}
                 </span>
@@ -416,18 +422,18 @@ function ScalesSheet() {
           </Panel>
           <Panel title="space · blur · hairline" tone="light" background={cssVar("stage-white")} rows={9}>
             {Object.entries(space).map(([name, value]) => (
-              <div key={name} style={{ display: "flex", alignItems: "center", gap: space[8], width: 192 }}>
+              <div key={name} style={{ display: "flex", alignItems: "center", gap: space[8], width: SCALE_COL }}>
                 <span style={{ ...nameStyle("light"), width: space[64] }}>{`space-${name}`}</span>
                 <span style={{ width: value, height: space[8], borderRadius: radius[2], background: cssVar("ios-blue") }} />
               </div>
             ))}
             {Object.entries(blur).map(([name, value]) => (
-              <div key={`blur-${name}`} style={{ display: "flex", alignItems: "center", gap: space[8], width: 192 }}>
+              <div key={`blur-${name}`} style={{ display: "flex", alignItems: "center", gap: space[8], width: SCALE_COL }}>
                 <span style={{ ...nameStyle("light"), width: space[64] }}>{`blur-${name}`}</span>
                 <span style={valueStyle("light")}>{String(value)}</span>
               </div>
             ))}
-            <div style={{ display: "flex", alignItems: "center", gap: space[8], width: 192 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: space[8], width: SCALE_COL }}>
               <span style={{ ...nameStyle("light"), width: space[64] }}>hairline</span>
               <span style={{ width: space[64], height: cssVar("hairline"), background: cssVar("ios-separator") }} />
             </div>

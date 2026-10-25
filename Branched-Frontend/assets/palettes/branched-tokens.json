@@ -83,6 +83,13 @@
     "frame-seam": "#C4C3BD",
     "bezel": "#050506",
     "hinge-seam": "#BEBFC3",
-    "back-glass": "#FBFBF9"
+    "back-glass": "#FBFBF9",
+    "ti-highlight": "#F6F4F0",
+    "ti-light": "#DEDAD3",
+    "ti-base": "#C3BEB5",
+    "ti-mid": "#A39E95",
+    "ti-shadow": "#77736C",
+    "ti-deep": "#46443F",
+    "back-glass-ti": "#D5D1C9"
   }
 }

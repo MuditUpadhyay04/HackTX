@@ -81,6 +81,14 @@
   --device-bezel: #050506;
   --device-hinge-seam: #BEBFC3;
   --device-back-glass: #FBFBF9;
+  /* device: iPhone Fold, natural titanium (RULES.md D10) */
+  --device-ti-highlight: #F6F4F0;
+  --device-ti-light: #DEDAD3;
+  --device-ti-base: #C3BEB5;
+  --device-ti-mid: #A39E95;
+  --device-ti-shadow: #77736C;
+  --device-ti-deep: #46443F;
+  --device-back-glass-ti: #D5D1C9;
 
   /* stage, wallpaper base, iOS labels, device parts (sections 4.3, Phase 1) */
   --stage-black: #000000;
@@ -120,7 +128,7 @@
   --ig-dm-out: linear-gradient(90deg, #7B2FF7 0%, #3B5BFE 100%);
   --messenger-gradient: linear-gradient(45deg, #0099FF 0%, #A033FF 60%, #FF5280 90%, #FF7061 100%);
   --meta-ai-gradient: conic-gradient(from 200deg, #0064E0, #7B3FF2, #D63BC4, #FF6A3D, #0064E0);
-  --ios-wallpaper: radial-gradient(40% 50% at 22% 30%, #677FEF, transparent), radial-gradient(45% 55% at 78% 25%, #A166B7, transparent), radial-gradient(50% 60% at 60% 80%, #8776DF, transparent), radial-gradient(40% 45% at 15% 85%, #607CF2, transparent), linear-gradient(#0B0B12, #0B0B12);
+  --ios-wallpaper: radial-gradient(40% 50% at 22% 30%, var(--un-icon-blue), transparent), radial-gradient(45% 55% at 78% 25%, var(--un-icon-orchid), transparent), radial-gradient(50% 60% at 60% 80%, var(--un-icon-violet), transparent), radial-gradient(40% 45% at 15% 85%, var(--un-icon-periwinkle), transparent), linear-gradient(#0B0B12, #0B0B12);
   --wallpaper-filter: blur(80px) saturate(1.2);
   --wallpaper-scale: 1.2;
   --wallpaper-noise-opacity: 0.04;
@@ -145,7 +153,19 @@
   --device-crease-right-display: linear-gradient(to right, rgba(0,0,0,0.16) 0px, rgba(0,0,0,0) 12px);
   --device-reflection-mask: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0) 35%);
   --device-reflection-filter: blur(1.5px);
-  --material-light: rgba(250,250,250,0.78);
+  --device-ti-band: linear-gradient(135deg, #F6F4F0 0%, #C3BEB5 18%, #E6E2DC 38%, #A39E95 60%, #DEDAD3 80%, #77736C 100%);
+  --device-ti-side: linear-gradient(180deg, #46443F 0%, #A39E95 10%, #F6F4F0 28%, #C3BEB5 50%, #DEDAD3 68%, #77736C 90%, #46443F 100%);
+  --device-ti-spine: linear-gradient(180deg, #DEDAD3 0%, #C3BEB5 30%, #E6E2DC 55%, #A39E95 100%);
+  --device-ti-brush: repeating-linear-gradient(90deg, rgba(255,255,255,0) 0px, rgba(255,255,255,0) 2px, rgba(255,255,255,0.07) 2px, rgba(255,255,255,0.07) 3px);
+  --device-back-glass-ti-fill: linear-gradient(165deg, #E5E1DA 0%, #D5D1C9 45%, #C5C0B7 100%);
+  --device-back-glass-ti-gloss: linear-gradient(110deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.32) 48%, rgba(255,255,255,0) 62%);
+  --device-plateau-fill: linear-gradient(170deg, #DCD8D1 0%, #C9C4BB 55%, #B9B4AA 100%);
+  --device-lens-ring-ti: linear-gradient(135deg, #E6E2DC 0%, #A39E95 55%, #46443F 100%);
+  --device-screen-wallpaper: radial-gradient(55% 65% at 16% 18%, #8FA3FF 0%, transparent 70%), radial-gradient(50% 60% at 86% 14%, #C08AD6 0%, transparent 70%), radial-gradient(70% 75% at 62% 96%, #8776DF 0%, transparent 72%), radial-gradient(45% 55% at 6% 92%, #607CF2 0%, transparent 70%), linear-gradient(160deg, #3D439A 0%, #2B2670 52%, #1A1642 100%);
+  --device-screen-off: linear-gradient(160deg, #17181C 0%, #060607 36%, #000000 100%);
+  --device-glass-sheen: linear-gradient(118deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.04) 22%, rgba(255,255,255,0) 40%);
+  --device-crease: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.09) 30%, rgba(255,255,255,0.16) 50%, rgba(0,0,0,0.09) 70%, rgba(0,0,0,0) 100%);
+  --material-light: rgba(245,245,245,0.78);
   --material-light-filter: blur(30px) saturate(180%);
   --material-glass: rgba(255,255,255,0.22);
   --material-glass-filter: blur(30px) saturate(1.6);
@@ -154,7 +174,9 @@
   --material-pill-light: rgba(0,0,0,0.06);
   --material-pill-filter: blur(20px);
 
-  /* space: 4-pt grid (pt = CSS px at 1x) */
+  /* space: 4-pt grid (pt = CSS px at 1x). Named iOS exceptions, used only where iOS uses them:
+     2 (hairline-adjacent insets, switch knob inset), 6 (icon-label gap family, compact rows), 10 and 14
+     (iOS list/bubble paddings). Everything else stays on the 4/8 grid. */
   --space-0: 0px;
   --space-2: 2px;
   --space-4: 4px;
@@ -179,6 +201,43 @@
   --space-96: 96px;
   --space-120: 120px;
   --hairline: 0.5px;
+
+  /* size: fixed control sizes (lib/tokens.ts size); 44 = HIG hit target, UISwitch 51x31 / 27 knob */
+  --size-tap-target: 44px;
+  --size-grabber-width: 36px;
+  --size-grabber-height: 5px;
+  --size-switch-width: 51px;
+  --size-switch-height: 31px;
+  --size-switch-knob: 27px;
+  --size-switch-inset: 2px;
+  --size-focus-ring: 2px;
+  --size-imsg-apps-button: 34px;
+  --size-meta-ai-send: 32px;
+  --size-dev-panel-width: 320px;
+  --size-dev-clock-field: 88px;
+  --size-test-tile-width: 408px;
+  --size-test-tile-height: 236px;
+  --size-glyph-small: 20px;
+  --size-glyph-large: 24px;
+  --size-glyph-stroke-ios: 1.6px;
+  --size-glyph-stroke-whatsapp: 1.6px;
+  --size-glyph-stroke-instagram: 1.6px;
+  --size-glyph-stroke-facebook: 1.6px;
+  --size-glyph-stroke-meta-ai: 2px;
+  --size-disclosure-width: 8px;
+  --size-disclosure-height: 13px;
+  --size-disclosure-stroke: 2px;
+  --size-test-rail: 240px;
+  --size-test-list-col: 160px;
+  --size-test-swatch-wide: 200px;
+  --size-test-swatch-narrow: 120px;
+  --size-test-swatch-tile: 112px;
+  --size-test-material-tile: 128px;
+  --size-test-type-col: 260px;
+  --size-test-scale-col: 192px;
+  --size-test-un-cell: 104px;
+  --size-test-ref-un-palette-height: 198px;
+  --size-test-ref-palette-height: 435px;
 
   /* type: system stack + iOS text styles (HIG) + Meta sizes. --type-<style> is a font shorthand. */
   --font-system: -apple-system, "SF Pro Text", "SF Pro Display", system-ui, BlinkMacSystemFont, Inter, sans-serif;
@@ -277,6 +336,8 @@
   --motion-reduced-fold: 200ms;
   --motion-splash-hold: 900ms;
   --motion-splash-crossfade: 200ms;
+  --motion-hinge-ripple: 220ms;
+  --motion-concept-only: 1600ms;
   --motion-caret-on: 500ms;
   --motion-caret-off: 500ms;
   --dur-200: 200ms;
@@ -290,6 +351,9 @@
   /* Tailwind numeric spacing = the 4-pt grid: p-4 = 16pt = --space-16, gap-0.5 = 2pt */
   --spacing: 4px;
 
+  /* Radii off the 4/8 grid are spec-given iOS/device geometry, never free choices: 5 keyboard key,
+     10 and 14 iOS controls/cards, 18 bubbles, 26 home widgets, 34 dock, 62/68 display + panel corners
+     (CLAUDE_PROMPT.md Phase 1-3 GEOMETRY). */
   --radius-2: 2px;
   --radius-4: 4px;
   --radius-5: 5px;
@@ -399,6 +463,13 @@
   --color-device-bezel: var(--device-bezel);
   --color-device-hinge-seam: var(--device-hinge-seam);
   --color-device-back-glass: var(--device-back-glass);
+  --color-device-ti-highlight: var(--device-ti-highlight);
+  --color-device-ti-light: var(--device-ti-light);
+  --color-device-ti-base: var(--device-ti-base);
+  --color-device-ti-mid: var(--device-ti-mid);
+  --color-device-ti-shadow: var(--device-ti-shadow);
+  --color-device-ti-deep: var(--device-ti-deep);
+  --color-device-back-glass-ti: var(--device-back-glass-ti);
   --color-stage-black: var(--stage-black);
   --color-stage-white: var(--stage-white);
   --color-ios-wallpaper-base: var(--ios-wallpaper-base);

@@ -1,31 +1,31 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { scenesByGroup, sceneUrl } from "@/lib/scenes";
-
-export const metadata: Metadata = {
-  title: "Scenes",
-};
+import { size } from "@/lib/tokens";
 
 /*
- * Dev index of lib/scenes.ts: an iOS inset-grouped list on black.
- * Colors are tokens only. The dark-surface names (--label-on-dark, --ios-dark-fill,
- * --ios-dark-separator) fall back to existing tokens until P0-B defines them.
+ * Dev index of lib/scenes.ts: an iOS inset-grouped list on black. Colors are tokens only.
  */
 const color = {
-  label: "var(--label-on-dark, var(--ios-kb-key))",
+  label: "var(--label-on-dark)",
   secondary: "var(--ios-gray)",
-  cell: "var(--ios-dark-fill, var(--material-pill-dark))",
-  separator: "var(--ios-dark-separator, var(--material-pill-dark))",
+  cell: "var(--ios-dark-fill)",
+  separator: "var(--ios-dark-separator)",
 } as const;
 
 function Chevron() {
   return (
-    <svg width={8} height={13} viewBox="0 0 8 13" aria-hidden="true" className="shrink-0">
+    <svg
+      width={size.disclosureWidth}
+      height={size.disclosureHeight}
+      viewBox={`0 0 ${size.disclosureWidth} ${size.disclosureHeight}`}
+      aria-hidden="true"
+      className="shrink-0"
+    >
       <path
         d="M1.5 1.5 6.5 6.5 1.5 11.5"
         fill="none"
         stroke={color.secondary}
-        strokeWidth={2}
+        strokeWidth={size.disclosureStroke}
         strokeLinecap="round"
         strokeLinejoin="round"
       />

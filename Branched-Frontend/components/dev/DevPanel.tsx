@@ -11,7 +11,8 @@ import {
 } from "react";
 import { motion } from "framer-motion";
 import { useFlags } from "@/lib/flags";
-import { springSnapback } from "@/lib/motion";
+import { durations, easeSoft, ms, springSnapback, usePrefersReducedMotion } from "@/lib/motion";
+import { size } from "@/lib/tokens";
 import { sceneUrl, scenesByGroup } from "@/lib/scenes";
 
 /**
@@ -24,43 +25,34 @@ declare global {
   }
 }
 
-const PANEL_WIDTH = 320;
-const SWITCH = { width: 51, height: 31, knob: 27, inset: 2 } as const;
 const CLOCK = /^([01]\d|2[0-3]):[0-5]\d$/;
 
-/* ---------- styles (tokens only) ----------
- * TOKEN NEEDED (iOS dark sheet, HIG dark mode): --ios-dark-elevated #1C1C1E,
- * --ios-dark-grouped #2C2C2E, --ios-dark-fill #39393D, --ios-dark-separator
- * rgba(84,84,88,0.65), --ios-dark-label #FFFFFF, --ios-dark-label-2
- * rgba(235,235,245,0.6), --ios-dark-label-3 rgba(235,235,245,0.3),
- * --shadow-sheet, --shadow-knob. Until then each falls back to the nearest
- * existing token. Dev-only UI (hidden in recordings).
- */
+/* ---------- styles (tokens only; iOS dark sheet, HIG dark mode). Dev-only UI (hidden in recordings). ---------- */
 
 const panel: CSSProperties = {
   position: "fixed",
   top: "var(--space-16)",
   right: "var(--space-16)",
-  width: PANEL_WIDTH,
+  width: "var(--size-dev-panel-width)",
   maxHeight: "calc(100vh - 2 * var(--space-16))",
   overflowY: "auto",
   zIndex: 3,
   padding: "var(--space-8) var(--space-16) var(--space-16)",
   borderRadius: "var(--radius-16)",
-  background: "var(--ios-dark-elevated, var(--wa-call-bg))",
-  boxShadow: "var(--shadow-sheet, var(--shadow-banner))",
-  color: "var(--ios-dark-label, var(--ios-gray6))",
+  background: "var(--ios-dark-elevated)",
+  boxShadow: "var(--shadow-sheet)",
+  color: "var(--ios-dark-label)",
   font: "var(--type-subheadline)",
   letterSpacing: "var(--type-subheadline-tracking)",
   userSelect: "none",
 };
 
 const grabber: CSSProperties = {
-  width: 36,
-  height: 5,
+  width: "var(--size-grabber-width)",
+  height: "var(--size-grabber-height)",
   margin: "0 auto var(--space-8)",
   borderRadius: "var(--radius-pill)",
-  background: "var(--ios-dark-fill, var(--material-pill-dark))",
+  background: "var(--ios-dark-fill)",
 };
 
 const sectionHeader: CSSProperties = {
@@ -68,7 +60,7 @@ const sectionHeader: CSSProperties = {
   font: "var(--type-footnote)",
   letterSpacing: "var(--type-footnote-tracking)",
   textTransform: "uppercase",
-  color: "var(--ios-dark-label-2, var(--ios-gray))",
+  color: "var(--ios-dark-label-2)",
 };
 
 const group: CSSProperties = {
@@ -76,7 +68,7 @@ const group: CSSProperties = {
   padding: 0,
   listStyle: "none",
   borderRadius: "var(--radius-10)",
-  background: "var(--ios-dark-grouped, var(--wa-call-surface))",
+  background: "var(--ios-dark-grouped)",
   overflow: "hidden",
 };
 
@@ -85,10 +77,10 @@ const row: CSSProperties = {
   alignItems: "center",
   justifyContent: "space-between",
   gap: "var(--space-12)",
-  minHeight: 44,
+  minHeight: "var(--size-tap-target)",
   padding: "0 var(--space-16)",
   boxShadow:
-    "inset 0 calc(-1 * var(--hairline)) 0 var(--ios-dark-separator, var(--material-pill-dark))",
+    "inset 0 calc(-1 * var(--hairline)) 0 var(--ios-dark-separator)",
   color: "inherit",
   textDecoration: "none",
 };
@@ -97,7 +89,7 @@ const lastRow: CSSProperties = { ...row, boxShadow: "none" };
 
 const muted: CSSProperties = {
   ...lastRow,
-  color: "var(--ios-dark-label-3, var(--ios-gray))",
+  color: "var(--ios-dark-label-3)",
 };
 
 const textButton: CSSProperties = {
@@ -113,16 +105,24 @@ const textButton: CSSProperties = {
 
 const field: CSSProperties = {
   appearance: "none",
-  width: 88,
+  width: "var(--size-dev-clock-field)",
   border: 0,
   padding: "var(--space-4) var(--space-8)",
   borderRadius: "var(--radius-8)",
-  background: "var(--ios-dark-fill, var(--material-pill-dark))",
+  background: "var(--ios-dark-fill)",
   color: "inherit",
   font: "inherit",
   fontVariantNumeric: "tabular-nums",
   textAlign: "center",
+  // The native ring is replaced, not removed: fieldFocused draws a blue ring (focus is keyboard
+  // or tap; a text field always shows focus, so :focus-visible and :focus coincide here).
   outline: "none",
+  transition: "box-shadow var(--motion-press) var(--ease-ios)",
+};
+
+const fieldFocused: CSSProperties = {
+  ...field,
+  boxShadow: "0 0 0 var(--size-focus-ring) var(--ios-blue)",
 };
 
 /* ---------- pieces ---------- */
@@ -147,6 +147,17 @@ function Switch({
   label: string;
   onToggle: () => void;
 }) {
+  const reduced = usePrefersReducedMotion();
+  const travel = size.switchWidth - size.switchKnob - 2 * size.switchInset;
+  const knob: CSSProperties = {
+    position: "absolute",
+    top: "var(--size-switch-inset)",
+    width: "var(--size-switch-knob)",
+    height: "var(--size-switch-knob)",
+    borderRadius: "var(--radius-pill)",
+    background: "var(--ios-kb-key)",
+    boxShadow: "var(--shadow-knob)",
+  };
   return (
     <button
       type="button"
@@ -158,33 +169,40 @@ function Switch({
       style={{
         appearance: "none",
         position: "relative",
-        width: SWITCH.width,
-        height: SWITCH.height,
+        width: "var(--size-switch-width)",
+        height: "var(--size-switch-height)",
         flex: "none",
         border: 0,
         padding: 0,
         borderRadius: "var(--radius-pill)",
-        background: on ? "var(--ios-green)" : "var(--ios-dark-fill, var(--material-pill-dark))",
+        background: on ? "var(--ios-green)" : "var(--ios-dark-fill)",
         transition: "background-color var(--motion-press) var(--ease-ios)",
         cursor: "pointer",
       }}
     >
-      <motion.span
-        aria-hidden="true"
-        initial={false}
-        animate={{ x: on ? SWITCH.width - SWITCH.knob - 2 * SWITCH.inset : 0 }}
-        transition={springSnapback}
-        style={{
-          position: "absolute",
-          top: SWITCH.inset,
-          left: SWITCH.inset,
-          width: SWITCH.knob,
-          height: SWITCH.knob,
-          borderRadius: "var(--radius-pill)",
-          background: "var(--ios-kb-key)",
-          boxShadow: "var(--shadow-knob, var(--shadow-key))",
-        }}
-      />
+      {reduced ? (
+        // Reduced motion: no slide. A knob at each end crossfades (--motion-reduced-shell).
+        <>
+          {[false, true].map((end) => (
+            <motion.span
+              key={String(end)}
+              aria-hidden="true"
+              initial={false}
+              animate={{ opacity: on === end ? 1 : 0 }}
+              transition={{ duration: ms(durations.reducedShell), ease: easeSoft }}
+              style={{ ...knob, left: size.switchInset + (end ? travel : 0) }}
+            />
+          ))}
+        </>
+      ) : (
+        <motion.span
+          aria-hidden="true"
+          initial={false}
+          animate={{ x: on ? travel : 0 }}
+          transition={springSnapback}
+          style={{ ...knob, left: "var(--size-switch-inset)" }}
+        />
+      )}
     </button>
   );
 }
@@ -206,6 +224,13 @@ export function DevPanel() {
   const open = toggled ?? flags.dev;
 
   const [clockDraft, setClockDraft] = useState<string | null>(null);
+  const [clockFocused, setClockFocused] = useState(false);
+  // The Device section only shows where a device is mounted (it installs window.__unsaidDevice).
+  const [hasDevice, setHasDevice] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setHasDevice(Boolean(window.__unsaidDevice)));
+    return () => cancelAnimationFrame(id);
+  }, []);
   const clockValue = clockDraft ?? (flags.clock && CLOCK.test(flags.clock) ? flags.clock : "");
 
   useEffect(() => {
@@ -262,7 +287,7 @@ export function DevPanel() {
                   style={isLast ? lastRow : row}
                 >
                   <span>{scene.label}</span>
-                  <span style={{ color: "var(--ios-dark-label-3, var(--ios-gray))" }}>{name}</span>
+                  <span style={{ color: "var(--ios-dark-label-3)" }}>{name}</span>
                 </Link>
               </li>
             );
@@ -282,11 +307,15 @@ export function DevPanel() {
             maxLength={5}
             value={clockValue}
             onChange={(event) => setClockDraft(event.target.value)}
-            onBlur={(event) => applyClock(event.target.value)}
+            onFocus={() => setClockFocused(true)}
+            onBlur={(event) => {
+              setClockFocused(false);
+              applyClock(event.target.value);
+            }}
             onKeyDown={(event) => {
               if (event.key === "Enter") applyClock(event.currentTarget.value);
             }}
-            style={field}
+            style={clockFocused ? fieldFocused : field}
           />
         </li>
         <li style={lastRow}>
@@ -313,6 +342,7 @@ export function DevPanel() {
         <li style={muted}>no replies registered</li>
       </Section>
 
+      {hasDevice && (
       <Section title="Device">
         <li style={row}>
           <button
@@ -335,6 +365,7 @@ export function DevPanel() {
           </button>
         </li>
       </Section>
+      )}
 
       <Section title="Toggles">
         <li style={row}>

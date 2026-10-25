@@ -2,13 +2,16 @@
 
 **Planner:** Opus (Fable out of credits). **Spec:** `docs/CLAUDE_PROMPT.md` Phase 3 block (wallpaper, home grid, layout, icons, shell: registry/state/API/open/close/switcher/switch/Duo panels/reduced motion, home states, banners, UnsaidSlot, acceptance, additions).
 
+## Gurneal override (D8, docs/RULES.md)
+**The unfolded home follows D8, not the spec's two-iPhone-homes layout:** flat straight-on Duo; ONE continuous iPadOS-style home across both displays; widgets top-left; dense full-width grid; vertical dock on the right edge; search button bottom-right; page dots bottom-center; max Meta apps (list in D8) with their OFFICIAL app icons, 1:1, never redrawn (D9); no Safari, Camera or Settings. Look at `screenshots/reference/unfolded-home-gurneal.webp` before building P3-A/P3-B. `getIconRect` and `HomeScreen` change accordingly (`<HomeScreen state wallpaper>` spans; no `side` prop). P3-B adds icons for Meta Horizon, WhatsApp Business, Meta Business Suite, Meta Ads Manager, Messenger Kids; P3-E registers stubs for them.
+
 ## Waves
 - **Wave 1 (parallel):** P3-A home screen, P3-B icon set, P3-C shell core (provider, registry, AppHost open/close, API), P3-D UnsaidSlot + placeholder Home + docs, P3-E Apple app stubs + Meta stubs.
 - **Wave 2 (parallel, after Wave 1 integrates):** P3-F switcher + swipe-between-apps + home-indicator gestures, P3-G banners through the shell + Un-Said launch path (banner → card morph → unfold → splash → slot) + incoming-call overlay, P3-H `/phone` route group + dev bar + dev panel Apps section + scenes + `scripts/shell-check.ts`.
 
 ## Interfaces
 - `components/home/HomeScreen.tsx`: `<HomeScreen side="left"|"right" state wallpaper>`; `getIconRect(appId): {x,y,w,h}` in artboard px for the unfolded Duo at scale 1 (from `components/home/layout.ts`, computed from `GEOM` + the grid: margins 27 pt, pitch 87/100 pt, first row 74 pt, ×0.95).
-- `components/icons/apps/*.tsx` + `components/icons/AppGlyph.tsx`: `<AppIconArt app="instagram"|... size />` (drawn SVG/CSS, squircle from `lib/squircle.ts`; Un-Said uses `UnsaidLogo`). `components/ios/AppIcon.tsx` (Phase 2) delegates to it.
+- `components/icons/apps/*.tsx` + `components/icons/AppGlyph.tsx`: `<AppIconArt app="instagram"|... size />` (Meta apps: official artwork from `assets/brand/meta/` per D9; Apple apps drawn SVG/CSS; squircle from `lib/squircle.ts`; Un-Said uses `UnsaidLogo`). `components/ios/AppIcon.tsx` (Phase 2) delegates to it.
 - `components/shell/appRegistry.ts`: `registerApp({ id, name, Icon, route, placement, Screen })`, `getApp(id)`, `apps`.
 - `components/shell/ShellProvider.tsx`: zustand `lib/store/shell.ts` state `{ openApps, foreground: {span}|{left,right}, phase, progress }`; API `shell.open(appId,{placement,from:"icon"|"banner",sourceRect})`, `close(placement?)`, `openSwitcher()`, `resume(appId)`, `kill(appId)`, `switchTo("prev"|"next")`, `notify(appId,{title,body,threadId})` — each returns a Promise; `window.__unsaidShell` (+ `frameStats`). Every transition = pure function of progress 0..1 (`components/shell/transitions.ts`), fed by a spring MotionValue (driven mode in Phase 4 supplies progress).
 - `components/UnsaidSlot.tsx`: props `src?`, `mode?: "auto"|"placeholder"|"frame"`, `placement?`, `onReady?`; `?unsaid=placeholder|<url>`; iframe contract per section 8.2; 8 s fallback; placeholder Home from `lib/mock/unsaid-placeholder.ts` (strings from App-UI-Final COPY_AND_NAMES Home section) in the synced theme only.

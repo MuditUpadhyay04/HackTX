@@ -6,10 +6,7 @@ import { DevPanel } from "@/components/dev/DevPanel";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Un-Said · Branched-Frontend (concept mock)",
-  icons: {
-    icon: "/unsaid-theme/brand/favicon.ico",
-  },
+  title: "concept mock",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

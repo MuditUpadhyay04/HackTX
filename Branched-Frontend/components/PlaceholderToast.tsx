@@ -3,6 +3,7 @@
 import type { CSSProperties } from "react";
 import { Toaster, toast } from "sonner";
 import { useFlags } from "@/lib/flags";
+import { durations, prefersReducedMotion } from "@/lib/motion";
 
 /** The app part of a placeholder id (spec 8.1). */
 export const PLACEHOLDER_PLATFORMS = [
@@ -21,7 +22,7 @@ export type PlaceholderPlatform = (typeof PLACEHOLDER_PLATFORMS)[number];
 /** Spec 8.1: the only toast text. */
 export const CONCEPT_ONLY = "concept only";
 /** Spec 8.1: 1.6 s. */
-export const CONCEPT_ONLY_DURATION = 1600;
+export const CONCEPT_ONLY_DURATION = durations.conceptOnly;
 
 const PILL_BASE: CSSProperties = {
   display: "inline-flex",
@@ -44,12 +45,13 @@ const PILL_HOST: CSSProperties = {
   backdropFilter: "var(--material-light-filter)",
   boxShadow: "var(--shadow-hud)",
   color: "var(--ios-label)",
-  font: "var(--type-subhead-semibold)",
+  font: "var(--type-subheadline-semibold)",
 };
 
 /**
  * Inside Un-Said (the slot placeholder): App-UI-Final's toast (DESIGN_SPEC 2.7):
  * un-surface-raised, radius 16, un-caption in un-text. No material, no shadow.
+ * Bottom-centered like App-UI-Final (Gurneal's decision, P0-R1-11); host toasts stay top-center.
  */
 const PILL_UNSAID: CSSProperties = {
   ...PILL_BASE,
@@ -83,6 +85,14 @@ const TOAST_ITEM: CSSProperties = {
   transitionTimingFunction: "var(--ease-soft)",
 };
 
+/**
+ * Reduced motion (OS setting or ?motion=reduced): no slide, an opacity crossfade at
+ * --motion-reduced-shell. A class + !important rule is needed because sonner's own
+ * prefers-reduced-motion block sets `transition: none !important` on every toast.
+ */
+const REDUCED_CLASS = "concept-only-reduced";
+const REDUCED_CSS = `[data-sonner-toast].${REDUCED_CLASS},[data-sonner-toast].${REDUCED_CLASS}[data-mounted="true"]{transform:none !important;transition:opacity var(--motion-reduced-shell) var(--ease-soft) !important;}`;
+
 let seq = 0;
 
 /**
@@ -92,11 +102,14 @@ let seq = 0;
 export function toastConceptOnly(platform: PlaceholderPlatform = "ios"): void {
   toast.dismiss();
   seq += 1;
+  const reduced = prefersReducedMotion();
   toast.custom(() => <ConceptOnlyPill platform={platform} />, {
     id: `concept-only-${seq}`,
     duration: CONCEPT_ONLY_DURATION,
     unstyled: true,
     dismissible: false,
+    position: platform === "unsaid" ? "bottom-center" : "top-center",
+    className: reduced ? REDUCED_CLASS : undefined,
     style: TOAST_ITEM,
   });
 }
@@ -109,15 +122,18 @@ export function PlaceholderToaster() {
   const { toasts } = useFlags();
   if (!toasts) return null;
   return (
-    <Toaster
-      position="top-center"
-      offset={{ top: "var(--space-24)" }}
-      mobileOffset={{ top: "var(--space-16)" }}
-      visibleToasts={1}
-      gap={0}
-      duration={CONCEPT_ONLY_DURATION}
-      swipeDirections={[]}
-      toastOptions={{ unstyled: true }}
-    />
+    <>
+      <style>{REDUCED_CSS}</style>
+      <Toaster
+        position="top-center"
+        offset={{ top: "var(--space-24)", bottom: "var(--space-24)" }}
+        mobileOffset={{ top: "var(--space-16)", bottom: "var(--space-16)" }}
+        visibleToasts={1}
+        gap={0}
+        duration={CONCEPT_ONLY_DURATION}
+        swipeDirections={[]}
+        toastOptions={{ unstyled: true }}
+      />
+    </>
   );
 }

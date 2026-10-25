@@ -88,15 +88,15 @@ export type ColorToken = keyof typeof color;
 // ---------------------------------------------------------------------------
 
 /**
- * Phase 1 /device wallpaper: radial blobs sampled from Gurneal's app icon on #0B0B12.
+ * Phase 1 /device wallpaper: radial blobs from the synced un-icon-* colors (Gurneal's app icon) on #0B0B12.
  * The base is a flat linear-gradient so the whole value is a valid background-image list.
  * Render it on a layer with `wallpaper.filter` and `wallpaper.scale` (see below).
  */
 const iosWallpaper = [
-  "radial-gradient(40% 50% at 22% 30%, #677FEF, transparent)",
-  "radial-gradient(45% 55% at 78% 25%, #A166B7, transparent)",
-  "radial-gradient(50% 60% at 60% 80%, #8776DF, transparent)",
-  "radial-gradient(40% 45% at 15% 85%, #607CF2, transparent)",
+  `radial-gradient(40% 50% at 22% 30%, ${unTheme.color["un-icon-blue"]}, transparent)`,
+  `radial-gradient(45% 55% at 78% 25%, ${unTheme.color["un-icon-orchid"]}, transparent)`,
+  `radial-gradient(50% 60% at 60% 80%, ${unTheme.color["un-icon-violet"]}, transparent)`,
+  `radial-gradient(40% 45% at 15% 85%, ${unTheme.color["un-icon-periwinkle"]}, transparent)`,
   "linear-gradient(#0B0B12, #0B0B12)",
 ].join(", ");
 
@@ -155,8 +155,21 @@ export const material = {
   // reflection fade (mask-image)
   "device-reflection-mask": "linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0) 35%)",
   "device-reflection-filter": "blur(1.5px)",
+  // iPhone Fold, natural titanium (RULES.md D10)
+  "device-ti-band": "linear-gradient(135deg, #F6F4F0 0%, #C3BEB5 18%, #E6E2DC 38%, #A39E95 60%, #DEDAD3 80%, #77736C 100%)",
+  "device-ti-side": "linear-gradient(180deg, #46443F 0%, #A39E95 10%, #F6F4F0 28%, #C3BEB5 50%, #DEDAD3 68%, #77736C 90%, #46443F 100%)",
+  "device-ti-spine": "linear-gradient(180deg, #DEDAD3 0%, #C3BEB5 30%, #E6E2DC 55%, #A39E95 100%)",
+  "device-ti-brush": "repeating-linear-gradient(90deg, rgba(255,255,255,0) 0px, rgba(255,255,255,0) 2px, rgba(255,255,255,0.07) 2px, rgba(255,255,255,0.07) 3px)",
+  "device-back-glass-ti-fill": "linear-gradient(165deg, #E5E1DA 0%, #D5D1C9 45%, #C5C0B7 100%)",
+  "device-back-glass-ti-gloss": "linear-gradient(110deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.32) 48%, rgba(255,255,255,0) 62%)",
+  "device-plateau-fill": "linear-gradient(170deg, #DCD8D1 0%, #C9C4BB 55%, #B9B4AA 100%)",
+  "device-lens-ring-ti": "linear-gradient(135deg, #E6E2DC 0%, #A39E95 55%, #46443F 100%)",
+  "device-screen-wallpaper": "radial-gradient(55% 65% at 16% 18%, #8FA3FF 0%, transparent 70%), radial-gradient(50% 60% at 86% 14%, #C08AD6 0%, transparent 70%), radial-gradient(70% 75% at 62% 96%, #8776DF 0%, transparent 72%), radial-gradient(45% 55% at 6% 92%, #607CF2 0%, transparent 70%), linear-gradient(160deg, #3D439A 0%, #2B2670 52%, #1A1642 100%)",
+  "device-screen-off": "linear-gradient(160deg, #17181C 0%, #060607 36%, #000000 100%)",
+  "device-glass-sheen": "linear-gradient(118deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.04) 22%, rgba(255,255,255,0) 40%)",
+  "device-crease": "linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.09) 30%, rgba(255,255,255,0.16) 50%, rgba(0,0,0,0.09) 70%, rgba(0,0,0,0) 100%)",
   // iOS light notification material (banners, Phase 2): fill + backdrop filter
-  "material-light": "rgba(250,250,250,0.78)",
+  "material-light": "rgba(245,245,245,0.78)",
   "material-light-filter": "blur(30px) saturate(180%)",
   // home-screen glass (widgets, dock, search pill; Phase 3)
   "material-glass": "rgba(255,255,255,0.22)",
@@ -188,6 +201,58 @@ export const radius = {
   pill: 999,
 } as const;
 export type RadiusToken = keyof typeof radius;
+
+/**
+ * Fixed control sizes (pt) used in style props, so components never carry bare numbers.
+ * iOS HIG: 44 pt minimum hit target; UISwitch 51 x 31 with a 27 pt knob inset 2 pt;
+ * sheet grabber 36 x 5. The rest are this build's dev / test layouts.
+ * Mirrored in app/tokens.css as --size-<kebab-name>.
+ */
+export const size = {
+  tapTarget: 44,
+  grabberWidth: 36,
+  grabberHeight: 5,
+  switchWidth: 51,
+  switchHeight: 31,
+  switchKnob: 27,
+  switchInset: 2,
+  focusRing: 2,
+  imsgAppsButton: 34,
+  metaAiSend: 32,
+  devPanelWidth: 320,
+  devClockField: 88,
+  testTileWidth: 408,
+  testTileHeight: 236,
+  // host-app glyphs (/test/placeholder, the app shells): drawn on a 24-unit grid, shown at 20 or 24 pt
+  glyphSmall: 20,
+  glyphLarge: 24,
+  // glyph stroke weight per host family, in RENDERED pt (the Glyph component scales it into the
+  // 24-unit grid, so a 20 pt and a 24 pt glyph draw the same line). Tuned at 2x so every host's
+  // outline reads as heavy as the iOS search / plus; Meta AI's arrow is white on a blue disc and
+  // is drawn bold in Meta's UI, so it sits one step heavier.
+  glyphStrokeIos: 1.6,
+  glyphStrokeWhatsapp: 1.6,
+  glyphStrokeInstagram: 1.6,
+  glyphStrokeFacebook: 1.6,
+  glyphStrokeMetaAi: 2,
+  // iOS table-row disclosure chevron (8 x 13 pt, 2 pt stroke) on /scenes
+  disclosureWidth: 8,
+  disclosureHeight: 13,
+  disclosureStroke: 2,
+  // /test/tokens swatch-sheet layout (artboard px)
+  testRail: 240,
+  testListCol: 160,
+  testSwatchWide: 200,
+  testSwatchNarrow: 120,
+  testSwatchTile: 112,
+  testMaterialTile: 128,
+  testTypeCol: 260,
+  testScaleCol: 192,
+  testUnCell: 104,
+  testRefUnPaletteHeight: 198,
+  testRefPaletteHeight: 435,
+} as const;
+export type SizeToken = keyof typeof size;
 
 /** SF hairline (0.5 pt). */
 export const hairline = 0.5;
@@ -291,6 +356,7 @@ export const tokens = {
   palettes,
   space,
   radius,
+  size,
   hairline,
   shadow,
   blur,

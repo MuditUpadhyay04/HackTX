@@ -21,8 +21,7 @@ const FILL: Record<StageBackground, string> = {
   black: "var(--stage-black)",
   "un-stage": "var(--un-stage)",
   wallpaper: "var(--ios-wallpaper-base)",
-  // TOKEN NEEDED: --stage-white (#FFFFFF); falls back to the white iOS key fill until P0-B adds it.
-  white: "var(--stage-white, var(--ios-kb-key))",
+  white: "var(--stage-white)",
 };
 
 export type StageScale = {

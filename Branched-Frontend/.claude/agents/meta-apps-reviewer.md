@@ -18,3 +18,4 @@ HOW YOU WORK
 REPORT FORMAT
 - First line: CLEAN, or FINDINGS (n).
 - Then one line per finding: [severity: blocker | major | minor] file:line or screenshot — what is wrong — the rule (section/rule number) — the smallest fix.
+- Decision D9 (docs/RULES.md, Gurneal): Meta app icons use the OFFICIAL Meta artwork, 1:1. Do not flag official Meta logos; DO flag any Meta logo that is redrawn, traced, recolored, cropped, stretched or otherwise not identical to its source file in assets/brand/meta/ (check sources in assets/README.md), and any Safari, Camera or Settings icon on the home screen.

@@ -91,6 +91,10 @@ export const durations = {
   splashHold: 900,
   /** Un-Said splash -> slot crossfade */
   splashCrossfade: 200,
+  /** hinge "click" ripple, CLAUDE_PROMPT.md Phase 1 fold control ("24 pt ... over 220 ms"), easeSoft */
+  hingeRipple: 220,
+  /** "concept only" toast on screen (section 8.1: 1.6 s) */
+  conceptOnly: 1600,
 } as const;
 
 /** Seconds, for Framer Motion `duration`. */
