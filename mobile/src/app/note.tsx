@@ -34,7 +34,8 @@ export default function SelfNote() {
   const [take, setTake] = useState<PickedVideo | null>(null);
   const [saving, setSaving] = useState(false);
   const notes = home?.self_notes ?? [];
-  const frame = Math.min(layout.usableWidth - inset.card * 2, READING_MAX - inset.card * 2);
+  // fits the screen's height too, so the record button stays in view on a short (folded or wide) screen
+  const frame = Math.min(layout.usableWidth - inset.card * 2, READING_MAX - inset.card * 2, Math.round((layout.height * 0.55) / 1.1));
 
   const record = async () => {
     const v = await pickVideo("camera", true);

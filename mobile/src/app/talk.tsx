@@ -181,6 +181,9 @@ export default function Talk() {
   const photoUri = photo || (seenPhoto ? mediaUrl(seenPhoto) : null);
   const showPhoto = Boolean(photoUri) && !recording && !spoken && !typing;
 
+  // the folded cover is short: a smaller mic, the waveform only while recording, and "Start over"
+  // only once there is something to start over, so his words keep most of the screen
+  const tight = layout.short && !wide;
   const dock = (
     <>
       <View style={styles.tools}>
@@ -196,16 +199,16 @@ export default function Talk() {
           </View>
         </View>
       ) : (
-        <View style={styles.micColumn}>
-          <Waveform levels={live.levels} live={recording} />
-          <View style={[styles.micRing, recording && styles.micRingOn]}>
-            <Press featureId={recording ? "rant-stop" : "rant-record"} onPress={toggleMic} disabled={live.state === "finishing" || sorting} style={[styles.mic, shadow.pill]}>
+        <View style={[styles.micColumn, tight && { gap: space.s4 }]}>
+          {!tight || recording ? <Waveform levels={live.levels} live={recording} /> : null}
+          <View style={[styles.micRing, tight && styles.micRingTight, recording && styles.micRingOn]}>
+            <Press featureId={recording ? "rant-stop" : "rant-record"} onPress={toggleMic} disabled={live.state === "finishing" || sorting} style={[styles.mic, tight && styles.micTight, shadow.pill]}>
               <PillGradientFill />
-              <Ionicons name={recording ? "stop" : "mic"} size={32} color={color.onAccent} />
+              <Ionicons name={recording ? "stop" : "mic"} size={tight ? 26 : 32} color={color.onAccent} />
             </Press>
           </View>
           <T v="caption">{live.state === "finishing" || sorting ? "sorting it by person…" : recording ? "Tap to stop" : "Tap to talk"}</T>
-          <TextButton featureId="rant-discard" label="Start over" tone="text3" onPress={startOver} />
+          {!tight || spoken ? <TextButton featureId="rant-discard" label="Start over" tone="text3" onPress={startOver} /> : null}
         </View>
       )}
     </>
@@ -217,7 +220,14 @@ export default function Talk() {
       <View style={wide ? [styles.wideRow, layout.column(1080)] : { flex: 1 }}>
         <ScrollView style={{ flex: 1 }} contentContainerStyle={[wide ? null : layout.column(), { paddingBottom: space.s24 }]} keyboardShouldPersistTaps="handled">
           {showPhoto ? (
-            <Image source={{ uri: photoUri ?? undefined }} style={[styles.photo, { height: Math.min(224, Math.round(layout.height * 0.36)) }]} contentFit="cover" transition={150} />
+            <Image
+              source={{ uri: photoUri ?? undefined }}
+              // side by side there is room for a taller photo; anchor the crop high so faces stay in frame
+              style={[styles.photo, { height: wide ? Math.min(300, Math.round(layout.height * 0.5)) : Math.min(224, Math.round(layout.height * (layout.short ? 0.22 : 0.36))) }]}
+              contentFit="cover"
+              contentPosition="top"
+              transition={150}
+            />
           ) : null}
           {/* Full-width column: the app rail lives in the dock's tool row, so nothing sits on the transcript. */}
           <View style={styles.column}>
@@ -263,6 +273,8 @@ export default function Talk() {
               <T v="compose" style={styles.compose}>
                 {spoken}
                 {recording || !spoken ? <T v="compose" style={{ color: color.caret, fontWeight: "400" }}>|</T> : null}
+                {/* before he says anything, the hero question shows where his words will appear (no new copy) */}
+                {!spoken && !recording ? <T v="compose" style={{ color: color.text4 }}>What have you been meaning to say?</T> : null}
               </T>
             )}
             {sorting ? (
@@ -348,13 +360,15 @@ const styles = StyleSheet.create({
   micColumn: { alignItems: "center", gap: space.s8 },
   personCard: { backgroundColor: color.surface, borderRadius: radius.row, padding: space.s16 },
   wideRow: { flex: 1, flexDirection: "row" },
-  panel: { width: 340, flexGrow: 0, borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: color.hairline },
-  // Top-aligned with the transcript's first line (column marginTop), tools then mic, no floating gap.
-  panelInner: { flexGrow: 1, justifyContent: "flex-start", paddingTop: space.s24, gap: space.s32 },
+  panel: { width: 340, flexGrow: 0 },
+  // The mic sits in the middle of its side, with the apps above it: no empty half under it.
+  panelInner: { flexGrow: 1, justifyContent: "center", paddingTop: space.s24, gap: space.s32 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: space.s8 },
   gridCell: { flexBasis: "48%", flexGrow: 1 },
   dock: { alignItems: "center", gap: space.s12, paddingTop: space.s12, backgroundColor: color.bg },
   micRing: { width: 104, height: 104, borderRadius: 52, alignItems: "center", justifyContent: "center" },
+  micRingTight: { width: 76, height: 76, borderRadius: 38 },
+  micTight: { width: 64, height: 64, borderRadius: 32 },
   micRingOn: { borderWidth: 2, borderColor: "rgba(168,144,246,0.4)" },
   mic: { width: 88, height: 88, borderRadius: 44, overflow: "hidden", alignItems: "center", justifyContent: "center" },
 });
