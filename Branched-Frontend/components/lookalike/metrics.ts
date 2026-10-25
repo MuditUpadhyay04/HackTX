@@ -49,8 +49,9 @@ export const KEYBOARD = {
   radius: 5,
   letterSize: 22.5,
   labelSize: 16,
-  /** the bottom strip (emoji / dictation glyphs) below the key rows */
-  strip: 46,
+  /** the bottom strip (emoji / dictation glyphs) below the key rows: height minus predictive bar and
+   *  rows (44 + 0.5 + 4 × 42 + 5.5 + 3 × 11 = 251) leaves 40; 38 keeps a 2 pt gap above the glyphs */
+  strip: 38,
   glyph: 26,
   pop: { width: 52, height: 108, letterSize: 34 },
   deleteRepeat: { delay: 400, start: 110, min: 40, accel: 0.85 },
