@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <!-- Branched-Frontend: Mom, illustrated avatar (our own art; no real person). Soft peach. -->
+  <defs>
+    <radialGradient id="bg" cx="0.35" cy="0.3" r="0.9"><stop offset="0" stop-color="#FCE1CC"/><stop offset="1" stop-color="#F4C3A2"/></radialGradient>
+    <linearGradient id="kurta" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9C3445"/><stop offset="1" stop-color="#7E2636"/></linearGradient>
+    <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#BF8662"/><stop offset="1" stop-color="#A9714F"/></linearGradient>
+  </defs>
+  <rect width="240" height="240" fill="url(#bg)"/>
+  <circle cx="186" cy="54" r="34" fill="#FBE7D6" opacity="0.6"/>
+  <!-- bun -->
+  <circle cx="120" cy="58" r="22" fill="#2A1C16"/>
+  <!-- shoulders -->
+  <path d="M42 240c4-44 34-70 78-70s74 26 78 70z" fill="url(#kurta)"/>
+  <!-- dupatta drape -->
+  <path d="M150 176c22 8 38 30 44 64h-26c-4-26-12-44-30-58z" fill="#E3A84E"/>
+  <path d="M150 176c22 8 38 30 44 64" fill="none" stroke="#C98B33" stroke-width="3"/>
+  <!-- neck -->
+  <path d="M104 150h32v26c0 9-7 14-16 14s-16-5-16-14z" fill="#A36B4A"/>
+  <!-- face -->
+  <ellipse cx="120" cy="114" rx="40" ry="46" fill="url(#skin)"/>
+  <!-- hair, middle part -->
+  <path d="M78 116c-4-34 14-58 42-58s46 24 42 58c-6-16-14-28-24-34-6 6-12 9-18 10-6-1-12-4-18-10-10 6-18 18-24 34z" fill="#2A1C16"/>
+  <path d="M120 60v22" stroke="#4A3328" stroke-width="2"/>
+  <!-- ears + earrings -->
+  <ellipse cx="80" cy="118" rx="6" ry="9" fill="#A9714F"/>
+  <ellipse cx="160" cy="118" rx="6" ry="9" fill="#A9714F"/>
+  <circle cx="80" cy="131" r="3.4" fill="#E3A84E"/>
+  <circle cx="160" cy="131" r="3.4" fill="#E3A84E"/>
+  <!-- features -->
+  <path d="M100 113c3-3 8-3 11 0M129 113c3-3 8-3 11 0" fill="none" stroke="#2A1C16" stroke-width="3" stroke-linecap="round"/>
+  <path d="M120 118c-1 6-3 10-6 12 3 1 6 1 8 0" fill="none" stroke="#8C573A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M108 139c7 6 17 6 24 0" fill="none" stroke="#7A3A2E" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="98" cy="128" rx="7" ry="4" fill="#D98973" opacity="0.45"/>
+  <ellipse cx="142" cy="128" rx="7" ry="4" fill="#D98973" opacity="0.45"/>
+  <circle cx="120" cy="100" r="2.6" fill="#B3263A"/>
+</svg>

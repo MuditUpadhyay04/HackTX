@@ -30,7 +30,7 @@ export const springBanner = { type: "spring", stiffness: 420, damping: 34, mass:
 export const springSend = { type: "spring", stiffness: 500, damping: 36, mass: 0.8 } as const;
 /** The camera pull-back from the black screen (B03). */
 export const springPullback = { type: "spring", stiffness: 75, damping: 20, mass: 1.2 } as const;
-/** The hinge: fold and unfold (fold control, banner tap, B27). */
+/** Spec section 4.4 spring-unfold (fold control, banner tap, B27). Kept as a token; the hinge itself now runs on hingeTween below. */
 export const springUnfold = { type: "spring", stiffness: 120, damping: 22, mass: 1.3 } as const;
 
 /**
@@ -107,9 +107,6 @@ export const durations = {
 
 /** iOS press feedback (spec fold control): scale 0.97 + 15% darken. */
 export const press = { scale: 0.97, brightness: 0.85 } as const;
-
-/** The hinge ripple ring grows from 60% to full size while it fades. */
-export const hingeRippleStartScale = 0.6;
 
 /** Seconds, for Framer Motion `duration`. */
 export const ms = (value: number): number => value / 1000;

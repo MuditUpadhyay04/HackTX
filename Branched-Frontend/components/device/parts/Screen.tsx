@@ -19,20 +19,6 @@ export function foldBlurRadius(openAngle: number): number {
   return r < foldMotion.blurFloor ? 0 : Math.round(r * 100) / 100;
 }
 
-/** The cover home fades toward the dark glass as it swings away (1 folded -> coverDimTo edge-on). */
-export function coverContentOpacity(openAngle: number): number {
-  const k = Math.min(1, clampAngle(openAngle) / 90);
-  const eased = k * k * (3 - 2 * k);
-  return 1 - (1 - foldMotion.coverDimTo) * eased;
-}
-
-/** The inner display's moving half brightens as it turns to face the viewer (innerDimFrom at 90 -> 1 flat). */
-export function innerHalfOpacity(openAngle: number): number {
-  const k = Math.max(0, (clampAngle(openAngle) - 90) / 90);
-  const eased = k * k * (3 - 2 * k);
-  return foldMotion.innerDimFrom + (1 - foldMotion.innerDimFrom) * eased;
-}
-
 /**
  * iphone-duo darkening: how far a moving display is into its swing (0 at rest facing the viewer,
  * 1 edge-on), smoothstepped. The cover swings away as the hinge opens; the inner half swings in.

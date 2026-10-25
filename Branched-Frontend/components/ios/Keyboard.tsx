@@ -1,15 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { KEYBOARD, SCREEN } from "@/components/lookalike/metrics";
+import { KEYBOARD } from "@/components/lookalike/metrics";
+import { usePane } from "@/components/lookalike/shared/pane";
 import { Placeholder } from "@/components/Placeholder";
 import { EMOJI, ROWS, autoShift, type KeyDef, type Layout } from "@/lib/keyboard/layout";
 import { predictions as predictWords } from "@/lib/mock/predict";
 import { useMessaging, type ThreadId } from "@/lib/store/messaging";
 import { KeyPop } from "./KeyPop";
 
-const UNIT = (SCREEN.width - 2 * KEYBOARD.sideInset - 9 * KEYBOARD.keyGap) / 10;
-const keyWidth = (units = 1) => units * UNIT;
+/** Key unit width for a keyboard `width` pt wide (ten letter keys and nine gaps per row). */
+const unitFor = (width: number) => (width - 2 * KEYBOARD.sideInset - 9 * KEYBOARD.keyGap) / 10;
 
 export type KeyboardProps = {
   threadId: ThreadId;
@@ -24,6 +25,9 @@ export type KeyboardProps = {
  * repeats and accelerates, and the physical keyboard bridged in while it is up.
  */
 export function Keyboard({ threadId, platform }: KeyboardProps) {
+  const { width } = usePane();
+  const unit = unitFor(width);
+  const keyWidth = (units = 1) => units * unit;
   const draft = useMessaging((s) => s.threads[threadId].draft);
   const [layout, setLayout] = useState<Layout>("letters");
   const [shiftOverride, setShiftOverride] = useState<boolean | null>(null);
@@ -67,10 +71,18 @@ export function Keyboard({ threadId, platform }: KeyboardProps) {
   }, [threadId]);
   useEffect(() => stopDelete, [stopDelete]);
 
-  // physical keyboard bridge (only while this keyboard is up)
+  // physical keyboard bridge (only while this keyboard is up). The phone draws each screen more than
+  // once (inert copies on the moving halves, the cover and inner hosts), so only the copy that is
+  // visible and not inert handles keys; otherwise every copy would type the same letter.
+  const root = useRef<HTMLDivElement>(null);
   useEffect(() => {
+    const live = () => {
+      const el = root.current;
+      return !!el && !el.closest("[inert]") && getComputedStyle(el).visibility === "visible" && el.getClientRects().length > 0;
+    };
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (!live()) return;
       const target = e.target as HTMLElement | null;
       if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
       if (e.key === "Backspace") {
@@ -125,10 +137,11 @@ export function Keyboard({ threadId, platform }: KeyboardProps) {
 
   return (
     <div
+      ref={root}
       data-keyboard={threadId}
       style={{
         position: "relative",
-        width: SCREEN.width,
+        width,
         height: KEYBOARD.height,
         background: "var(--ios-kb-bg)",
         color: "var(--kb-label)",
@@ -176,7 +189,7 @@ export function Keyboard({ threadId, platform }: KeyboardProps) {
                 gap: KEYBOARD.keyGap,
                 height: KEYBOARD.keyHeight,
                 marginTop: ri === 0 ? KEYBOARD.rowGap / 2 : KEYBOARD.rowGap,
-                paddingInline: layout === "letters" && ri === 1 ? (UNIT + KEYBOARD.keyGap) / 2 : 0,
+                paddingInline: layout === "letters" && ri === 1 ? (unit + KEYBOARD.keyGap) / 2 : 0,
               }}
             >
               {row.map((k, ki) => {
@@ -234,7 +247,7 @@ export function Keyboard({ threadId, platform }: KeyboardProps) {
                         </span>
                       )}
                       {k.kind === "char" && pressed === id ? (
-                        <KeyPop label={label} keyWidth={w ?? UNIT} keyHeight={KEYBOARD.keyHeight} />
+                        <KeyPop label={label} keyWidth={w ?? unit} keyHeight={KEYBOARD.keyHeight} />
                       ) : null}
                     </button>
                   </KeyCell>
@@ -253,7 +266,7 @@ export function Keyboard({ threadId, platform }: KeyboardProps) {
           position: "absolute",
           left: 0,
           bottom: 0,
-          width: SCREEN.width,
+          width,
           height: KEYBOARD.strip,
           display: "flex",
           alignItems: "flex-start",
@@ -296,6 +309,8 @@ function KeyCell({ children, spacerAfter, spacerBefore }: { children: ReactNode;
 }
 
 function EmojiPage({ threadId, onAbc }: { threadId: ThreadId; onAbc: () => void }) {
+  const paneWidth = usePane().width;
+  const keyWidth = (units = 1) => units * unitFor(paneWidth);
   return (
     <div style={{ paddingInline: KEYBOARD.sideInset * 3, paddingTop: KEYBOARD.topInset }}>
       <div

@@ -1,7 +1,8 @@
 "use client";
 
 import { useMockClock } from "@/lib/mock/clock";
-import { HOME_INDICATOR, PUNCH_PT, SCREEN, STATUS } from "@/components/lookalike/metrics";
+import { HOME_INDICATOR, PUNCH_PT, STATUS } from "@/components/lookalike/metrics";
+import { usePane } from "@/components/lookalike/shared/pane";
 
 /**
  * The cover display's iOS status bar (Phase 2 CHROME SPECS: 54 pt; "9:41" semibold 17 pt;
@@ -13,7 +14,9 @@ import { HOME_INDICATOR, PUNCH_PT, SCREEN, STATUS } from "@/components/lookalike
 export function CoverStatusBar({ tone = "dark" }: { tone?: "dark" | "light" }) {
   const { label } = useMockClock();
   const color = tone === "dark" ? "var(--ios-label)" : "var(--label-on-dark)";
-  const clusterRight = PUNCH_PT.fromRight + PUNCH_PT.diameter / 2 + STATUS.holeGap;
+  const pane = usePane();
+  // the cover has the punch-hole top-right; the inner display has no camera cutout (D11)
+  const clusterRight = pane.display === "cover" ? PUNCH_PT.fromRight + PUNCH_PT.diameter / 2 + STATUS.holeGap : STATUS.timeLeft;
   const b = STATUS.battery;
   return (
     <div
@@ -23,7 +26,7 @@ export function CoverStatusBar({ tone = "dark" }: { tone?: "dark" | "light" }) {
         position: "absolute",
         left: 0,
         top: 0,
-        width: SCREEN.width,
+        width: pane.width,
         height: STATUS.height,
         color,
         pointerEvents: "none",
@@ -108,13 +111,14 @@ export function CoverStatusBar({ tone = "dark" }: { tone?: "dark" | "light" }) {
 
 /** iOS home indicator: 134 x 5 pt, radius 2.5, 8 pt from the bottom. */
 export function CoverHomeIndicator({ tone = "dark" }: { tone?: "dark" | "light" }) {
+  const pane = usePane();
   return (
     <div
       aria-hidden="true"
       data-home-indicator=""
       style={{
         position: "absolute",
-        left: (SCREEN.width - HOME_INDICATOR.width) / 2,
+        left: (pane.width - HOME_INDICATOR.width) / 2,
         bottom: HOME_INDICATOR.bottom,
         width: HOME_INDICATOR.width,
         height: HOME_INDICATOR.height,

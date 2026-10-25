@@ -1,7 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { SCREEN, WA } from "@/components/lookalike/metrics";
+import { WA } from "@/components/lookalike/metrics";
+import { usePane } from "@/components/lookalike/shared/pane";
 import type { Receipt } from "@/lib/mock/threads";
 import { Ticks } from "./glyphs";
 
@@ -73,6 +74,7 @@ export type BubbleProps = {
  * double tick on his.
  */
 export function Bubble({ mine, tail, time, receipt, children, media, width }: BubbleProps) {
+  const pane = usePane();
   return (
     <div
       style={{
@@ -84,7 +86,7 @@ export function Bubble({ mine, tail, time, receipt, children, media, width }: Bu
       <div
         style={{
           position: "relative",
-          maxWidth: SCREEN.width * WA.bubbleMax,
+          maxWidth: Math.min(pane.width, 560) * WA.bubbleMax,
           width,
           background: mine ? "var(--wa-bubble-out)" : "var(--wa-bubble-in)",
           borderRadius: WA.bubbleRadius,

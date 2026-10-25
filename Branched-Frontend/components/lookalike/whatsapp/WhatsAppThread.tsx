@@ -25,16 +25,24 @@ export type WhatsAppThreadProps = {
   /** the story's "Seen" under her last bubble (default on; &seen=off) */
   seen?: boolean;
   initialScroll?: "bottom" | "top";
+  /** in-phone navigation: back to the chat list, start a call */
+  onBack?: () => void;
+  onCall?: (kind: "voice" | "video") => void;
+  /** the number beside the back chevron (unread chats elsewhere); default: the story's BACK_COUNT */
+  backCount?: number;
+  /** split view on the inner display: the chat list stays beside the thread, so no back button */
+  hideBack?: boolean;
 };
 
-const PHOTOS: Record<string, string> = { dal: "/mock/dal.svg" };
+/** Story photos are illustrated (scripts/make-mock-photos.py -> public/mock/photos). */
+const photoSrc = (id: string) => `/mock/photos/${id}.svg`;
 
 /**
  * The WhatsApp chat look-alike (Phase 2 STATE 1, Mom): doodle wallpaper, date pills, bubbles with
  * tails and ticks, missed-call rows, the composer and the keyboard. A working mock: focus the field,
  * type (drawn keys or the physical keyboard), send; ticks go gray -> double -> blue.
  */
-export function WhatsAppThread({ threadId = "mom", seen = true, initialScroll = "bottom" }: WhatsAppThreadProps) {
+export function WhatsAppThread({ threadId = "mom", seen = true, initialScroll = "bottom", onBack, onCall, backCount, hideBack }: WhatsAppThreadProps) {
   const thread = useMessaging((s) => s.threads[threadId]);
   const fresh = useMessaging((s) => s.fresh);
   const { focus, blur, send } = useMessaging.getState();
@@ -102,8 +110,12 @@ export function WhatsAppThread({ threadId = "mom", seen = true, initialScroll = 
             name={contact.name}
             subtitle={thread.presence === "online" ? PRESENCE_LABEL.whatsapp : ""}
             avatar={contact.avatar}
-            backCount={BACK_COUNT[threadId]}
+            backCount={backCount ?? BACK_COUNT[threadId]}
+            hideBack={hideBack}
             backHref="/scene/threads/whatsapp-chats"
+            onBack={onBack}
+            onVideo={onCall ? () => onCall("video") : undefined}
+            onVoice={onCall ? () => onCall("voice") : undefined}
           />
         }
         navHeight={STATUS.height + WA.navHeight}
@@ -140,7 +152,7 @@ function MessageRow({ m, mine, tail, onMissed }: { m: Message; mine: boolean; ta
       <Bubble mine={mine} tail={tail} time={waTime(m.at)} receipt={m.receipt} media width={WA.photo.width}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={PHOTOS[m.imageId] ?? `/mock/${m.imageId}.svg`}
+          src={photoSrc(m.imageId)}
           alt=""
           width={WA.photo.width - 2 * WA.photo.inset}
           height={WA.photo.height}

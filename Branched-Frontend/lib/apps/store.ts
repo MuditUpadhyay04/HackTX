@@ -9,12 +9,18 @@ import type { AppTarget } from "./registry";
 
 type State = {
   open: { target: AppTarget; display: HomeDisplay } | null;
+  /** The open app's status-bar tone on each display (AppFrame reports it; each display runs its own
+   *  copy of the app): "light" = drawn light-on-dark, so the home indicator over it turns light too. */
+  tone: Record<HomeDisplay, "dark" | "light">;
+  setTone: (display: HomeDisplay, tone: "dark" | "light") => void;
   openApp: (target: AppTarget, display: HomeDisplay) => void;
   closeApp: () => void;
 };
 
 export const useAppStore = create<State>((set) => ({
   open: null,
+  tone: { cover: "dark", inner: "dark" },
+  setTone: (display, tone) => set((s) => ({ tone: { ...s.tone, [display]: tone } })),
   openApp: (target, display) => set({ open: { target, display } }),
   closeApp: () => set({ open: null }),
 }));

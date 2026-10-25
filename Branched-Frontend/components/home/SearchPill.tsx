@@ -12,7 +12,7 @@ export function SearchPill({ display }: { display: HomeDisplay }) {
   const L = HOME_LAYOUT[display];
   const onClick = useOpenApp("search");
   return (
-    <Placeholder id="ios:search">
+    <Placeholder id="ios:search" press="darken">
       <button
         type="button"
         onClick={onClick}

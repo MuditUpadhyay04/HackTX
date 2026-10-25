@@ -9,15 +9,15 @@ import { useAppStore } from "./store";
 export const HomeDisplayContext = createContext<HomeDisplay>("cover");
 
 /**
- * onClick for a home button: opens its registered app on this display (and skips the
- * Placeholder's "concept only" toast); undefined when the button has no app.
+ * onClick for a home button: opens its registered app on this display. A button with no app
+ * (null in lib/apps/registry.tsx) is an empty button: the tap does nothing (no "concept only" toast).
  */
-export function useOpenApp(target: AppTarget): ((event: MouseEvent<HTMLElement>) => void) | undefined {
+export function useOpenApp(target: AppTarget): (event: MouseEvent<HTMLElement>) => void {
   const display = useContext(HomeDisplayContext);
   const openApp = useAppStore((s) => s.openApp);
-  if (!appScreen(target, display)) return undefined;
+  const linked = !!appScreen(target, display);
   return (event) => {
     event.preventDefault();
-    openApp(target, display);
+    if (linked) openApp(target, display);
   };
 }

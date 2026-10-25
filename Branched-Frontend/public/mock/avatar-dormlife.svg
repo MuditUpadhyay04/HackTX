@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <!-- Branched-Frontend: @dormlife.tx poster avatar: dorm window at night (our own art). -->
+  <rect width="240" height="240" fill="#1F2445"/>
+  <rect x="60" y="56" width="120" height="104" rx="6" fill="#2F3A6E"/>
+  <path d="M120 56v104M60 108h120" stroke="#1F2445" stroke-width="8"/>
+  <path d="M146 72a14 14 0 1 0 16 18 11 11 0 0 1-16-18z" fill="#F6E3A6"/>
+  <circle cx="80" cy="74" r="2" fill="#FFF"/><circle cx="100" cy="92" r="1.6" fill="#FFF"/><circle cx="90" cy="130" r="1.6" fill="#FFF"/>
+  <rect x="40" y="172" width="160" height="12" rx="4" fill="#3C4680"/>
+  <path d="M88 172l8-24h48l8 24z" fill="#9FB6FF" opacity="0.85"/>
+</svg>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { foldDevice } from "@/lib/device/fold";
 import { STAGE_WIDTH } from "@/components/stage/Stage";
 
@@ -11,11 +11,11 @@ import { STAGE_WIDTH } from "@/components/stage/Stage";
  */
 export function AngleSlider({ y = 1052 }: { y?: number }) {
   // starts at 0 on server and client alike (no hydration mismatch), then follows the live angle
-  const [angle, setAngle] = useState(0);
-  useEffect(() => {
-    setAngle(Math.round(foldDevice.getAngle()));
-    return foldDevice.value.on("change", (a) => setAngle(Math.round(a)));
-  }, []);
+  const angle = useSyncExternalStore(
+    (onChange) => foldDevice.value.on("change", onChange),
+    () => Math.round(foldDevice.getAngle()),
+    () => 0,
+  );
   const width = 640;
   return (
     <div
@@ -43,7 +43,7 @@ export function AngleSlider({ y = 1052 }: { y?: number }) {
         value={angle}
         aria-label="Hinge angle"
         onChange={(e) => foldDevice.setAngle(Number(e.target.value))}
-        style={{ flex: 1, accentColor: "#007AFF" }}
+        style={{ flex: 1, accentColor: "var(--ios-blue)" }}
       />
       <span style={{ width: 44, textAlign: "right" }}>{angle}°</span>
     </div>

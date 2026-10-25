@@ -8,16 +8,19 @@
  *   - the home Search button: "search"
  *   - the hardware buttons: "hw-volume-up", "hw-volume-down", "hw-touch-id", "hw-camera"
  *
- * Swap ExampleApp for your component:  instagram: MyInstagram,
+ * Link a button by setting its entry to your component:  facebook: MyFacebook,
  * Only if a button should do something different on one display, add it to DISPLAY_OVERRIDES.
- * Set an entry to `null` to make that button show the "concept only" toast instead.
+ * An entry left `null` is an empty button: tapping it does nothing.
  *
  * An app opened on one display carries over when the phone folds or unfolds (lib/apps/store.ts):
  * the component is told which display it is on (cover 402 x 573 pt, inner 822.5 x 573 pt).
  */
 import type { ComponentType } from "react";
 import { APP_NAMES, type HomeAppId, type HomeDisplay } from "@/components/home/layout";
-import { ExampleApp } from "@/components/apps/ExampleApp";
+import { InstagramApp } from "@/components/apps/instagram/InstagramApp";
+import { PhotosApp } from "@/components/apps/photos/PhotosApp";
+import { MessagesApp } from "@/components/apps/messages/MessagesApp";
+import { WhatsAppApp } from "@/components/apps/whatsapp/WhatsAppApp";
 
 export type WidgetTarget = "widget-weather" | "widget-calendar" | "widget-photos" | "widget-music" | "widget-reminders";
 export type HardwareTarget = "hw-volume-up" | "hw-volume-down" | "hw-touch-id" | "hw-camera";
@@ -49,13 +52,19 @@ export const TARGET_NAMES: Record<AppTarget, string> = {
 };
 
 const ALL = Object.keys(TARGET_NAMES) as AppTarget[];
-const DEFAULTS = Object.fromEntries(ALL.map((t) => [t, ExampleApp])) as Record<AppTarget, Screen>;
+/** Every button starts empty: tapping it does nothing. */
+const EMPTY = Object.fromEntries(ALL.map((t) => [t, null])) as Record<AppTarget, Screen>;
 
 /** One app per button, the same on both displays. */
 export const APP_SCREENS: Record<AppTarget, Screen> = {
-  ...DEFAULTS,
-  // facebook: MyFacebook,
-  // "hw-camera": MyCamera,
+  ...EMPTY,
+  // The story's look-alike apps (CLAUDE_PROMPT.md Phase 2)
+  whatsapp: WhatsAppApp,
+  messages: MessagesApp,
+  instagram: InstagramApp,
+  photos: PhotosApp,
+  // Un-Said: left empty on purpose; link the real app here when it is built.
+  unsaid: null,
 };
 
 /** Only for a button that should open something different on one display. */

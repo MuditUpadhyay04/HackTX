@@ -208,6 +208,7 @@ function HitArea({ target, label, x, y, width, height }: { target: HardwareTarge
       type="button"
       aria-label={label}
       data-hw-button={target}
+      data-action={target}
       onClick={() => pressHardware(target)}
       style={{
         position: "absolute",

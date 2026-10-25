@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <!-- Branched-Frontend: @goldenhour.pups poster avatar: a golden retriever (our own art). -->
+  <rect width="240" height="240" fill="#F7D58A"/>
+  <path d="M60 96c-14 10-22 40-12 66 12 6 26-6 30-24z" fill="#B9722F"/>
+  <path d="M180 96c14 10 22 40 12 66-12 6-26-6-30-24z" fill="#B9722F"/>
+  <ellipse cx="120" cy="126" rx="56" ry="60" fill="#D99A4E"/>
+  <ellipse cx="120" cy="158" rx="30" ry="24" fill="#F1C989"/>
+  <ellipse cx="120" cy="146" rx="12" ry="9" fill="#2A1C16"/>
+  <path d="M120 155v10M108 168c6 6 18 6 24 0" stroke="#2A1C16" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <circle cx="98" cy="118" r="6" fill="#2A1C16"/><circle cx="142" cy="118" r="6" fill="#2A1C16"/>
+  <circle cx="100" cy="116" r="1.8" fill="#FFF"/><circle cx="144" cy="116" r="1.8" fill="#FFF"/>
+</svg>

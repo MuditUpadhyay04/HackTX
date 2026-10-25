@@ -12,8 +12,8 @@
  */
 import { mkdirSync } from "node:fs";
 import path from "node:path";
-import { chromium } from "@playwright/test";
 import { scenes, sceneFileName, sceneUrl, type Scene } from "../lib/scenes";
+import { launchBrowser } from "./lib/browser";
 import { ROOT, withServer } from "./lib/server";
 
 /* Runs in the page; a string so tsx/esbuild cannot inject helpers. */
@@ -63,7 +63,7 @@ async function main(): Promise<void> {
   const failures: string[] = [];
 
   await withServer(async (baseUrl) => {
-    const browser = await chromium.launch();
+    const browser = await launchBrowser();
     try {
       const context = await browser.newContext({
         viewport: { width: 1920, height: 1080 },

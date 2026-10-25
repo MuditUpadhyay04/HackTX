@@ -52,7 +52,7 @@ export function AppIcon({
     outline: "none",
   };
   return (
-    <Placeholder id={`ios:app-${app}`} pressed={pressed}>
+    <Placeholder id={`ios:app-${app}`} pressed={pressed} press="darken">
       <button type="button" aria-label={name} data-app-icon={app} style={button} onClick={onClick}>
         <AppGlyph app={app} size={size} />
         {showLabel ? (

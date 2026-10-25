@@ -368,6 +368,24 @@
   --kb-special-label: #000000;
   --icon-messages-fill: linear-gradient(180deg, #5CF777 0%, #0EBE2C 100%);
   --icon-photos-fill: #FFFFFF;
+  /* look-alike apps (components/apps/*): iOS system colors (HIG) and app chrome the spec leaves open */
+  --on-accent: #FFFFFF;
+  --on-accent-2: rgba(255,255,255,0.8);
+  --ios-indigo: #5E5CE6;
+  --ios-teal: #30B0C7;
+  --ios-yellow: #FFCC00;
+  --ios-pink: #FF2D55;
+  --ios-push-shadow: rgba(0,0,0,0.12);
+  --meta-ai-blue: #3EC6F6;
+  --meta-ai-violet: #7A5CF5;
+  --meta-ai-magenta: #C04FD9;
+  --ig-active: #1CD14F;
+  --ig-pressed: #F2F2F2;
+  --ig-reel-stroke: rgba(255,255,255,0.7);
+  --photos-segment-bg: rgba(242,242,247,0.92);
+  --photos-chrome-fade: linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.9) 70%, rgba(255,255,255,0) 100%);
+  --ig-reel-tile-scrim: linear-gradient(180deg, rgba(0,0,0,0.45) 0%, transparent 28%, transparent 70%, rgba(0,0,0,0.55) 100%);
+  --ig-reel-viewer-scrim: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 22%, transparent 62%, rgba(0,0,0,0.6) 100%);
 
   /* Phase 3 home screen (home-screen builder; lib/tokens.ts homeWallpaper / homeColor / homeGradient).
      D9 tiles are sampled from the official Meta files in public/brand/meta/. */

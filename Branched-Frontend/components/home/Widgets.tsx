@@ -41,7 +41,7 @@ function WidgetFrame({
 }) {
   const onClick = useOpenApp(`widget-${id}` as WidgetTarget);
   return (
-    <Placeholder id={`ios:widget-${id}`}>
+    <Placeholder id={`ios:widget-${id}`} press="darken">
       <button
         type="button"
         onClick={onClick}

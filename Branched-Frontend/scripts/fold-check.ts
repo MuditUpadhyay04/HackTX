@@ -3,12 +3,13 @@
  *
  * Phase 1 acceptance 15-16 for the fold control (spec Phase 1, FOLD CONTROL):
  *   1. /device?state=folded&bg=wallpaper shows the "Unfold" pill.
- *   2. F unfolds with spring-unfold: rAF frame times p95 < 20 ms and no frame > 50 ms; settles at 180
- *      (logs the settle time); the detent ripple fires once; the label becomes "Fold".
- *   3. Frames at 30/60/90/120/150 degrees, screenshotted while the spring runs (sampling
- *      window.__unsaidDevice.angle) -> screenshots/fold-check/unfold-<target>.png.
- *   4. Pressing F again mid-unfold reverses from the current angle, keeping the velocity
- *      (no jump between frames, keeps rising for a moment, then folds back to 0).
+ *   2. F unfolds with the hinge tween (lib/motion.ts hingeTween: 1.4 s smoothstep, no overshoot, no
+ *      detent ripple): rAF frame times p95 < 20 ms and no frame > 50 ms; settles at 180 in about 1.4 s
+ *      without passing it; the label becomes "Fold".
+ *   3. Frames at 30/60/90/120/150 degrees (set through window.__unsaidDevice.setAngle)
+ *      -> screenshots/fold-check/unfold-<target>.png.
+ *   4. Pressing F again mid-unfold turns back from the current angle: no jump between frames, no
+ *      carried-over velocity (a new smoothstep tween starts at rest), then folds back to 0.
  *   5. Shift+F jumps instantly; ?frame=bare hides the pill; ?motion=reduced jumps (crossfade).
  *
  * Server: scripts/lib/server.ts (BASE_URL, a running :3000, or next start -p 3123 after a build).
@@ -16,7 +17,8 @@
  */
 import { mkdirSync } from "node:fs";
 import path from "node:path";
-import { chromium, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { launchBrowser } from "./lib/browser";
 import { ROOT, withServer } from "./lib/server";
 
 const VIEWPORT = { width: 1920, height: 1080 };
@@ -25,8 +27,8 @@ const SNAP_ANGLES = [30, 60, 90, 120, 150];
 const P95_LIMIT_MS = 20;
 const MAX_FRAME_MS = 50;
 /**
- * Largest believable per-frame step for spring-unfold. Its peak speed is about 750 deg/s
- * (about 12 deg per 60 fps frame); a discontinuity (restart, jump) shows up as a far larger step.
+ * Largest believable per-frame step for the hinge tween. Smoothstep peaks at 1.5x the mean speed,
+ * about 190 deg/s over 1.4 s (about 3 deg per 60 fps frame); a jump shows up as a far larger step.
  */
 const MAX_STEP_DEG = 20;
 
@@ -55,7 +57,7 @@ const RECORD_SOURCE = (timeoutMs: number) => `new Promise((resolve) => {
     angles.push(d.angle);
     if (d.moving) sawMoving = true;
     const done = (sawMoving && !d.moving) || now - t0 > ${timeoutMs};
-    if (done) resolve({ deltas: deltas.slice(1), angles, elapsed: now - t0, angle: d.angle, ripple: d.ripple });
+    if (done) resolve({ deltas: deltas.slice(1), angles, elapsed: now - t0, angle: d.angle });
     else requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);
@@ -75,7 +77,7 @@ const SAMPLE_SOURCE = (frames: number) => `new Promise((resolve) => {
 
 const TWO_FRAMES = `new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(null))))`;
 
-type Recording = { deltas: number[]; angles: number[]; elapsed: number; angle: number; ripple: number };
+type Recording = { deltas: number[]; angles: number[]; elapsed: number; angle: number };
 
 function percentile(values: number[], p: number): number {
   if (!values.length) return 0;
@@ -109,7 +111,7 @@ async function run(baseUrl: string): Promise<void> {
   const outDir = path.join(ROOT, "screenshots", "fold-check");
   mkdirSync(outDir, { recursive: true });
 
-  const browser = await chromium.launch({ args: ["--use-angle=metal"] });
+  const browser = await launchBrowser({ args: ["--use-angle=metal"] });
   try {
     const context = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 1 });
     const page = await context.newPage();
@@ -130,9 +132,9 @@ async function run(baseUrl: string): Promise<void> {
     check("frame time p95 < 20 ms", p95 < P95_LIMIT_MS, `p95 ${p95.toFixed(1)} ms over ${rec.deltas.length} frames`);
     check("no frame > 50 ms", worst <= MAX_FRAME_MS, `worst ${worst.toFixed(1)} ms`);
     check("settles at 180", Math.abs(rec.angle - 180) < 0.5, `angle ${rec.angle.toFixed(2)}`);
-    // spring-unfold (120/22/1.3, section 4.4) settles in about 0.8-1 s; the spec's "about 2 s" is loose.
-    check("settle time", rec.elapsed > 500 && rec.elapsed < 3500, `${(rec.elapsed / 1000).toFixed(2)} s`);
-    check("detent ripple fired once", rec.ripple === 1, `ripple ${rec.ripple}`);
+    // hingeTween: 1.4 s smoothstep (iphone-duo reference); rAF start/stop slack either side.
+    check("settle time ~1.4 s", rec.elapsed > 1200 && rec.elapsed < 2200, `${(rec.elapsed / 1000).toFixed(2)} s`);
+    check("no overshoot", Math.max(...rec.angles) <= 180.01, `max ${Math.max(...rec.angles).toFixed(2)} deg`);
     check("no angle jumps", maxStep(rec.angles) < MAX_STEP_DEG, `max step ${maxStep(rec.angles).toFixed(2)} deg`);
     check("pill label unfolded", (await pill.innerText()).trim() === "Fold", `"${(await pill.innerText()).trim()}"`);
 
@@ -158,10 +160,12 @@ async function run(baseUrl: string): Promise<void> {
     const peak = Math.max(...after);
     const reversedFrom = before[before.length - 1];
     check("reverse: no jump", maxStep(path_) < MAX_STEP_DEG, `max step ${maxStep(path_).toFixed(2)} deg`);
+    // a new tween starts at rest from the current angle: no carried-over rise (one in-flight frame
+    // between sampling and the key press is allowed, a few degrees at most)
     check(
-      "reverse: keeps velocity",
-      peak > reversedFrom,
-      `rose to ${peak.toFixed(1)} from ${reversedFrom.toFixed(1)} before folding back`,
+      "reverse: turns back from the current angle",
+      peak <= reversedFrom + 5,
+      `peak ${peak.toFixed(1)} vs ${reversedFrom.toFixed(1)} when reversed`,
     );
     check("reverse: heading back", after[after.length - 1] < peak, `now ${after[after.length - 1].toFixed(1)}`);
     await page.waitForFunction(`!${DEVICE}.moving`, undefined, { timeout: 6000 });

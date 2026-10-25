@@ -104,6 +104,24 @@ const extraColors = {
   "kb-label": "#000000",
   "kb-special-label": "#000000",
   "icon-photos-fill": "linear-gradient(180deg, #FFFFFF 0%, #ECECEC 100%)",
+  // look-alike apps (components/apps/*): iOS system colors (HIG) and app chrome the spec leaves open
+  "on-accent": "#FFFFFF",
+  "on-accent-2": "rgba(255,255,255,0.8)",
+  "ios-indigo": "#5E5CE6",
+  "ios-teal": "#30B0C7",
+  "ios-yellow": "#FFCC00",
+  "ios-pink": "#FF2D55",
+  "ios-push-shadow": "rgba(0,0,0,0.12)",
+  "meta-ai-blue": "#3EC6F6",
+  "meta-ai-violet": "#7A5CF5",
+  "meta-ai-magenta": "#C04FD9",
+  "ig-active": "#1CD14F",
+  "ig-pressed": "#F2F2F2",
+  "ig-reel-stroke": "rgba(255,255,255,0.7)",
+  "photos-segment-bg": "rgba(242,242,247,0.92)",
+  "photos-chrome-fade": "linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.9) 70%, rgba(255,255,255,0) 100%)",
+  "ig-reel-tile-scrim": "linear-gradient(180deg, rgba(0,0,0,0.45) 0%, transparent 28%, transparent 70%, rgba(0,0,0,0.55) 100%)",
+  "ig-reel-viewer-scrim": "linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 22%, transparent 62%, rgba(0,0,0,0.6) 100%)",
 } as const;
 
 export const color = { ...lookalikeColors, ...deviceColors, ...extraColors };
@@ -428,10 +446,6 @@ export const foldMotion = {
   blurFloor: 0.05,
   /** the curve of the blur over the fold: (sin(pi a / 180)) ^ blurCurve */
   blurCurve: 0.8,
-  /** the cover home fades to this opacity as it swings edge-on (90 degrees) */
-  coverDimTo: 0.3,
-  /** the inner display's moving half starts from this opacity at 90 degrees */
-  innerDimFrom: 0.4,
 } as const;
 
 // ---------------------------------------------------------------------------

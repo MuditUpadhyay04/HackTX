@@ -5,13 +5,13 @@
  *   useDeviceAngle()   the live openAngle as a MotionValue<number>: pass it straight to
  *                      <IPhoneDuo openAngle={...}>; it animates at 60 fps without re-rendering React.
  *   useFoldCrossfade() the reduced-motion crossfade the page renders (null when none).
- *   useFoldKeys()      F toggles, Shift+F jumps (ignored in text fields). FoldControl calls it.
+ *   useFoldKeys()      F toggles, Shift+F jumps (ignored in text fields and while an app's keyboard is up).
+ *                      FoldControl calls it.
  *   foldDevice         the same actions without React (the opening timeline, the dev panel).
  *   window.__unsaidDevice  the same actions + live angle, in dev/test builds (and ?dev=1).
  *
  * Motion: framer-motion animate(angleValue, target, hingeTween): 1.4 s smoothstep, no overshoot
  * (the iphone-duo reference). Interruptible: a new command mid-move starts from the current angle.
- * Detent: crossing 178 while unfolding / 2 while folding bumps `ripple` (HingeRipple plays).
  * Reduced motion (prefers-reduced-motion or ?motion=reduced): the angle jumps and `crossfade`
  * is set for durations.reducedFold ms so the page can fade the old snapshot out.
  *
@@ -31,10 +31,6 @@ import {
 } from "@/lib/device/store";
 
 export { FOLDED_ANGLE, UNFOLDED_ANGLE, useFoldStore, type FoldCrossfade } from "@/lib/device/store";
-
-/** The hinge "click" (spec: as openAngle crosses ~178, or ~2 when folding). */
-export const DETENT_UNFOLD = 178;
-export const DETENT_FOLD = 2;
 
 // ---------------------------------------------------------------------------
 // Driver (module scope: one hinge per page)
@@ -59,27 +55,11 @@ function clearCrossfade(): void {
   }
 }
 
-/** Detent listener + window API, installed once on the client. */
+/** Window API, installed once on the client. (No detent ripple: the iphone-duo hinge has none.) */
 function ensureDriver(): void {
   if (driverReady || typeof window === "undefined") return;
   driverReady = true;
-
-  let previous = angleValue.get();
-  angleValue.on("change", (next) => {
-    const { target, moving } = useFoldStore.getState();
-    if (moving) {
-      const unfolding = target > previous;
-      if (unfolding && previous < DETENT_UNFOLD && next >= DETENT_UNFOLD) bumpRipple();
-      if (!unfolding && previous > DETENT_FOLD && next <= DETENT_FOLD) bumpRipple();
-    }
-    previous = next;
-  });
-
   installWindowApi();
-}
-
-function bumpRipple(): void {
-  useFoldStore.setState((s) => ({ ripple: s.ripple + 1 }));
 }
 
 /** Springs (or, under reduced motion, crossfade-jumps) the hinge to `target` degrees. */
@@ -90,7 +70,7 @@ function moveTo(target: number): void {
 
   if (prefersReducedMotion()) {
     stopSpring();
-    useFoldStore.setState({ moving: false }); // before the jump: the detent listener must not ripple
+    useFoldStore.setState({ moving: false });
     angleValue.jump(target);
     const crossfade: FoldCrossfade = { from, to: target, duration: durations.reducedFold, key: ++crossfadeKey };
     useFoldStore.setState({
@@ -126,12 +106,12 @@ function moveTo(target: number): void {
   });
 }
 
-/** Sets the hinge instantly, no animation, no ripple (Shift+F, screenshots, the page's ?state=). */
+/** Sets the hinge instantly, no animation (Shift+F, screenshots, the page's ?state=). */
 function jumpTo(angle: number): void {
   ensureDriver();
   stopSpring();
   clearCrossfade();
-  useFoldStore.setState({ moving: false }); // before the jump: a jump never ripples
+  useFoldStore.setState({ moving: false });
   angleValue.jump(angle);
   useFoldStore.setState({
     angle,
@@ -187,8 +167,6 @@ export type UnsaidDeviceApi = {
   readonly target: number;
   readonly folded: boolean;
   readonly moving: boolean;
-  /** Detent count so far. */
-  readonly ripple: number;
   readonly reducedMotion: boolean;
 };
 
@@ -219,9 +197,6 @@ function installWindowApi(): void {
     },
     get moving() {
       return useFoldStore.getState().moving;
-    },
-    get ripple() {
-      return useFoldStore.getState().ripple;
     },
     get reducedMotion() {
       return prefersReducedMotion();
@@ -298,14 +273,27 @@ function isTextField(target: EventTarget | null): boolean {
   return false;
 }
 
-/** F toggles fold/unfold; Shift+F jumps instantly. Ignored while a text field has focus. */
+/**
+ * An app's iOS keyboard (components/ios/Keyboard.tsx, [data-keyboard]) is up and live: typed keys
+ * go to its composer, so F must type an "f" instead of folding the phone. Inert copies on the
+ * moving halves and hidden hosts don't count.
+ */
+function onScreenKeyboardUp(): boolean {
+  for (const el of document.querySelectorAll("[data-keyboard]")) {
+    if (el.closest("[inert]") || el.getClientRects().length === 0) continue;
+    if (getComputedStyle(el).visibility === "visible") return true;
+  }
+  return false;
+}
+
+/** F toggles fold/unfold; Shift+F jumps instantly. Ignored in a text field or while an app's keyboard is up. */
 export function useFoldKeys(enabled = true): void {
   useEffect(() => {
     if (!enabled) return;
     ensureDriver();
     const onKey = (event: KeyboardEvent) => {
       if (event.code !== "KeyF" || event.metaKey || event.ctrlKey || event.altKey || event.repeat) return;
-      if (event.defaultPrevented || isTextField(event.target)) return;
+      if (event.defaultPrevented || isTextField(event.target) || onScreenKeyboardUp()) return;
       event.preventDefault();
       if (event.shiftKey) foldDevice.jump();
       else foldDevice.toggle();

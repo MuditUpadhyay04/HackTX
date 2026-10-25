@@ -12,13 +12,16 @@ export type WhatsAppNavProps = {
   avatar: string;
   backCount?: number;
   backHref: string;
+  /** in-phone navigation (the app's stack); falls back to the scene route */
+  onBack?: () => void;
+  hideBack?: boolean;
   onVideo?: () => void;
   onVoice?: () => void;
 };
 
 /** WhatsApp chat header (Phase 2 CHROME SPECS): white 96% with a hairline; back chevron + count in
  * iOS blue; 36 pt avatar; name 17 semibold; subtitle 12; video + phone glyphs. */
-export function WhatsAppNav({ name, subtitle, avatar, backCount, backHref }: WhatsAppNavProps) {
+export function WhatsAppNav({ name, subtitle, avatar, backCount, backHref, onBack, hideBack, onVideo, onVoice }: WhatsAppNavProps) {
   const router = useRouter();
   return (
     <div
@@ -32,15 +35,17 @@ export function WhatsAppNav({ name, subtitle, avatar, backCount, backHref }: Wha
       }}
     >
       <div style={{ display: "flex", alignItems: "center", height: WA.navHeight, paddingInline: "var(--space-8)" }}>
+        {hideBack ? <span style={{ width: "var(--space-8)" }} /> : (
         <Pressable
           nav={backHref}
-          onPress={() => router.push(backHref)}
+          onPress={() => (onBack ? onBack() : router.push(backHref))}
           label="Back"
           style={{ display: "flex", alignItems: "center", gap: "var(--space-4)", color: "var(--ios-blue)", height: WA.navHeight, paddingRight: "var(--space-8)" }}
         >
           <ChevronBack width={WA.backChevron.width} height={WA.backChevron.height} />
           {backCount ? <span style={{ fontSize: WA.nameSize, letterSpacing: "var(--type-body-tracking)" }}>{backCount}</span> : null}
         </Pressable>
+        )}
         <Placeholder id="whatsapp:contact-info" press="darken">
           <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: "var(--space-8)" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -66,12 +71,12 @@ export function WhatsAppNav({ name, subtitle, avatar, backCount, backHref }: Wha
         </Placeholder>
         <div style={{ display: "flex", alignItems: "center", gap: "var(--space-20)", color: "var(--ios-blue)", paddingRight: "var(--space-8)" }}>
           <Placeholder id="whatsapp:call-start">
-            <button type="button" aria-label="Video call" style={iconButton}>
+            <button type="button" aria-label="Video call" style={iconButton} onClick={onVideo ? (e) => (e.preventDefault(), onVideo()) : undefined}>
               <VideoGlyph size={WA.composer.glyph} />
             </button>
           </Placeholder>
           <Placeholder id="whatsapp:call-start">
-            <button type="button" aria-label="Voice call" style={iconButton}>
+            <button type="button" aria-label="Voice call" style={iconButton} onClick={onVoice ? (e) => (e.preventDefault(), onVoice()) : undefined}>
               <PhoneGlyph size={WA.composer.glyph - 2} />
             </button>
           </Placeholder>

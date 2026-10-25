@@ -8,7 +8,7 @@ const D =
 export function PhoneGlyph() {
   return (
     <svg viewBox="0 0 60 60" width="100%" height="100%" aria-hidden="true" style={{ position: "absolute", inset: 0 }}>
-      <path d={D} fill="#FFFFFF" />
+      <path d={D} style={{ fill: "var(--on-accent)" }} />
     </svg>
   );
 }

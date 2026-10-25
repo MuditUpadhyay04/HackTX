@@ -5,7 +5,7 @@
  *   - `angleValue`: a framer-motion MotionValue<number> holding the LIVE openAngle (0 folded ... 180 flat).
  *     The spring writes it every frame; IPhoneDuo reads it without a React re-render per frame.
  *   - `useFoldStore`: a zustand store with the React-visible state that changes a few times per move
- *     (target, folded, moving, the settled angle, the detent ripple counter, the reduced-motion crossfade).
+ *     (target, folded, moving, the settled angle, the reduced-motion crossfade).
  *
  * The spring driver, the hooks and window.__unsaidDevice live in lib/device/fold.ts.
  */
@@ -37,8 +37,6 @@ export type FoldState = {
   folded: boolean;
   /** true while the spring is running. */
   moving: boolean;
-  /** Increments each time the detent fires (crossing 178 unfolding / 2 folding). HingeRipple keys on it. */
-  ripple: number;
   /** Set during a reduced-motion jump, null otherwise. */
   crossfade: FoldCrossfade | null;
 };
@@ -48,7 +46,6 @@ export const useFoldStore = create<FoldState>(() => ({
   target: FOLDED_ANGLE,
   folded: true,
   moving: false,
-  ripple: 0,
   crossfade: null,
 }));
 

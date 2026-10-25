@@ -2,7 +2,8 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useLayoutEffect, useRef, type ReactNode } from "react";
-import { KEYBOARD, SAFE_BOTTOM, SCREEN } from "@/components/lookalike/metrics";
+import { KEYBOARD, SAFE_BOTTOM } from "@/components/lookalike/metrics";
+import { usePane } from "./pane";
 import { durations, easeIos, ms, usePrefersReducedMotion } from "@/lib/motion";
 
 export type ThreadFrameProps = {
@@ -48,6 +49,7 @@ export function ThreadFrame({
   onDismissKeyboard,
 }: ThreadFrameProps) {
   const reduced = usePrefersReducedMotion();
+  const { width } = usePane();
   const scroller = useRef<HTMLDivElement>(null);
   const mounted = useRef(false);
   const lift = KEYBOARD.height - SAFE_BOTTOM;
@@ -97,7 +99,7 @@ export function ThreadFrame({
             position: "absolute",
             left: 0,
             bottom: 0,
-            width: SCREEN.width,
+            width,
             height: composerHeight + SAFE_BOTTOM,
             background: composerBackground,
             zIndex: 2,
@@ -106,7 +108,7 @@ export function ThreadFrame({
           <div style={{ height: composerHeight }}>{composer}</div>
         </div>
       </motion.div>
-      <div style={{ position: "absolute", left: 0, top: 0, width: SCREEN.width, zIndex: 30 }}>{nav}</div>
+      <div style={{ position: "absolute", left: 0, top: 0, width, zIndex: 30 }}>{nav}</div>
       <AnimatePresence initial={false}>
         {keyboardOpen ? (
           <motion.div
