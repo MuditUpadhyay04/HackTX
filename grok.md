@@ -2,6 +2,24 @@
 
 Running log of every change Grok Bot makes. Times are America/Chicago (CDT). Newest entries are at the top. Updated after every message Gurneal sends to Grok Bot.
 
+## Oct 24, 2026, 11:52 PM CDT
+
+Two commits on `unsaid-overhaul`, mobile only, with no backend, API, or feature changes:
+
+- `938b7cf` finishes the phone-portrait layouts (402×874):
+  - Talk's app rail moves into a tool row above the dock, so it no longer overlaps the transcript.
+  - Gallery, Photo and knock, Pile, and Preview are re-laid out against the reference image.
+  - Home, Letters, and You get a second pass.
+  - The Android adaptive icon is fixed.
+  - The web build no longer crashes on push setup.
+- `fc1a66e` re-lays out every screen live for any window size (iPhone Duo outer and inner displays, landscape, Split View):
+  - A new `useLayout` hook.
+  - `orientation: default`.
+  - Two columns when the window is wide.
+  - Safe areas on the left and right.
+
+`32afd00` (EAS and the demo runbook) was already on the branch. It was rebased onto and left unchanged. tsc, lint, and the iOS, Android, and web exports pass. Launching into Home vs. the gallery is still open. Nothing was built or published to EAS, and PR #1 was not merged. OVERHAUL_STATUS.md is updated.
+
 ## Oct 24, 2026, 11:19 PM CDT
 
 Stopped at Gurneal's request at 11:19 PM CDT. No further design or feature work. `unsaid-overhaul` tip is `6703bf4` (handoff). App restyle is `259c00b`. Handoff document is `4cf6071`. SHA line is `13abbe4`. `mobile/OVERHAUL_PROGRESS.md` is copied here as OVERHAUL_STATUS.md.
