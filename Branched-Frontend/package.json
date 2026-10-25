@@ -13,7 +13,8 @@
     "shoot": "tsx scripts/shoot.ts",
     "shoot:clean": "tsx scripts/shoot.ts --clean",
     "check:tokens": "tsx scripts/check-tokens.ts",
-    "check:placeholders": "tsx scripts/check-placeholders.ts"
+    "check:placeholders": "tsx scripts/check-placeholders.ts",
+    "demo": "bash scripts/demo.sh"
   },
   "dependencies": {
     "clsx": "^2.1.1",

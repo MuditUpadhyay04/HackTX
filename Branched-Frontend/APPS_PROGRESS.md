@@ -104,7 +104,9 @@ The phone's Un-Said icon opens the **real Un-Said app**: the newest `main` (Gurn
 - keep the Un-Said screen you're on through a fold or unfold;
 - launch it cleanly: Un-Said's splash rides the icon zoom, and the live app appears once the zoom lands (measured: 0–1 slow frames).
 
-**To run it:**
+**For the demo, one command:** `npm run demo`. It starts the backend, builds Un-Said in if needed, and runs the phone. Use `npm run demo -- --rebuild` to pull Un-Said's latest `main` first.
+
+**Or step by step:**
 1. `git worktree add ../HackTX-unsaid-main origin/main` (already done at `~/HackTX-unsaid-main`).
 2. **Backend:** `cd ~/HackTX-unsaid-main/backend && uv sync && uv run uvicorn app.main:app --host 127.0.0.1 --port 8000`. Its `.env` has `CORS_ORIGINS=*` and no keys, so it runs on clearly labelled mock AI; add `MODEL_API_KEY` etc. for the real Muse models.
 3. **Build Un-Said into the phone:** `scripts/build-unsaid.sh` (about 30 s). Re-run it whenever Un-Said's `main` changes (`git -C ~/HackTX-unsaid-main pull`). `UNSAID_API=` sets the backend address baked into the build (default `http://localhost:8000`).

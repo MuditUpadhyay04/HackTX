@@ -32,6 +32,9 @@ const DRESSING = `
   *, *::before, *::after { scrollbar-width: none !important; -webkit-tap-highlight-color: transparent; }
   *::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
   *:focus, *:focus-visible { outline: none !important; box-shadow: none; }
+  /* Tab bar labels: on web React Navigation's compact bar clips them to 10 px (their line height is
+     13), cutting off the bottoms of the letters on the folded screen. Let them show in full. */
+  [role="tablist"] a[role="tab"] > div:last-child { overflow: visible !important; height: auto !important; }
 `;
 
 export function UnsaidApp({ display }: AppScreenProps) {
