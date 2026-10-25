@@ -2,7 +2,9 @@
 
 Client protocol (JSON text frames, audio as binary frames):
   -> {"type": "start", "asset_id"?: "ph://..."}         the photo he's looking at, if any
-  <- {"type": "ready", "provider": "meta" | "mock"}     start sending audio after this
+  <- {"type": "ready", "provider": "meta" | "gemini" | "mock"}  start sending audio after this
+                                                       ("gemini": Muse's realtime socket is down, so no
+                                                       partials; the whole recording is transcribed at stop)
   -> binary: 16-bit mono PCM at 24 kHz, about 80 ms per frame, in real time
   <- {"type": "partial", "text"}                       live hypothesis for the current turn
   <- {"type": "turn", "turnId", "text"}                a finished turn
@@ -17,7 +19,7 @@ import logging
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from .. import guests, rants
+from .. import audio, guests, rants
 from ..ai import transcribe
 from ..auth import key_ok
 from ..config import settings
@@ -57,10 +59,16 @@ async def live_rant(ws: WebSocket) -> None:
         if start.get("type") != "start":
             await ws.close(code=4400)
             return
-        provider = "meta" if settings.muse_enabled else "mock"
+        provider = "meta" if settings.muse_enabled else "gemini" if settings.gemini_enabled else "mock"
         if provider == "meta":
             session = transcribe.RealtimeSession(emit, rants.language_bias(), rants.keywords())
-            await session.open()
+            try:
+                await session.open()
+            except Exception as exc:  # Muse's realtime socket is down: keep recording, Gemini transcribes at the end
+                if not settings.gemini_enabled:
+                    raise
+                log.warning("muse realtime unavailable (%s); gemini will transcribe this rant", exc)
+                session, provider = None, "gemini"
         await emit({"type": "ready", "provider": provider})
 
         while True:
@@ -71,13 +79,37 @@ async def live_rant(ws: WebSocket) -> None:
                 chunk = msg["bytes"]
                 pcm += chunk
                 if session:
-                    await session.send_audio(chunk)
+                    try:
+                        await session.send_audio(chunk)
+                    except Exception as exc:  # dropped mid-rant: the whole recording goes to Gemini instead
+                        if not settings.gemini_enabled:
+                            raise
+                        log.warning("muse realtime dropped (%s); gemini will transcribe this rant", exc)
+                        await session.abort()
+                        session, provider = None, "gemini"
                 if len(pcm) >= (guests.MAX_GUEST_PCM_BYTES if settings.guest else MAX_BYTES):  # a minute for try-it guests
                     break
             elif msg.get("text") and json.loads(msg["text"]).get("type") == "stop":
                 break
 
-        turns = await session.finish() if session else await _mock_stream(emit, len(pcm))
+        turns = None
+        if session:
+            try:
+                turns = await session.finish()
+                if not turns and len(pcm) > int(1.5 * 48_000) and settings.gemini_enabled:
+                    turns, provider = None, "gemini"  # a real recording and Muse heard nothing: ask Gemini
+            except Exception as exc:
+                if not settings.gemini_enabled:
+                    raise
+                log.warning("muse realtime failed at the end (%s); gemini will transcribe this rant", exc)
+                turns, provider = None, "gemini"
+        if turns is None and provider == "gemini":
+            await emit({"type": "partial", "text": "…"})
+            turns, provider = await transcribe.transcribe_any(audio.pcm_to_wav(bytes(pcm)), rants.language_bias())
+            for turn in turns:
+                await emit({"type": "turn", "turnId": turn["turnId"], "text": turn["text"]})
+        elif turns is None:
+            turns = await _mock_stream(emit, len(pcm))
         rant = rants.save_rant(turns, bytes(pcm), provider, asset_id=start.get("asset_id"))
         await emit({"type": "done", "rant": rant})
         await ws.close()

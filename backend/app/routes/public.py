@@ -100,9 +100,9 @@ async def public_reply(token: str, file: UploadFile | None = File(None), text: s
             raise HTTPException(400, "send mono 16-bit WAV")
         audio_path = store.save_media("replies", f"{reply_id}.wav", wav)
         bias = ["English"] if recipient["language"].lower() == "english" else [recipient["language"], "English"]
-        if settings.muse_enabled:
+        if settings.muse_enabled or settings.gemini_enabled:
             try:
-                turns = await transcribe.transcribe_wav(wav, bias)
+                turns, _ = await transcribe.transcribe_any(wav, bias)  # Muse, then Gemini
                 transcript = " ".join(t["text"] for t in turns).strip()
             except transcribe.TranscribeError as exc:
                 log.warning("reply transcription failed: %s", exc)

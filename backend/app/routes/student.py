@@ -315,14 +315,13 @@ async def rant_audio(file: UploadFile = File(...), asset_id: str = Form("")) -> 
         raise HTTPException(400, "send 24 kHz audio")
     if settings.guest and audio.duration_ms(pcm) > guests.MAX_GUEST_AUDIO_MS:
         raise HTTPException(413, guests.TOO_LONG)
-    if settings.muse_enabled:
+    if settings.muse_enabled or settings.gemini_enabled:
         try:
-            turns = await transcribe.transcribe_wav(wav, rants.language_bias())
+            turns, provider = await transcribe.transcribe_any(wav, rants.language_bias())  # Muse, then Gemini
         except transcribe.TranscribeError as exc:
             if settings.guest:
                 raise HTTPException(503, guests.MODELS_DOWN)
             raise HTTPException(502, f"transcription failed: {exc}")
-        provider = "meta"
     else:
         turns = transcribe.mock_turns(audio.duration_ms(pcm))
         provider = "mock"

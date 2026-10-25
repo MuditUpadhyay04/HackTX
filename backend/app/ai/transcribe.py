@@ -15,6 +15,7 @@ import httpx
 import websockets
 
 from ..config import settings
+from . import gemini
 
 log = logging.getLogger("unsaid.asr")
 
@@ -129,6 +130,32 @@ class RealtimeSession:
             # unknown event types are ignored, as the docs ask
 
 
+async def transcribe_any(wav: bytes, language_bias: list[str]) -> tuple[list[dict], str]:
+    """Muse Voice Transcribe, and Gemini when Muse fails or hears nothing in a real recording.
+    Returns (turns, provider) with provider "meta" or "gemini"; raises TranscribeError if both fail."""
+    reason = "no MODEL_API_KEY"
+    if settings.model_api_key:
+        try:
+            turns = await transcribe_wav(wav, language_bias)
+            if turns or not _long_enough(wav):
+                return turns, "meta"
+            reason = "muse heard nothing"
+        except (TranscribeError, httpx.HTTPError) as exc:
+            reason = str(exc) or exc.__class__.__name__
+    if not settings.gemini_enabled:
+        raise TranscribeError(reason)
+    log.warning("transcription: %s; gemini is transcribing instead", reason[:200])
+    try:
+        return await gemini.transcribe(wav, language_bias), "gemini"
+    except gemini.GeminiError as exc:
+        raise TranscribeError(f"{reason}, and the gemini fallback failed: {exc}") from exc
+
+
+def _long_enough(wav: bytes) -> bool:
+    """Over ~1.5 s of audio: an empty Muse transcript is then worth a second opinion."""
+    return len(wav) > 44 + int(1.5 * 24_000 * 2)
+
+
 async def transcribe_wav(wav: bytes, language_bias: list[str]) -> list[dict]:
     """File transcription with turn detection. Returns turns like the realtime session."""
     request = {"mode": "ENDPOINTING", "model": settings.asr_model, "audioEncoding": "WAV"}
@@ -140,7 +167,7 @@ async def transcribe_wav(wav: bytes, language_bias: list[str]) -> list[dict]:
     }
     url = f"{settings.model_api_base}/asr/transcribe?sessionId=unsaid-{uuid.uuid4().hex[:12]}"
     headers = {"Authorization": f"Bearer {settings.model_api_key}"}
-    async with httpx.AsyncClient(timeout=httpx.Timeout(90, connect=10)) as client:
+    async with httpx.AsyncClient(timeout=httpx.Timeout(45, connect=10)) as client:
         resp = await client.post(url, files=files, headers=headers)
     if resp.status_code != 200:
         raise TranscribeError(f"transcribe {resp.status_code}: {resp.text[:300]}")

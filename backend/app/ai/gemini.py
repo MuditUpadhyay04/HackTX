@@ -81,6 +81,55 @@ async def chat_json(system: str, user: str, schema: dict, max_tokens: int = 4000
         raise GeminiError(f"unreadable gemini json: {exc}") from exc
 
 
+_TRANSCRIBE = """Transcribe this voice note exactly as spoken. Do not fix, summarize, translate, or add anything.
+The speaker may mix {languages} in one sentence. Write English words in English and Hindi words in
+romanized Hindi (Latin letters), the way the speaker would type them in a text message.
+Split it into turns at natural pauses. Leave out nothing that was said, including names.
+If nothing is said, return no turns."""
+
+# Inline audio stays well under Gemini's 20 MB request limit (a minute of 24 kHz PCM is ~2.9 MB).
+MAX_INLINE_AUDIO = 18 * 1024 * 1024
+
+
+async def transcribe(wav: bytes, language_bias: list[str]) -> list[dict]:
+    """Muse Voice Transcribe's stand-in: turns of {turnId, startMs, endMs, text}, without timestamps."""
+    import base64  # noqa: PLC0415  (only this path needs it)
+
+    if not settings.gemini_enabled:
+        raise GeminiError("no Gemini key")
+    if len(wav) > MAX_INLINE_AUDIO:
+        raise GeminiError("recording too long for the Gemini fallback")
+    languages = " and ".join(language_bias or ["English"])
+    body = {
+        "systemInstruction": {"parts": [{"text": _TRANSCRIBE.format(languages=languages)}]},
+        "contents": [{"parts": [
+            {"inlineData": {"mimeType": "audio/wav", "data": base64.b64encode(wav).decode()}},
+            {"text": "Transcribe this voice note."},
+        ]}],
+        "generationConfig": {
+            "temperature": 0,
+            "maxOutputTokens": 4000,
+            "responseMimeType": "application/json",
+            "responseJsonSchema": {
+                "type": "object",
+                "properties": {"turns": {"type": "array", "items": {"type": "string"}}},
+                "required": ["turns"],
+            },
+        },
+    }
+    try:
+        text = await _generate(body, timeout=60)
+    except httpx.HTTPError as exc:
+        raise GeminiError(f"gemini unreachable: {exc.__class__.__name__}") from exc
+    if text is None:
+        raise GeminiError("no gemini model answered")
+    try:
+        turns = [str(t).strip() for t in json.loads(text).get("turns", []) if str(t).strip()]
+    except (json.JSONDecodeError, AttributeError) as exc:
+        raise GeminiError(f"unreadable gemini transcript: {exc}") from exc
+    return [{"turnId": i + 1, "startMs": None, "endMs": None, "text": t} for i, t in enumerate(turns)]
+
+
 def _too_long(said: str, echo: str) -> bool:
     said_words = len(said.split())
     echo_words = len(echo.split())
