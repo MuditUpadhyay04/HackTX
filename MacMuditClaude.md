@@ -2,12 +2,26 @@
 
 Running log of every change Claude Code makes on the `branched-frontend` workstream (`Branched-Frontend/`). Times are America/Chicago (CDT). Newest entries are at the top. Updated after every message Gurneal sends to Claude Code.
 
-## Current state
+## Current state: PAUSED (Oct 24, 2026, 11:18 PM CDT)
 
-- **Device (Phase 1):** the iPhone Fold, drawn in CSS 3D, opens and closes with the Fold/Unfold pill or the F key (Shift+F jumps). The inner screen has no punch-hole and no crease (D11). The cover screen keeps its camera top-right. The stage is a studio off-white (D12). fold-check passes 26/26 at 60 fps. Not committed yet.
-- **In progress:** the iOS home screen (wallpaper, status bar, widgets, iPhone layout on the cover and iPad-style layout on the inner screen per D8) and the smooth unfold (screen content visible on both halves while folding, with motion blur), plus the fake apps (WhatsApp thread + chat list, Messages, Instagram DMs, keyboard; then Photos, calls, Reels).
+Gurneal said "pause". All builders are stopped. Nothing in `Branched-Frontend/` is committed; the last pushed commit on `branched-frontend` is still `7efface` (Phase 0). The working tree compiles (`npx tsc` 0 errors).
+
+- **Device (Phase 1), done:** the iPhone Fold, drawn in CSS 3D, at `/device`. Opens and closes with the Fold/Unfold pill or the F key (Shift+F jumps). The inner screen has no punch-hole and no crease (D11). The cover screen keeps its camera top-right. The stage is a studio off-white (D12). Checks passing: build, lint, check:tokens, check:placeholders and fold-check (26/26 at 60 fps). Review: round 1 fixed (P1-R1-*). Round 2 left a few device polish items (top-edge buttons read as hairlines, a shadow edge at 120-150°, spine shading, two hand-typed wallpaper colors), plus re-shooting the screenshots after D12.
+- **Home screen, partly built, stopped mid-way:** `components/home/{HomeScreen,HomeWallpaper,Widgets,Dock,SearchPill,PageDots,layout}`, `components/ios/{StatusBar,HomeIndicator,AppIcon}`, `components/icons/{AppGlyph,apps/Messages,Phone,Photos}`. Not wired into `/device` yet. The smooth unfold isn't started (content visible on both halves while folding, with motion blur, like https://iphone-duo-tawny.vercel.app).
+- **Fake apps, partly built, stopped mid-way:** data/stores (`lib/mock/*`, `lib/store/*`), keyboard layout, avatars (`assets/images/avatar-*.svg`), `components/scene/PhoneScene`, and the WhatsApp thread with Mom (`/scene/threads/mom`, `components/lookalike/whatsapp/*`). Scenes are registered in `lib/scenes-apps.ts`, including Messages/Instagram scenes whose screens don't exist yet. Not started: WhatsApp chat list, Messages (Sarah), Instagram DMs (Michael), Photos, calls, Reels.
+- **Meta icons:** official logo files for Facebook, Messenger, Instagram, WhatsApp and Threads are in `Branched-Frontend/assets/brand/meta/` (sources in its README; D9: used 1:1, never redrawn). Meta AI, Edits, Meta Horizon, WhatsApp Business, Meta Business Suite, Meta Ads Manager and Messenger Kids have no official file on the Brand Resource Center, so they stay plain grey tiles.
+
+### To resume
+
+1. Restart the two builders on what's left. Home: wire the Meta icons, `CoverHome`/`InnerHome` into `/device`, the smooth unfold. Apps: finish WhatsApp (chat list), then Messages (Sarah), Instagram (Michael), keyboard typing, Photos.
+2. Look at every screen at 1x and 2x and fix until it reads as a real iPhone. Send Gurneal renders.
+3. Run the 10 reviewers until a round is all CLEAN. Commit Phase 1 (+2/3 work) on `branched-frontend` and push (`git pull --rebase` first; Grok also pushes there).
 - **Meta icons:** official logo files for Facebook, Messenger, Instagram, WhatsApp and Threads are in `Branched-Frontend/assets/brand/meta/` (sources in its README; D9: used 1:1, never redrawn). Meta AI, Edits, Meta Horizon, WhatsApp Business, Meta Business Suite, Meta Ads Manager and Messenger Kids have no official file on the Brand Resource Center, so they stay plain grey tiles.
 - **Open questions for Gurneal:** the fold spring (spec 120/22/1.3) settles in about 0.8 s, not "about 2 s", and its overshoot is about 0.5°, so the detent reads from the ripple only.
+
+## Oct 24, 2026, 11:18 PM CDT
+
+Gurneal said "pause". Stopped the home-screen builder and the apps builder. State and resume steps are in "Current state" above.
 
 ## Oct 24, 2026, 11:14 PM CDT
 
