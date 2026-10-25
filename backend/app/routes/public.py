@@ -45,7 +45,8 @@ def card_page(token: str) -> HTMLResponse:
         title = f"A letter from {store.me()['name']}"
         page = page.replace('<meta property="og:title" content="A letter" />', f'<meta property="og:title" content="{escape(title)}" />')
     page = page.replace('content="/app/icon-512.png"', f'content="{escape(store.public_base())}/app/icon-512.png"')
-    return HTMLResponse(page, headers={"Cache-Control": "no-store"})
+    # Same page either way (card.js shows "this link isn't open yet."), but a made-up link says 404.
+    return HTMLResponse(page, status_code=200 if card else 404, headers={"Cache-Control": "no-store"})
 
 
 @router.get("/api/public/cards/{token}")

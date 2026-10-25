@@ -196,11 +196,22 @@ export function wsUrl(path: string) {
   return `${base}${path}${APP_KEY ? `?key=${encodeURIComponent(APP_KEY)}` : ""}`;
 }
 
-async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
-    ...init,
-    headers: { ...(APP_KEY ? { "X-App-Key": APP_KEY } : {}), ...(init.headers ?? {}) },
-  });
+/** `ms` = 0 for uploads, which may take as long as the network needs. */
+async function call<T>(path: string, init: RequestInit = {}, ms = 45000): Promise<T> {
+  const ctrl = new AbortController();
+  const timer = ms ? setTimeout(() => ctrl.abort(), ms) : null;
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      ...init,
+      signal: ctrl.signal,
+      headers: { ...(APP_KEY ? { "X-App-Key": APP_KEY } : {}), ...(init.headers ?? {}) },
+    });
+  } catch {
+    throw new Error(ctrl.signal.aborted ? "Un-Said is taking too long. Try again." : "Can't reach Un-Said. Check your connection.");
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
   if (!res.ok) {
     let detail = `${res.status}`;
     try {
@@ -239,7 +250,7 @@ export const api = {
     const form = new FormData();
     form.append("file", file(wavUri, "rant.wav", "audio/wav"));
     if (assetId) form.append("asset_id", assetId);
-    return call<Rant>("/api/rants/audio", { method: "POST", body: form });
+    return call<Rant>("/api/rants/audio", { method: "POST", body: form }, 0);
   },
   typedRant: (text: string, assetId?: string | null) => call<Rant>("/api/rants/text", post({ text, asset_id: assetId ?? null })),
   // personId: Talk was opened from this person's page; words that name nobody are filed under them.
@@ -257,7 +268,7 @@ export const api = {
     form.append("person_id", personId);
     form.append("caption", caption);
     if (assetId) form.append("asset_id", assetId);
-    return call<{ id: string }>("/api/photos", { method: "POST", body: form });
+    return call<{ id: string }>("/api/photos", { method: "POST", body: form }, 0);
   },
 
   createCard: (recipientId: string, pieceIds: string[], when: "her_morning" | "now", photoId?: string | null) =>
@@ -273,7 +284,7 @@ export const api = {
     } else {
       form.append("file", file(uri, `video.${ext}`, mime));
     }
-    return call<Card>(`/api/cards/${cardId}/video`, { method: "POST", body: form });
+    return call<Card>(`/api/cards/${cardId}/video`, { method: "POST", body: form }, 0);
   },
   revoke: (cardId: string) => call<Card>(`/api/cards/${cardId}/revoke`, post()),
 
@@ -298,7 +309,7 @@ export const api = {
       form.append("file", file(uri, `note.${ext}`, mime));
     }
     if (durationMs) form.append("duration_ms", String(Math.round(durationMs)));
-    return call<SelfNote>("/api/self-notes", { method: "POST", body: form });
+    return call<SelfNote>("/api/self-notes", { method: "POST", body: form }, 0);
   },
 
   // Connect photos (demo import) and the face groups

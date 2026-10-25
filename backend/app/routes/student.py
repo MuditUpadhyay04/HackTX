@@ -2,6 +2,7 @@
 
 import logging
 import re
+from datetime import timedelta
 from typing import Literal
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
@@ -23,6 +24,8 @@ MAX_VIDEO = 80 * 1024 * 1024
 PHOTO_TYPES = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif"}
 VIDEO_TYPES = {"video/webm": "webm", "video/mp4": "mp4", "video/quicktime": "mov"}
 HHMM = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
+
+_seen: dict = {}  # what /home last wrote, so a poll every 5 s doesn't write every time
 
 
 def providers() -> dict:
@@ -53,10 +56,16 @@ def safety_resources() -> list[dict]:
 @router.get("/home")
 def home(request: Request) -> dict:
     """Everything the home screen needs in one call. Polled every few seconds."""
-    if not settings.public_base_url:
-        db.kv_set("public_base_url", str(request.base_url).rstrip("/"))
+    base = str(request.base_url).rstrip("/")
+    if not settings.public_base_url and _seen.get("base") != base:
+        db.kv_set("public_base_url", base)
+        _seen["base"] = base
     now = timeutil.now_utc()
-    db.kv_set("last_activity_at", db.iso(now))  # he's here; the weekly push waits for real quiet
+    # He's here; the weekly push waits for real quiet. A minute is precise enough, and skipping the
+    # write on most polls keeps the database free for the requests that matter.
+    if _seen.get("activity") is None or abs(now - _seen["activity"]) >= timedelta(minutes=1):  # abs: the demo clock can jump back
+        db.kv_set("last_activity_at", db.iso(now))
+        _seen["activity"] = now
     with db.tx() as c:
         photos = c.execute(  # imported (Connect) photos only once he has said who they are
             "SELECT * FROM photos WHERE removed = 0 AND (cluster IS NULL OR person_id IS NOT NULL) "
@@ -336,9 +345,10 @@ async def letter_echo(body: EchoIn) -> dict:
     language = recipient["language"]
     if language.lower() in ("english", "en") or not settings.muse_enabled or not settings.gemini_enabled:
         return quiet
-    said = "\n".join(row["text"] for row in sorted(rows, key=lambda r: (r["created_at"], r["id"])))
+    # The same lines, joined the same way, as the letter Send builds (delivery.create_card).
+    said = "\n".join(p["text"] for p in delivery.letter_lines(sorted(rows, key=lambda r: (r["created_at"], r["id"]))))
     try:
-        translation = await spark.translate(said, language)
+        translation = await delivery.translated(said, language)
     except spark.SparkError as exc:
         log.warning("echo translation failed: %s", exc)
         return quiet

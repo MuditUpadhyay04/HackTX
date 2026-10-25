@@ -95,7 +95,35 @@ def test_gemini_answers_when_spark_is_refused(monkeypatch):
         assert spark.served_by["spark"] == "gemini (fallback)"
     finally:
         object.__setattr__(settings, "gemini_api_key", "")
-        spark.served_by["spark"] = "meta"
+        spark.served_by["spark"] = "not used yet"
 
     with pytest.raises(spark.SparkError):  # no Gemini key: Spark's error stands
         asyncio.run(spark.classify_safety("i miss home"))
+
+
+def test_a_refused_spark_is_skipped_for_a_while(monkeypatch):
+    """After Meta refuses Spark, later calls go straight to Gemini instead of paying the round trip."""
+    import asyncio
+
+    from app.ai import spark
+
+    calls = {"meta": 0}
+
+    async def refused(*args, **kwargs):
+        calls["meta"] += 1
+        raise spark.SparkError("spark 404: model_not_found", refused=True)
+
+    async def gemini_answer(system, user, schema, max_tokens=4000):
+        return {"safety": "ok"}
+
+    monkeypatch.setattr(spark, "_muse", refused)
+    monkeypatch.setattr(gemini, "chat_json", gemini_answer)
+    monkeypatch.setattr(spark, "_skip_meta_until", 0.0)
+    object.__setattr__(settings, "gemini_api_key", "test-key")
+    try:
+        asyncio.run(spark.classify_safety("i miss home"))
+        asyncio.run(spark.classify_safety("i miss home"))
+        assert calls["meta"] == 1
+    finally:
+        object.__setattr__(settings, "gemini_api_key", "")
+        spark.served_by["spark"] = "not used yet"

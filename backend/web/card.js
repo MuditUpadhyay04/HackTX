@@ -159,7 +159,7 @@ function wireHold(c, local) {
       btn.disabled = true;
       const body = new FormData();
       body.append("file", wavBlob(chunks), "reply.wav");
-      const res = await fetch(`/api/public/cards/${encodeURIComponent(token)}/reply`, { method: "POST", body });
+      const res = await fetch(replyUrl, { method: "POST", body }).catch(() => ({ ok: false }));
       if (res.ok) return showSent(c, local);
       btn.disabled = false;
       idle();
@@ -190,7 +190,7 @@ function showWrite(c, local) {
     send.textContent = "sending…";
     const body = new FormData();
     body.append("text", field.value.trim());
-    const res = await fetch(replyUrl, { method: "POST", body });
+    const res = await fetch(replyUrl, { method: "POST", body }).catch(() => ({ ok: false })); // offline: say so, don't stick
     if (res.ok) return showSent(c, local);
     send.disabled = false;
     send.textContent = "Send";

@@ -6,6 +6,7 @@ words he already approved. It also writes Unsaid's one short reflection line.
 
 import json
 import logging
+import time
 
 import httpx
 
@@ -18,30 +19,46 @@ log = logging.getLogger("unsaid.spark")
 SAFETY_VALUES = ["ok", "self_harm", "harm_to_others", "abuse_or_control"]
 
 # Who answered the last Spark call: "meta", or "gemini (fallback)" when Meta refused this host.
-served_by = {"spark": "meta"}
+served_by = {"spark": "not used yet"}
 
 
 class SparkError(RuntimeError):
-    pass
+    def __init__(self, msg: str, refused: bool = False):
+        super().__init__(msg)
+        self.refused = refused  # Meta said no (401/403/404), as opposed to slow or down
+
+
+# After Meta refuses Spark, skip it for a while instead of paying that round trip on every call.
+REFUSAL_MEMORY = 600.0
+_skip_meta_until = 0.0
 
 
 async def chat_json(system: str, user: str, schema: dict, name: str, effort: str = "low", max_tokens: int = 4000) -> dict:
     """Muse Spark first. When Spark doesn't answer (refused from this host, down, or unreachable)
     and a Gemini key is set, Gemini answers the same prompt and schema, and providers() says so."""
+    global _skip_meta_until
+    if settings.gemini_enabled and time.monotonic() < _skip_meta_until:
+        return await _fallback(system, user, schema, max_tokens, "spark was refused recently")
     try:
         result = await _muse(system, user, schema, name, effort, max_tokens)
     except SparkError as exc:
         if not settings.gemini_enabled:
             raise
         # Our Vultr VM gets model_not_found for Spark with a key that works from a laptop.
+        if exc.refused:
+            _skip_meta_until = time.monotonic() + REFUSAL_MEMORY
         log.warning("%s; gemini is answering instead", exc)
-        try:
-            result = await gemini.chat_json(system, user, schema, max_tokens=max_tokens)
-        except gemini.GeminiError as gexc:
-            raise SparkError(f"{exc}, and the gemini fallback failed: {gexc}") from gexc
-        served_by["spark"] = "gemini (fallback)"
-        return result
+        return await _fallback(system, user, schema, max_tokens, str(exc))
     served_by["spark"] = "meta"
+    return result
+
+
+async def _fallback(system: str, user: str, schema: dict, max_tokens: int, why: str) -> dict:
+    try:
+        result = await gemini.chat_json(system, user, schema, max_tokens=max_tokens)
+    except gemini.GeminiError as exc:
+        raise SparkError(f"{why}, and the gemini fallback failed: {exc}") from exc
+    served_by["spark"] = "gemini (fallback)"
     return result
 
 
@@ -55,7 +72,7 @@ async def _muse(system: str, user: str, schema: dict, name: str, effort: str, ma
     }
     headers = {"Authorization": f"Bearer {settings.model_api_key}"}
     try:
-        async with httpx.AsyncClient(timeout=httpx.Timeout(60, connect=10)) as client:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(30, connect=5)) as client:
             for attempt in range(2):
                 resp = await client.post(f"{settings.model_api_base}/chat/completions", json=body, headers=headers)
                 if resp.status_code in (429, 500, 502, 503, 504) and attempt == 0:
@@ -65,7 +82,8 @@ async def _muse(system: str, user: str, schema: dict, name: str, effort: str, ma
     except httpx.HTTPError as exc:
         raise SparkError(f"spark unreachable: {exc.__class__.__name__}") from exc
     if resp.status_code != 200:
-        raise SparkError(f"spark {resp.status_code}: {resp.text[:300]}")
+        refused = resp.status_code in (401, 403, 404) or "model_not_found" in resp.text
+        raise SparkError(f"spark {resp.status_code}: {resp.text[:300]}", refused=refused)
     try:
         content = resp.json()["choices"][0]["message"]["content"]
         return json.loads(content)

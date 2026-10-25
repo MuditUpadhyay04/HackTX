@@ -25,6 +25,23 @@ class CardError(ValueError):
     pass
 
 
+# One translation per (language, text): the preview's echo starts it, Send reuses it (even mid-flight),
+# so Send doesn't wait twice and "she'll read" checks the exact Hindi that goes out.
+_translations: dict[tuple[str, str], asyncio.Task] = {}
+
+
+async def translated(text: str, language: str) -> str:
+    key = (language.lower(), text)
+    task = _translations.get(key)
+    loop = asyncio.get_running_loop()
+    stale = task is None or task.get_loop() is not loop or (task.done() and (task.cancelled() or task.exception()))
+    if stale:
+        if len(_translations) > 200:
+            _translations.clear()
+        task = _translations[key] = loop.create_task(spark.translate(text, language))
+    return await asyncio.shield(task)
+
+
 async def create_card(recipient_id: str, piece_ids: list[str], photo_id: str | None, when: str) -> dict:
     recipient = store.get_person(recipient_id)
     if not recipient or recipient["channel"] == "self":
@@ -49,7 +66,7 @@ async def create_card(recipient_id: str, piece_ids: list[str], photo_id: str | N
         text = "\n".join(line["text"] for line in lines)
         if settings.muse_enabled:
             try:
-                translation = await spark.translate(text, recipient["language"])
+                translation = await translated(text, recipient["language"])
             except spark.SparkError as exc:
                 log.warning("translation failed: %s", exc)
         else:

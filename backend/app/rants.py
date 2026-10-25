@@ -83,7 +83,7 @@ async def sort_rant(rant_id: str, for_person: str | None = None) -> dict:
     if settings.muse_enabled:
         try:
             raw = await spark.sort_rant(segments, store.me(), people)
-            sorted_by = "meta"
+            sorted_by = "meta" if spark.served_by["spark"] == "meta" else "gemini"
         except spark.SparkError as exc:
             log.warning("spark sort failed, using mock: %s", exc)
     if raw is None:

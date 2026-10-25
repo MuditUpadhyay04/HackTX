@@ -48,6 +48,8 @@ async def main() -> int:
         misses += len(cases) - right
     c_ok, c_n = totals["concern"]
     o_ok, o_n = totals["ordinary"]
+    if settings.muse_enabled and spark.served_by["spark"] != "meta":
+        layers = f"phrases + {spark.served_by['spark']}"  # Meta refused Spark here; say who really answered
     print(f"\n{c_ok}/{c_n} concerning rants routed to resources; {o_n - o_ok}/{o_n} ordinary rants blocked ({layers}).")
     return 1 if misses else 0
 

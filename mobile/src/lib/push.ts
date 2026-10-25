@@ -19,6 +19,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Platform } from "react-native";
 
 import { api, type Card, type Home, type Person } from "./api";
+import { playbackMode } from "./useLiveRant";
 
 const CHANNEL = "default"; // Android; the backend's pushes name the same one (push.ANDROID_CHANNEL)
 
@@ -85,6 +86,7 @@ export function usePushSetup() {
         return { shouldShowBanner: show, shouldShowList: show, shouldPlaySound: false, shouldSetBadge: false };
       },
     });
+    void playbackMode(); // her voice note plays even with the silent switch on
     (async () => {
       await ensureChannel();
       const ok = (await Notifications.getPermissionsAsync()).granted;
@@ -152,6 +154,33 @@ export function useHeadsUpAsk(name: string | undefined, needsTap: boolean) {
 }
 
 // ---------------------------------------------------------------- local reminders (Expo Go)
+
+const seenNudges = new Set<string>();
+let nudgesSeeded = false;
+
+/**
+ * Without a push token, her reply (or a letter that's ready for his tap) shows as a local banner
+ * the first time /api/home lists it. What was already there when the app opened stays quiet.
+ */
+export async function notifyNewNudges(home: Home) {
+  if (Platform.OS === "web" || remote) return;
+  const nudges = home.nudges ?? [];
+  if (!nudgesSeeded) {
+    nudges.forEach((n) => seenNudges.add(n.id));
+    nudgesSeeded = true;
+    return;
+  }
+  for (const n of nudges) {
+    if (seenNudges.has(n.id)) continue;
+    seenNudges.add(n.id);
+    if (!granted) continue;
+    await Notifications.scheduleNotificationAsync({
+      identifier: `nudge-${n.id}`,
+      content: { title: n.title, body: n.body, data: { kind: n.kind, ref_id: n.id } },
+      trigger: null,
+    }).catch(() => {});
+  }
+}
 
 type Reminded = Card & { remind_at: string; remind_body: string };
 

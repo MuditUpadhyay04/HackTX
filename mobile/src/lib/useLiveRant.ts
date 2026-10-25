@@ -17,6 +17,9 @@ const QUIET = Array<number>(BARS).fill(0.08);
 
 export type LiveState = "idle" | "starting" | "recording" | "finishing" | "error";
 
+/** Out of record mode, so playback is full volume and works with the silent switch on. */
+export const playbackMode = () => setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true }).catch(() => {});
+
 /** Linear-interpolation resample of int16 mono PCM to 24 kHz. */
 function toPcm24k(buffer: AudioStreamBuffer): ArrayBuffer {
   const input = new Int16Array(buffer.data);
@@ -151,11 +154,18 @@ export function useLiveRant() {
         setState("error");
         throw liveError;
       }
-      const rant = await api.uploadRant(wav.uri, asset.current);
+      let rant: Rant;
+      try {
+        rant = await api.uploadRant(wav.uri, asset.current);
+      } catch (uploadError) {
+        setState("error"); // never leave the mic stuck on "sorting"
+        throw uploadError;
+      }
       setState("idle");
       return rant;
     } finally {
       ws.current = null;
+      playbackMode(); // her voice note must play, even on silent
     }
   }, [stream]);
 
@@ -169,6 +179,7 @@ export function useLiveRant() {
     setPartial("");
     setLevels(QUIET);
     setState("idle");
+    playbackMode();
   }, [stream]);
 
   return { state, turns, partial, levels, provider, start, stop, cancel };
