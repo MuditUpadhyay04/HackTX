@@ -10,7 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AppIcon, PrimaryPill } from "../components/ui";
 import { haptics } from "../lib/haptics";
 import { type GalleryPhoto, SERVER_LIBRARY, loadPhotos } from "../lib/photos";
-import { TRY_MODE } from "../lib/try";
+import { TRY_GUIDE, TRY_MODE } from "../lib/try";
 import { useLayout } from "../lib/useLayout";
 import { color, space } from "../theme/tokens";
 
@@ -102,6 +102,12 @@ export default function Gallery() {
       </Pressable>
       )}
       <Text style={[styles.sub, styles.count]}>{photos.length ? `${photos.length}${done ? "" : "+"} photos` : " "}</Text>
+      {TRY_MODE ? (
+        <View style={styles.guide}>
+          <Ionicons name="hand-left-outline" size={18} color={color.accent} />
+          <Text style={styles.guideText}>{TRY_GUIDE.gallery}</Text>
+        </View>
+      ) : null}
     </View>
   );
 
@@ -162,4 +168,17 @@ const styles = StyleSheet.create({
   askWell: { width: 80, height: 80, borderRadius: 24, backgroundColor: color.tint, alignItems: "center", justifyContent: "center" },
   title: { color: color.text, fontSize: 34, lineHeight: 41, fontWeight: "700", letterSpacing: 0.4 },
   sub: { color: color.text3, fontSize: 15, lineHeight: 20 },
+  // Try mode's guide (lib/try.ts TRY_GUIDE): one soft line under the title.
+  guide: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.s8,
+    marginTop: space.s12,
+    paddingVertical: space.s12,
+    paddingHorizontal: space.s16,
+    borderRadius: 14,
+    backgroundColor: color.surface,
+  },
+  guideText: { color: color.text, fontSize: 16, lineHeight: 22, fontWeight: "600" },
 });

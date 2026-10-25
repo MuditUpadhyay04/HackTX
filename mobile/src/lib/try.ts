@@ -4,6 +4,13 @@
 
 export const TRY_MODE = process.env.EXPO_PUBLIC_TRY_MODE === "1";
 
+// TRY (needs Gurneal's OK): the guide that walks a judge from Memory Lane to Talk.
+export const TRY_GUIDE = {
+  gallery: "Tap a photo to open it.",
+  photo: "Tap the Un-Said icon up here.",
+  talk: "Let your hearts out",
+};
+
 const ID_KEY = "unsaid.try.guest";
 const OK_KEY = "unsaid.try.accepted";
 

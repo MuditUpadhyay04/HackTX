@@ -12,6 +12,7 @@ import { AppIcon } from "../../components/ui";
 import { useKnock } from "../../lib/attention";
 import { haptics } from "../../lib/haptics";
 import { usePhotoMemory } from "../../lib/memory";
+import { TRY_GUIDE, TRY_MODE } from "../../lib/try";
 import { photoDate } from "../../lib/photos";
 import { color, shadow, space, spring, type } from "../../theme/tokens";
 
@@ -48,6 +49,20 @@ export default function PhotoViewer() {
       Animated.spring(pulse, { toValue: 1, ...spring.press, useNativeDriver: true }),
     ]).start();
   }, [pulse]);
+
+  // Try mode's guide to the icon: a slow bob so the eye finds it (lib/try.ts TRY_GUIDE).
+  const [bob] = useState(() => new Animated.Value(0));
+  useEffect(() => {
+    if (!TRY_MODE) return;
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(bob, { toValue: -5, duration: 700, useNativeDriver: true }),
+        Animated.timing(bob, { toValue: 0, duration: 700, useNativeDriver: true }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [bob]);
 
   useEffect(() => {
     if (knock) {
@@ -104,6 +119,15 @@ export default function PhotoViewer() {
         </View>
       ) : null}
 
+      {TRY_MODE && chrome && !knockShown ? (
+        <Animated.View style={[styles.hint, { top: insets.top + space.s4 + 40 + space.s8, right: space.s8 + insets.right, transform: [{ translateY: bob }] }]}>
+          <Pressable accessibilityRole="button" accessibilityLabel={TRY_GUIDE.photo} onPress={() => talk()} style={[styles.hintBubble, shadow.letter]}>
+            <View style={styles.hintCaret} />
+            <Text style={styles.hintText}>{TRY_GUIDE.photo}</Text>
+          </Pressable>
+        </Animated.View>
+      ) : null}
+
       {memory?.step && chrome && !knockShown ? (
         <View pointerEvents="none" style={[styles.step, shadow.letter, { bottom: insets.bottom + space.s24 }]}>
           <Text style={type.rowPreview}>{memory.step.line}</Text>
@@ -139,4 +163,9 @@ const styles = StyleSheet.create({
   // Notification-width on a big or sideways screen, centered, like an iOS banner.
   knock: { width: "100%", maxWidth: 480, alignSelf: "center", flexDirection: "row", gap: space.s12, alignItems: "center", backgroundColor: color.bg, borderRadius: 24, padding: space.s12, borderWidth: StyleSheet.hairlineWidth, borderColor: color.hairline },
   grabber: { alignSelf: "center", width: 36, height: 5, borderRadius: 3, backgroundColor: color.hairline, marginTop: space.s8 },
+  // Try mode: a speech bubble under the top-right icon, its caret pointing up at it.
+  hint: { position: "absolute", alignItems: "flex-end", maxWidth: 240 },
+  hintBubble: { backgroundColor: color.accent, borderRadius: 16, paddingVertical: space.s12, paddingHorizontal: space.s16 },
+  hintCaret: { position: "absolute", top: -7, right: 15, width: 14, height: 14, backgroundColor: color.accent, transform: [{ rotate: "45deg" }], borderRadius: 2 },
+  hintText: { color: "#FFFFFF", fontSize: 16, lineHeight: 22, fontWeight: "700" },
 });

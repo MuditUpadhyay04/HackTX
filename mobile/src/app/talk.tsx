@@ -13,7 +13,7 @@ import { api, type Channel, mediaUrl, type SortResult } from "../lib/api";
 import { APP_LABEL, CHANNEL_APP } from "../lib/handoff";
 import { usePhotoMemory, useVoiceBack } from "../lib/memory";
 import { toast } from "../lib/toast";
-import { TRY_MODE } from "../lib/try";
+import { TRY_GUIDE, TRY_MODE } from "../lib/try";
 import { useLiveRant } from "../lib/useLiveRant";
 import { READING_MAX, useLayout } from "../lib/useLayout";
 import { color, inset, radius, shadow, space, spring, type } from "../theme/tokens";
@@ -306,7 +306,9 @@ export default function Talk() {
                 ))}
               </View>
             ) : null}
-            {prompt && !spoken ? <T v="section" style={{ marginBottom: space.s16 }}>{prompt}</T> : null}
+            {(prompt || (TRY_MODE && TRY_GUIDE.talk)) && !spoken ? (
+              <T v="section" style={{ marginBottom: space.s16 }}>{prompt || TRY_GUIDE.talk}</T>
+            ) : null}
             <Overline>Only you can hear this</Overline>
             {channelLine ? <T v="rowPreview" style={{ marginTop: space.s8 }}>{channelLine}</T> : null}
             {typing ? (
