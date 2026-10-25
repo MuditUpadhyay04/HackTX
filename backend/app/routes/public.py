@@ -7,8 +7,10 @@ cards stay sealed until her morning; revoked or expired ones are gone.
 import json
 import logging
 
+from html import escape
+
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import HTMLResponse
 
 from .. import audio, db, push, store, timeutil
 from ..ai import spark, transcribe
@@ -32,8 +34,18 @@ def _open_card(token: str):
 
 
 @router.get("/c/{token}", include_in_schema=False)
-def card_page(token: str) -> FileResponse:
-    return FileResponse(WEB_DIR / "card.html", headers={"Cache-Control": "no-store"})
+def card_page(token: str) -> HTMLResponse:
+    """The letter page. Link previews (WhatsApp, Messages) read only the HTML, so the server fills
+    in "A letter from {name}" and an absolute icon. Never a sentence of the letter (DESIGN_SPEC 3.9),
+    and the name only for a letter that's actually open."""
+    page = (WEB_DIR / "card.html").read_text(encoding="utf-8")
+    with db.tx() as c:
+        card = c.execute("SELECT status FROM cards WHERE token = ?", (token,)).fetchone()
+    if card and card["status"] in ("ready", "released"):
+        title = f"A letter from {store.me()['name']}"
+        page = page.replace('<meta property="og:title" content="A letter" />', f'<meta property="og:title" content="{escape(title)}" />')
+    page = page.replace('content="/app/icon-512.png"', f'content="{escape(store.public_base())}/app/icon-512.png"')
+    return HTMLResponse(page, headers={"Cache-Control": "no-store"})
 
 
 @router.get("/api/public/cards/{token}")
@@ -105,7 +117,8 @@ async def public_reply(token: str, file: UploadFile | None = File(None), text: s
                 translation = await spark.translate(transcript, listener_language)
             except spark.SparkError as exc:
                 log.warning("reply translation failed: %s", exc)
-        else:
+        elif transcript == transcribe.MOCK_REPLY:
+            # Mock mode only knows its own canned voice note; a typed reply gets no caption.
             translation = "no emergency. just wanted to hear your voice. [mock caption]"
 
     now = timeutil.now_utc()

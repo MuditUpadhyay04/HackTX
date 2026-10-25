@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field
 
-from .. import attention, audio, db, delivery, memory, rants, seed, store, timeutil
+from .. import attention, audio, db, delivery, memory, rants, safety, seed, store, timeutil
 from ..ai import transcribe
 from ..auth import require_key
 from ..config import settings
@@ -38,6 +38,12 @@ async def _read_limited(upload: UploadFile, limit: int) -> bytes:
 
 
 # ---------------------------------------------------------------- home
+
+
+@router.get("/safety/resources")
+def safety_resources() -> list[dict]:
+    """The same help list a flagged rant returns, for the Safety screen opened from You."""
+    return safety.RESOURCES
 
 
 @router.get("/home")
