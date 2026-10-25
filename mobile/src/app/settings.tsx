@@ -1,7 +1,7 @@
 // Settings: the attention budget (GET/PATCH /api/settings). The server decides; this only records the choice.
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { ScrollView, Switch, View } from "react-native";
+import { Platform, ScrollView, Switch, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { NavBar, Press, Row, styles as ui, T } from "../components/ui";
@@ -114,8 +114,11 @@ export default function SettingsScreen() {
                   haptics.select();
                   patch({ push_enabled });
                 }}
-                trackColor={{ false: color.hairline, true: color.violet }}
-                thumbColor={color.text}
+                // Theme colors on every platform; react-native-web otherwise paints its default teal.
+                trackColor={{ false: color.hairline, true: color.accent }}
+                thumbColor={color.bg}
+                ios_backgroundColor={color.hairline}
+                {...(Platform.OS === "web" ? ({ activeThumbColor: color.bg } as object) : {})}
               />
             </View>
           </>

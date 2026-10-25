@@ -329,7 +329,8 @@ const styles = StyleSheet.create({
   personCard: { backgroundColor: color.surface, borderRadius: radius.row, padding: space.s16 },
   wideRow: { flex: 1, flexDirection: "row" },
   panel: { width: 340, flexGrow: 0, borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: color.hairline },
-  panelInner: { flexGrow: 1, justifyContent: "center" },
+  // Top-aligned with the transcript's first line (column marginTop), tools then mic, no floating gap.
+  panelInner: { flexGrow: 1, justifyContent: "flex-start", paddingTop: space.s24, gap: space.s32 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: space.s8 },
   gridCell: { flexBasis: "48%", flexGrow: 1 },
   dock: { alignItems: "center", gap: space.s12, paddingTop: space.s12, backgroundColor: color.bg },

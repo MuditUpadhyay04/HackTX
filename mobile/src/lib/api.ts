@@ -151,6 +151,22 @@ export const mediaUrl = (path: string | null) => (path ? `${API_URL}${path}` : n
 export const authedUrl = (path: string | null | undefined) =>
   path ? `${API_URL}${path}${APP_KEY ? `${path.includes("?") ? "&" : "?"}key=${encodeURIComponent(APP_KEY)}` : ""}` : null;
 
+const norm = (text: string) => text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+
+/** The letter's lines: a piece that only repeats another (same words, or contained in a longer one) is
+ *  dropped, so a seeded line and a later rant saying the same thing don't read twice. The backend
+ *  builds the card with the same rule (backend/app/delivery.py letter_lines). */
+export function letterLines(pieces: Pick<Piece, "text">[]): string[] {
+  const keys = pieces.map((p) => norm(p.text));
+  return pieces
+    .filter((_, i) => {
+      const k = keys[i];
+      if (!k) return false;
+      return !keys.some((other, j) => j !== i && other.includes(k) && (other.length > k.length || j < i));
+    })
+    .map((p) => p.text);
+}
+
 export function wsUrl(path: string) {
   const base = API_URL.replace(/^http/, "ws");
   return `${base}${path}${APP_KEY ? `?key=${encodeURIComponent(APP_KEY)}` : ""}`;

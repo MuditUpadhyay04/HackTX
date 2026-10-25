@@ -60,7 +60,8 @@ export default function Letters() {
           </View>
         ) : null}
 
-        {senders.length ? (
+        {/* The strip is a way to pick between senders; with one sender it only repeats the row below. */}
+        {senders.length > 1 ? (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.rings}>
             {senders.map((r) => (
               <Pressable key={r.from_person_id} onPress={() => openFrom(r.from_person_id, r.id)} style={{ alignItems: "center", gap: space.s8, width: 72 }}>

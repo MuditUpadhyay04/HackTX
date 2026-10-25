@@ -214,3 +214,17 @@ Nick asked for a video-sending feature. This is the first backend change on the 
 - `app.json`: `expo-image-picker` plugin with camera, microphone and photo-library usage strings (NSCameraUsageDescription, NSMicrophoneUsageDescription, NSPhotoLibraryUsageDescription); `expo-video` plugin.
 - Backend: `POST /api/cards/{card_id}/video` in `routes/student.py` (reuses `VIDEO_TYPES`, `MAX_VIDEO`, `_read_limited`; 415 / 404 / 409 for a revoked card), file saved to `media/videos/{card_id}.{ext}`, new `cards.video_path` column via `db.MIGRATIONS`. `video_url` is returned by `GET /api/cards/{id}` (`store.card_out`) and `GET /api/public/cards/{token}`. `web/card.js` renders a `<video controls playsinline>` under the photo (one line). Test: `tests/test_public.py::test_a_video_rides_with_the_letter_to_her_page`.
 - Not done: attaching the video file itself to the native share sheet. The handoff opens WhatsApp/Messages with the link (the link plays the video); a file attach would replace that deep link with the generic share sheet.
+
+## Pass 6: QA fixes on 1843560 (Oct 25, 2026)
+
+QA (HackTx2) on 1843560. Items 7 and 8 are copy and wait for Gurneal; 14 needed no change.
+
+- Preview hold follows sleep, not channel (QA 1, 2). `holdable = person.is_asleep` for every channel (was WhatsApp only). Awake: the "Hold until her morning" box is hidden and the letter goes now. Asleep: Hold is the default, Send now is the other choice. The dock pill reads "Send when they're ready" while holding and reuses "Send now" otherwise. Backend `next_release_utc` was already channel-agnostic; new `tests/test_hold_and_letter.py` covers an iMessage letter held while Sarah sleeps and an awake "her_morning" request going out now.
+- Preview dock (QA 3): the dock is absolute at the bottom and the ScrollView's bottom padding is the measured dock height + 32, so "Send now" scrolls clear of it at 402 wide.
+- Settings Switch (QA 4): `trackColor {false: hairline, true: accent}`, `thumbColor bg`, `ios_backgroundColor hairline`, and web-only `activeThumbColor bg` (no react-native-web teal).
+- Letter de-dupe (QA 5): a piece whose words are contained in another selected piece is dropped from the letter. Same rule in `mobile/src/lib/api.ts letterLines()` (Preview) and `backend/app/delivery.py letter_lines()` (the card she gets); every selected piece is still marked `in_card`. Sarah's seeded "I miss the way we used to talk." no longer repeats under tonight's longer line. Test in `test_hold_and_letter.py`.
+- Home reply title wraps to 2 lines (QA 6).
+- Talk on a wide screen (QA 9): the side panel is top-aligned with the transcript (`paddingTop 24`, tools row, then the mic block), no centered float.
+- Letters (QA 10): the avatar strip only shows with 2+ senders.
+- Settings debug lines (QA 14): already inside `__DEV__`, so hidden in release builds. Left as is.
+- Copy for Gurneal: none new. The awake case hides the hold box instead of inventing an "Arrives now" line; the send pill reuses "Send now".

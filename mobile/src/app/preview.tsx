@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Skeleton } from "../components/motion";
 import { Chip, LetterCard, NavBar, PrimaryPill, styles as ui, T, TextButton } from "../components/ui";
 import { type PickedVideo, VideoAttach } from "../components/video";
-import { api, type Piece } from "../lib/api";
+import { api, letterLines, type Piece } from "../lib/api";
 import { haptics } from "../lib/haptics";
 import { type App, handOff } from "../lib/handoff";
 import { uploadGalleryPhoto } from "../lib/photos";
@@ -38,6 +38,8 @@ export default function Preview() {
   const [sending, setSending] = useState(false);
   const [held, setHeld] = useState<string | null>(null);
   const [video, setVideo] = useState<PickedVideo | null>(null);
+  // The dock overlays the bottom of the scroll, so the scroll ends one dock-height lower.
+  const [dockH, setDockH] = useState(0);
   // The one notification ask, at the moment it means something: once he's held a letter (lib/push.ts).
   const headsUp = useHeadsUpAsk(person?.name, person && home ? needsHisTap(person, home.providers) : false);
 
@@ -60,8 +62,9 @@ export default function Preview() {
     );
   }
 
-  const holdable = person.channel === "whatsapp";
-  // Spec 3.9: Hold is the default for a letter that can be held; he can switch to Send now.
+  // Spec 3.9: while they're asleep, Hold is the default (any channel) and he can switch to Send now.
+  // Awake: there's nothing to hold for, so the choice is hidden and it goes now.
+  const holdable = person.is_asleep;
   const holding = holdable && (hold ?? true);
   const pos = POSSESSIVE[person.pronoun];
 
@@ -110,7 +113,7 @@ export default function Preview() {
   const letter = (
     <>
       {pieces.length || loaded ? (
-        <LetterCard compact lines={pieces.map((p) => p.text)} signature={home.me.name} />
+        <LetterCard compact lines={letterLines(pieces)} signature={home.me.name} />
       ) : (
         <Skeleton height={420} r={radius.hero} style={{ marginHorizontal: inset.card }} />
       )}
@@ -160,7 +163,7 @@ export default function Preview() {
 
   const dockContent = (
     <>
-      <PrimaryPill featureId="unsend-queue-send" label="Send when they're ready" disabled={sending || pieces.length === 0} onPress={send} />
+      <PrimaryPill featureId="unsend-queue-send" label={holding ? "Send when they're ready" : "Send now"} disabled={sending || pieces.length === 0} onPress={send} />
       <View style={{ alignItems: "center" }}>
         <TextButton label="Keep editing" onPress={() => router.back()} />
       </View>
@@ -183,13 +186,13 @@ export default function Preview() {
         </View>
       ) : (
         <>
-          <ScrollView style={{ flex: 1 }} contentContainerStyle={[layout.column(), { paddingTop: space.s16, paddingBottom: space.s32 }]}>
+          <ScrollView style={{ flex: 1 }} contentContainerStyle={[layout.column(), { paddingTop: space.s16, paddingBottom: dockH + space.s32 }]}>
             {letter}
             {choices}
           </ScrollView>
 
           {!held ? (
-            <View style={[styles.dock, { paddingBottom: insets.bottom + space.s8, paddingLeft: insets.left, paddingRight: insets.right }]}>{dockContent}</View>
+            <View onLayout={(e) => setDockH(e.nativeEvent.layout.height)} style={[styles.dock, { paddingBottom: insets.bottom + space.s8, paddingLeft: insets.left, paddingRight: insets.right }]}>{dockContent}</View>
           ) : null}
         </>
       )}
@@ -216,5 +219,5 @@ const styles = StyleSheet.create({
   main: { flex: 3 },
   side: { flex: 2 },
   sideDock: { gap: space.s4, marginTop: space.s24 },
-  dock: { paddingTop: space.s16, backgroundColor: color.bg, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.hairline },
+  dock: { position: "absolute", left: 0, right: 0, bottom: 0, paddingTop: space.s16, backgroundColor: color.bg, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.hairline },
 });

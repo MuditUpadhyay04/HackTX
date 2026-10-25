@@ -271,7 +271,7 @@ export default function Home() {
                       <Row key={n.id} featureId="letter-open" onPress={() => router.push({ pathname: "/letter/[id]", params: { id: n.id } })}>
                         <Avatar name={name(n.person_id)} ring />
                         <View style={{ flex: 1 }}>
-                          <T v="rowName" lines={1}>
+                          <T v="rowName" lines={2}>
                             {n.title}
                           </T>
                           <T v="rowPreview" lines={1}>
