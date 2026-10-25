@@ -1,68 +1,110 @@
 // You (DESIGN_SPEC 3.12).
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { RAIL_APPS, AppGlyph } from "../../components/AppRail";
-import { Avatar, Row, styles as ui, T } from "../../components/ui";
-import { API_URL } from "../../lib/api";
+import { Skeleton } from "../../components/motion";
+import { Avatar, Press, Row, styles as ui, T } from "../../components/ui";
 import { useHome } from "../../lib/useHome";
 import { color, inset, radius, space } from "../../theme/tokens";
+import { useLayout } from "../../lib/useLayout";
 
 export default function You() {
   const insets = useSafeAreaInsets();
-  const { home } = useHome(15000);
+  const layout = useLayout();
+  const { home, error, refresh } = useHome(15000);
+  const loading = !home && !error;
+  const notes = home?.self_notes.length ?? 0;
+  const [peopleOpen, setPeopleOpen] = useState(true);
 
-  const link = (label: string, onPress: () => void, featureId?: string) => (
-    <Row featureId={featureId} onPress={onPress} style={{ minHeight: 56 }}>
-      <T v="rowName" style={{ flex: 1 }}>{label}</T>
+  const link = (icon: keyof typeof Ionicons.glyphMap, label: string, onPress: () => void, featureId?: string, meta?: string) => (
+    <Row featureId={featureId} onPress={onPress} style={styles.groupRow}>
+      <View style={styles.well}>
+        <Ionicons name={icon} size={22} color={color.text} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <T v="rowName">{label}</T>
+        {meta ? <T v="rowPreview">{meta}</T> : null}
+      </View>
       <Ionicons name="chevron-forward" size={16} color={color.text3} />
     </Row>
   );
 
   return (
     <View style={ui.screen}>
-      <ScrollView contentContainerStyle={{ paddingTop: insets.top + space.s24, paddingBottom: space.s48 }}>
-        <View style={{ marginHorizontal: inset.text, gap: space.s12 }}>
-          <Avatar name={home?.me.name ?? "R"} size={72} />
-          <T v="display">{home?.me.name ?? ""}</T>
-        </View>
-
-        <View style={styles.group}>
-          {link("Connect photos", () => router.push("/connect"), "photo-connectors-open")}
-          {link("Safety and support", () => router.push("/safety"))}
-        </View>
-
-        <T v="section" style={{ marginHorizontal: inset.text, marginTop: space.s24 }}>Your people</T>
-        <View style={styles.group}>
-          {home?.people.map((p) => (
-            <Row key={p.id} onPress={() => router.push({ pathname: "/pile/[person]", params: { person: p.id } })}>
-              <Avatar name={p.name} />
-              <View style={{ flex: 1 }}>
-                <T v="rowName">{p.name}</T>
-                <T v="rowPreview">{`${p.is_asleep ? "asleep · " : ""}${p.local_time} for ${p.name}`}</T>
-              </View>
-              <Ionicons name="chevron-forward" size={16} color={color.text3} />
-            </Row>
-          ))}
-        </View>
-
-        <T v="section" style={{ marginHorizontal: inset.text, marginTop: space.s24 }}>Settings</T>
-        <View style={[styles.group, ui.card, { gap: space.s12 }]}>
-          <View style={{ flexDirection: "row", gap: space.s12 }}>
-            {RAIL_APPS.map((a) => <AppGlyph key={a} app={a} size={36} />)}
+      <ScrollView contentContainerStyle={{ ...layout.column(), paddingTop: insets.top + space.s24, paddingBottom: space.s48 }}>
+        <View style={{ marginHorizontal: inset.text, flexDirection: "row", alignItems: "center", gap: space.s16 }}>
+          <Avatar name={home?.me.name ?? "Riley"} size={72} ring />
+          <View style={{ flex: 1 }}>
+            <T v="display">{home?.me.name || (loading ? " " : "Riley")}</T>
           </View>
-          <T v="rowPreview">{`Server ${API_URL}`}</T>
-          <T v="rowPreview">{home ? `Transcription: ${home.providers.transcribe} · Sorting: ${home.providers.spark} · Delivery: ${home.providers.whatsapp}` : "Not connected"}</T>
         </View>
 
-        <T v="caption" style={{ marginHorizontal: inset.text, marginTop: space.s32, color: color.text4 }}>powered by Meta AI</T>
+        {loading ? (
+          <View style={{ marginHorizontal: inset.card, marginTop: space.s24, gap: space.s8 }}>
+            <Skeleton height={76} />
+            <Skeleton height={76} />
+            <Skeleton height={76} />
+          </View>
+        ) : null}
+
+        {error && !home ? (
+          <View style={{ marginTop: space.s24, gap: space.s16 }}>
+            <T v="rowPreview" style={{ marginHorizontal: inset.text }}>{`Can't reach Un-Said's server. ${error}`}</T>
+            <Press onPress={() => refresh()} style={[ui.pill, { backgroundColor: color.surfaceRaised }]}>
+              <T v="button">Try again</T>
+            </Press>
+          </View>
+        ) : null}
+
+        {home ? (
+          <>
+            <View style={styles.group}>
+              {link("albums-outline", "Notes to yourself", () => router.push("/notes"), undefined, notes ? `${notes}` : undefined)}
+              {/* Spec 3.12: "Your people" is row 2 of this group; its people open under it. */}
+              <Row featureId="you-people" onPress={() => setPeopleOpen((o) => !o)} style={styles.groupRow}>
+                <View style={styles.well}>
+                  <Ionicons name="people-outline" size={22} color={color.text} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <T v="rowName">Your people</T>
+                  <T v="rowPreview">{`${home.people.length}`}</T>
+                </View>
+                <Ionicons name={peopleOpen ? "chevron-up" : "chevron-down"} size={16} color={color.text3} />
+              </Row>
+              {peopleOpen
+                ? home.people.map((p) => (
+                    <Row key={p.id} style={[styles.groupRow, styles.personRow]} onPress={() => router.push({ pathname: "/pile/[person]", params: { person: p.id } })}>
+                      <Avatar name={p.name} />
+                      <View style={{ flex: 1 }}>
+                        <T v="rowName">{p.name}</T>
+                        <T v="rowPreview">{p.time_label}</T>
+                      </View>
+                      <Ionicons name="chevron-forward" size={16} color={color.text3} />
+                    </Row>
+                  ))
+                : null}
+              {link("images-outline", "Connect photos", () => router.push("/connect"), "photo-connectors-open")}
+              {link("shield-checkmark-outline", "Safety and support", () => router.push("/safety"))}
+              {link("options-outline", "Settings", () => router.push("/settings"))}
+            </View>
+          </>
+        ) : null}
+
+        <T v="caption" style={{ marginHorizontal: inset.text, marginTop: space.s32, color: color.text4 }}>
+          powered by Meta AI
+        </T>
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  group: { marginHorizontal: inset.card, gap: space.s8, marginTop: space.s16, borderRadius: radius.row },
+  // One grouped surface block (DESIGN_SPEC 3.12), no dividers between rows (Nick, Oct 25); a little padding spaces them.
+  group: { marginHorizontal: inset.card, marginTop: space.s16, backgroundColor: color.surface, borderRadius: radius.row, overflow: "hidden", paddingVertical: space.s4 },
+  groupRow: { borderRadius: 0, backgroundColor: "transparent", borderWidth: 0, minHeight: 64 },
+  personRow: { paddingLeft: space.s32 },
+  well: { width: 44, height: 44, borderRadius: 22, backgroundColor: color.surfaceRaised, alignItems: "center", justifyContent: "center" },
 });

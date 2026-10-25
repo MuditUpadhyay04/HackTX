@@ -39,6 +39,7 @@ function render(c) {
   root.innerHTML = `
     ${header}
     ${c.photo_url ? `<img class="photo pad-card mt-8 fade-in" src="${esc(c.photo_url)}" alt="" />` : ""}
+    ${c.video_url ? `<video class="photo pad-card mt-8 fade-in" src="${esc(c.video_url)}" style="object-fit: contain" controls playsinline preload="metadata" data-feature-id="card-video"></video>` : ""}
     <article class="letter pad-card mt-16 fade-in d1">
       <span class="quote">${QUOTE_SVG}</span>
       <p class="t-overline">For you</p>

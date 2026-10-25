@@ -1,16 +1,25 @@
-// Gurneal's Un-Said tokens (design/tokens/unsaid-tokens.json). Fixed: don't edit values here.
-import type { TextStyle } from "react-native";
+import { Platform, type TextStyle } from "react-native";
 
+// Un-Said tokens, light theme. Brand values come from Gurneal's design/tokens/unsaid-tokens.json;
+// the neutrals were flipped to white/near-white with dark ink (Nick, Oct 24 2026: "no dark mode").
+// Every text pair here passes WCAG AA (4.5:1) on bg, surface and surfaceRaised.
 export const color = {
-  stage: "#0B0B10",
-  bg: "#0F0D15",
-  surface: "#191622",
-  surfaceRaised: "#211E39",
-  hairline: "#322E3E",
-  text: "#FFFFFF",
-  text2: "#DDDBE4",
-  text3: "#9C99AA",
-  text4: "#6F6A80",
+  stage: "#F4F2FB",
+  bg: "#FFFFFF",
+  surface: "#F6F4FD",
+  surfaceRaised: "#EEEAFB",
+  hairline: "#E4E0F0",
+  text: "#1D1742",
+  text2: "#3B3570",
+  text3: "#5F5A78",
+  text4: "#66617E",
+  // Text/icons that sit on the blue/indigo gradients (pills, mic, hero card).
+  onAccent: "#FFFFFF",
+  // Accent for text and small icons on light surfaces (violet is too pale for text on white).
+  accent: "#5B45D6",
+  // Soft violet tint for chips, selected rows and badges.
+  tint: "rgba(168,144,246,0.16)",
+  scrim: "rgba(29,23,66,0.28)",
   violet: "#A890F6",
   blue: "#4F62F4",
   indigo: "#4046EE",
@@ -23,7 +32,7 @@ export const color = {
   letterInk: "#1D1742",
   letterLabel: "#3B3570",
   letterAccent: "#504FF3",
-  danger: "#FF453A",
+  danger: "#D70015",
 } as const;
 
 // The only three gradients allowed inside Un-Said.
@@ -36,12 +45,16 @@ export const space = { s4: 4, s8: 8, s12: 12, s16: 16, s24: 24, s32: 32, s48: 48
 export const inset = { text: 24, card: 16 } as const;
 export const radius = { hero: 28, row: 16, square: 16, pill: 999 } as const;
 
+// System stack only. iOS keeps SF; web uses system-ui. No downloaded font.
+const sans = Platform.select<string | undefined>({ web: "system-ui", android: "sans-serif", default: undefined });
+
 const t = (size: number, lineHeight: number, weight: TextStyle["fontWeight"], trackingEm = 0): TextStyle => ({
   fontSize: size,
   lineHeight,
   fontWeight: weight,
   letterSpacing: trackingEm * size,
   color: color.text,
+  ...(sans ? { fontFamily: sans } : {}),
 });
 
 export const type = {
@@ -61,14 +74,16 @@ export const type = {
   meta: { ...t(12, 16, "500"), color: color.text3 },
   overline: { ...t(11, 14, "700", 0.1), color: color.text4, textTransform: "uppercase" },
   tab: t(11, 13, "600"),
-  // A person's own words on dark cards (un-compose scaled to 22/28).
+  // A person's own words on cards (un-compose scaled to 22/28).
   words: t(22, 28, "700", -0.02),
 } satisfies Record<string, TextStyle>;
 
 export const shadow = {
-  hero: { shadowColor: "#3949EA", shadowOpacity: 0.45, shadowRadius: 24, shadowOffset: { width: 0, height: 16 }, elevation: 12 },
-  pill: { shadowColor: "#4046EE", shadowOpacity: 0.55, shadowRadius: 14, shadowOffset: { width: 0, height: 8 }, elevation: 8 },
-  letter: { shadowColor: "#000000", shadowOpacity: 0.6, shadowRadius: 32, shadowOffset: { width: 0, height: 20 }, elevation: 16 },
+  hero: { shadowColor: "#3949EA", shadowOpacity: 0.22, shadowRadius: 24, shadowOffset: { width: 0, height: 12 }, elevation: 8 },
+  pill: { shadowColor: "#4046EE", shadowOpacity: 0.28, shadowRadius: 14, shadowOffset: { width: 0, height: 6 }, elevation: 6 },
+  letter: { shadowColor: "#3949EA", shadowOpacity: 0.14, shadowRadius: 28, shadowOffset: { width: 0, height: 14 }, elevation: 8 },
+  // Soft lift for white cards on the white page.
+  card: { shadowColor: "#1D1742", shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2 },
 } as const;
 
 // Springs from the motion tokens, as React Native Animated.spring configs.

@@ -4,11 +4,13 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { type ReactNode, useState } from "react";
-import { Animated, Pressable, type StyleProp, StyleSheet, Text, type TextStyle, View, type ViewStyle } from "react-native";
+import { Animated, Modal, Pressable, type StyleProp, StyleSheet, Text, type TextStyle, View, type ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Defs, LinearGradient as SvgLinear, RadialGradient, Rect, Stop } from "react-native-svg";
 
+import { haptics } from "../lib/haptics";
 import { color, inset, pillGradient, radius, shadow, space, spring, type } from "../theme/tokens";
+import { Portrait } from "./portrait";
 
 export const ICON = require("../../assets/brand/unsaid-app-icon.png");
 
@@ -27,7 +29,10 @@ export function Press({ onPress, style, children, disabled, featureId }: {
     <Pressable
       testID={featureId}
       disabled={disabled}
-      onPress={onPress}
+      onPress={() => {
+        if (!disabled) haptics.tap();
+        onPress?.();
+      }}
       onPressIn={() => to(0.97)}
       onPressOut={() => to(1)}
     >
@@ -57,7 +62,7 @@ export function PrimaryPill({ label, onPress, disabled, featureId }: { label: st
   return (
     <Press onPress={onPress} disabled={disabled} featureId={featureId} style={[styles.pill, shadow.pill]}>
       <LinearGradient colors={pillGradient.colors} locations={pillGradient.locations} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
-      <T v="button">{label}</T>
+      <T v="button" style={{ color: color.onAccent }}>{label}</T>
     </Press>
   );
 }
@@ -73,7 +78,15 @@ export function OutlinePill({ label, onPress, icon, featureId }: { label: string
 
 export function TextButton({ label, onPress, tone = "text2", featureId }: { label: string; onPress?: () => void; tone?: "text2" | "text3" | "text" | "danger"; featureId?: string }) {
   return (
-    <Pressable onPress={onPress} testID={featureId} hitSlop={12} style={{ paddingVertical: space.s8 }}>
+    <Pressable
+      onPress={() => {
+        haptics.tap();
+        onPress?.();
+      }}
+      testID={featureId}
+      hitSlop={12}
+      style={{ paddingVertical: space.s8 }}
+    >
       <T v="caption" style={{ fontWeight: "600", color: color[tone] }}>{label}</T>
     </Pressable>
   );
@@ -96,8 +109,8 @@ export function Card({ children, style }: { children: ReactNode; style?: StylePr
 export function Chip({ label, icon }: { label: string; icon?: keyof typeof Ionicons.glyphMap }) {
   return (
     <View style={styles.chip}>
-      {icon ? <Ionicons name={icon} size={14} color={color.text2} /> : null}
-      <T v="meta" style={{ color: color.violet, fontWeight: "600" }}>{label}</T>
+      {icon ? <Ionicons name={icon} size={14} color={color.accent} /> : null}
+      <T v="meta" style={{ color: color.accent, fontWeight: "600" }}>{label}</T>
     </View>
   );
 }
@@ -108,14 +121,10 @@ export function Overline({ children, style }: { children: ReactNode; style?: Sty
 
 // ------------------------------------------------------------------ avatar
 
-const AVATAR_FILLS = ["#677FEF", "#8776DF", "#A166B7", "#AD78D4", "#607CF2"];
-
 export function Avatar({ name, size = 44, ring }: { name: string; size?: number; ring?: boolean }) {
-  const fill = AVATAR_FILLS[[...name].reduce((n, ch) => n + ch.charCodeAt(0), 0) % AVATAR_FILLS.length];
   const inner = (
-    <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: color.surfaceRaised, alignItems: "center", justifyContent: "center" }}>
-      <View style={{ position: "absolute", width: size * 0.62, height: size * 0.62, borderRadius: size, backgroundColor: fill, opacity: 0.35 }} />
-      <Text style={{ color: color.text, fontWeight: "700", fontSize: size * 0.4 }}>{name.slice(0, 1).toUpperCase()}</Text>
+    <View style={{ width: size, height: size, borderRadius: size / 2, overflow: "hidden" }}>
+      <Portrait name={name} size={size} />
     </View>
   );
   if (!ring) return inner;
@@ -167,8 +176,17 @@ export function PillGradientFill({ style }: { style?: StyleProp<ViewStyle> }) {
 export function NavBar({ title, trailing, onBack, backLabel }: { title?: string; trailing?: ReactNode; onBack?: () => void; backLabel?: string }) {
   const insets = useSafeAreaInsets();
   return (
-    <View style={[styles.nav, { paddingTop: insets.top }]}>
-      <Pressable hitSlop={12} onPress={onBack ?? (() => (router.canGoBack() ? router.back() : router.replace("/home")))} style={styles.navSide}>
+    <View style={[styles.nav, { paddingTop: insets.top, paddingLeft: space.s16 + insets.left, paddingRight: space.s16 + insets.right }]}>
+      <Pressable
+        hitSlop={12}
+        onPress={() => {
+          haptics.tap();
+          if (onBack) onBack();
+          else if (router.canGoBack()) router.back();
+          else router.replace("/home");
+        }}
+        style={styles.navSide}
+      >
         <Ionicons name="chevron-back" size={26} color={color.text} />
         {backLabel ? <T v="button">{backLabel}</T> : null}
       </Pressable>
@@ -181,34 +199,67 @@ export function NavBar({ title, trailing, onBack, backLabel }: { title?: string;
 // ------------------------------------------------------------------ letter card
 
 /** The lavender letter card: reserved for letters only. */
-export function LetterCard({ lines, signature, footer, minHeight = 420 }: { lines: string[]; signature: string; footer?: ReactNode; minHeight?: number }) {
+export function LetterCard({ lines, signature, footer, minHeight, compact = false }: { lines: string[]; signature: string; footer?: ReactNode; minHeight?: number; compact?: boolean }) {
   const [first, ...rest] = lines;
-  const heroSize = first && first.length > 60 ? 36 : first && first.length > 28 ? 48 : 64;
+  const n = first?.length ?? 0;
+  // Smaller steps for long first lines; `compact` (Preview) caps the card so the Hold/Send choice stays on screen.
+  const heroSize = compact
+    ? n > 140 ? 24 : n > 90 ? 28 : n > 50 ? 32 : n > 28 ? 40 : 52
+    : n > 140 ? 28 : n > 60 ? 36 : n > 28 ? 48 : 64;
+  const bodySize = compact ? 18 : 22;
+  minHeight = minHeight ?? (compact ? 240 : 420);
   return (
-    <View style={[styles.letter, shadow.letter, { minHeight }]}>
-      <Text style={{ fontSize: 40, lineHeight: 40, fontWeight: "800", color: color.letterAccent }}>{"“"}</Text>
-      <T v="overline" style={{ color: color.letterLabel, marginTop: space.s12 }}>For you</T>
-      {first ? (
-        <Text style={[type.letterHero, { color: color.letterInk, fontSize: heroSize, lineHeight: heroSize * 1.125, marginTop: space.s16 }]}>{first}</Text>
-      ) : null}
-      {rest.map((line, i) => (
-        <Text key={i} style={[type.letterBody, { color: color.letterInk, marginTop: space.s16 }]}>{line}</Text>
-      ))}
-      {footer}
-      <View style={{ flex: 1, minHeight: space.s24 }} />
-      <Text style={[type.signature, { color: color.letterInk }]}>{signature}</Text>
+    // Phone width on a phone; on a big or unfolded screen the card keeps letter proportions, centered.
+    <View style={styles.letterWrap}>
+      <View style={[styles.letter, shadow.letter, { minHeight }]}>
+        <Text style={{ fontSize: 40, lineHeight: 40, fontWeight: "800", color: color.letterAccent }}>{"“"}</Text>
+        <T v="overline" style={{ color: color.letterLabel, marginTop: space.s12 }}>For you</T>
+        {first ? (
+          <View style={{ marginTop: space.s16, alignSelf: "stretch" }}>
+            {/* No underline stroke under the first paragraph (Nick, Oct 25: no lines under paragraphs). */}
+            <Text style={[type.letterHero, { color: color.letterInk, fontSize: heroSize, lineHeight: heroSize * 1.125 }]}>{first}</Text>
+          </View>
+        ) : null}
+        {rest.map((line, i) => (
+          <Text key={i} style={[type.letterBody, { color: color.letterInk, marginTop: compact ? space.s12 : space.s16, fontSize: bodySize, lineHeight: Math.round(bodySize * 1.27) }]}>{line}</Text>
+        ))}
+        {footer}
+        <View style={{ flex: 1, minHeight: space.s24 }} />
+        <Text style={[type.signature, { color: color.letterInk }]}>{signature}</Text>
+      </View>
     </View>
   );
 }
 
+
+export function Sheet({ visible, onClose, children }: { visible: boolean; onClose: () => void; children: ReactNode }) {
+  const insets = useSafeAreaInsets();
+  return (
+    <Modal transparent visible={visible} animationType="slide" supportedOrientations={ALL_ORIENTATIONS} onRequestClose={onClose}>
+      <Pressable style={{ flex: 1, backgroundColor: color.scrim }} onPress={onClose} />
+      {/* On a wide screen the sheet stays phone-width and centered instead of spanning the window. */}
+      <View style={[styles.sheet, { paddingBottom: insets.bottom + space.s16, paddingLeft: space.s16 + insets.left, paddingRight: space.s16 + insets.right }]}>
+        <View style={styles.grabber} />
+        {children}
+      </View>
+    </Modal>
+  );
+}
+
+/** iOS Modals default to portrait only; let sheets follow the phone in every pose. */
+export const ALL_ORIENTATIONS = ["portrait", "portrait-upside-down", "landscape", "landscape-left", "landscape-right"] as ("portrait" | "portrait-upside-down" | "landscape" | "landscape-left" | "landscape-right")[];
+
 export const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.bg },
   pill: { height: 56, borderRadius: radius.pill, overflow: "hidden", alignItems: "center", justifyContent: "center", marginHorizontal: 18 },
-  outline: { height: 52, borderRadius: radius.pill, borderWidth: 1.5, borderColor: color.text, alignItems: "center", justifyContent: "center", flexDirection: "row", gap: space.s8, marginHorizontal: 27 },
-  row: { minHeight: 76, borderRadius: radius.row, backgroundColor: color.surface, paddingHorizontal: space.s16, paddingVertical: space.s12, flexDirection: "row", alignItems: "center", gap: space.s12 },
-  card: { borderRadius: radius.row, backgroundColor: color.surface, padding: space.s16 },
-  chip: { flexDirection: "row", alignItems: "center", gap: space.s4, backgroundColor: color.surfaceRaised, borderRadius: radius.pill, paddingHorizontal: space.s8, paddingVertical: space.s4, alignSelf: "flex-start" },
+  outline: { height: 52, borderRadius: radius.pill, borderWidth: 1.5, borderColor: color.indigo, alignItems: "center", justifyContent: "center", flexDirection: "row", gap: space.s8, marginHorizontal: 27 },
+  row: { minHeight: 76, borderRadius: radius.row, backgroundColor: color.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: color.hairline, paddingHorizontal: space.s16, paddingVertical: space.s12, flexDirection: "row", alignItems: "center", gap: space.s12 },
+  card: { borderRadius: radius.row, backgroundColor: color.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: color.hairline, padding: space.s16 },
+  chip: { flexDirection: "row", alignItems: "center", gap: space.s4, backgroundColor: color.tint, borderRadius: radius.pill, paddingHorizontal: space.s8, paddingVertical: space.s4, alignSelf: "flex-start" },
   nav: { flexDirection: "row", alignItems: "center", paddingHorizontal: space.s16, height: undefined, minHeight: 44, backgroundColor: color.bg },
   navSide: { width: 88, height: 44, flexDirection: "row", alignItems: "center" },
-  letter: { marginHorizontal: inset.card, borderRadius: radius.hero, backgroundColor: color.letter, padding: space.s24 },
+  letterWrap: { paddingHorizontal: inset.card, alignItems: "center" },
+  letter: { width: "100%", maxWidth: 480, borderRadius: radius.hero, backgroundColor: color.letter, borderWidth: 1, borderColor: "rgba(168,144,246,0.35)", padding: space.s24 },
+  sheet: { backgroundColor: color.bg, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: space.s16, paddingTop: space.s12, width: "100%", maxWidth: 560, alignSelf: "center", maxHeight: "85%" },
+  grabber: { alignSelf: "center", width: 36, height: 5, borderRadius: 3, backgroundColor: color.hairline, marginBottom: space.s16 },
 });

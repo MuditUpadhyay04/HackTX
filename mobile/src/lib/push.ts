@@ -39,7 +39,7 @@ export const needsHisTap = (person: Person, providers: Home["providers"]) =>
 function ensureChannel() {
   if (Platform.OS !== "android") return Promise.resolve();
   channel ??= Notifications.setNotificationChannelAsync(CHANNEL, {
-    name: "Letters",
+    name: "Un-said",
     importance: AndroidImportance.DEFAULT,
   }).catch(() => (channel = null));
   return channel;
@@ -75,6 +75,8 @@ function onTap(response: Notifications.NotificationResponse) {
 /** Foreground rules, taps, and the push token if he already said yes. Never asks for anything. */
 export function usePushSetup() {
   useEffect(() => {
+    // Web (the local preview build) has no notification taps or push; native behavior is unchanged.
+    if (Platform.OS === "web") return;
     // He's already in the app: only a person's reply or a letter that needs him gets a banner, never a sound.
     Notifications.setNotificationHandler({
       handleNotification: async (notification) => {

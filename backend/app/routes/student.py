@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field
 
-from .. import attention, audio, db, delivery, memory, rants, safety, seed, store, timeutil
+from .. import attention, audio, db, delivery, groups, memory, rants, safety, seed, store, timeutil
 from ..ai import gemini, spark, transcribe
 from ..auth import require_key
 from ..config import settings
@@ -58,7 +58,10 @@ def home(request: Request) -> dict:
     now = timeutil.now_utc()
     db.kv_set("last_activity_at", db.iso(now))  # he's here; the weekly push waits for real quiet
     with db.tx() as c:
-        photos = c.execute("SELECT * FROM photos ORDER BY person_id, taken_at DESC").fetchall()
+        photos = c.execute(  # imported (Connect) photos only once he has said who they are
+            "SELECT * FROM photos WHERE removed = 0 AND (cluster IS NULL OR person_id IS NOT NULL) "
+            "ORDER BY person_id, taken_at DESC"
+        ).fetchall()
         cards = c.execute(
             "SELECT * FROM cards WHERE status != 'revoked' AND id != ? ORDER BY created_at DESC LIMIT 20",
             (seed.TUESDAY_CARD_ID,),
@@ -133,12 +136,20 @@ class PersonPatch(BaseModel):
     morning: str | None = None
     quiet_start: str | None = None
     quiet_end: str | None = None
+    channel: str | None = None  # whatsapp | imessage | instagram: "Change" on the pile sticks
 
 
 @router.get("/people")
 def people() -> list[dict]:
     now = timeutil.now_utc()
     return [store.person_out(p, now) for p in store.list_people(include_self=True)]
+
+
+@router.get("/people/groups")
+def people_groups() -> dict:
+    """The People tab: everyone, grouped by who they are to him (mom, dad, brother, sister,
+    best friend, partner, other), with the photos he has given each of them. No face recognition."""
+    return groups.people_groups(timeutil.now_utc())
 
 
 @router.patch("/people/{person_id}")
@@ -151,6 +162,8 @@ def patch_person(person_id: str, body: PersonPatch) -> dict:
             ZoneInfo(changes["timezone"])
         except (ZoneInfoNotFoundError, ValueError):
             raise HTTPException(400, "unknown time zone; use an IANA name like Asia/Kolkata")
+    if "channel" in changes and changes["channel"] not in ("whatsapp", "imessage", "instagram"):
+        raise HTTPException(400, "channel must be whatsapp, imessage, or instagram")
     for field in ("morning", "quiet_start", "quiet_end"):
         if field in changes and not HHMM.match(changes[field]):
             raise HTTPException(400, f"{field} must be HH:MM")
@@ -280,11 +293,15 @@ def get_rant(rant_id: str) -> dict:
         raise HTTPException(404, "no such rant")
 
 
+class SortHint(BaseModel):
+    person_id: str | None = Field(None, max_length=80)  # opened from this person's page
+
+
 @router.post("/rants/{rant_id}/sort")
-async def sort_rant(rant_id: str) -> dict:
+async def sort_rant(rant_id: str, body: SortHint | None = None) -> dict:
     """Safety gate first, then his words sorted by person. Idempotent."""
     try:
-        return await rants.sort_rant(rant_id)
+        return await rants.sort_rant(rant_id, body.person_id if body else None)
     except KeyError:
         raise HTTPException(404, "no such rant")
 
@@ -363,6 +380,26 @@ def card_shared(card_id: str) -> dict:
     return delivery.mark_shared(card_id)
 
 
+@router.post("/cards/{card_id}/video")
+async def card_video(card_id: str, file: UploadFile = File(...)) -> dict:
+    """A video he recorded or picked to go with the letter. Played on her card page."""
+    mime = (file.content_type or "").split(";")[0]
+    ext = VIDEO_TYPES.get(mime)
+    if not ext:
+        raise HTTPException(415, "video must be webm, mp4, or mov")
+    with db.tx() as c:
+        card = c.execute("SELECT id, status FROM cards WHERE id = ?", (card_id,)).fetchone()
+    if not card:
+        raise HTTPException(404, "no such card")
+    if card["status"] == "revoked":
+        raise HTTPException(409, "this letter was taken back")
+    data = await _read_limited(file, MAX_VIDEO)
+    path = store.save_media("videos", f"{card_id}.{ext}", data)
+    with db.tx() as c:
+        c.execute("UPDATE cards SET video_path = ? WHERE id = ?", (path, card_id))
+    return delivery.get_card(card_id)
+
+
 @router.post("/cards/{card_id}/revoke")
 def card_revoke(card_id: str) -> dict:
     return delivery.revoke(card_id)
@@ -385,7 +422,9 @@ def reply_heard(reply_id: str) -> dict:
 
 
 @router.post("/self-notes")
-async def new_self_note(file: UploadFile = File(...), label: str = Form("for the next hard day")) -> dict:
+async def new_self_note(
+    file: UploadFile = File(...), label: str = Form("for the next hard day"), duration_ms: int | None = Form(None)
+) -> dict:
     mime = (file.content_type or "").split(";")[0]
     ext = VIDEO_TYPES.get(mime)
     if not ext:
@@ -395,8 +434,8 @@ async def new_self_note(file: UploadFile = File(...), label: str = Form("for the
     path = store.save_media("notes", f"{note_id}.{ext}", data)
     with db.tx() as c:
         c.execute(
-            "INSERT INTO self_notes (id, path, mime, label, created_at) VALUES (?, ?, ?, ?, ?)",
-            (note_id, path, mime, label[:80], db.iso(timeutil.now_utc())),
+            "INSERT INTO self_notes (id, path, mime, label, created_at, duration_ms) VALUES (?, ?, ?, ?, ?, ?)",
+            (note_id, path, mime, label[:80], db.iso(timeutil.now_utc()), duration_ms),
         )
         row = c.execute("SELECT * FROM self_notes WHERE id = ?", (note_id,)).fetchone()
     return store.self_note_out(row)

@@ -66,7 +66,9 @@ def get_rant(rant_id: str) -> dict:
     }
 
 
-async def sort_rant(rant_id: str) -> dict:
+async def sort_rant(rant_id: str, for_person: str | None = None) -> dict:
+    """for_person: he opened Talk/Write from that person's page. If the sort finds nobody in
+    what he said, the words are filed under that person instead of being kept just for him."""
     with db.tx() as c:
         row = c.execute("SELECT * FROM rants WHERE id = ?", (rant_id,)).fetchone()
     if not row:
@@ -97,6 +99,9 @@ async def sort_rant(rant_id: str) -> dict:
 
     person_ids = {p["id"] for p in people}
     pieces = sorting.validate_pieces(raw.get("pieces"), segments, person_ids)
+    if not pieces and for_person in person_ids and segments:
+        hinted = {"person": for_person, "segment_ids": [s.id for s in segments], "tone": "loving"}
+        pieces = sorting.validate_pieces([hinted], segments, person_ids)
     spoken_about = [p["id"] for p in people if any(piece["person"] == p["id"] for piece in pieces)]
     # Decided once, before this rant's pieces exist, and kept, so sorting twice says the same thing.
     encourage = _choose_encourage(rant_id, row["asset_id"], spoken_about, now_dt)

@@ -3,16 +3,22 @@
     "name": "Un-Said",
     "slug": "unsaid",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/brand/icon-1024.png",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "light",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "app.unsaid.demo"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#0F0D15",
+        "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -25,23 +31,42 @@
     "plugins": [
       "expo-router",
       "expo-image",
+      "expo-updates",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FFFFFF",
+          "image": "./assets/brand/unsaid-app-icon.png",
+          "imageWidth": 120,
+          "resizeMode": "contain"
+        }
+      ],
       [
         "expo-media-library",
         {
-          "photosPermission": "Unsaid looks through your photos with you, on this phone, to find the people you miss.",
+          "photosPermission": "Un-Said looks through your photos with you, on this phone, to find the people you miss.",
           "savePhotosPermission": false
         }
       ],
       [
         "expo-audio",
         {
-          "microphonePermission": "Unsaid listens only while you hold the mic."
+          "microphonePermission": "Un-Said listens only while you talk."
         }
       ],
       "expo-font",
-      "expo-asset"
+      "expo-asset",
+      "expo-video",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Un-Said lets you pick a video from your library to send with a letter.",
+          "cameraPermission": "Un-Said uses the camera so you can record a video to send with a letter.",
+          "microphonePermission": "Un-Said records sound with your video so they can hear you."
+        }
+      ]
     ],
     "scheme": "unsaid",
-    "backgroundColor": "#0F0D15"
+    "backgroundColor": "#FFFFFF"
   }
 }

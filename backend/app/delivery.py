@@ -9,6 +9,7 @@ Release paths:
 import asyncio
 import json
 import logging
+import re
 from datetime import timedelta
 
 from . import audio, db, push, store, timeutil
@@ -42,7 +43,7 @@ async def create_card(recipient_id: str, piece_ids: list[str], photo_id: str | N
         if p["status"] != "kept":
             raise CardError("a piece was already sent or discarded")
 
-    lines = [{"text": p["text"], "created_at": p["created_at"]} for p in pieces]
+    lines = [{"text": p["text"], "created_at": p["created_at"]} for p in letter_lines(pieces)]
     translation = None
     if recipient["language"].lower() != "english":
         text = "\n".join(line["text"] for line in lines)
@@ -77,6 +78,26 @@ async def create_card(recipient_id: str, piece_ids: list[str], photo_id: str | N
     if status == "releasing":
         await _deliver(card_id)
     return get_card(card_id)
+
+
+def _norm(text: str) -> str:
+    return " ".join(re.sub(r"[^\w]+", " ", text.lower()).split())
+
+
+def letter_lines(pieces: list) -> list:
+    """The pieces that make the letter's lines, in order. A piece that only repeats another one (the
+    same words, or contained in a longer piece) is dropped, so a seeded line and a later rant saying
+    the same thing don't read twice. mobile/src/lib/api.ts letterLines() shows the same rule."""
+    keys = [_norm(p["text"]) for p in pieces]
+    kept = []
+    for i, p in enumerate(pieces):
+        k = keys[i]
+        if not k:
+            continue
+        if any(j != i and k in other and (len(other) > len(k) or j < i) for j, other in enumerate(keys)):
+            continue
+        kept.append(p)
+    return kept
 
 
 def _card_audio(card_id: str, pieces) -> str | None:

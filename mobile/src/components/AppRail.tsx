@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { type App, APP_LABEL } from "../lib/handoff";
 import { color, space } from "../theme/tokens";
-import { T, TextButton } from "./ui";
+import { ALL_ORIENTATIONS, T, TextButton } from "./ui";
 
 const GLYPH: Record<App, keyof typeof Ionicons.glyphMap> = {
   messages: "chatbubble",
@@ -21,29 +21,41 @@ export const RAIL_APPS: App[] = ["messages", "whatsapp", "instagram", "facebook"
 export function AppGlyph({ app, size = 44 }: { app: App; size?: number }) {
   return (
     <View style={[styles.glyph, { width: size, height: size, borderRadius: size * 0.2237 }]}>
-      <Ionicons name={GLYPH[app]} size={size * 0.5} color={color.text} />
+      <Ionicons name={GLYPH[app]} size={size * 0.5} color={color.accent} />
     </View>
   );
 }
 
-export function AppRail() {
+/**
+ * The apps his words can leave through. `row` is the compact tool row Talk uses above its dock
+ * hairline (no labels, so it never crowds the transcript); the column keeps its labels.
+ */
+export function AppRail({ row = false }: { row?: boolean }) {
   const insets = useSafeAreaInsets();
   const [open, setOpen] = useState<App | null>(null);
   return (
     <>
-      <View style={styles.rail}>
+      <View style={row ? styles.row : styles.rail}>
         {RAIL_APPS.map((app) => (
-          <Pressable key={app} testID={`rail-${app}`} onPress={() => setOpen(app)} style={{ alignItems: "center", gap: space.s4 }}>
+          <Pressable
+            key={app}
+            testID={`rail-${app}`}
+            accessibilityRole="button"
+            accessibilityLabel={`${APP_LABEL[app]}, connected`}
+            hitSlop={row ? 6 : 0}
+            onPress={() => setOpen(app)}
+            style={{ alignItems: "center", gap: space.s4 }}
+          >
             <View>
-              <AppGlyph app={app} />
-              <View style={styles.dot} />
+              <AppGlyph app={app} size={row ? 32 : 44} />
+              <View style={[styles.dot, row && styles.dotSmall]} />
             </View>
-            <T v="tab" style={{ color: color.text3 }}>{APP_LABEL[app]}</T>
+            {row ? null : <T v="tab" style={{ color: color.text3 }}>{APP_LABEL[app]}</T>}
           </Pressable>
         ))}
       </View>
 
-      <Modal transparent visible={open !== null} animationType="slide" onRequestClose={() => setOpen(null)}>
+      <Modal transparent visible={open !== null} animationType="slide" supportedOrientations={ALL_ORIENTATIONS} onRequestClose={() => setOpen(null)}>
         <Pressable style={styles.backdrop} onPress={() => setOpen(null)} />
         <View style={[styles.sheet, { paddingBottom: insets.bottom + space.s24 }]}>
           <View style={styles.grabber} />
@@ -52,7 +64,7 @@ export function AppRail() {
               <AppGlyph app={open} />
               <View style={{ flex: 1 }}>
                 <T v="rowName">{APP_LABEL[open]}</T>
-                <T v="meta" style={{ color: color.violet }}>Connected</T>
+                <T v="meta" style={{ color: color.accent }}>Connected</T>
               </View>
             </View>
           ) : null}
@@ -70,9 +82,11 @@ export function AppRail() {
 
 const styles = StyleSheet.create({
   rail: { gap: space.s16, alignItems: "center" },
-  glyph: { backgroundColor: color.surfaceRaised, alignItems: "center", justifyContent: "center" },
+  row: { flexDirection: "row", gap: space.s12, alignItems: "center" },
+  dotSmall: { width: 10, height: 10, borderRadius: 5, right: -3, top: -3 },
+  glyph: { backgroundColor: color.tint, alignItems: "center", justifyContent: "center" },
   dot: { position: "absolute", right: -2, top: -2, width: 12, height: 12, borderRadius: 6, backgroundColor: color.violet, borderWidth: 2, borderColor: color.bg },
-  backdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)" },
-  sheet: { backgroundColor: color.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: space.s24, paddingTop: space.s12 },
-  grabber: { alignSelf: "center", width: 36, height: 5, borderRadius: 3, backgroundColor: color.text4, marginBottom: space.s16 },
+  backdrop: { flex: 1, backgroundColor: color.scrim },
+  sheet: { backgroundColor: color.bg, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: space.s24, paddingTop: space.s12, width: "100%", maxWidth: 560, alignSelf: "center" },
+  grabber: { alignSelf: "center", width: 36, height: 5, borderRadius: 3, backgroundColor: color.hairline, marginBottom: space.s16 },
 });

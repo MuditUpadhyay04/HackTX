@@ -1,11 +1,13 @@
 // Safety (DESIGN_SPEC 3.14): calm, no gradient. Shown instead of person cards when a rant is a concern.
 import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import { Linking, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { NavBar, OutlinePill, styles as ui, T } from "../components/ui";
-import type { Resource } from "../lib/api";
+import { api, type Resource } from "../lib/api";
 import { color, inset, radius, space } from "../theme/tokens";
+import { useLayout } from "../lib/useLayout";
 
 const DEFAULT: Resource[] = [
   { name: "988 Suicide & Crisis Lifeline", detail: "Call or text 988", links: [{ label: "Call 988", href: "tel:988" }, { label: "Text 988", href: "sms:988" }] },
@@ -17,19 +19,40 @@ const DEFAULT: Resource[] = [
   { name: "Immediate danger", detail: "Call 911", links: [{ label: "Call 911", href: "tel:911" }] },
 ];
 
+function featureFor(href: string) {
+  if (href.includes("911")) return "emergency-911";
+  if (href.includes("988")) return "hotline-988";
+  if (href.includes("88788")) return "hotline-ndvh-text";
+  if (href.includes("799") || href.includes("18007997233")) return "hotline-ndvh-call";
+  return undefined;
+}
+
+const cap = (label: string) => (label ? label.charAt(0).toUpperCase() + label.slice(1) : label);
+
 export default function Safety() {
   const insets = useSafeAreaInsets();
+  const layout = useLayout();
   const { resources } = useLocalSearchParams<{ resources?: string }>();
-  let list = DEFAULT;
-  try {
-    if (resources) list = JSON.parse(resources);
-  } catch {}
+  const fromRant = Boolean(resources);
+  const [list, setList] = useState<Resource[]>(() => {
+    try {
+      return resources ? JSON.parse(resources) : DEFAULT;
+    } catch {
+      return DEFAULT;
+    }
+  });
+
+  useEffect(() => {
+    if (resources) return;
+    api.safetyResources().then(setList).catch(() => {});
+  }, [resources]);
 
   return (
     <View style={ui.screen}>
       <NavBar onBack={() => router.dismissTo("/home")} />
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + space.s48 }}>
+      <ScrollView contentContainerStyle={{ ...layout.column(), paddingBottom: insets.bottom + space.s48 }}>
         <T v="display" style={{ marginHorizontal: inset.text, marginTop: space.s8 }}>{"You deserve to feel safe. Here's real help."}</T>
+        {fromRant ? <T v="rowPreview" style={{ marginHorizontal: inset.text, marginTop: space.s16 }}>{"we're not going to show memories right now."}</T> : null}
         <View style={{ gap: space.s8, marginTop: space.s24 }}>
           {list.map((r) => (
             <View key={r.name} style={styles.row}>
@@ -37,7 +60,7 @@ export default function Safety() {
               <T v="rowPreview">{r.detail}</T>
               <View style={{ gap: space.s8, marginTop: space.s12 }}>
                 {r.links.map((l) => (
-                  <OutlinePill key={l.href} label={l.label} onPress={() => Linking.openURL(l.href)} />
+                  <OutlinePill key={l.href} featureId={featureFor(l.href)} label={cap(l.label)} onPress={() => Linking.openURL(l.href)} />
                 ))}
               </View>
             </View>
