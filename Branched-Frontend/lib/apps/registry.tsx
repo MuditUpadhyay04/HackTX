@@ -23,6 +23,8 @@ import { PhotosApp } from "@/components/apps/photos/PhotosApp";
 import { MessagesApp } from "@/components/apps/messages/MessagesApp";
 import { WhatsAppApp } from "@/components/apps/whatsapp/WhatsAppApp";
 import { PhoneApp } from "@/components/apps/phone/PhoneApp";
+import { DemoNotice } from "@/components/apps/demo/DemoNotice";
+import { isJudge } from "@/lib/apps/judge";
 
 export type WidgetTarget = "widget-weather" | "widget-calendar" | "widget-photos" | "widget-music" | "widget-reminders";
 export type HardwareTarget = "hw-volume-up" | "hw-volume-down" | "hw-side-key";
@@ -77,6 +79,8 @@ export const DISPLAY_OVERRIDES: Partial<Record<HomeDisplay, Partial<Record<AppTa
 };
 
 export function appScreen(target: AppTarget, display: HomeDisplay): Screen | undefined {
+  // /judge (lib/apps/judge.ts): Un-Said is the only real app; every other button explains the demo.
+  if (isJudge() && !target.startsWith("hw-")) return target === "unsaid" ? UnsaidApp : DemoNotice;
   const override = DISPLAY_OVERRIDES[display];
   return override && target in override ? override[target] : APP_SCREENS[target];
 }

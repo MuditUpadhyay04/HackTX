@@ -20,10 +20,10 @@
 	reverse_proxy phone:3000
 }
 
-# "Try Un-Said" for judges' own phones (the QR code): the try-mode app served by the phone container
-# under /try. TRY_DOMAIN is try.{$DOMAIN}; the bare address goes straight to the app.
+# "Try Un-Said" for judges' own phones (the QR code): the phone home screen at /judge, where Un-Said
+# opens its try-mode build (/try) and the other apps explain the demo. TRY_DOMAIN is try.{$DOMAIN}.
 {$TRY_DOMAIN:try.localhost} {
 	encode zstd gzip
-	redir / /try/
+	redir / /judge
 	reverse_proxy phone:3000
 }

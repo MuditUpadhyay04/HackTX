@@ -17,10 +17,16 @@ import { usePane } from "@/components/lookalike/shared/pane";
 import type { AppScreenProps } from "@/lib/apps/registry";
 import { useAppStore } from "@/lib/apps/store";
 import { installUnsaidBridge } from "@/lib/director/bridge";
+import { TRY_BASE, isJudge } from "@/lib/apps/judge";
 import { AppFrame, useStack } from "../kit";
 
 /** Where the Un-Said web build is served (same-origin by default). */
 const BASE = process.env.NEXT_PUBLIC_UNSAID_URL ?? "/unsaid";
+
+/** On /judge, the try-mode build (privacy first, a sandbox per browser, nothing sends). Read after a
+ *  tap, never during the server render (lib/apps/judge.ts). */
+const appBase = () => (isJudge() ? TRY_BASE : BASE);
+const stripBase = (pathname: string) => pathname.replace(new RegExp(`^${appBase()}`), "");
 
 /** The gesture handle's strip under the app (Android's bottom inset with gesture navigation). */
 const SAFE_BOTTOM = 18;
@@ -56,7 +62,7 @@ function UnsaidWindow() {
   const path = stack.top.path;
   const reset = stack.reset;
   // the first route is fixed at mount: changing `src` later would reload the app
-  const [src] = useState(() => `${BASE}${path || "/"}`);
+  const [src] = useState(() => `${appBase()}${path || "/"}`);
   const closing = useAppStore((s) => s.open?.target !== "unsaid");
   const frame = useRef<HTMLIFrameElement>(null);
   const [loaded, setLoaded] = useState(false);
@@ -77,7 +83,7 @@ function UnsaidWindow() {
         if (!el || el.closest("[inert]") || getComputedStyle(el).visibility !== "visible") return;
         const loc = el.contentWindow?.location;
         if (!loc) return;
-        const p = loc.pathname.replace(/^\/unsaid/, "") + loc.search;
+        const p = stripBase(loc.pathname) + loc.search;
         if (p && p !== path) reset([{ path: p }]);
       } catch {
         // cross-origin (NEXT_PUBLIC_UNSAID_URL elsewhere): the route can't be read; nothing to keep
@@ -93,8 +99,8 @@ function UnsaidWindow() {
     try {
       const win = frame.current?.contentWindow;
       if (!win) return;
-      const here = win.location.pathname.replace(/^\/unsaid/, "") + win.location.search;
-      if (here !== path) win.location.replace(`${BASE}${path}`);
+      const here = stripBase(win.location.pathname) + win.location.search;
+      if (here !== path) win.location.replace(`${appBase()}${path}`);
     } catch {
       // cross-origin: can't steer it
     }
