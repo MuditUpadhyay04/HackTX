@@ -214,7 +214,8 @@ async def classify_safety(text: str) -> str:
 
 TRANSLATE_SYSTEM = """Translate the user's words into {language}, as they would naturally be said aloud in a family.
 Keep the meaning exact. Do not add, remove, soften, or explain anything. Keep names as they are.
-If a sentence is already in {language}, keep it unchanged."""
+If a sentence is already in {language}, keep it unchanged.
+Write {language} in its own script (Hindi in Devanagari), never in Latin letters."""
 
 
 async def translate(text: str, language: str) -> str:
