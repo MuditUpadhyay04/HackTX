@@ -1,4 +1,4 @@
-"""The demo cast and history from ideas/mudit/Demo_Script_v2.md.
+"""The demo cast and history from docs/demo/Demo_Script_v2.md.
 
 People come from SEED_* env vars on first boot and can be edited later with
 PATCH /api/people/{id}. Fixtures (Jordan's older lines, the Tuesday card Mom

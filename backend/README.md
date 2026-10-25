@@ -4,7 +4,7 @@
 
 Server, APIs, and Meta / Muse integrations for Unsaid. Changes here are watched every 10 minutes, and the frontend is updated to match.
 
-This is the working product for [`ideas/mudit/Demo_Script_v2.md`](../ideas/mudit/Demo_Script_v2.md) §6: everything from the knock to Mom's 8 AM runs for real. One FastAPI service serves three things:
+This is the working product for [`docs/demo/Demo_Script_v2.md`](../docs/demo/Demo_Script_v2.md) §6: everything from the knock to Mom's 8 AM runs for real. One FastAPI service serves three things:
 
 | URL | What it is |
 |---|---|
@@ -104,7 +104,7 @@ All `/api/*` routes except `/api/public/*` and `/api/health` need the `X-App-Key
 | (waiting on you) | `GET` via home, `POST /api/reminders`, `POST /api/reminders/{id}/done` | `handoff` opens Instagram, WhatsApp, or Messages. |
 | (demo) | `/api/demo/state`, `/clock`, `/release-due`, `/cards/{id}/release-now`, `/replies/{id}/backdate`, `/mock-reply`, `/reset` | Same key. |
 
-`frontend/BACKEND_REQUESTS.md` Request 1 (photo connectors and face grouping) is **not built**. Its own notes say it can stay mock for the demo, and it isn't in Demo_Script_v2.
+[`docs/BACKEND_REQUESTS.md`](../docs/BACKEND_REQUESTS.md) Request 1 (photo connectors and face grouping) is **not built**. Its own notes say it can stay mock for the demo, and it isn't in Demo_Script_v2.
 
 ## Tests and the safety eval
 

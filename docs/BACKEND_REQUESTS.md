@@ -1,7 +1,7 @@
 # Unsaid: Backend Requests (frontend → backend)
 
 **To:** Mudit Upadhyay (backend, `backend/`) · **From:** Gurneal Chandi (frontend, `frontend/`)
-**Lives at:** `frontend/BACKEND_REQUESTS.md` in [MuditUpadhyay04/HackTX](https://github.com/MuditUpadhyay04/HackTX). It sits in `frontend/` because Gurneal owns that folder. Mudit, reply inline or in a PR comment. Nothing here edits `backend/`.
+**Lives at:** `docs/BACKEND_REQUESTS.md` (moved from `frontend/` in the Oct 24 cleanup) in [MuditUpadhyay04/HackTX](https://github.com/MuditUpadhyay04/HackTX). It sits in `frontend/` because Gurneal owns that folder. Mudit, reply inline or in a PR comment. Nothing here edits `backend/`.
 **Started:** Oct 24, 2026 (CT)
 
 These are features where the frontend is already designed or built against mock data, with `data-feature-id` placeholders marked NOT YET CONNECTED, and is waiting on a backend. The endpoint shapes below are **suggestions**. Change anything you like, then tell us the final shape so the contract table (`Unsaid_Frontend_Build_Spec.md` Section 9) can be updated.

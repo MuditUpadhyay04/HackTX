@@ -1,4 +1,4 @@
-// Gurneal's Un-Said tokens (App-UI-Final/tokens/unsaid-tokens.json). Fixed: don't edit values here.
+// Gurneal's Un-Said tokens (design/tokens/unsaid-tokens.json). Fixed: don't edit values here.
 import type { TextStyle } from "react-native";
 
 export const color = {

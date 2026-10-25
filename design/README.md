@@ -1,5 +1,7 @@
 # App-UI-Final: the Un-Said design handoff for Mudit
 
+*Moved from `App-UI-Final/` to `design/` in the Oct 24 cleanup. Contents unchanged. It now styles the Expo app in `mobile/` as well as `backend/web/`.*
+
 **Owner of everything in this folder:** Gurneal Chandi (design, palette, names, wordmark, icon, copy).
 **For:** Mudit, to restyle his Un-Said app (`backend/web/` on the `backend` branch). Mudit owns the app and the backend. Nothing here asks for a backend change.
 

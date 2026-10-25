@@ -1,0 +1,8 @@
+# Same line endings for everyone (Windows and macOS).
+* text=auto
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.pdf binary
+*.wav binary

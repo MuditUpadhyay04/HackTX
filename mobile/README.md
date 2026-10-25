@@ -1,6 +1,6 @@
 # mobile/: the Un-Said app (Expo, SDK 58)
 
-The real app for the demo. Your actual photo gallery → open a photo → the Un-Said icon → say it out loud → Un-Said splits it by person → his own lines become a letter → it leaves through WhatsApp, Messages or Instagram. Styled with Gurneal's **App-UI-Final** (branch `app-ui-final`). It talks to the backend in `../backend`, which is unchanged.
+The real app for the demo. Your actual photo gallery → open a photo → the Un-Said icon → say it out loud → Un-Said splits it by person → his own lines become a letter → it leaves through WhatsApp, Messages or Instagram. Styled with Gurneal's design system in [`../design/`](../design/) (his App-UI-Final handoff). It talks to the backend in `../backend`, which is unchanged.
 
 ## Run it on your iPhone
 
