@@ -105,6 +105,11 @@ def ensure_cast() -> list[str]:
             ).rowcount
             if inserted:
                 added.append(pid)
+            else:
+                # Pronouns can't be edited in the app, so the cast's is the truth. An older database
+                # still has the best friend's from before he became Michael ("her"), which reads
+                # wrong in every templated line about him.
+                c.execute("UPDATE people SET pronoun = ? WHERE id = ? AND pronoun != ?", (pronoun, pid, pronoun))
     return added
 
 

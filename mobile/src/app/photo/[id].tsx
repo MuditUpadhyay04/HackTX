@@ -33,8 +33,13 @@ export default function PhotoViewer() {
   // From a person's gallery the words are for them; otherwise the knock's person, if it named one.
   const forPerson = person || (knock && "person_id" in knock ? knock.person_id ?? "" : "");
   const forName = person ? toName : knock && "person_name" in knock ? knock.person_name ?? "" : "";
-  const talk = () =>
-    router.push({ pathname: "/talk", params: { photo: id, person: forPerson ?? "", toName: forName ?? "", channel: person ? channel ?? "" : "" } });
+  // Demo mode: the knock carries the line Talk opens with ("Send the words you're keeping to yourself...").
+  const prompt = knock && "prompt" in knock ? knock.prompt ?? "" : "";
+  const talk = (fromKnock = false) =>
+    router.push({
+      pathname: "/talk",
+      params: { photo: id, person: forPerson ?? "", toName: forName ?? "", channel: person ? channel ?? "" : "", prompt: fromKnock ? prompt : "" },
+    });
 
   useEffect(() => {
     // The icon breathes once when the photo opens, so it's noticed without nagging.
@@ -91,7 +96,7 @@ export default function PhotoViewer() {
             <Ionicons name="chevron-back" size={24} color={color.text} />
           </Pressable>
           <Text style={styles.date} numberOfLines={1}>{photoDate(Number(t))}</Text>
-          <Pressable testID="overlay-open-talk" accessibilityLabel="Say it out loud" hitSlop={12} onPress={talk}>
+          <Pressable testID="overlay-open-talk" accessibilityLabel="Say it out loud" hitSlop={12} onPress={() => talk()}>
             <Animated.View style={{ transform: [{ scale: pulse }] }}>
               <AppIcon size={40} />
             </Animated.View>
@@ -108,7 +113,7 @@ export default function PhotoViewer() {
       <Animated.View
         style={[styles.knockWrap, { paddingTop: insets.top + space.s8, left: space.s8 + insets.left, right: space.s8 + insets.right, transform: [{ translateY: knockY }] }]}
       >
-        <Pressable testID="drift-nudge-open" onPress={() => { open(); hideKnock(); talk(); }} style={[styles.knock, shadow.letter]}>
+        <Pressable testID="drift-nudge-open" onPress={() => { open(); hideKnock(); talk(true); }} style={[styles.knock, shadow.letter]}>
           <AppIcon size={40} />
           <View style={{ flex: 1 }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>

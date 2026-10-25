@@ -140,7 +140,7 @@ export default function Compose() {
   };
 
   return (
-    <KeyboardAvoidingView style={ui.screen} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <KeyboardAvoidingView style={ui.screen} behavior={Platform.OS === "web" ? undefined : "padding"}>
       <NavBar
         title={person ? `To ${person.name}` : ""}
         trailing={

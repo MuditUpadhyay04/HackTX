@@ -12,11 +12,14 @@ Gentle mode, the default:
   - 72 h of quiet for a person after he dismisses a knock about them
   - 2 dismisses in a row pause knocks for 7 days; opening one resets that
   - nothing within 24 h of a safety concern
-Demo mode: 3 s on any photo, no caps (rehearsing on stage). Off: never.
+Demo mode (the live demo at the judging table): 8 s of lingering on any photo (or a pinch in),
+no caps, and always the demo lines (voice.KNOCK_DEMO, then voice.TALK_DEMO on Talk).
+Film mode (recording the film): 3 s on any photo, no caps, and the film's lines below.
+Off: never.
 
 What it says, in order: her unheard reply; the drift knock (someone on this photo he has
-kept words for, who keeps texting, with no letter from him in 7 days; Demo: no wait);
-then body B or A.
+kept words for, who keeps texting, with no letter from him in 7 days; Demo/Film: no wait);
+then body B or A. Demo mode says KNOCK_DEMO instead, whoever the photo is about.
 """
 
 import re
@@ -25,12 +28,14 @@ from datetime import datetime, timedelta
 
 from . import db, store, timeutil, voice
 
-KNOCK_MODES = ("gentle", "off", "demo")
+KNOCK_MODES = ("gentle", "off", "demo", "film")
+REHEARSAL_MODES = ("demo", "film")  # no caps, no waits: showing the app, not living with it
 OUTCOMES = ("opened", "dismissed", "ignored")
 
 LINKED_DWELL_MS = 4000
 FIRST_DWELL_MS = 6000
-DEMO_DWELL_MS = 3000
+DEMO_DWELL_MS = 8000   # the judges linger on a photo for 8 s
+FILM_DWELL_MS = 3000
 KNOCKS_PER_DAY = 2
 KNOCK_GAP = timedelta(hours=3)
 PERSON_COOLDOWN = timedelta(hours=72)
@@ -173,6 +178,7 @@ class KnockDecision:
     detail: str | None = None                 # reply | drift | linked | first
     body: str | None = None
     person_id: str | None = None
+    prompt: str | None = None                 # Demo mode: the line at the top of Talk
 
 
 def _no(reason: str) -> KnockDecision:
@@ -196,10 +202,13 @@ def decide_knock(req: KnockRequest, ctx: KnockContext, now: datetime) -> KnockDe
         return _no("off")
     if ctx.last_concern_at and now - ctx.last_concern_at < SAFETY_QUIET:
         return _no("safety_quiet")
-    demo = ctx.mode == "demo"
+    demo = ctx.mode in REHEARSAL_MODES
 
-    if ctx.linked or demo:
-        lingering = req.dwell_ms >= (DEMO_DWELL_MS if demo else LINKED_DWELL_MS) or req.zoomed or req.revisit
+    if ctx.mode == "demo":
+        # Only real lingering: coming back to a photo doesn't count, so every judge gets the full 8 s.
+        lingering = req.dwell_ms >= DEMO_DWELL_MS or req.zoomed
+    elif ctx.linked or demo:
+        lingering = req.dwell_ms >= (FILM_DWELL_MS if demo else LINKED_DWELL_MS) or req.zoomed or req.revisit
     elif ctx.knocks:
         return _no("unlinked")
     else:
@@ -227,6 +236,9 @@ def decide_knock(req: KnockRequest, ctx: KnockContext, now: datetime) -> KnockDe
         detail = "linked" if ctx.linked else "first"
         person_id = candidates[0] if candidates else None
         body = voice.knock_b(ctx.reached_out) if len(ctx.reached_out) >= 2 else voice.KNOCK_A
+    prompt = None
+    if ctx.mode == "demo":
+        body, prompt = voice.KNOCK_DEMO, voice.TALK_DEMO
 
     if not demo:
         if req.session_id and any(e.session_id == req.session_id for e in ctx.knocks):
@@ -237,7 +249,7 @@ def decide_knock(req: KnockRequest, ctx: KnockContext, now: datetime) -> KnockDe
             return _no("too_close")
         if _paused(ctx.knocks, now):
             return _no("paused")
-    return KnockDecision(True, "ok", detail, body, person_id)
+    return KnockDecision(True, "ok", detail, body, person_id, prompt)
 
 
 # ---------------------------------------------------------------- reading the world for a knock
@@ -335,5 +347,5 @@ def knock_context(asset_id: str, now: datetime) -> KnockContext:
         reached_out=reached_out(now),
         last_concern_at=last_concern_at(),
         knocks=events("knock"),
-        drift=drifting(linked, now, mode == "demo"),
+        drift=drifting(linked, now, mode in REHEARSAL_MODES),
     )

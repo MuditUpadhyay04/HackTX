@@ -103,6 +103,7 @@ def mock_reply() -> dict:
 @router.post("/reset")
 def reset() -> dict:
     """Clears his rants, cards, replies, and notes. Keeps people, photos, and the clock."""
+    seed.ensure_cast()  # and puts back any cast member (or pronoun) that's gone missing
     seed.reset_activity()
     return _state()
 

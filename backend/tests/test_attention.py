@@ -131,13 +131,28 @@ def test_a_reply_from_someone_not_in_this_photo_does_not_knock_here():
     assert other.detail == "linked" and other.person_id == "priya" and other.body == KNOCK_A
 
 
-def test_demo_mode_knocks_fast_and_ignores_caps_but_not_safety():
+def test_demo_mode_knocks_after_8_s_with_the_demo_lines_ignoring_caps_but_not_safety():
     busy = [knock(timedelta(minutes=1), session="s-now", outcome="dismissed"),
             knock(timedelta(minutes=2), session="s-now", outcome="dismissed")]
     demo = ctx(mode="demo", linked=[], knocks=busy)
-    assert decide_knock(ask(2999), demo, NOW).reason == "too_soon"
-    assert decide_knock(ask(3000), demo, NOW).knock
-    assert decide_knock(ask(3000), ctx(mode="demo", last_concern_at=NOW), NOW).reason == "safety_quiet"
+    assert decide_knock(ask(7999), demo, NOW).reason == "too_soon"
+    d = decide_knock(ask(8000), demo, NOW)
+    assert d.knock and d.body == "You miss them, right?"
+    assert d.prompt == "Send the words you're keeping to yourself. They're waiting for your answer."
+    # Coming back to the photo isn't lingering in Demo mode: every judge gets the full 8 s.
+    assert decide_knock(ask(1000, revisit=True), demo, NOW).reason == "too_soon"
+    assert decide_knock(ask(8000), ctx(mode="demo", last_concern_at=NOW), NOW).reason == "safety_quiet"
+    # Her unheard reply on this photo: Demo mode still says the demo line.
+    reply = decide_knock(ask(8000), ctx(mode="demo", linked=["mom"], unheard_replies=[("mom", "Mom left you a voice note.")]), NOW)
+    assert reply.detail == "reply" and reply.person_id == "mom" and reply.body == "You miss them, right?"
+
+
+def test_film_mode_knocks_fast_with_the_gentle_lines():
+    film = ctx(mode="film", linked=[], knocks=[knock(timedelta(minutes=1), session="s-now", outcome="dismissed")])
+    assert decide_knock(ask(2999), film, NOW).reason == "too_soon"
+    f = decide_knock(ask(3000), film, NOW)
+    assert f.knock and f.body == KNOCK_A and f.prompt is None
+    assert decide_knock(ask(3000), ctx(mode="gentle"), NOW).prompt is None
 
 
 # ---------------------------------------------------------------- the API
@@ -184,10 +199,17 @@ def test_the_knock_through_the_api(client):
     assert client.patch("/api/settings", json={"knock_mode": "loud"}).status_code == 422
     assert client.patch("/api/settings", json={"quiet_start": "25:00"}).status_code == 400
 
-    # Demo mode for rehearsal: fast and uncapped.
+    # Demo mode for the judging table: 8 s, uncapped, the demo lines.
     client.patch("/api/settings", json={"knock_mode": "demo"})
-    assert check(client, "ph://kitchen", dwell=3000, session="s3")["knock"]
-    assert check(client, "ph://kitchen", dwell=3000, session="s3")["knock"]
+    assert check(client, "ph://kitchen", dwell=3000, session="s3")["reason"] == "too_soon"
+    demo = check(client, "ph://kitchen", dwell=8000, session="s3")
+    assert demo["knock"] and demo["body"] == "You miss them, right?" and demo["person_name"] == "Mom"
+    assert demo["prompt"] == "Send the words you're keeping to yourself. They're waiting for your answer."
+    assert check(client, "ph://kitchen", dwell=8000, session="s3")["knock"]
+    # Film mode for recording: 3 s, uncapped, no demo prompt.
+    client.patch("/api/settings", json={"knock_mode": "film"})
+    film = check(client, "ph://kitchen", dwell=3000, session="s3")
+    assert film["knock"] and film["prompt"] is None
     client.post("/api/demo/attention/reset")
     client.patch("/api/settings", json={"knock_mode": "off"})
     assert check(client, "ph://kitchen", dwell=60000, session="s9")["reason"] == "off"

@@ -15,7 +15,8 @@ import { useLayout } from "../lib/useLayout";
 const MODES: { id: Settings["knock_mode"]; title: string; body: string }[] = [
   { id: "gentle", title: "Gentle", body: "A quiet knock, rarely." },
   { id: "off", title: "Off", body: "No knocks." },
-  { id: "demo", title: "Demo", body: "Knocks a little sooner, for showing the app." },
+  // DEMO (needs Gurneal's OK): the body changed from "Knocks a little sooner, for showing the app."
+  { id: "demo", title: "Demo", body: "Knocks after 8 seconds on any photo, for showing the app." },
 ];
 
 const QUIET: { start: string; end: string; label: string }[] = [

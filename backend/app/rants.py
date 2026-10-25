@@ -87,7 +87,7 @@ async def sort_rant(rant_id: str, for_person: str | None = None) -> dict:
     if settings.muse_enabled:
         try:
             raw = await spark.sort_rant(segments, store.me(), people)
-            sorted_by = "meta" if spark.served_by["spark"] == "meta" else "gemini"
+            sorted_by = spark.short_provider()
         except spark.SparkError as exc:
             log.warning("spark sort failed, using mock: %s", exc)
     if raw is None:
@@ -171,7 +171,7 @@ def _choose_step(rant_id: str, spoken_about: list[str], now: datetime) -> str | 
     """
     if not spoken_about:
         return None
-    demo = attention.get_settings()["knock_mode"] == "demo"
+    demo = attention.get_settings()["knock_mode"] in attention.REHEARSAL_MODES
     with db.tx() as c:
         if not demo:
             earlier = c.execute(

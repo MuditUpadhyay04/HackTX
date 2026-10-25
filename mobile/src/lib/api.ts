@@ -84,13 +84,15 @@ export type KnockDecision =
       body: string;
       person_id: string | null;
       person_name: string | null;
+      /** Demo mode: the line at the top of Talk when he opens the knock. */
+      prompt?: string | null;
       reason: string;
     };
 
 export type AttentionOutcome = "opened" | "dismissed" | "ignored";
 
 export type Settings = {
-  knock_mode: "gentle" | "off" | "demo";
+  knock_mode: "gentle" | "off" | "demo" | "film";
   quiet_start: string; // his quiet hours, HH:MM in his time zone
   quiet_end: string;
   push_enabled: boolean;

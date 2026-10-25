@@ -81,13 +81,18 @@ def test_drift_knock_on_sarahs_photo(client):
     assert m.get("kind") != "drift"
 
 
-def test_no_drift_right_after_he_spoke_about_her_unless_demo(client):
+def test_no_drift_right_after_he_spoke_about_her_unless_filming(client):
     r = client.post("/api/rants/text", json={"text": "Sarah, I miss you.", "asset_id": SARAH_PHOTO}).json()
     client.post(f"/api/rants/{r['id']}/sort")
     client.post("/api/demo/attention/reset")
     assert knock(client, SARAH_PHOTO, "s3").get("kind") != "drift"
+    client.patch("/api/settings", json={"knock_mode": "film"})
+    filmed = knock(client, SARAH_PHOTO, "s3")
+    assert filmed["kind"] == "drift" and filmed["body"] == DRIFT
+    # Demo mode (the judging table) says the demo line instead, after 8 s.
     client.patch("/api/settings", json={"knock_mode": "demo"})
-    assert knock(client, SARAH_PHOTO, "s3")["kind"] == "drift"
+    demo = client.post("/api/knock/check", json={"asset_id": SARAH_PHOTO, "dwell_ms": 8000, "session_id": "s3"}).json()
+    assert demo["kind"] == "drift" and demo["body"] == voice.KNOCK_DEMO and demo["prompt"] == voice.TALK_DEMO
 
 
 def group(result, pid):

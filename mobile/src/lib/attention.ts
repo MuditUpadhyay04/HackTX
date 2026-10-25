@@ -7,9 +7,10 @@ import { api, type KnockDecision } from "./api";
 /** One session per app launch. Gentle mode allows at most one knock per session. */
 export const SESSION_ID = `s-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
-// When to ask, in ms of dwell: demo mode (3 s), a photo of someone he's spoken about (4 s),
-// the one first-ever knock (6 s). A little slack so the server sees the full dwell.
-const CHECK_AT_MS = [3050, 4050, 6050];
+// When to ask, in ms of dwell: film mode (3 s), a photo of someone he's spoken about (4 s),
+// the one first-ever knock (6 s), demo mode at the judging table (8 s). A little slack so the
+// server sees the full dwell.
+const CHECK_AT_MS = [3050, 4050, 6050, 8050];
 const seenThisSession = new Set<string>();
 
 export type Knock = Extract<KnockDecision, { knock: true }>;

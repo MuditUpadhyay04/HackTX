@@ -25,7 +25,8 @@ export default function Talk() {
   // typing=1: opened as "Write" from a person page; starts in the typed mode (same flow).
   // person: opened from that person's page (Talk, Write, a photo of theirs); what names nobody is filed under them.
   // seenPhoto: a photo of them from the People tab (a server URL), shown above the words.
-  const { photo, toName, channel, typing: startTyping, person, seenPhoto } = useLocalSearchParams<{ photo?: string; toName?: string; channel?: string; typing?: string; person?: string; seenPhoto?: string }>();
+  // prompt: Demo mode's knock line for Talk ("Send the words you're keeping to yourself..."), from the server.
+  const { photo, toName, channel, typing: startTyping, person, seenPhoto, prompt } = useLocalSearchParams<{ photo?: string; toName?: string; channel?: string; typing?: string; person?: string; seenPhoto?: string; prompt?: string }>();
   const title = toName ? `To ${toName}` : "Say it out loud";
   const channelLine = (() => {
     if (!toName || !channel || channel === "self") return null;
@@ -102,8 +103,12 @@ export default function Talk() {
         { options: ["Delete recording", "Cancel"], destructiveButtonIndex: 0, cancelButtonIndex: 1 },
         (i) => i === 0 && reset(),
       );
+    } else if (Platform.OS === "web") {
+      // react-native-web's Alert does nothing, so the browser's own confirm asks instead.
+      if (typeof window !== "undefined" && window.confirm("Delete recording?")) reset();
     } else {
-      Alert.alert("", "", [{ text: "Delete recording", style: "destructive", onPress: reset }, { text: "Cancel", style: "cancel" }]);
+      // Android: an empty title and message draws a blank dialog, so the question is the title.
+      Alert.alert("Delete recording?", undefined, [{ text: "Cancel", style: "cancel" }, { text: "Delete recording", style: "destructive", onPress: reset }]);
     }
   };
 
@@ -215,7 +220,7 @@ export default function Talk() {
   );
 
   return (
-    <KeyboardAvoidingView style={ui.screen} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <KeyboardAvoidingView style={ui.screen} behavior={Platform.OS === "web" ? undefined : "padding"}>
       <NavBar title={title} />
       <View style={wide ? [styles.wideRow, layout.column(1080)] : { flex: 1 }}>
         <ScrollView style={{ flex: 1 }} contentContainerStyle={[wide ? null : layout.column(), { paddingBottom: space.s24 }]} keyboardShouldPersistTaps="handled">
@@ -252,6 +257,7 @@ export default function Talk() {
                 ))}
               </View>
             ) : null}
+            {prompt && !spoken ? <T v="section" style={{ marginBottom: space.s16 }}>{prompt}</T> : null}
             <Overline>Only you can hear this</Overline>
             {channelLine ? <T v="rowPreview" style={{ marginTop: space.s8 }}>{channelLine}</T> : null}
             {typing ? (

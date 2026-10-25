@@ -65,3 +65,18 @@ def test_an_existing_database_drops_dad_on_start_and_reset():
     seed.seed_if_empty()               # a restart never brings him back
     assert "dad" not in names()
     assert not list((Path(seed.SEED_MEDIA)).glob("seed_dad_*"))
+
+
+def test_reset_puts_back_a_cast_pronoun_from_an_older_database():
+    """Michael was the best friend "Priya" ("her") in older databases; the cast's pronoun wins."""
+    from fastapi.testclient import TestClient
+
+    from app import db
+    from app.main import app
+
+    with TestClient(app) as c:
+        with db.tx() as conn:
+            conn.execute("UPDATE people SET pronoun = 'her' WHERE id = 'priya'")
+        c.post("/api/demo/reset")
+        michael = next(p for p in c.get("/api/people").json() if p["id"] == "priya")
+        assert michael["pronoun"] == "him"

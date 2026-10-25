@@ -11,6 +11,11 @@ APP_NAME = "Un-Said"  # GURNEAL
 KNOCK_A = "We noticed you've been quieter with the people closest to you lately. Want to say what you haven't?"
 _KNOCK_B_TAIL = "Some things are easier to say here first."
 
+# DEMO (needs Gurneal's OK). The live demo at the judging table (Demo mode): the knock after he
+# lingers 8 s on a photo, then the line at the top of Talk when he opens it.
+KNOCK_DEMO = "You miss them, right?"
+TALK_DEMO = "Send the words you're keeping to yourself. They're waiting for your answer."
+
 # After he records about someone he's held words for before. PROPOSED (Mudit's line).
 ENCOURAGE = "Tell them how you feel. Communication helps."
 

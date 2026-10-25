@@ -42,6 +42,7 @@ def knock_check(body: KnockIn) -> dict:
         "body": decision.body,
         "person_id": decision.person_id,
         "person_name": person["name"] if person else None,
+        "prompt": decision.prompt,  # Demo mode: the line at the top of Talk when he opens the knock
         "reason": decision.reason,
     }
 
@@ -61,7 +62,7 @@ def attention_outcome(event_id: str, body: OutcomeIn) -> dict:
 
 
 class SettingsPatch(BaseModel):
-    knock_mode: Literal["gentle", "off", "demo"] | None = None
+    knock_mode: Literal["gentle", "off", "demo", "film"] | None = None
     quiet_start: str | None = None   # his quiet hours, HH:MM in his time zone
     quiet_end: str | None = None
     push_enabled: bool | None = None
