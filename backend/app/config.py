@@ -44,7 +44,7 @@ class Settings:
     data_dir: Path
     cors_origins: list[str]
     gemini_api_key: str
-    gemini_model: str
+    gemini_models: list[str]  # tried in order; a busy model (429/5xx) falls through to the next
 
     @property
     def muse_enabled(self) -> bool:
@@ -67,11 +67,17 @@ class Settings:
         return self.data_dir / "media"
 
 
+GEMINI_FALLBACKS = ("gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-3.5-flash")
+
+
 def load_settings() -> Settings:
     data_dir = Path(_env("DATA_DIR", str(BACKEND_DIR / "data")))
     if not data_dir.is_absolute():
         data_dir = (BACKEND_DIR / data_dir).resolve()
     origins = [o.strip() for o in _env("CORS_ORIGINS", "*").split(",") if o.strip()]
+    # GEMINI_MODEL may name one model or a comma list; the defaults always follow as fallbacks.
+    gemini_models = [m.strip() for m in _env("GEMINI_MODEL").split(",") if m.strip()]
+    gemini_models += [m for m in GEMINI_FALLBACKS if m not in gemini_models]
     return Settings(
         model_api_key=_env("MODEL_API_KEY"),
         model_api_base=_env("MODEL_API_BASE", "https://api.meta.ai/v1").rstrip("/"),
@@ -88,7 +94,7 @@ def load_settings() -> Settings:
         data_dir=data_dir,
         cors_origins=origins or ["*"],
         gemini_api_key=_env("GEMINI_API_KEY"),
-        gemini_model=_env("GEMINI_MODEL", "gemini-3.1-flash-lite"),
+        gemini_models=gemini_models,
     )
 
 

@@ -15,6 +15,8 @@ from ..config import settings
 log = logging.getLogger("unsaid.gemini")
 
 _URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+# Overloaded, rate limited, or retired: worth trying the next model. A bad key (400/403) is not.
+_BUSY = {404, 429, 500, 502, 503, 504}
 
 _SYSTEM = """You check a translation. You do not improve it, soften it, or explain it.
 The speaker's exact words are under "said". Another model translated them into {language}.
@@ -57,12 +59,22 @@ async def echo(said: str, translation: str, language: str) -> str | None:
             },
         },
     }
-    url = _URL.format(model=settings.gemini_model)
     try:
-        async with httpx.AsyncClient(timeout=httpx.Timeout(8, connect=4)) as client:
-            resp = await client.post(url, headers={"x-goog-api-key": settings.gemini_api_key}, json=body)
-        if resp.status_code != 200:
-            log.warning("gemini echo %s", resp.status_code)
+        resp = None
+        async with httpx.AsyncClient(timeout=httpx.Timeout(6, connect=3)) as client:
+            for model in settings.gemini_models[:3]:
+                try:
+                    resp = await client.post(_URL.format(model=model), headers={"x-goog-api-key": settings.gemini_api_key}, json=body)
+                except httpx.TimeoutException:
+                    log.warning("gemini echo timed out on %s", model)
+                    resp = None
+                    continue
+                if resp.status_code == 200:
+                    break
+                log.warning("gemini echo %s from %s", resp.status_code, model)
+                if resp.status_code not in _BUSY:
+                    return None
+        if resp is None or resp.status_code != 200:
             return None
         parts = resp.json()["candidates"][0]["content"]["parts"]
         text = next(p["text"] for p in parts if "text" in p)

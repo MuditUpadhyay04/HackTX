@@ -263,17 +263,23 @@ async def check_gemini() -> None:
         "contents": [{"parts": [{"text": "Return JSON {\"reads_as\": \"ok\"}"}]}],
         "generationConfig": {"temperature": 0, "maxOutputTokens": 20, "responseMimeType": "application/json"},
     }
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{settings.gemini_model}:generateContent"
-    try:
-        async with httpx.AsyncClient(timeout=20) as client:
-            resp = await client.post(url, headers={"x-goog-api-key": settings.gemini_api_key}, json=body)
-    except httpx.HTTPError as exc:
-        report(name, "FAIL", f"can't reach Gemini: {exc.__class__.__name__}", "Check the network. The preview still sends without it.")
-        return
-    if resp.status_code != 200:
-        report(name, "FAIL", api_error(resp), "Check GEMINI_API_KEY and GEMINI_MODEL. The preview still sends without it.")
-        return
-    report(name, "PASS", f"{settings.gemini_model} answered")
+    busy = []
+    for model in settings.gemini_models[:3]:  # the same order the echo tries them in
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+        try:
+            async with httpx.AsyncClient(timeout=20) as client:
+                resp = await client.post(url, headers={"x-goog-api-key": settings.gemini_api_key}, json=body)
+        except httpx.HTTPError as exc:
+            report(name, "FAIL", f"can't reach Gemini: {exc.__class__.__name__}", "Check the network. The preview still sends without it.")
+            return
+        if resp.status_code == 200:
+            note = f" (busy, skipped: {', '.join(busy)})" if busy else ""
+            report(name, "PASS", f"{model} answered{note}")
+            return
+        if resp.status_code not in (404, 429, 500, 502, 503, 504):
+            break
+        busy.append(f"{model} {resp.status_code}")
+    report(name, "FAIL", api_error(resp), "Check GEMINI_API_KEY and GEMINI_MODEL. The preview still sends without it.")
 
 
 # ------------------------------------------------------------------ main
