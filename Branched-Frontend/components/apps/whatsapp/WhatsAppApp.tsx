@@ -37,30 +37,35 @@ import { useMessaging, type ThreadId } from "@/lib/store/messaging";
 import { AppFrame, Avatar, Scroll, Split, StackView, TOP, Tap, ellipsis, useStack, type Stack } from "../kit";
 
 type Tab = "updates" | "calls" | "communities" | "chats" | "settings";
-type Route = { kind: "home" } | { kind: "chat"; id: ThreadId } | { kind: "call"; with: PersonId; video: boolean };
+type Route = { kind: "home"; tab: Tab } | { kind: "chat"; id: ThreadId } | { kind: "call"; with: PersonId; video: boolean };
 
 /** Chat list order (Phase 2 ROUTES: Mom first, then Fam, Roommates, Marfa Trip). */
 const CHATS: ThreadId[] = ["mom", "fam", "roommates", "marfa"];
 
 export function WhatsAppApp({ display }: AppScreenProps) {
-  const stack = useStack<Route>({ kind: "home" });
-  const [tab, setTab] = useState<Tab>("chats");
-  const [selected, setSelected] = useState<ThreadId | null>(display === "inner" ? "mom" : null);
-  // the split opens on Mom's chat, so it reads as read
+  // shared with the other display's copy, so a fold/unfold keeps the open chat, call and tab
+  const stack = useStack<Route>("whatsapp", { kind: "home", tab: "chats" });
+  const root = stack.routes[0] as Extract<Route, { kind: "home" }>;
+  const tab = root.tab;
+  const setTab = (t: Tab) => stack.reset([{ kind: "home", tab: t }, ...stack.routes.slice(1)]);
+  const chat = stack.routes.find((r): r is Extract<Route, { kind: "chat" }> => r.kind === "chat");
+  const selected = chat?.id ?? null;
+  const call = stack.top.kind === "call" ? stack.top : null;
+  // the split view always shows a chat (Mom's first); record it so folding lands in that chat
+  const { reset, routes } = stack;
+  useEffect(() => {
+    if (display === "inner" && !selected) reset([...routes.slice(0, 1), { kind: "chat", id: "mom" }, ...routes.slice(1)]);
+  }, [display, selected, reset, routes]);
   useEffect(() => {
     if (selected) useMessaging.getState().markRead(selected);
   }, [selected]);
-  const [call, setCall] = useState<{ with: PersonId; video: boolean } | null>(null);
 
   const open = (id: ThreadId) => {
     useMessaging.getState().markRead(id);
-    if (display === "inner") setSelected(id);
+    if (display === "inner") stack.reset([root, { kind: "chat", id }]);
     else stack.push({ kind: "chat", id });
   };
-  const startCall = (withId: PersonId, video: boolean) => {
-    if (display === "inner") setCall({ with: withId, video });
-    else stack.push({ kind: "call", with: withId, video });
-  };
+  const startCall = (withId: PersonId, video: boolean) => stack.push({ kind: "call", with: withId, video });
 
   const home = <Home tab={tab} setTab={setTab} onOpen={open} onCall={startCall} selected={display === "inner" ? selected : null} />;
 
@@ -77,7 +82,7 @@ export function WhatsAppApp({ display }: AppScreenProps) {
             )
           }
         />
-        {call ? <CallScreen with={call.with} video={call.video} onEnd={() => setCall(null)} /> : null}
+        {call ? <CallScreen with={call.with} video={call.video} onEnd={stack.pop} /> : null}
       </AppFrame>
     );
   }

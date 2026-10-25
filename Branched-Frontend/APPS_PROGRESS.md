@@ -95,3 +95,21 @@ Each one works folded (one column) and unfolded (split view).
 - **Fake data (word for word):** `lib/mock/threads.ts`, `lib/mock/people.ts`, `lib/mock/reels.ts`. **Message state:** `lib/store/messaging.ts`.
 - **Spec:** `docs/CLAUDE_PROMPT.md` (Phase 2 has each app's look and copy).
 - **Older phone versions:** `~/Desktop/DUO old/`.
+
+## Un-Said (added Oct 25, 2026)
+The phone's Un-Said icon opens the **real Un-Said app**: the newest `main` (Gurneal's overhaul, merged by Mudit at `3db5cd5`), running live inside the display. Nothing is re-implemented. `components/apps/unsaid/UnsaidApp.tsx` shows that app in a window sized to the screen, with the phone's status bar on top and the home bar under it. It works folded (phone layout) and unfolded (Un-Said's own wide two-column layout).
+
+To run it locally (three things at once):
+1. `git worktree add ../HackTX-unsaid-main origin/main` (already done at `~/HackTX-unsaid-main`).
+2. **Backend:**
+   - `cd ~/HackTX-unsaid-main/backend && uv sync && uv run uvicorn app.main:app --host 127.0.0.1 --port 8000`
+   - `.env` has `CORS_ORIGINS=*` and no keys, so it runs on clearly labelled mock AI. Add `MODEL_API_KEY` etc. for the real Muse models.
+3. **App (web):**
+   - `cd ~/HackTX-unsaid-main/mobile && npm install && npx expo start --web --port 8081`
+   - `.env.local` has `EXPO_PUBLIC_API_URL=http://localhost:8000`.
+4. **This phone:** `npm run dev` here. `NEXT_PUBLIC_UNSAID_URL` overrides where the phone looks for Un-Said (default `http://localhost:8081`), e.g. a deployed build.
+
+Known limits:
+- Folding or unfolding with Un-Said open reloads it at Home. The other apps keep their place; Un-Said runs on its own port, so the phone can't read which screen it's on.
+- Mic and camera features need the browser's permission for `localhost:8081`.
+- At the folded screen's 573 pt height, Un-Said's tab bar labels sit right at the bottom edge. That's in Un-Said's own layout.

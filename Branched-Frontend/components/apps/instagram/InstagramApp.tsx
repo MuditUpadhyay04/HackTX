@@ -33,23 +33,27 @@ const STAMP_GAP_MIN = 60;
 const MY_HANDLE = "riley";
 
 export function InstagramApp({ display }: AppScreenProps) {
-  const stack = useStack<Route>({ kind: "inbox" });
-  const [selected, setSelected] = useState<ThreadId | null>(display === "inner" ? "michael" : null);
-  const [reel, setReel] = useState<ReelId | null>(null);
+  // shared with the other display's copy, so a fold/unfold keeps the open thread or reel
+  const stack = useStack<Route>("instagram", { kind: "inbox" });
+  const thread = stack.routes.find((r): r is Extract<Route, { kind: "thread" }> => r.kind === "thread");
+  const selected = thread?.id ?? null;
+  const reel = stack.top.kind === "reels" ? stack.top.start : null;
+  // the split view always shows a thread; record it so folding lands in that thread
+  const { reset, routes } = stack;
+  useEffect(() => {
+    if (display === "inner" && !selected) reset([{ kind: "inbox" }, { kind: "thread", id: INBOX[0] }, ...routes.slice(1)]);
+  }, [display, selected, reset, routes]);
   useEffect(() => {
     if (selected) useMessaging.getState().markRead(selected);
   }, [selected]);
 
   const open = (id: ThreadId) => {
     useMessaging.getState().markRead(id);
-    if (display === "inner") setSelected(id);
+    if (display === "inner") stack.reset([{ kind: "inbox" }, { kind: "thread", id }]);
     else stack.push({ kind: "thread", id });
   };
-  const openReel = (id: ReelId) => {
-    if (display === "inner") setReel(id);
-    else stack.push({ kind: "reels", start: id });
-  };
-  const dark = stack.top.kind === "reels" || (display === "inner" && reel !== null);
+  const openReel = (id: ReelId) => stack.push({ kind: "reels", start: id });
+  const dark = reel !== null;
 
   if (display === "inner") {
     return (
@@ -61,7 +65,7 @@ export function InstagramApp({ display }: AppScreenProps) {
         />
         {reel ? (
           <div style={{ position: "absolute", inset: 0, zIndex: 30 }}>
-            <Reels start={reel} onBack={() => setReel(null)} />
+            <Reels start={reel} onBack={stack.pop} />
           </div>
         ) : null}
       </AppFrame>

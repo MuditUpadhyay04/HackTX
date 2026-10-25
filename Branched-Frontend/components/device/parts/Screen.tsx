@@ -1,5 +1,6 @@
 "use client";
 
+import { InertCopyContext } from "@/lib/apps/copies";
 import { motion, useTransform, type MotionValue } from "framer-motion";
 import type { ReactNode } from "react";
 import { foldMotion } from "@/lib/tokens";
@@ -74,56 +75,58 @@ export function FoldContent({
   const alpha = useTransform(angle, (a) => (opacity ? opacity(a) : 1));
   const shadeOpacity = useTransform(angle, (a) => (shade ? Math.min(1, 2 * shade.swing(a)) : 0));
   return (
-    <motion.div
-      data-fold-content=""
-      inert={inert}
-      aria-hidden={inert ? true : undefined}
-      style={{
-        position: "absolute",
-        left: 0,
-        top: 0,
-        width,
-        height,
-        overflow: "hidden",
-        opacity: alpha,
-        // inert copies must not swallow clicks meant for the display facing the viewer
-        pointerEvents: inert ? "none" : undefined,
-      }}
-    >
-      {/*
-        iphone-duo blur: sharp at the hinge, growing toward the far edge. A sharp copy underneath
-        and a blurred copy on top, masked in from the hinge (blurGradient^1.35), so the swinging
-        half meets the still half at the crease with no hard edge. The blurred copy overhangs the
-        clip by BLUR_BLEED so its fringe falls outside the display.
-      */}
-      {shade && soften ? <div style={{ position: "absolute", inset: 0 }}>{children}</div> : null}
+    <InertCopyContext.Provider value={!!inert}>
       <motion.div
+        data-fold-content=""
+        inert={inert}
+        aria-hidden={inert ? true : undefined}
         style={{
           position: "absolute",
-          inset: -BLUR_BLEED,
-          padding: BLUR_BLEED,
-          filter,
-          willChange: soften ? "filter" : undefined,
-          ...(shade && soften ? hingeMask(shade.hinge) : null),
+          left: 0,
+          top: 0,
+          width,
+          height,
+          overflow: "hidden",
+          opacity: alpha,
+          // inert copies must not swallow clicks meant for the display facing the viewer
+          pointerEvents: inert ? "none" : undefined,
         }}
       >
-        <div style={{ position: "relative", width, height }}>{children}</div>
-      </motion.div>
-      {shade ? (
+        {/*
+          iphone-duo blur: sharp at the hinge, growing toward the far edge. A sharp copy underneath
+          and a blurred copy on top, masked in from the hinge (blurGradient^1.35), so the swinging
+          half meets the still half at the crease with no hard edge. The blurred copy overhangs the
+          clip by BLUR_BLEED so its fringe falls outside the display.
+        */}
+        {shade && soften ? <div style={{ position: "absolute", inset: 0 }}>{children}</div> : null}
         <motion.div
-          aria-hidden="true"
-          data-fold-shade=""
           style={{
             position: "absolute",
-            inset: 0,
-            pointerEvents: "none",
-            opacity: shadeOpacity,
-            // darkenGradient^1.35 from 20% off the hinge, as in the reference shader
-            background: `linear-gradient(to ${shade.hinge === "left" ? "right" : "left"}, rgba(0,0,0,0) 20%, rgba(0,0,0,0.11) 40%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.53) 75%, rgba(0,0,0,0.8) 90%, #000 100%)`,
+            inset: -BLUR_BLEED,
+            padding: BLUR_BLEED,
+            filter,
+            willChange: soften ? "filter" : undefined,
+            ...(shade && soften ? hingeMask(shade.hinge) : null),
           }}
-        />
-      ) : null}
-    </motion.div>
+        >
+          <div style={{ position: "relative", width, height }}>{children}</div>
+        </motion.div>
+        {shade ? (
+          <motion.div
+            aria-hidden="true"
+            data-fold-shade=""
+            style={{
+              position: "absolute",
+              inset: 0,
+              pointerEvents: "none",
+              opacity: shadeOpacity,
+              // darkenGradient^1.35 from 20% off the hinge, as in the reference shader
+              background: `linear-gradient(to ${shade.hinge === "left" ? "right" : "left"}, rgba(0,0,0,0) 20%, rgba(0,0,0,0.11) 40%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.53) 75%, rgba(0,0,0,0.8) 90%, #000 100%)`,
+            }}
+          />
+        ) : null}
+      </motion.div>
+    </InertCopyContext.Provider>
   );
 }
 

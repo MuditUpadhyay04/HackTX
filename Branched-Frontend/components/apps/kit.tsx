@@ -19,6 +19,7 @@ import { CoverStatusBar } from "@/components/scene/CoverStatusBar";
 import { GEOM } from "@/components/device/geometry";
 import { useAppStore } from "@/lib/apps/store";
 import { usePrefersReducedMotion } from "@/lib/motion";
+import type { AppTarget } from "@/lib/apps/registry";
 
 export type Tone = "dark" | "light";
 
@@ -105,11 +106,23 @@ export type Stack<R> = {
   reset: (routes: R[]) => void;
 };
 
-export function useStack<R>(root: R): Stack<R> {
-  const [routes, setRoutes] = useState<R[]>([root]);
-  const push = useCallback((r: R) => setRoutes((s) => [...s, r]), []);
-  const pop = useCallback(() => setRoutes((s) => (s.length > 1 ? s.slice(0, -1) : s)), []);
-  const reset = useCallback((r: R[]) => setRoutes(r), []);
+/**
+ * The app's navigation stack, shared by its cover and inner copies (lib/apps/store.ts `routes`), so
+ * the screen you are on survives a fold or unfold. `target` is the app's registry key.
+ */
+export function useStack<R>(target: AppTarget, root: R): Stack<R> {
+  const stored = useAppStore((s) => s.routes[target]) as R[] | undefined;
+  const routes = stored && stored.length ? stored : [root];
+  const write = useCallback((fn: (r: R[]) => R[]) => {
+    const st = useAppStore.getState();
+    const cur = (st.routes[target] as R[] | undefined) ?? [root];
+    st.setRoutes(target, fn(cur.length ? cur : [root]));
+    // the root is a fresh object each render; only its shape matters here
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [target]);
+  const push = useCallback((r: R) => write((s) => [...s, r]), [write]);
+  const pop = useCallback(() => write((s) => (s.length > 1 ? s.slice(0, -1) : s)), [write]);
+  const reset = useCallback((r: R[]) => write(() => r), [write]);
   return { routes, top: routes[routes.length - 1], push, pop, reset };
 }
 

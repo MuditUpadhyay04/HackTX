@@ -10,7 +10,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { usePane } from "@/components/lookalike/shared/pane";
 import type { AppScreenProps } from "@/lib/apps/registry";
-import { AppFrame, TOP, Tap } from "../kit";
+import { AppFrame, TOP, Tap, useStack } from "../kit";
 
 type Photo = { id: string; at: string };
 
@@ -57,7 +57,10 @@ function dateLabel(at: string): { day: string; time: string } {
 }
 
 export function PhotosApp({ display }: AppScreenProps) {
-  const [open, setOpen] = useState<number | null>(null);
+  // the open photo is shared with the other display's copy, so a fold/unfold keeps it open
+  const stack = useStack<{ photo: number | null }>("photos", { photo: null });
+  const open = stack.top.photo;
+  const setOpen = (i: number | null) => stack.reset([{ photo: i }]);
   const [liked, setLiked] = useState<Record<string, boolean>>({ "sunrise-290": true });
   return (
     <AppFrame display={display} background="var(--ios-bg)">

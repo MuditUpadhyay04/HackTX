@@ -18,6 +18,7 @@
 import type { ComponentType } from "react";
 import { APP_NAMES, type HomeAppId, type HomeDisplay } from "@/components/home/layout";
 import { InstagramApp } from "@/components/apps/instagram/InstagramApp";
+import { UnsaidApp } from "@/components/apps/unsaid/UnsaidApp";
 import { PhotosApp } from "@/components/apps/photos/PhotosApp";
 import { MessagesApp } from "@/components/apps/messages/MessagesApp";
 import { WhatsAppApp } from "@/components/apps/whatsapp/WhatsAppApp";
@@ -63,8 +64,8 @@ export const APP_SCREENS: Record<AppTarget, Screen> = {
   messages: MessagesApp,
   instagram: InstagramApp,
   photos: PhotosApp,
-  // Un-Said: left empty on purpose; link the real app here when it is built.
-  unsaid: null,
+  // Un-Said: the real app (repo `main`, mobile/ + backend/) running live in the display
+  unsaid: UnsaidApp,
 };
 
 /** Only for a button that should open something different on one display. */

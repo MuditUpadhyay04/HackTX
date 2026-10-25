@@ -7,7 +7,7 @@
  * push/pop. Unfolded: the iPad-style split. Copy: lib/mock/threads.ts (SARAH_SEED).
  */
 import { AnimatePresence, motion } from "framer-motion";
-import { Fragment, useEffect, useState, type ReactNode } from "react";
+import { Fragment, useEffect, type ReactNode } from "react";
 import { IMSG, STATUS } from "@/components/lookalike/metrics";
 import { usePane } from "@/components/lookalike/shared/pane";
 import { ThreadFrame } from "@/components/lookalike/shared/ThreadFrame";
@@ -31,15 +31,23 @@ const CONVERSATIONS: ThreadId[] = ["sarah"];
 const STAMP_GAP_MIN = 60;
 
 export function MessagesApp({ display }: AppScreenProps) {
-  const stack = useStack<Route>({ kind: "list" });
-  const [selected, setSelected] = useState<ThreadId | null>(display === "inner" ? "sarah" : null);
+  // shared with the other display's copy, so a fold/unfold keeps the open conversation
+  const stack = useStack<Route>("messages", { kind: "list" });
+  const thread = stack.routes.find((r): r is Extract<Route, { kind: "thread" }> => r.kind === "thread");
+  const selected = thread?.id ?? null;
+  // the split view always shows a conversation; record it so folding lands in that chat (iOS shows
+  // the selected detail when a split view collapses)
+  const { reset } = stack;
+  useEffect(() => {
+    if (display === "inner" && !selected) reset([{ kind: "list" }, { kind: "thread", id: CONVERSATIONS[0] }]);
+  }, [display, selected, reset]);
   useEffect(() => {
     if (selected) useMessaging.getState().markRead(selected);
   }, [selected]);
 
   const open = (id: ThreadId) => {
     useMessaging.getState().markRead(id);
-    if (display === "inner") setSelected(id);
+    if (display === "inner") stack.reset([{ kind: "list" }, { kind: "thread", id }]);
     else stack.push({ kind: "thread", id });
   };
 
