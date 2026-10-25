@@ -103,7 +103,7 @@ const extraColors = {
   "banner-stroke": "rgba(0,0,0,0.06)",
   "kb-label": "#000000",
   "kb-special-label": "#000000",
-  "icon-photos-fill": "#FFFFFF",
+  "icon-photos-fill": "linear-gradient(180deg, #FFFFFF 0%, #ECECEC 100%)",
 } as const;
 
 export const color = { ...lookalikeColors, ...deviceColors, ...extraColors };
@@ -380,16 +380,20 @@ export const homeColor = {
   "icon-meta-pending": "#D1D1D6",
   // drawn Apple look-alikes (D8/D9: Messages, Phone, Photos)
   "icon-glyph": "#FFFFFF",
-  "icon-green-top": "#5CF777",
-  "icon-green-bottom": "#0EBE2C",
-  "photos-petal-orange": "#F8A12C",
-  "photos-petal-yellow": "#FAD02C",
-  "photos-petal-lime": "#A6D23C",
-  "photos-petal-green": "#4DBE6A",
+  "icon-green-top": "#54EF6D",
+  "icon-green-bottom": "#25C040",
+  "photos-petal-orange": "#FF8504",
+  "photos-petal-yellow": "#FFC200",
+  "photos-petal-lime": "#71C200",
+  "photos-petal-green": "#2AA76D",
   "photos-petal-teal": "#38B6D8",
-  "photos-petal-blue": "#4F7BE0",
-  "photos-petal-purple": "#9A5BD0",
-  "photos-petal-pink": "#EE4C7A",
+  "photos-petal-blue": "#3E8AEA",
+  "photos-petal-purple": "#9A75DE",
+  "photos-petal-pink": "#F057C1",
+  "photos-petal-red": "#FF5560",
+  "icon-glyph-frost-mid": "#ECFAEE",
+  "icon-glyph-frost-end": "#B8ECC1",
+  "icon-glass-rim": "#FFFFFF",
   // widgets (spec Phase 3 LAYOUT: Weather on a blue sky #3C8CE7 -> #7EC3F8; Calendar white with iOS red)
   "widget-weather-top": "#3C8CE7",
   "widget-weather-bottom": "#7EC3F8",

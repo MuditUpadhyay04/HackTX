@@ -5,6 +5,9 @@ import type { CSSProperties, ReactNode } from "react";
 import { iconSquircleClipPath } from "@/lib/squircle";
 import { UnsaidLogo } from "@/components/unsaid/UnsaidLogo";
 import type { HomeAppId } from "@/components/home/layout";
+import { MessagesGlyph } from "./apps/Messages";
+import { PhoneGlyph } from "./apps/Phone";
+import { PhotosGlyph } from "./apps/Photos";
 
 /** The Meta apps on the home screen (D8). */
 export type MetaAppId = Extract<
@@ -50,14 +53,13 @@ export function isMetaApp(app: HomeAppId): app is MetaAppId {
 }
 
 /**
- * Apple apps (D8: Messages, Photos, Phone): the full-bleed icon artwork from
- * github.com/aroundsketch/Apple-App-Icons (docs/App-Icon/Apple/<App>/@SVG.svg; Nick, Oct 25, 2026),
- * served from public/brand/apple/ and masked by the iOS squircle. Sources: assets/brand/apple/README.md.
+ * Drawn Apple look-alikes in the iOS 26 style (D8: Messages, Photos, Phone; never an Apple file),
+ * matched side by side to the iOS 26 icons (iosicongallery.com, 2025-10-20).
  */
-const APPLE_ICON_SRC: Partial<Record<HomeAppId, string>> = {
-  messages: "/brand/apple/messages.svg",
-  phone: "/brand/apple/phone.svg",
-  photos: "/brand/apple/photos.svg",
+const APPLE: Partial<Record<HomeAppId, { tile: string; glyph: ReactNode }>> = {
+  messages: { tile: "var(--icon-green-fill)", glyph: <MessagesGlyph /> },
+  phone: { tile: "var(--icon-green-fill)", glyph: <PhoneGlyph /> },
+  photos: { tile: "var(--icon-photos-fill)", glyph: <PhotosGlyph /> },
 };
 
 function FullBleed({ src, size }: { src: string; size: number }) {
@@ -99,16 +101,15 @@ function Tile({ size, background, children, style }: { size: number; background:
 
 /**
  * An app's icon artwork at `size` pt, masked to the iOS squircle (22.37%, lib/squircle.ts).
- * Un-Said: Gurneal's icon (UnsaidLogo). Meta apps: the official App Store icon (META_ICON_SRC). Apple apps: aroundsketch/Apple-App-Icons artwork (APPLE_ICON_SRC).
+ * Un-Said: Gurneal's icon (UnsaidLogo). Meta apps: the official App Store icon (META_ICON_SRC). Apple apps: drawn iOS 26 look-alikes.
  */
 export function AppGlyph({ app, size }: { app: HomeAppId; size: number }) {
   if (app === "unsaid") return <UnsaidLogo size={size} label="" />;
 
   if (isMetaApp(app)) return <FullBleed src={META_ICON_SRC[app]} size={size} />;
 
-  const apple = APPLE_ICON_SRC[app];
-  if (apple) return <FullBleed src={apple} size={size} />;
-  return <Tile size={size} background="var(--icon-meta-pending)" />;
+  const apple = APPLE[app];
+  return <Tile size={size} background={apple?.tile ?? "var(--icon-meta-pending)"}>{apple?.glyph}</Tile>;
 }
 
 export default AppGlyph;
