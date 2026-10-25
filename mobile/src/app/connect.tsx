@@ -35,7 +35,7 @@ export default function Connect() {
                 <AppGlyph app={r.glyph} />
               ) : (
                 <View style={[styles.photosGlyph]}>
-                  <Ionicons name="images" size={22} color="#fff" />
+                  <Ionicons name="images" size={22} color={color.accent} />
                 </View>
               )}
               <View style={{ flex: 1 }}>
@@ -43,11 +43,11 @@ export default function Connect() {
                 <T v="rowPreview">{r.sub}</T>
               </View>
               {r.on ? (
-                <Ionicons name="checkmark-circle" size={28} color={color.violet} />
+                <Ionicons name="checkmark-circle" size={28} color={color.accent} />
               ) : (
                 <Press featureId={r.id} onPress={r.connect} style={styles.connect}>
                   <PillGradientFill />
-                  <T v="meta" style={{ color: "#fff", fontWeight: "600" }}>Connect</T>
+                  <T v="meta" style={{ color: color.onAccent, fontWeight: "600" }}>Connect</T>
                 </Press>
               )}
             </View>
@@ -66,6 +66,6 @@ export default function Connect() {
 
 const styles = StyleSheet.create({
   row: { minHeight: 76, flexDirection: "row", alignItems: "center", gap: space.s12, backgroundColor: color.surface, borderRadius: radius.row, paddingHorizontal: space.s16 },
-  photosGlyph: { width: 44, height: 44, borderRadius: 10, backgroundColor: color.surfaceRaised, alignItems: "center", justifyContent: "center" },
+  photosGlyph: { width: 44, height: 44, borderRadius: 10, backgroundColor: color.tint, alignItems: "center", justifyContent: "center" },
   connect: { height: 32, paddingHorizontal: space.s16, borderRadius: radius.pill, overflow: "hidden", alignItems: "center", justifyContent: "center" },
 });

@@ -6,6 +6,8 @@ Branch: `unsaid-overhaul`, off `main` at `c32f7ee`. Mobile only. Nothing under `
 - Pass 3 (Grok, Oct 24): every screen re-lays out live for any window size and orientation (the iPhone Duo foldable's outer and inner displays, landscape, half-open, Split View). See "Pass 3".
 - Pass 2 (Grok, Oct 24): phone-portrait finish of the demo path (Talk, Gallery, Photo + knock, Pile, Preview), second pass on Home / Letters / You, Android adaptive icon, web-build fix, verification and screenshots. See "Pass 2".
 
+- Pass 4 (Grok, Oct 24, ~11:55 PM CDT): **no dark mode.** Nick asked for white with light accents. See "Pass 4: light theme".
+
 The app is for a **local demo**, not a hosted deployment. See "Local demo" below.
 
 ## Commits
@@ -47,7 +49,7 @@ Cast in the seed: Riley (`me`), Mom (`mom`, WhatsApp), Dad (`dad`, WhatsApp), Sa
 
 ## Done, by screen
 
-- **Launch** (`src/app/index.tsx`). `#0F0D15`, 120 pt icon, "Un-Said" 20 pt under it, then `router.replace("/home")`. Reduced motion is a short fade.
+- **Launch** (`src/app/index.tsx`). White (was `#0F0D15` before Pass 4), 120 pt icon, "Un-Said" 20 pt under it, then `router.replace("/home")`. Reduced motion is a short fade.
 - **Home**. Wordmark, portrait, headline, hero card, Your words from pieces, Say it out loud, Your photos, Your lane (`home.photos`), waiting strip with a progress line, ready-to-send, reply nudges, waiting on you. Pull to refresh. Loading and error. "+" opens "Who is this for?" then Talk or that pile.
 - **Letters**. Header, story rings (unread ring, tap opens the newest unheard), rows, empty state, loading and error.
 - **You**. 72 pt portrait, Riley, Notes, Connect photos, Safety and support, Settings, Your people, "powered by Meta AI".
@@ -74,7 +76,7 @@ Same features and API calls. Visual and layout work only, against `design/` toke
 - **Letters**. Empty state is a dashed card with a mail icon and the stand-in line.
 - **You**. The rows are now grouped `un-surface` blocks with hairline dividers (spec 3.12). The 72 pt portrait has the gradient ring and sits beside "Riley".
 - **Letter, Connect, Safety**. Screenshot-checked at 402×874. No layout bugs found. No changes.
-- **Android adaptive icon** (`app.json`). The foreground was the full-bleed square art, which Android masks and crops, and the monochrome icon was Expo's default chevron. Now: `android-icon-foreground.png` is the white “ glyph inside the safe zone, `android-icon-background.png` is the icon's gradient with the glyph removed, `monochromeImage` is the glyph, and `backgroundColor` stays `#0F0D15`.
+- **Android adaptive icon** (`app.json`). The foreground was the full-bleed square art, which Android masks and crops, and the monochrome icon was Expo's default chevron. Now: `android-icon-foreground.png` is the white “ glyph inside the safe zone, `android-icon-background.png` is the icon's gradient with the glyph removed, `monochromeImage` is the glyph, and `backgroundColor` is now `#FFFFFF` (Pass 4).
 - **Web build**. `usePushSetup` crashed the web bundle (`getLastNotificationResponse` isn't on web), so every screen rendered blank. It now returns early on web. Native behavior is unchanged.
 - **Launch**. Still opens on Home (splash → Home). Whether the demo should open on the gallery instead is **still an open decision** for Gurneal.
 
@@ -189,3 +191,14 @@ Not on screen, so they are not dead controls. See `mobile/BACKEND_REQUESTS.md`.
 - Recording a new note (`POST /api/self-notes` exists; the app does not capture video)
 - A "Delivered" beat on the waiting strip
 - `release_label` always says "her time", including for Dad
+
+
+## Pass 4: light theme (Oct 24, 2026)
+
+Nick: "no dark mode, get rid of the black and change to white with light accents." This overrides the dark palette from Gurneal's original tokens for the app; `design/` itself was not touched.
+
+- `src/theme/tokens.ts` neutrals flipped: `bg #FFFFFF`, `stage #F4F2FB`, `surface #F6F4FD`, `surfaceRaised #EEEAFB`, `hairline #E4E0F0`, text `#1D1742` / `#3B3570` / `#5F5A78` / `#66617E`, `danger #D70015`. Brand accents (blue `#4F62F4`, violet `#A890F6`, indigo `#4046EE`, the pill gradient and hero card gradient) are unchanged.
+- New tokens: `onAccent` (white text/icons on the blue gradients), `accent #5B45D6` (violet text and small icons; plain `#A890F6` is only 2.6:1 on white), `tint` (violet at 16% for chips, wells, app glyphs), `scrim` (ink at 28% behind sheets), `shadow.card`.
+- Contrast (WCAG AA, 4.5:1) checked for every text token on bg, surface and surfaceRaised: text 14.2+, text2 9.2+, text3 5.5+, text4 4.6+, accent 5.4+. White on the pill gradient is 4.8 to 6.3 except the violet end.
+- Hard-coded dark colors removed: portrait backdrop, sheet scrims, gallery and photo viewer (`#000` -> white, Photos-style light chrome; the photo's top fade is now white), hero "+" tile, Photos glyph wells. Shadows softened to indigo at low opacity.
+- `app.json`: `userInterfaceStyle: "light"`, splash/Android icon/background `#FFFFFF`. Root `StatusBar style="dark"`.

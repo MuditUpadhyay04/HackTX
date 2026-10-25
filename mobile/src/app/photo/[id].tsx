@@ -1,4 +1,4 @@
-// One photo, full screen. The Un-Said icon waits in the corner; if he lingers, Un-Said knocks.
+// One photo, full screen, on white like Photos in light mode. The Un-Said icon waits in the corner; if he lingers, Un-Said knocks.
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
@@ -67,7 +67,7 @@ export default function PhotoViewer() {
 
       {chrome ? (
         <View style={[styles.top, { paddingTop: insets.top + space.s4, paddingLeft: space.s16 + insets.left, paddingRight: space.s16 + insets.right }]}>
-          <LinearGradient pointerEvents="none" colors={["rgba(0,0,0,0.55)", "rgba(0,0,0,0)"]} style={StyleSheet.absoluteFill} />
+          <LinearGradient pointerEvents="none" colors={["rgba(255,255,255,0.94)", "rgba(255,255,255,0)"]} style={StyleSheet.absoluteFill} />
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Back"
@@ -75,7 +75,7 @@ export default function PhotoViewer() {
             onPress={() => (router.canGoBack() ? router.back() : router.replace("/gallery"))}
             style={styles.round}
           >
-            <Ionicons name="chevron-back" size={24} color="#fff" />
+            <Ionicons name="chevron-back" size={24} color={color.text} />
           </Pressable>
           <Text style={styles.date} numberOfLines={1}>{photoDate(Number(t))}</Text>
           <Pressable testID="overlay-open-talk" accessibilityLabel="Say it out loud" hitSlop={12} onPress={talk}>
@@ -106,12 +106,12 @@ export default function PhotoViewer() {
 }
 
 const styles = StyleSheet.create({
-  black: { flex: 1, backgroundColor: "#000" },
+  black: { flex: 1, backgroundColor: color.bg },
   top: { position: "absolute", top: 0, left: 0, right: 0, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: space.s12, paddingHorizontal: space.s16, paddingBottom: space.s24 },
-  round: { width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(0,0,0,0.45)", alignItems: "center", justifyContent: "center" },
+  round: { width: 40, height: 40, borderRadius: 20, backgroundColor: color.bg, borderWidth: StyleSheet.hairlineWidth, borderColor: color.hairline, alignItems: "center", justifyContent: "center" },
   date: { ...type.navTitle, flex: 1, textAlign: "center", fontSize: 15 },
   knockWrap: { position: "absolute", top: 0, left: space.s8, right: space.s8 },
   // Notification-width on a big or sideways screen, centered, like an iOS banner.
-  knock: { width: "100%", maxWidth: 480, alignSelf: "center", flexDirection: "row", gap: space.s12, alignItems: "center", backgroundColor: color.surface, borderRadius: 24, padding: space.s12, borderWidth: StyleSheet.hairlineWidth, borderColor: color.hairline },
-  grabber: { alignSelf: "center", width: 36, height: 5, borderRadius: 3, backgroundColor: color.text4, marginTop: space.s8 },
+  knock: { width: "100%", maxWidth: 480, alignSelf: "center", flexDirection: "row", gap: space.s12, alignItems: "center", backgroundColor: color.bg, borderRadius: 24, padding: space.s12, borderWidth: StyleSheet.hairlineWidth, borderColor: color.hairline },
+  grabber: { alignSelf: "center", width: 36, height: 5, borderRadius: 3, backgroundColor: color.hairline, marginTop: space.s8 },
 });

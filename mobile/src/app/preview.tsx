@@ -110,7 +110,7 @@ export default function Preview() {
         <View style={styles.delivery}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: space.s12 }}>
             <View style={styles.well}>
-              <Ionicons name="moon" size={18} color={color.violet} />
+              <Ionicons name="moon" size={18} color={color.accent} />
             </View>
             <View style={{ flex: 1 }}>
               <T v="rowName">{`${person.name}'s morning`}</T>
@@ -125,7 +125,7 @@ export default function Preview() {
 
       {held ? (
         <View style={styles.held}>
-          <Ionicons name="checkmark-circle" size={28} color={color.violet} />
+          <Ionicons name="checkmark-circle" size={28} color={color.accent} />
           <T v="section" style={{ textAlign: "center" }}>{`Held for ${person.name}'s morning.`}</T>
           <Chip icon="moon" label={`arrives ${held}`} />
           {headsUp.question ? (
@@ -185,7 +185,7 @@ export default function Preview() {
 function Choice({ label, on, onPress, featureId }: { label: string; on: boolean; onPress: () => void; featureId?: string }) {
   return (
     <Pressable testID={featureId} onPress={onPress} style={styles.choice}>
-      <Ionicons name={on ? "radio-button-on" : "radio-button-off"} size={22} color={on ? color.violet : color.text3} />
+      <Ionicons name={on ? "radio-button-on" : "radio-button-off"} size={22} color={on ? color.accent : color.text3} />
       <T v="rowName" style={{ color: on ? color.text : color.text2 }}>{label}</T>
     </Pressable>
   );

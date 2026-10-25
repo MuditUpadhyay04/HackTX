@@ -21,7 +21,7 @@ export const RAIL_APPS: App[] = ["messages", "whatsapp", "instagram", "facebook"
 export function AppGlyph({ app, size = 44 }: { app: App; size?: number }) {
   return (
     <View style={[styles.glyph, { width: size, height: size, borderRadius: size * 0.2237 }]}>
-      <Ionicons name={GLYPH[app]} size={size * 0.5} color={color.text} />
+      <Ionicons name={GLYPH[app]} size={size * 0.5} color={color.accent} />
     </View>
   );
 }
@@ -64,7 +64,7 @@ export function AppRail({ row = false }: { row?: boolean }) {
               <AppGlyph app={open} />
               <View style={{ flex: 1 }}>
                 <T v="rowName">{APP_LABEL[open]}</T>
-                <T v="meta" style={{ color: color.violet }}>Connected</T>
+                <T v="meta" style={{ color: color.accent }}>Connected</T>
               </View>
             </View>
           ) : null}
@@ -84,9 +84,9 @@ const styles = StyleSheet.create({
   rail: { gap: space.s16, alignItems: "center" },
   row: { flexDirection: "row", gap: space.s12, alignItems: "center" },
   dotSmall: { width: 10, height: 10, borderRadius: 5, right: -3, top: -3 },
-  glyph: { backgroundColor: color.surfaceRaised, alignItems: "center", justifyContent: "center" },
+  glyph: { backgroundColor: color.tint, alignItems: "center", justifyContent: "center" },
   dot: { position: "absolute", right: -2, top: -2, width: 12, height: 12, borderRadius: 6, backgroundColor: color.violet, borderWidth: 2, borderColor: color.bg },
-  backdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)" },
-  sheet: { backgroundColor: color.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: space.s24, paddingTop: space.s12, width: "100%", maxWidth: 560, alignSelf: "center" },
-  grabber: { alignSelf: "center", width: 36, height: 5, borderRadius: 3, backgroundColor: color.text4, marginBottom: space.s16 },
+  backdrop: { flex: 1, backgroundColor: color.scrim },
+  sheet: { backgroundColor: color.bg, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: space.s24, paddingTop: space.s12, width: "100%", maxWidth: 560, alignSelf: "center" },
+  grabber: { alignSelf: "center", width: 36, height: 5, borderRadius: 3, backgroundColor: color.hairline, marginBottom: space.s16 },
 });

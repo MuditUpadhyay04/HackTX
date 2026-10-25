@@ -77,7 +77,7 @@ export default function SettingsScreen() {
                       <T v="rowName">{mode.title}</T>
                       <T v="rowPreview">{mode.body}</T>
                     </View>
-                    {on ? <Ionicons name="checkmark" size={22} color={color.violet} /> : null}
+                    {on ? <Ionicons name="checkmark" size={22} color={color.accent} /> : null}
                   </Row>
                 );
               })}
@@ -94,7 +94,7 @@ export default function SettingsScreen() {
                     <T v="rowName" style={{ flex: 1 }}>
                       {q.label}
                     </T>
-                    {on ? <Ionicons name="checkmark" size={22} color={color.violet} /> : null}
+                    {on ? <Ionicons name="checkmark" size={22} color={color.accent} /> : null}
                   </Row>
                 );
               })}

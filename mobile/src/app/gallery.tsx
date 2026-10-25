@@ -68,7 +68,7 @@ export default function Gallery() {
         }}
         style={styles.back}
       >
-        <Ionicons name="chevron-back" size={24} color="#fff" />
+        <Ionicons name="chevron-back" size={24} color={color.text} />
       </Pressable>
       <View style={{ flex: 1 }}>
         <Text style={styles.title}>Library</Text>
@@ -96,7 +96,7 @@ export default function Gallery() {
         {header}
         <View style={styles.ask}>
           <View style={styles.askWell}>
-            <Ionicons name="images" size={34} color={color.violet} />
+            <Ionicons name="images" size={34} color={color.accent} />
           </View>
           <Text style={[styles.sub, { textAlign: "center", paddingHorizontal: space.s32, color: color.text2 }]}>
             Un-Said looks through your photos with you, on this phone.
@@ -136,11 +136,11 @@ export default function Gallery() {
 }
 
 const styles = StyleSheet.create({
-  black: { flex: 1, backgroundColor: "#000" },
+  black: { flex: 1, backgroundColor: color.bg },
   header: { flexDirection: "row", alignItems: "flex-end", gap: space.s8, paddingHorizontal: space.s16, paddingBottom: space.s12 },
   back: { width: 36, height: 41, justifyContent: "center", marginLeft: -space.s8 },
   ask: { flex: 1, width: "100%", maxWidth: 440, alignSelf: "center", justifyContent: "center", alignItems: "center", gap: space.s16, paddingBottom: space.s64 },
-  askWell: { width: 80, height: 80, borderRadius: 24, backgroundColor: color.surfaceRaised, alignItems: "center", justifyContent: "center" },
-  title: { color: "#fff", fontSize: 34, lineHeight: 41, fontWeight: "700", letterSpacing: 0.4 },
+  askWell: { width: 80, height: 80, borderRadius: 24, backgroundColor: color.tint, alignItems: "center", justifyContent: "center" },
+  title: { color: color.text, fontSize: 34, lineHeight: 41, fontWeight: "700", letterSpacing: 0.4 },
   sub: { color: color.text3, fontSize: 15, lineHeight: 20 },
 });

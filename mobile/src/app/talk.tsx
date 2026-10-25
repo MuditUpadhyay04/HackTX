@@ -132,7 +132,7 @@ export default function Talk() {
                       <Ionicons name="chevron-forward" size={18} color={color.text3} />
                     </View>
                     {/* Data wiring: at most one card, rarely (backend decides). Tapping the card opens their pile. */}
-                    {g.encourage ? <T v="caption" style={{ marginTop: space.s8, color: color.violet }}>{g.encourage}</T> : null}
+                    {g.encourage ? <T v="caption" style={{ marginTop: space.s8, color: color.accent }}>{g.encourage}</T> : null}
                     <View style={{ marginTop: space.s12, gap: space.s8 }}>
                       {g.pieces.slice(0, 3).map((p) => (
                         <T key={p.id} v="words" style={{ color: color.text2 }}>{`“${p.text}”`}</T>
@@ -186,7 +186,7 @@ export default function Talk() {
           <View style={[styles.micRing, recording && styles.micRingOn]}>
             <Press featureId={recording ? "rant-stop" : "rant-record"} onPress={toggleMic} disabled={live.state === "finishing" || sorting} style={[styles.mic, shadow.pill]}>
               <PillGradientFill />
-              <Ionicons name={recording ? "stop" : "mic"} size={32} color="#fff" />
+              <Ionicons name={recording ? "stop" : "mic"} size={32} color={color.onAccent} />
             </Press>
           </View>
           <T v="caption">{live.state === "finishing" || sorting ? "sorting it by person…" : recording ? "Tap to stop" : "Tap to talk"}</T>

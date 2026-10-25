@@ -62,7 +62,7 @@ export function PrimaryPill({ label, onPress, disabled, featureId }: { label: st
   return (
     <Press onPress={onPress} disabled={disabled} featureId={featureId} style={[styles.pill, shadow.pill]}>
       <LinearGradient colors={pillGradient.colors} locations={pillGradient.locations} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
-      <T v="button">{label}</T>
+      <T v="button" style={{ color: color.onAccent }}>{label}</T>
     </Press>
   );
 }
@@ -109,8 +109,8 @@ export function Card({ children, style }: { children: ReactNode; style?: StylePr
 export function Chip({ label, icon }: { label: string; icon?: keyof typeof Ionicons.glyphMap }) {
   return (
     <View style={styles.chip}>
-      {icon ? <Ionicons name={icon} size={14} color={color.text2} /> : null}
-      <T v="meta" style={{ color: color.violet, fontWeight: "600" }}>{label}</T>
+      {icon ? <Ionicons name={icon} size={14} color={color.accent} /> : null}
+      <T v="meta" style={{ color: color.accent, fontWeight: "600" }}>{label}</T>
     </View>
   );
 }
@@ -244,7 +244,7 @@ export function Sheet({ visible, onClose, children }: { visible: boolean; onClos
   const insets = useSafeAreaInsets();
   return (
     <Modal transparent visible={visible} animationType="slide" supportedOrientations={ALL_ORIENTATIONS} onRequestClose={onClose}>
-      <Pressable style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)" }} onPress={onClose} />
+      <Pressable style={{ flex: 1, backgroundColor: color.scrim }} onPress={onClose} />
       {/* On a wide screen the sheet stays phone-width and centered instead of spanning the window. */}
       <View style={[styles.sheet, { paddingBottom: insets.bottom + space.s16, paddingLeft: space.s16 + insets.left, paddingRight: space.s16 + insets.right }]}>
         <View style={styles.grabber} />
@@ -260,14 +260,14 @@ export const ALL_ORIENTATIONS = ["portrait", "portrait-upside-down", "landscape"
 export const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.bg },
   pill: { height: 56, borderRadius: radius.pill, overflow: "hidden", alignItems: "center", justifyContent: "center", marginHorizontal: 18 },
-  outline: { height: 52, borderRadius: radius.pill, borderWidth: 1.5, borderColor: color.text, alignItems: "center", justifyContent: "center", flexDirection: "row", gap: space.s8, marginHorizontal: 27 },
-  row: { minHeight: 76, borderRadius: radius.row, backgroundColor: color.surface, paddingHorizontal: space.s16, paddingVertical: space.s12, flexDirection: "row", alignItems: "center", gap: space.s12 },
-  card: { borderRadius: radius.row, backgroundColor: color.surface, padding: space.s16 },
-  chip: { flexDirection: "row", alignItems: "center", gap: space.s4, backgroundColor: color.surfaceRaised, borderRadius: radius.pill, paddingHorizontal: space.s8, paddingVertical: space.s4, alignSelf: "flex-start" },
+  outline: { height: 52, borderRadius: radius.pill, borderWidth: 1.5, borderColor: color.indigo, alignItems: "center", justifyContent: "center", flexDirection: "row", gap: space.s8, marginHorizontal: 27 },
+  row: { minHeight: 76, borderRadius: radius.row, backgroundColor: color.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: color.hairline, paddingHorizontal: space.s16, paddingVertical: space.s12, flexDirection: "row", alignItems: "center", gap: space.s12 },
+  card: { borderRadius: radius.row, backgroundColor: color.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: color.hairline, padding: space.s16 },
+  chip: { flexDirection: "row", alignItems: "center", gap: space.s4, backgroundColor: color.tint, borderRadius: radius.pill, paddingHorizontal: space.s8, paddingVertical: space.s4, alignSelf: "flex-start" },
   nav: { flexDirection: "row", alignItems: "center", paddingHorizontal: space.s16, height: undefined, minHeight: 44, backgroundColor: color.bg },
   navSide: { width: 88, height: 44, flexDirection: "row", alignItems: "center" },
   letterWrap: { paddingHorizontal: inset.card, alignItems: "center" },
-  letter: { width: "100%", maxWidth: 480, borderRadius: radius.hero, backgroundColor: color.letter, padding: space.s24 },
-  sheet: { backgroundColor: color.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: space.s16, paddingTop: space.s12, width: "100%", maxWidth: 560, alignSelf: "center", maxHeight: "85%" },
-  grabber: { alignSelf: "center", width: 36, height: 5, borderRadius: 3, backgroundColor: color.text4, marginBottom: space.s16 },
+  letter: { width: "100%", maxWidth: 480, borderRadius: radius.hero, backgroundColor: color.letter, borderWidth: 1, borderColor: "rgba(168,144,246,0.35)", padding: space.s24 },
+  sheet: { backgroundColor: color.bg, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: space.s16, paddingTop: space.s12, width: "100%", maxWidth: 560, alignSelf: "center", maxHeight: "85%" },
+  grabber: { alignSelf: "center", width: 36, height: 5, borderRadius: 3, backgroundColor: color.hairline, marginBottom: space.s16 },
 });

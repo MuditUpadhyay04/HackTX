@@ -52,7 +52,7 @@ export default function Letters() {
         {home && senders.length === 0 ? (
           <View style={styles.empty}>
             <View style={styles.emptyWell}>
-              <Ionicons name="mail-open-outline" size={30} color={color.violet} />
+              <Ionicons name="mail-open-outline" size={30} color={color.accent} />
             </View>
             <T v="rowPreview" style={{ textAlign: "center", color: color.text2 }}>
               When someone writes back, it lands here.

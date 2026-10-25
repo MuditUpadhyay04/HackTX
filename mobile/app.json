@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/brand/icon-1024.png",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "light",
     "runtimeVersion": {
       "policy": "appVersion"
     },
@@ -18,7 +18,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#0F0D15",
+        "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -35,7 +35,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#0F0D15",
+          "backgroundColor": "#FFFFFF",
           "image": "./assets/brand/unsaid-app-icon.png",
           "imageWidth": 120,
           "resizeMode": "contain"
@@ -58,6 +58,6 @@
       "expo-asset"
     ],
     "scheme": "unsaid",
-    "backgroundColor": "#0F0D15"
+    "backgroundColor": "#FFFFFF"
   }
 }

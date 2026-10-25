@@ -143,7 +143,7 @@ export default function Pile() {
             </View>
             {active ? (
               <LinearGradient colors={pillGradient.colors} locations={pillGradient.locations} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.toggle}>
-                <Ionicons name="checkmark" size={16} color="#fff" />
+                <Ionicons name="checkmark" size={16} color={color.onAccent} />
               </LinearGradient>
             ) : (
               <View style={[styles.toggle, { borderWidth: 1.5, borderColor: color.text4 }]} />
@@ -192,7 +192,7 @@ export default function Pile() {
           <Pressable key={a} onPress={() => { setApp(a); setPicking(false); }} style={styles.sheetRow}>
             <AppGlyph app={a} size={36} />
             <T v="rowName" style={{ flex: 1 }}>{APP_LABEL[a]}</T>
-            {a === channelApp ? <Ionicons name="checkmark" size={20} color={color.violet} /> : null}
+            {a === channelApp ? <Ionicons name="checkmark" size={20} color={color.accent} /> : null}
           </Pressable>
         ))}
       </Sheet>
@@ -202,7 +202,7 @@ export default function Pile() {
         {(person && !ZONES.some((z) => z.id === person.timezone) ? [{ id: person.timezone, label: person.timezone }, ...ZONES] : ZONES).map((z) => (
           <Pressable key={z.id} onPress={() => pickZone(z.id)} style={styles.sheetRow}>
             <T v="rowName" style={{ flex: 1 }}>{z.label}</T>
-            {person?.timezone === z.id ? <Ionicons name="checkmark" size={20} color={color.violet} /> : null}
+            {person?.timezone === z.id ? <Ionicons name="checkmark" size={20} color={color.accent} /> : null}
           </Pressable>
         ))}
       </Sheet>

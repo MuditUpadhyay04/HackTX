@@ -96,7 +96,7 @@ export default function Home() {
         refreshControl={
           <RefreshControl
             refreshing={pulling}
-            tintColor={color.violet}
+            tintColor={color.accent}
             onRefresh={() => {
               setPulling(true);
               refresh().finally(() => setPulling(false));
@@ -129,11 +129,11 @@ export default function Home() {
               <Press featureId="draft-new" onPress={openNew} style={[styles.hero, shadow.hero, { height: heroHeight }]}>
                 <CardGradient />
                 <Text style={styles.quote}>{"“"}</Text>
-                <T v="cardTitle" style={{ marginTop: space.s8, marginRight: space.s64 }}>
+                <T v="cardTitle" style={{ marginTop: space.s8, marginRight: space.s64, color: color.onAccent }}>
                   What have you been meaning to say?
                 </T>
                 <View style={styles.plus}>
-                  <Ionicons name="add" size={26} color="#fff" />
+                  <Ionicons name="add" size={26} color={color.onAccent} />
                 </View>
               </Press>
             </Rise>
@@ -188,7 +188,7 @@ export default function Home() {
                   <Row onPress={() => router.push("/talk")}>
                     <View style={styles.micDot}>
                       <PillGradientFill />
-                      <Ionicons name="mic" size={22} color="#fff" />
+                      <Ionicons name="mic" size={22} color={color.onAccent} />
                     </View>
                     <View style={{ flex: 1 }}>
                       <T v="rowName">Say it out loud</T>
@@ -197,8 +197,8 @@ export default function Home() {
                   </Row>
 
                   <Row onPress={() => router.push("/gallery")}>
-                    <View style={[styles.micDot, { backgroundColor: color.surfaceRaised }]}>
-                      <Ionicons name="images" size={22} color="#fff" />
+                    <View style={[styles.micDot, { backgroundColor: color.tint }]}>
+                      <Ionicons name="images" size={22} color={color.accent} />
                     </View>
                     <View style={{ flex: 1 }}>
                       <T v="rowName">Your photos</T>
@@ -241,7 +241,7 @@ export default function Home() {
                         <Avatar name={c.recipient_name} size={32} />
                         <View style={{ flex: 1 }}>
                           <T v="rowName">{c.recipient_name}</T>
-                          <T v="meta" style={{ color: color.violet }}>{`arrives ${c.release_label ?? ""}`}</T>
+                          <T v="meta" style={{ color: color.accent }}>{`arrives ${c.release_label ?? ""}`}</T>
                         </View>
                         <TextButton featureId="pending-unsend-cancel" tone="text3" label="Cancel" onPress={() => cancel(c)} />
                         <View style={styles.track}>
@@ -256,7 +256,7 @@ export default function Home() {
                         <Avatar name={c.recipient_name} size={32} />
                         <View style={{ flex: 1 }}>
                           <T v="rowName">{c.recipient_name}</T>
-                          <T v="meta" style={{ color: color.violet }}>{`it's ${home.people.find((p) => p.id === c.recipient_id)?.local_time ?? ""} for ${c.recipient_name}`}</T>
+                          <T v="meta" style={{ color: color.accent }}>{`it's ${home.people.find((p) => p.id === c.recipient_id)?.local_time ?? ""} for ${c.recipient_name}`}</T>
                         </View>
                         <TextButton featureId="handoff-whatsapp" tone="text" label="Send now" onPress={() => sendReady(c)} />
                       </View>
@@ -329,7 +329,7 @@ export default function Home() {
         >
           <View style={styles.micDot}>
             <PillGradientFill />
-            <Ionicons name="mic" size={20} color="#fff" />
+            <Ionicons name="mic" size={20} color={color.onAccent} />
           </View>
           <View style={{ flex: 1 }}>
             <T v="rowName">Say it out loud</T>
@@ -361,8 +361,8 @@ const styles = StyleSheet.create({
   header: { height: 44, marginHorizontal: inset.text, flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: space.s8 },
   wordmark: { color: color.text, fontSize: 24, lineHeight: 28, fontWeight: "800", letterSpacing: -0.24 },
   hero: { marginHorizontal: inset.card, marginTop: space.s24, height: 288, borderRadius: radius.hero, overflow: "hidden", padding: space.s24 },
-  quote: { color: "#fff", fontSize: 40, lineHeight: 40, fontWeight: "800" },
-  plus: { position: "absolute", right: space.s16, bottom: space.s16, width: 56, height: 56, borderRadius: radius.square, backgroundColor: color.surfaceRaised, alignItems: "center", justifyContent: "center" },
+  quote: { color: color.onAccent, fontSize: 40, lineHeight: 40, fontWeight: "800" },
+  plus: { position: "absolute", right: space.s16, bottom: space.s16, width: 56, height: 56, borderRadius: radius.square, backgroundColor: "rgba(255,255,255,0.22)", alignItems: "center", justifyContent: "center" },
   split: { flexDirection: "row", alignItems: "flex-start" },
   pane: { flex: 1, flexBasis: 0, minWidth: 0 },
   section: { marginHorizontal: inset.text, marginTop: space.s24, marginBottom: space.s8 },

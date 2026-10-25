@@ -38,7 +38,7 @@ export function Portrait({ name, size }: { name: string; size: number }) {
   const long = kind === "sarah" || kind === "mom";
   return (
     <Svg width={size} height={size} viewBox="0 0 80 80">
-      <Circle cx="40" cy="40" r="40" fill="#211E39" />
+      <Circle cx="40" cy="40" r="40" fill="#E3DDFA" />
       {kind === "sarah" ? <Path d="M16 40 C14 62 20 86 28 90 L52 90 C60 86 66 62 64 40 C60 28 20 28 16 40Z" fill={hair} /> : null}
       {kind === "mom" ? (
         <>
@@ -47,7 +47,7 @@ export function Portrait({ name, size }: { name: string; size: number }) {
         </>
       ) : null}
       <Ellipse cx="40" cy="78" rx="26" ry="22" fill={shoulder} />
-      <Circle cx="40" cy="38" r="15" fill="#EEEAFB" />
+      <Circle cx="40" cy="38" r="15" fill="#FFFFFF" />
       {kind === "dad" ? <Path d="M25 34 C27 18 53 18 55 34 C49 24 31 24 25 34Z" fill={hair} /> : null}
       {!long && kind !== "dad" ? <Path d="M24 36 C26 18 54 18 56 36 C50 24 30 24 24 36Z" fill={hair} /> : null}
       {kind === "sarah" ? <Path d="M26 34 C28 20 52 20 54 32 C48 24 32 24 26 34Z" fill={hair} /> : null}
