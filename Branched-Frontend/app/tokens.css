@@ -383,8 +383,6 @@
   --ig-active: #1CD14F;
   --ig-pressed: #F2F2F2;
   --ig-reel-stroke: rgba(255,255,255,0.7);
-  --photos-segment-bg: rgba(242,242,247,0.92);
-  --photos-chrome-fade: linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.9) 70%, rgba(255,255,255,0) 100%);
   --ig-reel-tile-scrim: linear-gradient(180deg, rgba(0,0,0,0.45) 0%, transparent 28%, transparent 70%, rgba(0,0,0,0.55) 100%);
   --ig-reel-viewer-scrim: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 22%, transparent 62%, rgba(0,0,0,0.6) 100%);
 

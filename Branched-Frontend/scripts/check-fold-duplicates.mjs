@@ -7,7 +7,7 @@ const b = await chromium.launch({ channel: "chrome" });
 const p = await b.newPage({ viewport: { width: 1920, height: 1080 } });
 const res = {};
 for (const app of ["whatsapp", "messages", "instagram", "photos", "unsaid"]) {
-  await p.goto(`http://localhost:3000/device?state=unfolded&labels=off&toasts=off`, { waitUntil: "networkidle" });
+  await p.goto(`${process.env.BASE_URL ?? "http://localhost:3000"}/device?state=unfolded&labels=off&toasts=off`, { waitUntil: "networkidle" });
   await p.waitForTimeout(700);
   const r = await p.locator(`[data-fold-part="inner-content"] [data-app-icon="${app}"]`).first().boundingBox();
   await p.mouse.click(r.x + r.width / 2, r.y + r.height / 2); await p.waitForTimeout(app === "unsaid" ? 3000 : 1200);
