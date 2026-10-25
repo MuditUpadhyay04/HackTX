@@ -68,7 +68,10 @@ function UnsaidWindow() {
     if (!loaded) return;
     const id = setInterval(() => {
       try {
-        const loc = frame.current?.contentWindow?.location;
+        const el = frame.current;
+        // only the copy being used reports its route (the kept-mounted copies follow it)
+        if (!el || el.closest("[inert]") || getComputedStyle(el).visibility !== "visible") return;
+        const loc = el.contentWindow?.location;
         if (!loc) return;
         const p = loc.pathname.replace(/^\/unsaid/, "") + loc.search;
         if (p && p !== path) reset([{ path: p }]);
@@ -78,6 +81,20 @@ function UnsaidWindow() {
     }, 300);
     return () => clearInterval(id);
   }, [loaded, path, reset]);
+
+  // a copy that isn't the one being used (kept mounted for the fold) follows the route the live copy
+  // is on, so both halves show the same Un-Said screen when the hinge moves
+  useEffect(() => {
+    if (!loaded || !path) return;
+    try {
+      const win = frame.current?.contentWindow;
+      if (!win) return;
+      const here = win.location.pathname.replace(/^\/unsaid/, "") + win.location.search;
+      if (here !== path) win.location.replace(`${BASE}${path}`);
+    } catch {
+      // cross-origin: can't steer it
+    }
+  }, [loaded, path]);
 
   const onLoad = () => {
     try {
@@ -113,7 +130,9 @@ function UnsaidWindow() {
           background: "#FFFFFF",
           // hidden (not just transparent) while the splash shows, so the launch/close zoom never
           // repaints a live web page through the moving clip
-          visibility: live ? "visible" : "hidden",
+          // "inherit", never "visible": an explicit visible would show through a hidden ancestor (the
+          // flat screen layers are hidden part-way through a fold)
+          visibility: live ? "inherit" : "hidden",
           opacity: live ? 1 : 0,
           transition: live ? "opacity 0.2s ease-out" : "none",
         }}

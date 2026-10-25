@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Un-Said's generated web build (scripts/build-unsaid.sh)
+    "public/unsaid/**",
   ]),
 ]);
 

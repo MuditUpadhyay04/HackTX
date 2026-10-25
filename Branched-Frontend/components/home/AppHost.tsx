@@ -1,10 +1,9 @@
 "use client";
 
-import { animate, motion, useMotionValue, useTransform, type AnimationPlaybackControls } from "framer-motion";
+import { animate, motion, useMotionValue, useMotionValueEvent, useTransform, type AnimationPlaybackControls } from "framer-motion";
 import { createElement, useContext, useEffect, useRef, useState } from "react";
-import { useShallow } from "zustand/react/shallow";
 import { InertCopyContext } from "@/lib/apps/copies";
-import { useFoldStore } from "@/lib/device/store";
+import { angleValue, useFoldStore } from "@/lib/device/store";
 import { GEOM } from "@/components/device/geometry";
 import { AppGlyph } from "@/components/icons/AppGlyph";
 import { appScreen, type AppTarget } from "@/lib/apps/registry";
@@ -91,22 +90,36 @@ export function AppHost({ display }: { display: HomeDisplay }) {
   // The home screen is drawn up to 7 times (the cover and inner live layers plus the inert slices on
   // the halves). Running the app in every copy halved the frame rate of the launch, so only the copy
   // the viewer can see runs it: the live layer of the display that faces out, and the inert slices
-  // only while the hinge is moving (that is when they show).
+  // whenever the hinge is part-way open (moving or resting there: that is when they show).
   const inert = useContext(InertCopyContext);
-  const { folded, moving } = useFoldStore(useShallow((s) => ({ folded: s.folded, moving: s.moving })));
+  const folded = useFoldStore((s) => s.folded);
+  const [midFold, setMidFold] = useState(() => isMidFold(angleValue.get()));
+  useMotionValueEvent(angleValue, "change", (a) => setMidFold(isMidFold(a)));
   const facing = display === "cover" ? folded : !folded;
-  const visible = moving || (!inert && facing);
+  const visible = midFold || (!inert && facing);
+  // apps that load over the network (Un-Said's web app) stay mounted, hidden, in every copy while
+  // they are open, so a fold shows them already loaded and on the same screen instead of each half
+  // starting its own copy mid-fold
+  const keep = target ? KEEP_MOUNTED.has(target) : false;
 
   const Screen = target ? appScreen(target, display) : undefined;
-  if (!target || !Screen || !visible) return null;
+  if (!target || !Screen || (!visible && !keep)) return null;
   const isIcon = !target.startsWith("widget-") && target !== "search" && !target.startsWith("hw-");
 
   return (
     <>
-      <motion.div aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 19, background: "#000000", opacity: dim, pointerEvents: "none" }} />
+      <motion.div aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 19, background: "#000000", opacity: dim, pointerEvents: "none", visibility: visible ? undefined : "hidden" }} />
       <motion.div
         data-app-open={target}
-        style={{ position: "absolute", inset: 0, overflow: "hidden", zIndex: 20, clipPath, pointerEvents: open ? "auto" : "none" }}
+        style={{
+          position: "absolute",
+          inset: 0,
+          overflow: "hidden",
+          zIndex: 20,
+          clipPath,
+          pointerEvents: open && visible ? "auto" : "none",
+          visibility: visible ? undefined : "hidden",
+        }}
       >
         <motion.div style={{ position: "absolute", inset: 0, opacity: appOpacity }}>
           {/* registry lookup, not a component defined in render */}
@@ -153,6 +166,14 @@ export function AppHost({ display }: { display: HomeDisplay }) {
     </>
   );
 }
+
+/** Part-way open: the slices on the halves are what the viewer sees. */
+function isMidFold(a: number): boolean {
+  return a > 0.5 && a < 179.5;
+}
+
+/** Apps kept mounted (hidden) in every screen copy while open: see `keep` above. */
+const KEEP_MOUNTED = new Set<AppTarget>(["unsaid"]);
 
 /** The iOS icon squircle's corner, as a share of the icon's side (lib/squircle.ts). */
 const ICON_CORNER = 0.225;

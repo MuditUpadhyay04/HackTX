@@ -119,7 +119,12 @@ export function FoldControl({ tone, hidden, x = STAGE_WIDTH / 2, y = FOLD_CONTRO
       onPointerUp={() => setDown(false)}
       onPointerLeave={() => setDown(false)}
       onPointerCancel={() => setDown(false)}
-      onClick={toggle}
+      onClick={(e) => {
+        toggle();
+        // don't keep focus after a click: with focus parked here, the next F press (or the slider's
+        // arrow keys) flips the browser into keyboard mode and draws the focus ring round the pill
+        e.currentTarget.blur();
+      }}
     >
       <HingeGlyph />
       <span>{label}</span>

@@ -14,7 +14,8 @@
     "shoot:clean": "tsx scripts/shoot.ts --clean",
     "check:tokens": "tsx scripts/check-tokens.ts",
     "check:placeholders": "tsx scripts/check-placeholders.ts",
-    "demo": "bash scripts/demo.sh"
+    "demo": "bash scripts/demo.sh",
+    "check:duplicates": "node scripts/check-fold-duplicates.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",
