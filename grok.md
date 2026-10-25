@@ -4,6 +4,10 @@ Running log of every change Grok Bot makes. Times are America/Chicago (CDT). New
 
 ## Oct 24, 2026, 11:10 PM CDT
 
+Gurneal told Grok to stop tracking Claude and focus only on the Un-Said app. The Claude watcher is paused. The overhaul priorities are (1) the core demo flow: Gallery, Photo + knock, Talk, Pile, Preview; (2) the Home/Letters/You tabs; (3) Letter, Connect, Safety. Checkpoints get pushed early and often.
+
+## Oct 24, 2026, 11:10 PM CDT
+
 Gurneal clarified ownership. Grok Bot is the ONLY one building the Un-Said app itself (the overhaul of mobile/ on unsaid-overhaul). Claude Code builds everything else for the demo (iPhone Fold device, mock WhatsApp/iMessage/Instagram apps, animations) in Branched-Frontend/, where Un-Said is only an icon or placeholder.
 
 ## Oct 24, 2026, 11:09 PM CDT
