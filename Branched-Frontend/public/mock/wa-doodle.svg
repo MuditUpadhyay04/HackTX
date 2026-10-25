@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" width="220" height="220">
+  <!-- Branched-Frontend: WhatsApp look-alike chat doodle tile, drawn in-house (our own line icons; not WhatsApp's art). Lines at 6% opacity on the wallpaper. -->
+  <g fill="none" stroke="#3B3A36" stroke-opacity="0.075" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <!-- coffee cup -->
+    <path d="M14 22h18v10a9 9 0 0 1-18 0V22z"/><path d="M32 25h3a4 4 0 0 1 0 8h-3"/><path d="M19 14c0-3 3-3 3-6M25 14c0-3 3-3 3-6"/>
+    <!-- heart -->
+    <path d="M70 30c-3-5-11-4-11 3 0 6 11 12 11 12s11-6 11-12c0-7-8-8-11-3z"/>
+    <!-- star -->
+    <path d="M118 12l3.5 7.2 7.9 1.1-5.7 5.6 1.3 7.9-7-3.7-7 3.7 1.3-7.9-5.7-5.6 7.9-1.1z"/>
+    <!-- music note -->
+    <path d="M160 34V14l16-4v20"/><circle cx="156" cy="35" r="4"/><circle cx="172" cy="31" r="4"/>
+    <!-- cloud -->
+    <path d="M196 34h14a7 7 0 0 0 0-14 10 10 0 0 0-19-2 7 7 0 0 0 5 16z"/>
+    <!-- chat bubble -->
+    <path d="M20 62h26a5 5 0 0 1 5 5v14a5 5 0 0 1-5 5H32l-8 7v-7h-4a5 5 0 0 1-5-5V67a5 5 0 0 1 5-5z"/>
+    <!-- camera -->
+    <rect x="66" y="66" width="28" height="20" rx="4"/><circle cx="80" cy="76" r="5.5"/><path d="M73 66l3-5h8l3 5"/>
+    <!-- leaf -->
+    <path d="M114 92c0-16 12-26 26-26 0 16-10 26-26 26z"/><path d="M114 92l16-16"/>
+    <!-- moon -->
+    <path d="M176 64a12 12 0 1 0 14 15 10 10 0 0 1-14-15z"/>
+    <!-- balloon -->
+    <ellipse cx="206" cy="72" rx="8" ry="10"/><path d="M206 82c-2 6 3 8 0 14"/>
+    <!-- phone handset -->
+    <path d="M18 118c2-2 5-2 6 0l3 5c1 2 0 3-1 4l-2 2c2 4 5 7 9 9l2-2c1-1 3-2 4-1l5 3c2 1 2 4 0 6l-2 2c-2 2-5 2-8 1-9-4-16-11-20-20-1-3-1-6 1-8z"/>
+    <!-- sun -->
+    <circle cx="80" cy="128" r="7"/><path d="M80 114v4M80 138v4M66 128h4M90 128h4M70 118l3 3M87 135l3 3M70 138l3-3M87 121l3-3"/>
+    <!-- gift -->
+    <rect x="114" y="118" width="24" height="20" rx="2"/><path d="M112 118h28M126 118v20M126 118c-4-8-12-6-8-1M126 118c4-8 12-6 8-1"/>
+    <!-- pizza slice -->
+    <path d="M160 112l26 6-18 24z"/><circle cx="170" cy="122" r="1.5"/><circle cx="174" cy="130" r="1.5"/>
+    <!-- paper plane -->
+    <path d="M196 126l22-10-8 24-5-9z"/><path d="M205 131l13-15"/>
+    <!-- smiley -->
+    <circle cx="28" cy="180" r="12"/><path d="M23 184c3 3 7 3 10 0"/><path d="M24 176v1M32 176v1"/>
+    <!-- bicycle -->
+    <circle cx="66" cy="190" r="7"/><circle cx="94" cy="190" r="7"/><path d="M66 190l8-14h12l8 14M74 176l6 14 6-14M84 172h5"/>
+    <!-- book -->
+    <path d="M114 172c6-3 11-3 14 0v24c-3-3-8-3-14 0zM142 172c-6-3-11-3-14 0v24c3-3 8-3 14 0z"/>
+    <!-- umbrella -->
+    <path d="M160 186a14 14 0 0 1 28 0zM174 186v12a3 3 0 0 1-6 0"/>
+    <!-- clock -->
+    <circle cx="206" cy="186" r="10"/><path d="M206 180v6l4 3"/>
+  </g>
+</svg>

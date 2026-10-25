@@ -1,0 +1,32 @@
+PHASE 5: Finish the scripted opening: beat B27 (the Apple-style unfold) and B28 (the Un-Said splash handing off to the UnsaidSlot), then polish the whole opening to the frame checklist, render the MP4 and record a screen-capture backup. Nothing new is built outside lib/opening/, components/opening/ and remotion/, except fixes the polish pass finds.
+
+WORKSPACE RULE (still in force): branch `branched-frontend` only; folder `Branched-Frontend/` only; everything stays in that folder; never touch frontend/, backend/, App-UI-Final/, ideas/, Mudit's Un-Said app or anything else (App-UI-Final/ is the read-only theme source); stage with git add Branched-Frontend/ and push only with git push origin branched-frontend; run git branch --show-current before every commit. All design, naming, palette and user-facing decisions come from Gurneal. Mudit owns backend/ and the real Un-Said app; it is NOT built here (it mounts in components/UnsaidSlot.tsx). Phase 0 global rules apply (docs/RULES.md), including rule 12 (BUILD_LOG + commit + push after every change), rule 13 (10 Haiku reviewers until CLEAN), rule 14 (PRODUCTION QUALITY BAR) and rule 16 (motion: interactive springs plus the one scripted opening).
+
+THE BEATS (continuing Phase 4's table; t in seconds)
+| Beat | t | What happens | Motion |
+| B27 | 31.60–33.60 | The pressed banner becomes the app card (the iOS notification-open: the banner rect grows to the cover display, radius 24 -> 52 px, un-card-gradient fills it, the Un-Said icon fades in at center, 31.60–32.00). Then the Duo unfolds: openAngle 0 -> 180 through the SAME function the fold control uses (Phase 1: left panel rotateY = openAngle - 180, group translateX = -215 * (1 - openAngle/180), tilt rotateY = -8deg * sin(pi * openAngle/180), rotateX = 3deg * sin(pi * openAngle/180), specular 0.15 -> 0.85). The camera eases from the Phase 4 drift back to scale 1 so the whole unfolded Duo is centered. The hinge ripple fires at openAngle ~178 | spring-unfold {120, 22, 1.3} (Remotion spring() with the same config, starting at 32.00), camera ease-breath |
+| B28 | 33.60–38.00 | The UnsaidSplash (state=ready: the 120 pt icon centered on the left display, "Un-Said" wordmark 20 pt below, un-card-gradient full bleed across both displays, continuous across the hinge) holds 900 ms, then crossfades (200 ms, ease-soft) into the UnsaidSlot (placeholder unless a slot URL is set; in the render, always the placeholder, ?unsaid= ignored, so the MP4 is deterministic). Hold to the end | ease-soft |
+- The unfold must read as Apple's own product film: a mechanical hinge (no rubbery overshoot beyond the detent settle), a continuous specular sweep along the white frame and the back glass, the camera bump catching the light as it passes 60-120 degrees, no flicker at 90 degrees, no z-fighting, the crease shading fading in only as the panels go flat.
+- Reduced motion: B27 becomes a 400 ms crossfade from the folded card to the unfolded splash; B28 is unchanged (it is already a crossfade).
+- ?scene=unfold starts at B26; ?scene=launch starts at B28.
+
+POLISH PASS (the whole opening, B01–B28)
+- Frame checklist (scripts/opening-check.ts, extended): screenshot t = 0.50, 2.60, 5.20, 8.00, 10.40, 11.70, 12.60, 13.60, 14.40, 15.00, 16.90, 19.40, 20.60, 21.60, 22.90, 24.60, 26.30, 27.40, 28.20, 30.00, 31.45, 31.80, 32.40, 32.80, 33.20, 33.60, 34.20, 35.00 and 37.50, at 1x and 2x, twice (pixel-identical pairs). Save them under Branched-Frontend/screenshots/opening/ and LOOK at every one side by side with the matching static ?state= frame from Phases 1-3: the opening's frame and the hand-built state must be the same pixels (beyond the camera transform).
+- Holds are silent and still: during B06, B09, B11 and the end of B24 nothing moves except the caret.
+- Timing review: play the opening three times end to end; if a beat feels rushed or slow, propose a change in BUILD_LOG.md (beat, old t, new t, why) and ask Gurneal before changing the table.
+- Fonts, emoji and the clock are pinned (system stack, the same emoji rendering every run, 9:41 PM).
+
+THE MP4
+- npx remotion render Opening out/opening.mp4 --codec=h264 --crf=16 (from inside Branched-Frontend/; out/ is git-ignored). 1920 x 1080, 60 fps, 38.00 s, no audio track. Check the file with ffprobe (duration, fps, size) and watch it.
+- SCREEN-RECORD BACKUP: also record /opening?autoplay=1&frame=bare&labels=off&dev=off in Chromium at 1920 x 1080 with Playwright's recordVideo (scripts/record-opening.ts -> out/opening-screen.webm), so a live recording exists if the render ever disagrees with the browser.
+- Neither file is committed. Note their paths, sizes and durations in BUILD_LOG.md.
+
+ACCEPTANCE CRITERIA (Phase 5)
+1. /opening plays B01–B28 at 60 fps (frameStats p95 under 20 ms, no frame over 50 ms); Replay restarts cleanly; ?t= lands on the exact frame anywhere in 0–38 s.
+2. The unfold in the opening and the unfold from the fold control are the same motion (same function, same spring): a frame strip of both at openAngle 30/60/90/120/150 matches.
+3. B28 lands on the splash and then the UnsaidSlot placeholder; from 35.00 s the end frame is completely still.
+4. Every checklist frame passes as an Apple/Meta screenshot (rule 14); the slop detector and the opening reviewer report CLEAN.
+5. out/opening.mp4 and out/opening-screen.webm exist and play; ffprobe shows 1920x1080, 60 fps (the webm: whatever Chromium records), about 38 s.
+6. npm run build, lint, check:tokens and check:placeholders pass. Commit "branched-frontend: phase 5: unfold, splash to slot, polish, render" and push per rule 12 (the MP4 itself is not committed). All 10 reviewers CLEAN in one round.
+
+STOP AND LET ME REVIEW. Report: git branch --show-current, git diff main --name-only (only Branched-Frontend/ paths), the frame checklist screenshots, the MP4 and webm paths with ffprobe output, every timing change you propose, every COPY NEEDED and the reviewer round results. Do not start Phase 6.

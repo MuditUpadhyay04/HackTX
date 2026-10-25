@@ -1,0 +1,23 @@
+/* app/theme-gallery.css: colors for the Samsung Gallery look-alike (One UI 9). Owned by that app only. */
+:root {
+  /* One UI light surfaces: an off-white page, white rounded cards */
+  --gallery-bg: #F7F7F7;
+  --gallery-card: #FFFFFF;
+  --gallery-text: #000000;
+  --gallery-text-secondary: #737373;
+  --gallery-tab-inactive: #8A8A8A;
+  --gallery-divider: rgba(0, 0, 0, 0.08);
+  --gallery-pressed: rgba(0, 0, 0, 0.06);
+  --gallery-accent: #387AFF;
+  --gallery-thumb-bg: #E4E4E4;
+  /* the photo viewer */
+  --gallery-viewer-bg: #000000;
+  --gallery-viewer-icon: #FFFFFF;
+  --gallery-viewer-text-secondary: rgba(255, 255, 255, 0.7);
+  --gallery-viewer-top-scrim: linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0) 100%);
+  --gallery-viewer-bottom-scrim: linear-gradient(0deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0) 100%);
+  --gallery-favorite: #FF4D5E;
+  /* Stories card text scrim */
+  --gallery-story-scrim: linear-gradient(180deg, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.6) 100%);
+  --gallery-on-photo: #FFFFFF;
+}

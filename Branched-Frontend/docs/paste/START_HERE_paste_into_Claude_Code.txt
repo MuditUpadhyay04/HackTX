@@ -1,0 +1,99 @@
+You're building the Un-Said demo frontend for HackTX (BF-v2). Read this whole message before you do anything.
+
+WHAT YOU'RE BUILDING
+This build is the phone, its apps and the opening animation. Un-Said itself is NOT built here.
+- The phone: a white iPhone Duo (a book-style, dual-screen concept iPhone), folded and unfolded, drawn from scratch with Apple-level materials.
+- On the phone: the iOS home screen across both displays, the iOS navigation shell (open, close, the app switcher, swiping between apps), and iOS notification banners.
+- The apps, all working look-alikes on mock data:
+  - WhatsApp: Mom's chat, missed calls, the Calls tab, and the incoming, voice and video call screens.
+  - Messages: Sarah ❤️🤍.
+  - Instagram: Michael (Best Friend)'s DMs and the Reels viewer.
+  - Photos.
+  - Facebook and Meta AI as shells.
+  - A dev panel plus `?notify=` to fire any banner by hand.
+- A fold/unfold control: a glass "Fold"/"Unfold" button on the stage below the phone, plus the `F` key.
+  - It uses an Apple-quality spring (spring-unfold: stiffness 120, damping 22, mass 1.3), a smooth hinge, and a click at the detent.
+  - It can be interrupted mid-move.
+  - With reduced motion it falls back to a crossfade.
+- The opening animation: a scripted, replayable storyboard at `/opening`. It runs on the real build, never on copies of the screens. It has Replay, `?t=` seeking and an MP4 render.
+  1. The folded Duo.
+  2. Mom's WhatsApp with "Seen".
+  3. He types "love you too", then deletes it.
+  4. Sarah's notification and his reply.
+  5. Michael's notification and his reply.
+  6. The Un-Said notification.
+  7. The Apple-style unfold into the Un-Said splash.
+- Un-Said is logo only. It appears as:
+  - its home-screen icon
+  - its notification icon
+  - a launch splash: the icon plus the "Un-Said" wordmark on the gradient
+  - `components/UnsaidSlot.tsx`
+- `components/UnsaidSlot.tsx` is where Mudit's real app mounts later, through an iframe URL prop or env var. Until then it shows a polished, static placeholder Home in Gurneal's App-UI-Final theme.
+  - The placeholder does nothing: no fake features, no fake recording, no AI text.
+  - It can be swapped out in one line.
+
+WORKSPACE RULE (outranks everything else)
+- Branch: work ONLY on the git branch `branched-frontend`.
+  - First run `git fetch origin`, then `git checkout branched-frontend` (or `git checkout -b branched-frontend` if it doesn't exist).
+  - Run `git branch --show-current` before every commit.
+  - Never commit to, merge into or push to main. Push only with `git push origin branched-frontend`.
+- Folder: work ONLY inside the top-level folder `Branched-Frontend/` (hyphenated, so no path has a space).
+  - The Next.js app, code, assets, logs, reviewers, reports and docs all live there.
+  - Stage with `git add Branched-Frontend/` only.
+- NEVER touch Mudit's work. Never create, edit, move or delete anything in `backend/`, in Mudit's Un-Said app, in `frontend/`, `ideas/` or any root file.
+  - Mudit owns `backend/` and the real Un-Said app. You never build Un-Said's screens; his app plugs into UnsaidSlot.
+- `App-UI-Final/` is the Un-Said theme source (tokens, icon, wordmark, UI reference, copy). It is READ-ONLY.
+  - It sits at the repo root, or at `~/Desktop/Unsaid-Claude-Context/App-UI-Final/`.
+  - A sync script copies what the build needs into `Branched-Frontend/`. Never edit App-UI-Final.
+- Every design, name, palette and user-facing decision comes from Gurneal. The names are Riley, Mom, Dad, Sarah ❤️🤍 and Michael (Best Friend).
+
+THE SPEC
+- The full build spec (BF-v2) is `~/Desktop/Unsaid-Claude-Context/Branched-Frontend/CLAUDE_PROMPT.md`. Read it in full.
+- Its `assets/`, `reference/` and `paste/` files sit next to it.
+- Scaffold the Next.js app inside `Branched-Frontend/` first. Then copy in the spec, `GOAL_STATEMENT.txt`, `CONTEXT.md`, `assets/` and `reference/` (put the docs in `Branched-Frontend/docs/`).
+- Never copy anything from a `private/` folder.
+- The spec is the source of truth. Follow it phase by phase and stop for Gurneal's approval at the end of each phase:
+  - Phase 0: retire the old v1 Un-Said leftovers, scaffold, theme sync from App-UI-Final, tokens, rules, reviewers.
+  - Phase 1: the Duo and the fold control.
+  - Phase 2: the Act 1 apps, banners, the Un-Said splash and the dev panel.
+  - Phase 3: home, the shell, UnsaidSlot and the interactive unfold.
+  - Phase 4: the opening timeline engine, beats B01–B26.
+  - Phase 5: the Apple-style unfold, splash → slot, polish and the MP4.
+  - Phase 6: the Facebook and Meta AI shells, the full click-through, and the final "ready for animation work" report.
+
+HOW YOU WORK: PLAN WITH FABLE, BUILD WITH OPUS IN PARALLEL, REVIEW WITH HAIKU
+1. Plan with Fable. Before each phase, use Fable to write that phase's plan to `Branched-Frontend/docs/plans/PhaseN_plan.md`.
+   - The plan splits the phase into independent work packages (one per app, screen, component group or beat range) and lists each package's files.
+   - It names a single owner for every shared file (tokens, mock data, the opening timeline, layout).
+   - Show Gurneal the plan before building.
+2. Build with Opus agents in parallel. Define Opus builder subagents in `Branched-Frontend/.claude/agents/` (front matter `model: opus`), for example `opus-builder-device`, `opus-builder-apps`, `opus-builder-shell` and `opus-builder-opening`.
+   - Dispatch them in parallel, one per work package, with about 10 running at once.
+   - Each builder sticks to its own files and follows spec section 4 (styling) and section 5 (quality bar) exactly.
+   - Each builder reports which files it changed.
+3. Review with Haiku. After every package and every change, run the 10 Haiku reviewers from spec section 9 in parallel.
+   - Every issue, however small, gets logged in `REVIEW_FINDINGS.md`, fixed by an Opus builder and re-checked.
+   - Repeat until all 10 report CLEAN in the same round, before Gurneal sees anything.
+4. Log and push every change. After every change, add an entry to `Branched-Frontend/BUILD_LOG.md`, then commit and push to `branched-frontend`.
+
+SCOPE: DEMO-ONLY
+- This is NOT a production app. Build only what shows on screen in the HackTX demo. "Production quality" means how it LOOKS and MOVES, not production engineering.
+- Skip these:
+  - auth, a real backend and persistence
+  - security hardening
+  - tests beyond keeping `npm run build` green and the spec's Playwright checks
+  - responsiveness and deployment
+- Mock data, local state and hardcoding are fine. If something won't show up in the demo, skip it.
+
+QUALITY BAR
+- Nothing may look vibe-coded or like AI slop.
+- The phone, the iOS chrome, the banners, the fold and the opening must look like Apple built them:
+  - follow Apple's Human Interface Guidelines pixel for pixel
+  - use springs, not linear easing
+  - hold 60 fps
+- The app look-alikes must pass as real WhatsApp, iMessage, Instagram, Photos, Facebook and Meta AI screenshots. They are look-alikes only: never use official logo files, icons or fonts.
+- The Un-Said icon, splash and placeholder use only App-UI-Final's tokens. No handwriting fonts, no amber, no invented colors.
+- Controls that would do something real outside the demo have a press state and show a small "concept only" toast. Nothing is dead to the touch.
+- The only thing that plays on its own is `/opening`. Everything else moves only when touched.
+- When the build is done, the frontend is ready for animation work.
+
+Start now with Phase 0 from the spec. Fable writes the Phase 0 plan first.

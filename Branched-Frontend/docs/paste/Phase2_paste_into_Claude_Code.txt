@@ -1,0 +1,230 @@
+PHASE 2: Build Act 1's apps as WORKING MOCK APPS (local mock state, no backend) on the folded white iPhone Duo's cover display: Mom on WhatsApp (chats AND the calls side: Calls tab, missed calls, an incoming call, the voice/video call screen), Sarah ❤️🤍 on Messages (iMessage), Michael (Best Friend) on Instagram (DMs AND Reels), the Photos gallery he retreats to, the iOS keyboard, the iOS notification banners (fired from the dev panel and ?notify=), and Un-Said's launch splash (logo only). Everything is a pixel-accurate look-alike you can use by hand: open threads, type, send, see receipts, answer or decline a call, swipe reels, open a photo. Nothing plays on its own (the scripted opening comes in Phase 4 and drives these same apps). Every storyboard frame below also exists as an exact ?state=.
+Rule 3a (mock messaging) applies. Every frame must pass as a real WhatsApp / iMessage / Instagram / Photos / iOS screenshot. Colors come only from the look-alike palettes in CLAUDE_PROMPT.md section 4.2 (lib/tokens.ts).
+
+WORKSPACE RULE (still in force): branch `branched-frontend` only; folder `Branched-Frontend/` only; everything stays in that folder; never touch frontend/, backend/, App-UI-Final/, ideas/, Mudit's Un-Said app or anything else (App-UI-Final/ is the read-only theme source); stage with git add Branched-Frontend/ and push only with git push origin branched-frontend; run git branch --show-current before every commit. All design, naming, palette and user-facing decisions come from Gurneal. Mudit owns backend/ and the real Un-Said app; it is NOT built here (it mounts in components/UnsaidSlot.tsx). Phase 0 global rules apply (docs/RULES.md), including rule 12 (BUILD_LOG + commit + push after every change), rule 13 (10 Haiku reviewers until CLEAN), rule 14 (PRODUCTION QUALITY BAR) and rule 16 (motion: interactive springs plus the one scripted opening).
+
+
+
+HONESTY
+These are look-alikes we draw ourselves. Use no official logos, wordmarks, app icons, ringtones, notification sounds or bundled fonts (system stack only), and no real people's photos (illustrated avatars and photos only). Chrome text is paraphrased where needed. The "Seen" under Mom's last bubble is a story annotation: real WhatsApp doesn't show the reader a "Seen" on incoming messages, so it's listed in the honesty notes.
+
+THE STORY BEAT
+The cold open is "The last thing my kid ever texted me was 'k.'" Then we're on the SON's (Riley's) phone, folded. Mom's WhatsApp: her check-ins, missed calls, his "k", her "I love you beta", Seen. He starts to answer ("…love you too"), stalls, and deletes it. Sarah's banner drops in; he opens it and fires back "i just don't feel like talking rn". Michael's banner drops in; he answers "im good bro just tired". Then a banner from Un-Said. He taps it, and the Duo unfolds into the Un-Said splash, which hands off to the UnsaidSlot (Phase 3).
+
+THE SCRIPTS (exact seed data and storyboard, in order)
+NOW on the son's phone = Saturday, Oct 24, 2026, 9:41 PM (status bar "9:41" in every state). The son is Riley. The phone is the FOLDED white iPhone Duo: everything until the unfold is on its single cover display (the right panel's display). Date labels follow each app's own rules relative to NOW (Today, Yesterday, weekday names within the last 7 days, then dates). Each thread's default state shows exactly ONE screen of messages: what fits between the nav bar and the composer with the keyboard down. Earlier messages exist above it in a "history" state (scrolled up), so nothing written before is lost.
+
+STATE 1 · MOM · WhatsApp look-alike · /scene/threads/mom
+Header: back chevron + "3" · Mom's illustrated avatar (soft peach) · "Mom" · subtitle "online" (she is still there, waiting) · video + phone glyphs.
+On screen (default "read", keyboard down; 11 rows + Seen):
+[Wednesday]
+  ☎ Missed voice call · 9:15 PM
+  Mom     9:17 PM  call me when you can ❤️
+  Mom     9:40 PM  haven't heard from you in a bit
+[Yesterday]
+  Mom     7:46 PM  did you eat?
+  Mom     7:48 PM  can you call me this weekend? even 5 minutes
+  Riley  11:36 PM  k                                         ✓✓ blue   <- the last thing he ever sent her
+[Today]
+  ☎ Missed voice call · 6:01 PM
+  ☎ Missed voice call · 6:04 PM
+  Mom     6:05 PM  just wanted to hear your voice
+  Mom     9:02 PM  I love you beta                           <- final bubble
+          Seen                                               <- small gray "Seen" under her last bubble (story annotation; see RECEIPTS)
+Above it ("history" state, scrolled up): the encryption pill "🔒 messages and calls are end-to-end encrypted.", then
+[Sat, Oct 10] Mom 11:04 AM "hi beta, how's it going? 😊" · Mom 11:05 AM "how did the chem exam go?" · Riley 10:51 PM "yeah im good" ✓✓
+[Mon, Oct 12] ☎ Missed voice call · 7:30 PM · Mom 7:34 PM "tried calling. no emergency" · Mom 7:34 PM "did you eat?"
+[Wed, Oct 14] Mom 6:12 PM "your dad asked about you today" · Mom 6:13 PM "he won't say it but he misses you" · Mom 6:15 PM "is everything okay?" · Riley 11:58 PM "everything's good" ✓✓
+[Fri, Oct 16] ☎ Missed voice call · 8:02 PM · ☎ Missed voice call · 8:09 PM · Mom 8:11 PM "just wanted to hear your voice" · Mom 8:12 PM "I know you're busy. no pressure ❤️"
+[Sunday] Mom 1:20 PM "made your favorite dal today. wish you were here" · Mom 1:20 PM [illustrated photo: a steel pot of dal on the stove] · Mom 1:22 PM "I put some in the freezer for when you come home"
+STORYBOARD ACTION (Phase 4 drives this; it must also be possible by hand in your build; he answers her, then can't):
+- He taps the field; the keyboard rises (the thread shifts up: "k", Today, both missed calls, "no emergency…", "I love you beta" and Seen stay visible).
+- We cut in mid-word, so we only see the last letters land: the field already reads "love you t", then "love you to", then "love you too". The send button (green circle, white arrow) has replaced the mic.
+- Stall: the caret blinks. Nothing happens.
+- He deletes it: backspace, letter by letter, then faster (iOS hold-to-delete), back to an empty field. The mic glyph returns.
+- Nothing is sent. "k" stays the last thing he ever texted her.
+Predictive bar while typing: "too" · "to" · "you".
+
+STATE 2 · SARAH (girlfriend) · iOS notification banner, then iOS Messages (iMessage) look-alike · /scene/threads/sarah
+Contact name everywhere: "Sarah ❤️🤍" (iMessage header and notification title).
+Banner (drops in over Mom's thread, keyboard still up, composer empty): Messages look-alike icon · title "Sarah ❤️🤍" · body "please just say something" · "now".
+Tap -> her thread. Header: back chevron + blue unread pill "8" · avatar (illustrated Sarah) · "Sarah ❤️🤍 >" · FaceTime glyph. Composer placeholder "iMessage".
+On screen (default "read", keyboard down):
+[Sunday 12:47 AM]
+  Sarah  I keep thinking about the night the bus never came and it started pouring and you gave me your hoodie and we split that gas station honey bun on the curb. you used to text me goodnight every single night. I'm not mad. I just miss you so much it scares me.
+  Sarah  I don't know what I did
+[Wednesday 8:15 PM]
+  Sarah  we haven't really hung out in almost three weeks
+[Yesterday 1:12 AM]
+  Sarah  I really miss you
+[Today 9:41 PM]
+  Sarah  please just say something
+Above it ("history"): [Sat, Oct 10 at 12:31 PM] "still on for barton springs today?" · "I packed the good snacks 🙂" · [Sat, Oct 10 at 3:47 PM] "ok I guess not" · "are you okay?" · [Tue, Oct 13 at 10:58 PM] "goodnight 🤍" · [Thu, Oct 15 at 11:20 PM] "I miss your voice. can we facetime tomorrow?"
+STORYBOARD ACTION (Phase 4 drives this; it must also be possible by hand in your build; he answers fast, and it's the wrong answer):
+- He taps the field; the keyboard rises.
+- He types the whole reply quickly, with no hesitation: "i just don't feel like talking rn" (33 characters).
+- The send arrow (blue circle, white up-arrow) is active; he hits send.
+- Sent: a blue bubble "i just don't feel like talking rn" with "Delivered" under it, then "Read 9:41 PM".
+- Her typing dots appear under it, then vanish. She doesn't answer.
+Predictive bar while typing: "rn" · "right" · "now".
+
+STATE 3 · MICHAEL (Best Friend) · iOS notification banner, then Instagram DM look-alike · /scene/threads/michael
+Banner (drops in over Sarah's thread, after her dots vanish): Instagram look-alike icon · title "Michael (Best Friend)" · body "hey bro I miss you, haven't talked in a while… is everything ok?" (two lines) · "now".
+Tap -> the DM. Header: back chevron · 32 pt avatar · "Michael (Best Friend)" (an Instagram chat nickname) · "Active now" · phone + video glyphs. The handle michael.ortiz (placeholder) shows only on the profile peek.
+On screen (default "read", keyboard down):
+  (top edge, clipped by the nav bar: the lower half of Michael's Sep 30 reel card, @goldenhour.pups, a golden retriever cannonballing into a pool)
+  Michael  bro??
+[Sun 7:26 PM]
+  Michael  [reel card: @rec.league.legends · a half-court buzzer beater]
+  Michael  you alive lol
+[Today 9:41 PM]
+  Michael  hey bro I miss you, haven't talked in a while… is everything ok?
+Above it ("history"): [Sep 19, 11:12 PM] reel @dormlife.tx ("when your roommate says 'one episode' at 1am") · Michael "this is so us lmao" · Riley "LMAOOO" · Riley "literally last night" · Seen · [Sep 30, 4:40 PM] the goldenhour.pups reel · [Oct 9, 1:07 AM] shared illustrated photo (two friends on a car hood, sunrise, empty highway) · "one year ago today. the night we ran out of gas on 290 and just watched the sunrise 🌅" · "we need to do that again"
+STORYBOARD ACTION (Phase 4 drives this; it must also be possible by hand in your build; the lie that's also the truth):
+- He taps the field; the keyboard rises.
+- He types "im good bro", pauses, then types "just tired": "im good bro just tired" (22 characters).
+- He hits send. His purple-blue gradient bubble appears: "im good bro just tired". No "Seen" yet.
+- (Changed Oct 24: this replaces the earlier unsent "I'm tired, a". He now sends a short reply.)
+Predictive bar while typing: "tired" · "tbh" · "bro".
+
+STATE 4 · UNSAID · iOS notification banner (Meta-styled) · /scene/threads/michael?banner=unsaid and /scene/launch
+Banner (drops in over Michael's thread, a beat after his reply): the Un-Said app icon (Gurneal's icon, public/brand/unsaid-app-icon.png via UnsaidLogo, masked to the banner's icon squircle; the same icon as on the home screen; the first blue-violet on screen) · app name / title "Un-Said" · body (default; options in the notes): "We noticed you've been quieter with the people closest to you lately. Want to say what you haven't?" · "now".
+Tap -> the Duo unfolds into book mode and shows the Un-Said splash (STATE 5), which hands off to the UnsaidSlot in Phase 3.
+
+STATE 5 · UN-SAID SPLASH (logo only) · /scene/launch
+Once unfolded, the phone shows Un-Said's launch splash, then hands off to the UnsaidSlot (Phase 3). Un-Said's screens are NOT built here: the splash is the only Un-Said page in this build.
+- components/unsaid/UnsaidSplash.tsx: full bleed across both displays (continuous across the hinge; folded, the cover display only), background un-card-gradient from the synced theme (lib/unsaid-theme.json; Gurneal can switch it to un-bg with one prop, see CLAUDE_PROMPT.md section 3 row 7). The app icon (UnsaidLogo, 120 pt, continuous squircle mask 22.37%, un-shadow-hero from the theme) sits centered on the LEFT display when unfolded (centered on the cover display when folded). "Un-Said" in the theme's wordmark style (white, per App-UI-Final/assets/wordmark.md) sits 20 pt below it. Nothing else: no tagline, no spinner, no buttons.
+- States: icon (the icon alone, wordmark at 0%), ready (default: icon + wordmark). Props: gradient (default "un-card-gradient"), onDone.
+- Interactive: when the splash is reached by tapping the Un-Said banner, it holds for 900 ms, then crossfades (200 ms, ease-soft) into the UnsaidSlot. Before Phase 3 exists, it simply stays on state=ready.
+- UnsaidLogo comes from Phase 1 (public/brand/unsaid-app-icon.png). The wordmark text and its rules come from App-UI-Final (COPY_AND_NAMES.md and assets/wordmark.md); never restyle them.
+
+STATE 6 · PHOTOS (working app; optional, not in the opening) · /scene/photos
+Photos is a fully working app but is NOT part of the scripted opening (CLAUDE_PROMPT.md section 3, row 5). It stays reachable by hand, and as an optional dev state (?scene=photos in the opening, ?notify=unsaid&photo=kitchen here): him and Mom in the kitchen at home, with the Un-Said banner landing on that photo.
+- Photos look-alike (iOS 18-style library): a "Library" grid, 3 columns with 2 pt gaps, newest at the bottom; the top bar ("Library", "Select", the search glyph) and the bottom segmented control ("Years · Months · All").
+- Seed (lib/mock/photos.ts, illustrated, never stock or real people): the Oct 9 sunrise car-hood photo (from Michael's thread), Mom's dal photo (from Mom's Sunday message), a lake shot ("lake trip, june"), campus, a dorm desk, a few screenshots, and the kitchen photo: Riley and Mom at the stove, warm light, her arm around his shoulder (state=kitchen opens it full screen with the date "November 12, 2023" and the iOS photo-viewer chrome: back, "Edit", share, heart, info, trash).
+- States: grid (default), grid-scrolled, kitchen (full screen), kitchen-zoomed (pinch frame, 1.4x), kitchen+banner (the Un-Said banner over it: ?notify=unsaid&photo=kitchen).
+- Interactive: tap a thumbnail to open it (iOS zoom-from-thumbnail spring), pinch or double-tap to zoom, swipe to the next photo, swipe down to dismiss. Heart/share/edit/trash are placeholders (rule 4: data-placeholder="photos:<control>", toast "concept only").
+- COPY NEEDED (log it): the kitchen photo's date label is Gurneal's to confirm; default "November 12, 2023".
+
+WHATSAPP CALLS (new; Mom calls a lot, so the calls side must exist and be usable)
+- Calls tab (WhatsApp look-alike tab bar: Updates · Calls · Communities · Chats · Settings): "Recent" list. Mom's rows (newest first): today 6:04 PM missed voice (red #F15C6D, missed-arrow glyph), today 6:01 PM missed voice, Wednesday 9:15 PM missed voice, Oct 16 8:09 PM and 8:02 PM missed voice (one row, shown "(2)"), Oct 12 7:30 PM missed. These match the missed-call rows in THE SCRIPTS exactly. Each row: avatar, name (missed rows in red), the call-type glyph + date/time in wa-meta, and a trailing info "ⓘ". Top: "Favorites" strip with Mom.
+- Missed-call rows in the chat: Mom's thread already shows "Missed voice call" system bubbles (THE SCRIPTS below). Tapping one opens a sheet: "Voice call" / "Video call" / "Cancel".
+- INCOMING CALL (state=incoming, route /scene/whatsapp/call?state=incoming&from=mom): the full-screen WhatsApp look-alike incoming call on the cover display: blurred Mom avatar backdrop (wa-call-bg #0B141A), "Mom", "WhatsApp voice call", the "end-to-end encrypted" line, and the iOS-style controls: decline (red) and accept (green) with "Remind me" and "Message" above them. Interactive: accept → in-call; decline → back to the chat with a new "Missed voice call" row at the current mock time; "Message" opens WhatsApp's quick replies sheet ("Can't talk now. What's up?" · "I'll call you right back." · "I'll call you later." · "Can't talk now. Call me later?" · "Custom message…"); choosing one sends it in Mom's thread from Riley. Fire it from the dev panel ("incoming call · Mom") or ?notify=call-mom. On a locked or other-app screen it appears as the iOS call banner (compact, at the top) with the same accept/decline.
+- IN-CALL / VIDEO CALL (route /scene/whatsapp/call?state=voice|video&with=mom): voice = avatar, name, timer "0:12" (tabular figures), controls (speaker, video, mute, end) in a wa-call-surface well; video = remote video full screen (an illustrated still of Mom in her kitchen; Dad leaning in behind her in state=video-dad), self-view tile top-right (Riley, draggable to the 4 corners with a spring), the same controls bar, and "end-to-end encrypted" at top. On the unfolded Duo the video call spans both displays (remote on the left, self-view + controls on the right). End → "Call ended" for 1.2 s, then back to the chat with a "Video call 4:12" row (state=after-call). The call buttons in the chat header (video, voice) open these screens; starting a call from Riley's side is a placeholder (data-placeholder="whatsapp:call-start", toast "concept only").
+- All call audio is silent; no ringtones or WhatsApp sounds (honesty).
+
+INSTAGRAM REELS (new; Michael sends reels that pile up)
+- Every reel bubble in Michael's thread (the @goldenhour.pups and @rec.league.legends reels, and @dormlife.tx in history) is a tappable reel card: 9:16 thumbnail (illustrated), the account handle, a reel glyph. Tapping opens the Reels viewer (route /scene/instagram/reels?id=<id>): black background, the illustrated still with a subtle Ken-Burns pan (it is a still, not a video), the handle + "Follow", caption (one line, "more"), audio line, and the right rail (heart, comment, share, more) with counts. Swipe up/down for the next/previous reel; tap to "pause" (a pause glyph); the back chevron returns to the DM. Heart toggles locally; comment/share are placeholders (data-placeholder="instagram:<control>", toast "concept only").
+- Each reel card in the thread shows its age under it in ig-muted (relative to NOW: "Sun", "Wed", "Today"), so the pile reads as unanswered.
+- SEND A REEL BACK: in the Reels viewer, the share (paper-plane) button opens Instagram's share sheet look-alike (search, a row of recent people with Michael first, "Write a message…", "Send"). Choosing Michael and Send adds the reel as an outgoing reel card in his DM with "Sent" (Instagram receipts). This one works locally (it's messaging); nothing else in the sheet does.
+- Instagram's main tabs (Home, Search, Reels, Profile) exist as look-alike shells in Phase 6; in Phase 2 only the DM inbox, Michael's thread and the Reels viewer must be complete.
+
+DEV PANEL + ?notify= (fire everything by hand)
+- The Phase 0 dev panel (` key or ?dev=1) gets a "Notifications" section: Sarah ("please just say something"), Michael ("hey bro I miss you, haven't talked in a while… is everything ok?"), Un-Said (the knock), Mom's incoming call, and (Phase 6) Sarah's and Michael's replies. Each fires the real iOS banner (or call screen) on whatever screen is showing and appends the incoming message to the right store.
+- URL equivalents on any route: ?notify=sarah | michael | unsaid | call-mom, optional &at=<ms> delay so a screenshot can catch the banner mid-drop (static frames: &banner=in|resting|out). Banners stack like iOS (newest on top, max 3 visible, then "+N more").
+- Tapping a banner opens that thread in its app (through the Phase 3 shell once it exists); swiping it up dismisses it; pulling it down expands it with the iOS quick-reply field (sending from there writes into the thread).
+
+RECEIPTS AND "SEEN"
+- Receipts stay true to each app on the reader's side: his blue WhatsApp ticks on "k"; iMessage "Delivered" then "Read 9:41 PM" under his reply; Instagram shows nothing under his new reply yet; "Seen" under his own Sep 19 replies (history).
+- Gurneal wants Mom's "Seen" visible: a small gray "Seen" (12 pt, #8696A0, regular, left-aligned with her bubble, 4 pt under it), on by default in the Mom thread. It means he looked and never answered. Hide it with &seen=off. One-line honesty note: "WhatsApp doesn't show 'Seen' on incoming messages; we added it for the story."
+
+CHROME SPECS (light mode; every glyph is inline SVG; no real assets)
+- Shared iOS status bar (54 pt, Dynamic Island safe area): "9:41" in the system font, semibold 17 pt; 4 cellular bars, 3 Wi-Fi arcs, a 72% battery glyph; black. Home indicator: 134x5 pt, radius 2.5, black, 8 pt from the bottom.
+- iOS keyboard look-alike (shared by all three threads): light, QWERTY, the system font, 291 pt tall at 402 wide (the predictive bar included), key radius 5, key shadow 0 1 0 rgba(0,0,0,0.3). The predictive bar shows each script's three words. The shift/return/space states are correct for the typed text. Drawn, not interactive. Caret: a 2 pt bar in the app's tint (WhatsApp-style green #00A884, iMessage #007AFF, Instagram #3B5BFE) that blinks 500 ms on / 500 ms off; ?caret=static keeps it visible for screenshots.
+- iOS notification banner look-alike (shared): 8 pt from the sides, 6 pt under the Dynamic Island area; radius 24 (continuous corners); the iOS light notification material (rgba(250,250,250,0.78) with a 30 px backdrop blur and saturate 180%); padding 14x14; a 38 pt app icon (22.37% squircle) at left; title 15 pt semibold (one line, truncated); body 15 pt regular (at most 2 lines); "now" 13 pt secondary at the top right; a 0.5 pt hairline edge and the soft iOS banner shadow. States: in (resting), pressed (0.97 scale, 8% darker), off (hidden). Same component for all three banners; only the icon and copy change.
+- WhatsApp look-alike (Mom):
+  - Wallpaper: the classic beige #EFE7DE with a faint doodle pattern we draw ourselves (our own line icons at 6% opacity).
+  - Nav bar: white rgba(255,255,255,0.96), 0.5 pt hairline. Back chevron + count in #007AFF. Avatar 36 pt. Name 17 pt semibold; subtitle 12 pt secondary.
+  - Date pills: centered, rgba(255,255,255,0.92), 12.5 pt medium #54656F, radius 8, a soft 1 pt shadow.
+  - Bubbles: incoming #FFFFFF, outgoing #D9FDD3, 16.5 pt text, radius 8, a small tail on the first bubble of each run; the time inside at bottom-right (11 pt #667781); outgoing bubbles carry the blue double tick #53BDEB.
+  - Missed-call rows: an incoming-side compact bubble with a red #EA0038 phone-down glyph in a soft red circle, "Missed voice call" (15 pt semibold), "Tap to call back" (13 pt secondary), time at right. Two in a row = two stacked bubbles.
+  - Composer: "+" · a capsule field · sticker and camera glyphs · mic (empty) or a green circle send button with a white arrow (text present).
+- iOS Messages look-alike (Sarah):
+  - Translucent white nav bar with a hairline; back chevron with a blue #007AFF unread pill "8"; 54 pt avatar with "Sarah ❤️🤍 >" (12 pt) under it; FaceTime glyph.
+  - Timestamps centered, 11 pt semibold secondary, iOS formats ("Sunday 12:47 AM", "Yesterday 1:12 AM", "Today 9:41 PM").
+  - Bubbles: incoming #E9E9EB with black text, outgoing #007AFF with white text, 17 pt, line-height 22, padding 7x12, radius 18, a tail (SVG path) on the last bubble of each run, max width 72%, 2 pt gap within a run and 8 pt between runs.
+  - Receipts right-aligned under his last bubble (11 pt secondary): "Delivered", then "Read 9:41 PM".
+  - Typing indicator: a gray bubble with three dots (static, mid-pulse).
+  - Composer: "+" circle · capsule field with placeholder "iMessage" and a mic glyph; with text, the mic becomes a blue circle with a white up-arrow.
+- Instagram DM look-alike (Michael):
+  - White background. Nav: back chevron, 32 pt avatar, name 16 pt semibold, "Active now" 12 pt secondary, phone + video glyphs.
+  - Timestamps centered, 12 pt secondary ("Sun 7:26 PM", "Today 9:41 PM").
+  - Incoming: #EFEFEF bubbles, black text, radius 22 (stacked bubbles get 4 pt inner corners), a 28 pt avatar beside the last bubble of each run. Outgoing: our own purple-to-blue gradient (#7B2FF7 -> #3B5BFE, approximating the in-app bubble, not a logo) with white text.
+  - Reel cards: 160x284 pt, radius 14, an illustrated thumbnail (our own art), the poster's avatar and handle on top, a small reel glyph, a one-line caption under it.
+  - Composer: a blue camera circle · capsule field "Message…" · mic/photo/sticker glyphs; with text, a "Send" label in #3B5BFE replaces the glyphs.
+- App icons in the banners: the same look-alike icons the Phase 3 home screen uses (build them here in components/ios/AppIcon if Phase 3 hasn't): Messages, Instagram, Un-Said.
+
+INTERACTIVE MESSAGING (these are working mock apps, not static shells; local mock state only, no backend, no network)
+- State: one in-memory messaging store (React context + useReducer in lib/mock/messaging.tsx; no new dependency). It is seeded from lib/mock/threads.ts and holds every thread, its messages, receipts and composer drafts. It survives in-app navigation and the Phase 3 shell, and resets on reload. ?state= seeds the store to that exact frame, and the screen stays interactive from there.
+- Mock clock: starts at NOW (Sat, Oct 24, 2026, 9:41 PM) and advances in real time. The status bar and every new timestamp read it. ?clock=frozen pins it at 9:41 for screenshots.
+- Composer: tap the field to focus it. The iOS keyboard look-alike rises with the iOS spring (about 250 ms; the thread shifts up, keeping the last message in view). Typing works BOTH ways: tap the drawn keys (each press shows the iOS key-pop callout, shift auto-capitalizes and then releases, 123 / emoji keys swap the layout, the delete key repeats and accelerates when held, the return key inserts a line break in Messages/IG and a send-less newline in WhatsApp) AND type on the computer's physical keyboard. The caret blinks in the app's tint. The predictive bar suggests 3 words from a small local word list (seeded with the storyboard words); tapping one inserts it plus a space. The send control appears as soon as there's text, exactly like each app; the mic/glyphs return when the field is empty. Tap outside the field, or swipe down on the thread, to dismiss the keyboard.
+- Send: the message appends as the app's outgoing bubble with the real send motion (bubble springs up from the composer, the field clears, the list scrolls to bottom; transform/opacity only), stamped with the mock clock, grouped and tailed with the run, with a new date separator if needed. Receipts follow each app:
+  - WhatsApp: one gray tick -> two gray ticks (300 ms) -> blue ticks when the contact is "online" (Mom: after 1.2 s).
+  - iMessage: "Delivered" -> "Read <time>" after 1.5 s (Sarah has read receipts on). After your send in Sarah's thread her typing dots appear 1 s after "Read", stay about 2.5 s, then vanish with no reply (the storyboard beat; per-thread flag typingAfterRead in lib/mock/threads.ts, default on for Sarah only).
+  - Instagram: no receipt -> "Seen" after 2 s only when the contact is "Active now" and ?replies=on; otherwise nothing (matches the storyboard).
+  - No contact ever auto-replies by default (the story is that nobody gets an answer they need). ?replies=on enables a canned reply from lib/mock for testing only.
+- Thread lists: every app's chat/DM list opens any thread; unread badges clear when a thread is opened; a sent message updates the list preview and time.
+- Long-press a bubble: the iOS context menu look-alike (Reply / Copy / React) appears as a placeholder sheet (navigation-like, no badge). Attachments, calls, camera, voice notes and stickers stay placeholders (rule 4, toast "concept only").
+- NOTIFICATION BANNERS, triggerable by hand so the animation can be recorded later:
+  - A hidden dev panel "Notifications" inside the Phase 0 dev panel (also the N key, or ?dev=on; hidden by default and in recordings): buttons "Sarah ❤️🤍", "Michael (Best Friend)", "Un-Said", and "custom" (pick an app, title and body). Each one fires the banner on the current display.
+  - URL trigger: ?notify=sarah|michael|unsaid fires that banner once, after &notify-delay=<ms> (default 600) from load.
+  - Code trigger: notify({ app, threadId, title, body }) from lib/notify.ts (Phase 3 forwards it to shell.notify).
+  - Firing a banner also appends its message to that thread in the store (as an incoming bubble with the clock time) and bumps that list's unread badge, like a real push.
+  - Tapping a banner opens the RIGHT thread (Sarah -> Messages/Sarah, Michael -> Instagram/Michael, Un-Said -> the Un-Said splash). In Phase 2 that's a route change with a crossfade; Phase 3 replaces it with the iOS open-from-banner transition and, for Un-Said, the unfold, the splash and the slot. Swipe up dismisses a banner; it auto-dismisses after 5 s.
+- What stays out: nothing types, sends or fires on its own. The storyboard's timed actions (auto-typing, the delete, the banner timing, the unfold timing) belong to the Phase 4-5 opening timeline, which drives THIS interactive build through the store actions, notify() and the shell. Make sure each storyboard action can be done by hand and that each resulting frame also exists as a ?state=.
+
+ROUTES AND STATES (register all in lib/scenes.ts; every route takes &device=folded (default) and &caret=static)
+- /scene/threads/mom?state=
+  - read (default): the one-screen view above, keyboard down, Seen visible.
+  - history: scrolled to the top of the two weeks (encryption pill, Sat, Oct 10).
+  - compose&typed=N: keyboard up, the field holds the first N characters of "love you too" (N = 0..12; the storyboard frames are 10, 11, 12, then back down to 0). typed=0 shows the empty field with the mic.
+  - off: black display (the folded Duo asleep).
+- /scene/threads/sarah?state=
+  - read (default): keyboard down, ending on "please just say something".
+  - history
+  - compose&typed=N: keyboard up, the first N characters of "i just don't feel like talking rn" (N = 0..33), send arrow active from N = 1.
+  - sent: keyboard up, his blue bubble + "Delivered".
+  - read-receipt: the same with "Read 9:41 PM".
+  - typing: read-receipt + her typing dots.
+- /scene/threads/michael?state=
+  - read (default): keyboard down, ending on "hey bro I miss you, haven't talked in a while… is everything ok?".
+  - history
+  - compose&typed=N: keyboard up, the first N characters of "im good bro just tired" (N = 0..22).
+  - sent: keyboard up, his gradient bubble "im good bro just tired", no Seen.
+- Banner overlay on any thread route: &banner=sarah|michael|unsaid&banner-state=in|pressed (default in). Storyboard frames: Mom compose&typed=0 + banner=sarah; Sarah typing (dots gone: state=read-receipt) + banner=michael; Michael sent + banner=unsaid.
+- &seen=off hides Mom's Seen annotation.
+- /scene/launch?state= (the unfold and launch; reuses the Phase 1 IPhoneDuo openAngle snapshots)
+  - tap: folded; Michael's thread (sent) with the Un-Said banner pressed.
+  - unfold-start: folded; the banner has expanded into a full-display app card (iOS notification-open: the banner's rect grows to the display, radius 24 -> 52 px, un-card-gradient fills it, Gurneal's app icon fades in at center).
+  - unfold-mid: openAngle 90 (Phase 1's unfold-90 snapshot); the right display shows the Un-Said card; the left panel is edge-on.
+  - unfold-end: openAngle 180, book mode; the splash gradient spans both displays, the icon at 0% opacity.
+  - ready (default): the splash, Gurneal's icon + "Un-Said" wordmark on un-card-gradient (STATE 5).
+  - icon: the icon alone (wordmark at 0%).
+  - slot: the UnsaidSlot (Phase 3; until then this state shows the splash).
+- /scene/threads/whatsapp-chats: the WhatsApp chat list (interactive: opens any chat) (Mom at the top with 3 unread, "I love you beta", 9:02 PM; then Fam, Roommates, Marfa Trip), for any shot that needs it.
+
+COMPONENTS (reusable in Phases 3-6)
+- components/lookalike/whatsapp/{WhatsAppThread,MissedCallRow,DatePill,Composer,ChatList}.tsx
+- components/lookalike/imessage/{MessagesThread,Bubble,TypingDots,Composer}.tsx
+- components/lookalike/instagram/{DMThread,ReelCard,Composer}.tsx
+- components/ios/{StatusBar,Keyboard,HomeIndicator,NotificationBanner,AppIcon}.tsx
+- components/unsaid/UnsaidSplash.tsx (states icon | ready; Gurneal's icon from public/brand/, the theme from lib/unsaid-theme.json)
+- lib/mock/messaging.tsx (the local messaging store and reducer: send, receipts, unread, drafts), lib/notify.ts (notify() + the dev-panel wiring), components/dev/NotificationsPanel.tsx (hidden; N key or ?dev=on).
+- All copy, times and seed strings live in lib/mock/threads.ts. Nothing is hard-coded in the components.
+
+ACCEPTANCE CRITERIA (Phase 2)
+- Would pass as a real Meta/Apple screenshot: every new state, at 2x, side by side with a reference screenshot of the real app or device. A designer couldn't tell at a glance which is the mock (apart from the look-alike icons). Zero PRODUCTION QUALITY BAR tells (rule 14); meta-style-slop-reviewer reports CLEAN.
+- Each default state reads instantly as the real app on an iPhone: status bar, nav bar, bubble colors/shapes/tails, receipts, date/timestamp formats, composer, keyboard and banners.
+- The copy matches THE SCRIPTS word for word, emoji included, and each default state fits on ONE screen with nothing clipped except the deliberately clipped reel at the top of Michael's thread. The weekday/date labels are right relative to NOW.
+- The emotional end points are unmistakable: "I love you beta" + Seen, and "love you too" typed and then deleted (Mom); "i just don't feel like talking rn" + Read 9:41 PM (Sarah); "im good bro just tired" sent (Michael); the Un-Said banner copy; the splash.
+- The system font throughout. No Caveat anywhere. No official logos or assets (Gurneal's Un-Said icon is our own art).
+- Interactive, checked by hand and by a Playwright test (scripts/messaging-check.ts): in each thread, focus the composer, type with the drawn keys AND the physical keyboard, use delete (hold to repeat) and a predictive word, send; the bubble appears with the right grouping, tail, mock-clock timestamp and receipt sequence for that app; the chat list preview and unread badges update. Firing each banner (dev panel and ?notify=) appends the incoming message and tapping it opens the right thread; the Un-Said banner opens /scene/launch (the splash). Nothing fires or types by itself. Placeholders (attachments, camera, voice notes, starting a call from Riley's side) still toast; the incoming call, Reels viewer, reel send-back and Photos viewer work by hand. Build each thread as a reusable component so Phase 3 can register it as the app's screen. check:placeholders passes (zero data-feature-id).
+- Screenshots of every route and state at 1920x1080 and 2x (caret=static). You checked each one side by side with the references. Commit "branched-frontend: phase 2: Act 1 apps (WhatsApp + calls, Messages, Instagram DMs + Reels, Photos), banners, Un-Said splash, dev panel" and push per rule 12.
+- All 10 reviewers report CLEAN in the same final round (rule 13); every finding is logged in REVIEW_FINDINGS.md and VERIFIED; BUILD_LOG.md is complete.
+
+COPY RULES (for the seed data and anything you add): he writes lowercase with no punctuation and no emoji ("im", "rn", "k"). Mom's emoji are sparse (😊 ❤️). Sarah's paragraphs are one long bubble each, never split. No melodrama: no "I'm worried sick", no crying emoji, no ALL CAPS (except Riley's own "LMAOOO" from September, in history). It reads as burnout and loneliness; don't imply self-harm. The Un-Said banner is gentle, never clinical (no "we detected", no "risk").
+(The opening's timing, holds and camera are in Phase 4's beat table. Don't build any timing here; just make sure every state it needs exists.)
+- New in this build: the WhatsApp Calls tab shows Mom's missed calls exactly as listed; the incoming call (dev panel and ?notify=call-mom) can be accepted, declined and answered with a quick reply; the voice and video call screens (including state=video-dad and the spanning unfolded layout) match WhatsApp's call UI; every reel in Michael's thread opens the Reels viewer and one can be sent back to Michael; Photos opens, zooms and swipes, and /scene/photos?state=kitchen&notify=unsaid shows the optional banner over the kitchen photo. Each has a Playwright check in scripts/messaging-check.ts.
+- Keep Mom's "k" history (his "k" from yesterday, ✓✓ blue) exactly as THE SCRIPTS show it.
+
+STOP AND LET ME REVIEW. Report: git branch --show-current, git diff main --name-only (only Branched-Frontend/ paths), the screenshot list, every COPY NEEDED, the reviewer round results, and any value you changed and why.  Do not start Phase 3.

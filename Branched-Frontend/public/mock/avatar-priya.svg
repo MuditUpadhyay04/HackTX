@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <!-- Branched-Frontend: Priya, illustrated avatar (our own art; no real person). -->
+  <defs>
+    <radialGradient id="bg-priya" cx="0.3" cy="0.25" r="0.95"><stop offset="0" stop-color="#FCE3D6"/><stop offset="1" stop-color="#F2BFA6"/></radialGradient>
+  </defs>
+  <rect width="240" height="240" fill="url(#bg-priya)"/>
+  <path d="M70 120c-6-50 18-78 50-78s56 28 50 78c-2 30 6 50 14 70H56c8-20 16-40 14-70z" fill="#2A1C16"/>
+  <path d="M40 240c4-42 36-66 80-66s76 24 80 66z" fill="#3E7C74"/>
+  <path d="M106 150h28v24c0 8-6 13-14 13s-14-5-14-13z" fill="#AE7650"/>
+  <ellipse cx="80" cy="116" rx="6" ry="9" fill="#AE7650"/><ellipse cx="160" cy="116" rx="6" ry="9" fill="#AE7650"/>
+  <ellipse cx="120" cy="114" rx="38" ry="44" fill="#C98E66"/>
+  <path d="M82 112c0-34 16-54 40-54 22 0 38 18 38 46-10-14-22-24-36-28-12 12-26 22-42 36z" fill="#2A1C16"/><path d="M82 104c-6 22-4 46 4 64-14-10-20-30-16-52z" fill="#2A1C16"/><path d="M158 104c6 22 4 46-4 64 14-10 20-30 16-52z" fill="#2A1C16"/>
+  <ellipse cx="105" cy="118" rx="3.4" ry="4.2" fill="#2E2218"/><ellipse cx="135" cy="118" rx="3.4" ry="4.2" fill="#2E2218"/>
+  <path d="M98 108c4-3 10-3 13-1M129 107c4-2 9-2 13 1" fill="none" stroke="#3A2A20" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M120 122c-1 5-2 8-5 10 2 1 5 1 7 0" fill="none" stroke="#AE7650" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M110 141c6 5 14 5 20 0" fill="none" stroke="#9C4E48" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="100" cy="132" rx="7" ry="4" fill="#EE9C91" opacity="0.35"/><ellipse cx="140" cy="132" rx="7" ry="4" fill="#EE9C91" opacity="0.35"/>
+</svg>

@@ -1,0 +1,715 @@
+/*
+ * app/tokens.css: this build's tokens as CSS custom properties, plus the Tailwind 4 theme mapping.
+ * Mirrors lib/tokens.ts and lib/motion.ts value for value (same names); keep them in step.
+ * The Un-Said theme (--un-*, and its --ease-std / --dur-* / --stagger) comes ONLY from
+ * app/unsaid-theme.css (synced from App-UI-Final); nothing here redefines it.
+ * Import order (app/globals.css): tailwindcss, ./unsaid-theme.css, ./tokens.css.
+ */
+
+:root {
+  /* look-alike: WhatsApp (Android, light) (section 4.2) */
+  --wa-green: #25D366;
+  --wa-accent: #1DAA61;
+  --wa-chat-bg: #EFEAE2;
+  --wa-bubble-out: #D9FDD3;
+  --wa-bubble-in: #FFFFFF;
+  --wa-meta: #667781;
+  --wa-tick-read: #53BDEB;
+  --wa-tick-sent: #8696A0;
+  --wa-missed: #F15C6D;
+  --wa-nav: #F6F6F6;
+  --wa-system-pill: #FFF5C4;
+
+  /* look-alike: WhatsApp calls (dark call screen) (section 4.2) */
+  --wa-call-bg: #0B141A;
+  --wa-call-surface: #1F2C34;
+  --wa-call-end: #F15C6D;
+  --wa-call-text: #E9EDEF;
+
+  /* look-alike: Messages (Android, light) (section 4.2) */
+  --msg-blue: #0B57D0;
+  --msg-gray: #E9E9EB;
+  --msg-green: #1E8E3E;
+  --msg-meta: #8E8E93;
+  --msg-failed: #D93025;
+  --msg-nav: #F9F9F9;
+  --msg-field-stroke: #C7C7CC;
+
+  /* look-alike: Instagram (light DMs, dark Reels) (section 4.2) */
+  --ig-text: #000000;
+  --ig-muted: #737373;
+  --ig-hairline: #DBDBDB;
+  --ig-blue: #0095F6;
+  --ig-red: #FF3040;
+  --ig-dm-in: #EFEFEF;
+  --ig-dm-out-start: #7B2FF7;
+  --ig-dm-out-end: #3B5BFE;
+  --ig-reels-bg: #000000;
+
+  /* look-alike: Facebook (light) (section 4.2) */
+  --fb-blue: #0866FF;
+  --fb-bg: #F0F2F5;
+  --fb-card: #FFFFFF;
+  --fb-text: #050505;
+  --fb-secondary: #65676B;
+  --fb-divider: #CED0D4;
+
+  /* look-alike: Meta AI (light) (section 4.2) */
+  --meta-ai-blue: #0064E0;
+  --meta-ai-text: #1C2B33;
+  --meta-ai-surface: #F1F4F7;
+
+  /* look-alike: One UI system (light, plus dark where used) (section 4.2) */
+  --ui-blue: #3E91FF;
+  --ui-red: #F2404C;
+  --ui-green: #3DB86B;
+  --ui-gray: #8A8A8E;
+  --ui-gray4: #D4D4D6;
+  --ui-gray5: #E6E6E8;
+  --ui-gray6: #F4F4F6;
+  --ui-kb-bg: #D1D4DA;
+  --ui-kb-key: #FFFFFF;
+  --ui-kb-key-special: #ABB0BA;
+  --ui-banner: #F5F5F5;
+
+  /* device: Galaxy Z Fold 8 (section 4.3) */
+  --device-frame-base: #E9E8E4;
+  --device-frame-highlight: #FFFFFF;
+  --device-frame-mid: #D8D7D2;
+  --device-frame-shadow: #B7B6B0;
+  --device-frame-seam: #C4C3BD;
+  --device-bezel: #050506;
+  --device-hinge-seam: #BEBFC3;
+  --device-back-glass: #FBFBF9;
+  /* device: Galaxy Z Fold 8, Graphite (Armor Aluminum frame, glass back) */
+  --device-ti-highlight: #A3A6AD;
+  --device-ti-light: #6E7179;
+  --device-ti-base: #4A4D54;
+  --device-ti-mid: #373A40;
+  --device-ti-shadow: #25272B;
+  --device-ti-deep: #141518;
+  --device-back-glass-ti: #2E3035;
+
+  /* stage, wallpaper base, system labels, device parts (sections 4.3, Phase 1) */
+  --stage-black: #000000;
+  --stage-white: #FFFFFF;
+  --stage-studio: #F5F5F1;
+  --ui-wallpaper-base: #05050B;
+  --ui-label: #000000;
+  --ui-label-secondary: rgba(60,60,67,0.6);
+  --ui-separator: rgba(60,60,67,0.29);
+  --ui-bg: #FFFFFF;
+  --label-on-dark: #FFFFFF;
+  --ui-dark-elevated: #1C1C1E;
+  --ui-dark-grouped: #2C2C2E;
+  --ui-dark-fill: #39393D;
+  --ui-dark-separator: rgba(84,84,88,0.65);
+  --ui-dark-label: #FFFFFF;
+  --ui-dark-label-2: rgba(235,235,245,0.6);
+  --ui-dark-label-3: rgba(235,235,245,0.3);
+  --device-island: #000000;
+  --device-display-off: #000000;
+  --device-hinge-cap: #DCDBD6;
+  --device-antenna: #C4C3BD;
+  --device-camera-control-ring: #BFC3C9;
+  --device-bump-rim: #D2D1CC;
+  --device-engraving: #D2D1CC;
+  --device-lidar: #1A1C22;
+  --device-mic: #1A1C22;
+  --device-front-camera-ring: rgba(255,255,255,0.05);
+  --device-lens-reflection: rgba(140,120,255,0.35);
+  --device-edge-highlight: rgba(255,255,255,0.8);
+  --device-seam-highlight: rgba(255,255,255,0.8);
+  --device-contact-shadow: rgba(0,0,0,0.35);
+  --device-hinge-ripple: rgba(255,255,255,0.25);
+  --device-test-grid: rgba(255,255,255,0.22);
+  --device-test-outline: rgba(255,255,255,0.7);
+  --device-test-label: #FFFFFF;
+  --device-debug-ruler: rgba(255,255,255,0.55);
+  --device-debug-box: #FF3B30;
+  --device-debug-box-alt: #0A84FF;
+  --device-debug-label-bg: rgba(0,0,0,0.72);
+
+  /* look-alike gradients (section 4.2); ui-wallpaper per the Phase 1 recipe */
+  --ig-gradient: linear-gradient(45deg, #FEDA75 0%, #FA7E1E 25%, #D62976 50%, #962FBF 75%, #4F5BD5 100%);
+  --ig-dm-out: linear-gradient(90deg, #7B2FF7 0%, #3B5BFE 100%);
+  --messenger-gradient: linear-gradient(45deg, #0099FF 0%, #A033FF 60%, #FF5280 90%, #FF7061 100%);
+  --meta-ai-gradient: conic-gradient(from 200deg, #0064E0, #7B3FF2, #D63BC4, #FF6A3D, #0064E0);
+  --ui-wallpaper: radial-gradient(125% 100% at 50% 56%, transparent 52%, #05050B 100%), radial-gradient(26% 32% at 57% 50%, var(--un-icon-lilac), transparent 70%), radial-gradient(52% 66% at 82% 40%, var(--un-icon-orchid), transparent 72%), radial-gradient(56% 76% at 20% 72%, var(--un-icon-blue), transparent 72%), radial-gradient(62% 72% at 50% 62%, var(--un-icon-violet), transparent 72%), radial-gradient(40% 48% at 86% 88%, var(--un-icon-plum), transparent 70%), radial-gradient(36% 44% at 16% 22%, var(--un-icon-periwinkle), transparent 70%), linear-gradient(#05050B, #05050B);
+  --wallpaper-filter: blur(80px) saturate(1.35);
+  --wallpaper-scale: 1.2;
+  --wallpaper-noise-opacity: 0.04;
+
+  /* materials: device (Phase 1) and UI materials (banner, home glass, fold-control pill) */
+  --device-frame-fill: linear-gradient(135deg, #FFFFFF 0%, #EDECE8 18%, #D8D7D2 46%, #F4F3EF 68%, #BDBCB6 100%);
+  --device-frame-side-fill: linear-gradient(225deg, #FFFFFF 0%, #EDECE8 18%, #D8D7D2 46%, #F4F3EF 68%, #BDBCB6 100%);
+  --device-frame-sheen: repeating-linear-gradient(90deg, rgba(255,255,255,0) 0px, rgba(255,255,255,0) 1px, rgba(255,255,255,0.10) 1px, rgba(255,255,255,0.10) 2px);
+  --device-bezel-glare: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0) 30%);
+  --device-hinge-segment: linear-gradient(90deg, #CFCFCB 0%, #FFFFFF 32%, #EDECE8 55%, #C9C8C2 80%, #B2B1AB 100%);
+  --device-button-fill: linear-gradient(90deg, #BDBCB6, #F4F3EF 60%, #D8D7D2);
+  --device-button-fill-mirrored: linear-gradient(270deg, #BDBCB6, #F4F3EF 60%, #D8D7D2);
+  --device-camera-control-fill: linear-gradient(90deg, #E4E6EA, #C9CDD3 50%, #F2F3F5);
+  --device-back-glass-fill: linear-gradient(180deg, #F7F7F4 0%, #EFEFEB 55%, #E6E6E1 100%);
+  --device-back-gloss: linear-gradient(105deg, rgba(255,255,255,0) 35%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0) 65%);
+  --device-camera-bump-fill: linear-gradient(145deg, #FBFBF9, #E9E9E5);
+  --device-lens-ring-fill: linear-gradient(135deg, #F2F1ED, #BDBCB6);
+  --device-lens: radial-gradient(circle at 38% 32%, #3A4256 0%, #12151D 45%, #050608 100%);
+  --device-front-camera: radial-gradient(circle at 35% 35%, #2B3140 0%, #0A0C12 60%, #000000 100%);
+  --device-flash: radial-gradient(#FFF8E7, #E9DFC8);
+  --device-reflection-mask: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0) 35%);
+  --device-reflection-filter: blur(1.5px);
+  --device-ti-band: linear-gradient(135deg, #8E9198 0%, #3A3D43 16%, #6A6D74 34%, #2A2C31 58%, #5C5F66 78%, #1C1D21 100%);
+  --device-ti-side: linear-gradient(180deg, #141518 0%, #373A40 10%, #A3A6AD 28%, #4A4D54 50%, #6E7179 68%, #25272B 90%, #141518 100%);
+  --device-ti-spine: linear-gradient(180deg, #5C5F66 0%, #3A3D43 30%, #55585F 55%, #222428 100%);
+  --device-ti-brush: repeating-linear-gradient(90deg, rgba(255,255,255,0) 0px, rgba(255,255,255,0) 2px, rgba(255,255,255,0.04) 2px, rgba(255,255,255,0.04) 3px);
+  --device-back-glass-ti-fill: linear-gradient(165deg, #3A3C42 0%, #2E3035 45%, #232529 100%);
+  --device-back-glass-ti-gloss: linear-gradient(110deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.12) 48%, rgba(255,255,255,0) 62%);
+  --device-plateau-fill: transparent;
+  --device-lens-ring-ti: linear-gradient(135deg, #9A9DA4 0%, #45484E 55%, #141518 100%);
+  --device-screen-wallpaper: radial-gradient(42% 46% at 62% 40%, var(--un-icon-lilac) 0%, transparent 72%), radial-gradient(62% 72% at 88% 12%, var(--un-icon-orchid) 0%, transparent 72%), radial-gradient(75% 85% at 18% 92%, var(--un-icon-blue) 0%, transparent 74%), radial-gradient(85% 95% at 48% 58%, var(--un-icon-violet) 0%, transparent 76%), radial-gradient(50% 60% at 8% 12%, var(--un-icon-periwinkle) 0%, transparent 72%), linear-gradient(160deg, #120E2A 0%, #07060F 100%);
+  --device-screen-off: linear-gradient(160deg, #17181C 0%, #060607 36%, #000000 100%);
+  --device-glass-sheen: linear-gradient(118deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.04) 22%, rgba(255,255,255,0) 40%);
+  --material-light: rgba(245,245,245,0.78);
+  --material-light-filter: blur(30px) saturate(180%);
+  --material-glass: rgba(255,255,255,0.22);
+  --material-glass-filter: blur(30px) saturate(1.6);
+  --material-glass-stroke: rgba(255,255,255,0.35);
+  --material-pill-dark: rgba(255,255,255,0.14);
+  --material-pill-light: rgba(0,0,0,0.06);
+  --material-pill-filter: blur(20px);
+
+  /* space: 4-pt grid (pt = CSS px at 1x). Named exceptions, used only where the apps use them:
+     2 (hairline-adjacent insets, switch knob inset), 6 (icon-label gap family, compact rows), 10 and 14
+     (list/bubble paddings). Everything else stays on the 4/8 grid. */
+  --space-0: 0px;
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-14: 14px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-28: 28px;
+  --space-32: 32px;
+  --space-36: 36px;
+  --space-40: 40px;
+  --space-44: 44px;
+  --space-48: 48px;
+  --space-56: 56px;
+  --space-64: 64px;
+  --space-72: 72px;
+  --space-80: 80px;
+  --space-96: 96px;
+  --space-120: 120px;
+  --hairline: 0.5px;
+
+  /* size: fixed control sizes (lib/tokens.ts size); 44 = minimum hit target, switch 51x31 / 27 knob */
+  --size-tap-target: 44px;
+  --size-grabber-width: 36px;
+  --size-grabber-height: 5px;
+  --size-switch-width: 51px;
+  --size-switch-height: 31px;
+  --size-switch-knob: 27px;
+  --size-switch-inset: 2px;
+  --size-focus-ring: 2px;
+  --size-msg-apps-button: 34px;
+  --size-meta-ai-send: 32px;
+  --size-dev-panel-width: 320px;
+  --size-dev-clock-field: 88px;
+  --size-test-tile-width: 408px;
+  --size-test-tile-height: 236px;
+  --size-glyph-small: 20px;
+  --size-glyph-large: 24px;
+  --size-glyph-stroke-ios: 1.6px;
+  --size-glyph-stroke-whatsapp: 1.6px;
+  --size-glyph-stroke-instagram: 1.6px;
+  --size-glyph-stroke-facebook: 1.6px;
+  --size-glyph-stroke-meta-ai: 2px;
+  --size-disclosure-width: 8px;
+  --size-disclosure-height: 13px;
+  --size-disclosure-stroke: 2px;
+  --size-test-rail: 240px;
+  --size-test-list-col: 160px;
+  --size-test-swatch-wide: 200px;
+  --size-test-swatch-narrow: 120px;
+  --size-test-swatch-tile: 112px;
+  --size-test-material-tile: 128px;
+  --size-test-type-col: 260px;
+  --size-test-scale-col: 192px;
+  --size-test-un-cell: 104px;
+  --size-test-ref-un-palette-height: 198px;
+  --size-test-ref-palette-height: 435px;
+
+  /* type: system stack + text styles  + Meta sizes. --type-<style> is a font shorthand. */
+  --font-system: var(--font-roboto), Roboto, "Noto Sans", system-ui, sans-serif;
+  --font-display: var(--font-roboto-flex), var(--font-roboto), Roboto, system-ui, sans-serif;
+  --type-large-title-size: 34px;
+  --type-large-title-line-height: 41px;
+  --type-large-title-weight: 400;
+  --type-large-title-tracking: 0.4px;
+  --type-large-title: 400 34px/41px var(--font-system);
+  --type-large-title-semibold: 600 34px/41px var(--font-system);
+  --type-title-1-size: 28px;
+  --type-title-1-line-height: 34px;
+  --type-title-1-weight: 400;
+  --type-title-1-tracking: 0.38px;
+  --type-title-1: 400 28px/34px var(--font-system);
+  --type-title-1-semibold: 600 28px/34px var(--font-system);
+  --type-title-2-size: 22px;
+  --type-title-2-line-height: 28px;
+  --type-title-2-weight: 400;
+  --type-title-2-tracking: -0.26px;
+  --type-title-2: 400 22px/28px var(--font-system);
+  --type-title-2-semibold: 600 22px/28px var(--font-system);
+  --type-title-3-size: 20px;
+  --type-title-3-line-height: 25px;
+  --type-title-3-weight: 400;
+  --type-title-3-tracking: -0.45px;
+  --type-title-3: 400 20px/25px var(--font-system);
+  --type-title-3-semibold: 600 20px/25px var(--font-system);
+  --type-headline-size: 17px;
+  --type-headline-line-height: 22px;
+  --type-headline-weight: 600;
+  --type-headline-tracking: -0.43px;
+  --type-headline: 600 17px/22px var(--font-system);
+  --type-body-size: 17px;
+  --type-body-line-height: 22px;
+  --type-body-weight: 400;
+  --type-body-tracking: -0.43px;
+  --type-body: 400 17px/22px var(--font-system);
+  --type-body-semibold: 600 17px/22px var(--font-system);
+  --type-callout-size: 16px;
+  --type-callout-line-height: 21px;
+  --type-callout-weight: 400;
+  --type-callout-tracking: -0.31px;
+  --type-callout: 400 16px/21px var(--font-system);
+  --type-callout-semibold: 600 16px/21px var(--font-system);
+  --type-subheadline-size: 15px;
+  --type-subheadline-line-height: 20px;
+  --type-subheadline-weight: 400;
+  --type-subheadline-tracking: -0.23px;
+  --type-subheadline: 400 15px/20px var(--font-system);
+  --type-subheadline-semibold: 600 15px/20px var(--font-system);
+  --type-footnote-size: 13px;
+  --type-footnote-line-height: 18px;
+  --type-footnote-weight: 400;
+  --type-footnote-tracking: -0.08px;
+  --type-footnote: 400 13px/18px var(--font-system);
+  --type-footnote-semibold: 600 13px/18px var(--font-system);
+  --type-caption-1-size: 12px;
+  --type-caption-1-line-height: 16px;
+  --type-caption-1-weight: 400;
+  --type-caption-1-tracking: 0px;
+  --type-caption-1: 400 12px/16px var(--font-system);
+  --type-caption-1-semibold: 600 12px/16px var(--font-system);
+  --type-caption-2-size: 11px;
+  --type-caption-2-line-height: 13px;
+  --type-caption-2-weight: 400;
+  --type-caption-2-tracking: 0.06px;
+  --type-caption-2: 400 11px/13px var(--font-system);
+  --type-caption-2-semibold: 600 11px/13px var(--font-system);
+  --type-meta-14-size: 14px;
+  --type-meta-14-line-height: 18px;
+  --type-meta-14-weight: 400;
+  --type-meta-14-tracking: 0px;
+  --type-meta-14: 400 14px/18px var(--font-system);
+  --type-meta-15-size: 15px;
+  --type-meta-15-line-height: 20px;
+  --type-meta-15-weight: 400;
+  --type-meta-15-tracking: 0px;
+  --type-meta-15: 400 15px/20px var(--font-system);
+  --type-meta-17-size: 17px;
+  --type-meta-17-line-height: 22px;
+  --type-meta-17-weight: 600;
+  --type-meta-17-tracking: 0px;
+  --type-meta-17: 600 17px/22px var(--font-system);
+
+  /* motion (section 4.4). --ease-std also exists in app/unsaid-theme.css with the identical value; this
+     file loads after it, so the phone's section 4.4 value wins if App-UI-Final ever changes. Named
+     durations are --motion-* (the reduced-motion crossfades are --motion-reduced-fold / -shell / -opening); --dur-200 / --dur-400 are
+     generic 200 / 400 ms steps (never App-UI-Final's --dur-press/fade/hold). */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-std: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-breath: cubic-bezier(0.45, 0, 0.55, 1);
+  --motion-keyboard-rise: 300ms;
+  --motion-press: 120ms;
+  --motion-press-in: 60ms;
+  --motion-display-wake: 400ms;
+  --motion-reduced-opening: 400ms;
+  --motion-reduced-shell: 200ms;
+  --motion-reduced-fold: 200ms;
+  --motion-splash-hold: 900ms;
+  --motion-splash-crossfade: 200ms;
+  --motion-hinge-ripple: 220ms;
+  --motion-concept-only: 1600ms;
+  --motion-caret-on: 500ms;
+  --motion-caret-off: 500ms;
+  --dur-200: 200ms;
+  --dur-400: 400ms;
+
+  /* Phase 2 look-alike apps (apps builder): values from CLAUDE_PROMPT.md Phase 2 CHROME SPECS, or the
+     One UI system colors where the spec gives none */
+  --wa-wallpaper: #EFE7DE;
+  --wa-nav-material: rgba(255,255,255,0.96);
+  --wa-pill: rgba(255,255,255,0.92);
+  --wa-pill-text: #54656F;
+  --wa-missed-glyph: #EA0038;
+  --wa-missed-glyph-bg: rgba(234,0,56,0.10);
+  --wa-caret: #00A884;
+  --wa-chip: #F0F2F5;
+  --wa-chip-active-text: #15603E;
+  --msg-nav-material: rgba(249,249,249,0.94);
+  --ui-fill-tertiary: rgba(118,118,128,0.12);
+  --ui-scrim: rgba(0,0,0,0.4);
+  --banner-stroke: rgba(0,0,0,0.06);
+  --kb-label: #000000;
+  --kb-special-label: #000000;
+  --icon-messages-fill: linear-gradient(180deg, #5CF777 0%, #0EBE2C 100%);
+  --icon-photos-fill: #FFFFFF;
+  /* look-alike apps (components/apps/*): One UI system colors and app chrome the spec leaves open */
+  --on-accent: #FFFFFF;
+  --on-accent-2: rgba(255,255,255,0.8);
+  --ui-indigo: #6A5CE8;
+  --ui-teal: #30B0C7;
+  --ui-yellow: #FFC22E;
+  --ui-pink: #F0457A;
+  --ui-push-shadow: rgba(0,0,0,0.12);
+  --meta-ai-blue: #3EC6F6;
+  --meta-ai-violet: #7A5CF5;
+  --meta-ai-magenta: #C04FD9;
+  --ig-active: #1CD14F;
+  --ig-pressed: #F2F2F2;
+  --ig-reel-stroke: rgba(255,255,255,0.7);
+  --ig-reel-tile-scrim: linear-gradient(180deg, rgba(0,0,0,0.45) 0%, transparent 28%, transparent 70%, rgba(0,0,0,0.55) 100%);
+  --ig-reel-viewer-scrim: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 22%, transparent 62%, rgba(0,0,0,0.6) 100%);
+
+  /* Phase 3 home screen (home-screen builder; lib/tokens.ts homeWallpaper / homeColor / homeGradient).
+     D9 tiles are sampled from the official Meta files in public/brand/meta/. */
+  --home-wallpaper-ink: #0B0D1C;
+  --home-wallpaper-slate: #2B3142;
+  --home-wallpaper-steel: #5A6179;
+  --home-wallpaper-lilac: #B7B6C4;
+  --home-wallpaper-pearl: #DDD6D2;
+  --home-wallpaper-white: #F4F1ED;
+  --home-wallpaper-mauve: #8C8087;
+  --home-wallpaper-gold: #CFA56C;
+  --home-wallpaper-amber: #8A633D;
+  --home-wallpaper-espresso: #2A1E18;
+  --home-wallpaper-taupe: #7A6352;
+  --home-wallpaper-cream: #E9DFD3;
+  --icon-facebook-tile: #0866FF;
+  --icon-messenger-tile: #FFFFFF;
+  --icon-whatsapp-tile: #25D366;
+  --icon-threads-tile: #000000;
+  --icon-meta-pending: #D1D1D6;
+  --icon-glyph: #FFFFFF;
+  --icon-green-top: #54EF6D;
+  --icon-green-bottom: #25C040;
+  --photos-petal-orange: #FF8504;
+  --photos-petal-yellow: #FFC200;
+  --photos-petal-lime: #71C200;
+  --photos-petal-green: #2AA76D;
+  --photos-petal-teal: #38B6D8;
+  --photos-petal-blue: #3E8AEA;
+  --photos-petal-purple: #9A75DE;
+  --photos-petal-pink: #F057C1;
+  --photos-petal-red: #FF5560;
+  --icon-glyph-frost-mid: #ECFAEE;
+  --icon-glyph-frost-end: #B8ECC1;
+  --icon-glass-rim: #FFFFFF;
+  --hun-fill: #FFFFFF;
+  --toast-fill: rgba(50,50,52,0.92);
+  --widget-weather-top: #3C8CE7;
+  --widget-weather-bottom: #7EC3F8;
+  --widget-weather-sun: #FFD60A;
+  --widget-calendar-bg: #FFFFFF;
+  --widget-music-fill: linear-gradient(160deg, #4A2D2A 0%, #26201E 100%);
+  --widget-music-ink: #26201E;
+  --widget-calendar-accent: #E5484D;
+  --widget-music-art: center / cover no-repeat url(/mock/album-encore.jpg); /* Encore (Eminem), album artwork */
+  --widget-music-accent: #FF5E7E;
+  --widget-music-track: rgba(255,255,255,0.25);
+  --widget-reminders-accent: #3E91FF;
+  --home-wallpaper-dim: rgba(0,0,0,0.18);
+  /* frosted dock glass: a light frosted capsule (white veil over the wallpaper) with a soft lit rim */
+  --home-dock-fill: linear-gradient(180deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.20) 100%);
+  --home-dock-stroke: inset 0 0 0 0.75px rgba(255,255,255,0.35), inset 0 1px 1px rgba(255,255,255,0.35), 0 4px 14px rgba(0,0,0,0.18);
+  --widget-event-blue: #3E91FF;
+  --widget-event-purple: #8E6CEF;
+  --home-dot-inactive: rgba(255,255,255,0.4);
+  --home-glass-edge: rgba(255,255,255,0.55);
+  --icon-green-fill: linear-gradient(180deg, #5DF576 0%, #0BBD29 100%);
+  --icon-phone-fill: linear-gradient(160deg, #4BD37B 0%, #1FAE57 100%);
+  --icon-messages-fill: #FFFFFF;
+  --icon-messages-bubble: #1A73E8;
+  --icon-messages-line: #AECBFA;
+  --icon-gallery-fill: linear-gradient(160deg, #FF5F7E 0%, #E8335A 100%);
+  --icon-gallery-center: #FFC2CF;
+  --widget-weather-fill: linear-gradient(160deg, #2F7DF6 0%, #58A6FF 60%, #8CC4FF 100%);
+  --home-glass-sheen: linear-gradient(160deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.10) 40%, rgba(255,255,255,0.16) 100%);
+}
+
+/* Radius, shadow and blur live in Tailwind's own namespaces, so they are declared once here.
+   "static" emits every one as a :root custom property (--radius-24, --shadow-banner, --blur-30)
+   and creates the utilities rounded-24, shadow-banner, blur-30 / backdrop-blur-30. */
+@theme static {
+  /* Tailwind numeric spacing = the 4-pt grid: p-4 = 16pt = --space-16, gap-0.5 = 2pt */
+  --spacing: 4px;
+
+  /* Radii off the 4/8 grid are spec-given device geometry, never free choices: 5 keyboard key,
+     10 and 14 controls/cards, 18 bubbles, 26 home widgets, 34 dock, 62/68 display + panel corners
+     (CLAUDE_PROMPT.md Phase 1-3 GEOMETRY). */
+  --radius-2: 2px;
+  --radius-4: 4px;
+  --radius-5: 5px;
+  --radius-8: 8px;
+  --radius-10: 10px;
+  --radius-12: 12px;
+  --radius-14: 14px;
+  --radius-16: 16px;
+  --radius-18: 18px;
+  --radius-22: 22px;
+  --radius-24: 24px;
+  --radius-26: 26px;
+  --radius-28: 28px;
+  --radius-34: 34px;
+  --radius-40: 40px;
+  --radius-44: 44px;
+  --radius-52: 52px;
+  --radius-62: 62px;
+  --radius-68: 68px;
+  --radius-squircle: 22.37%;
+  --radius-pill: 999px;
+
+  --shadow-banner: 0 4px 12px rgba(0,0,0,0.06), 0 12px 32px rgba(0,0,0,0.10);
+  --shadow-hud: 0 4px 12px rgba(0,0,0,0.06), 0 12px 32px rgba(0,0,0,0.10);
+  --shadow-sheet: 0 10px 40px rgba(0,0,0,0.35), 0 0 0 0.5px rgba(255,255,255,0.08);
+  --shadow-knob: 0 3px 8px rgba(0,0,0,0.15), 0 3px 1px rgba(0,0,0,0.06);
+  --shadow-key: 0 1px 0 rgba(0,0,0,0.3);
+  --shadow-icon-label: 0 0.5px 1px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.35);
+  --shadow-icon-stroke: inset 0 0 0 0.5px rgba(255,255,255,0.12);
+  --shadow-glass-stroke: inset 0 0 0 0.5px rgba(255,255,255,0.35);
+  --shadow-device-drop: 0 2px 4px rgba(20,16,30,0.10), 0 24px 48px rgba(20,16,30,0.22), 0 60px 120px rgba(20,16,30,0.28);
+  --shadow-device-rim-light: 0 0 0 1px rgba(255,255,255,0.35), 0 0 60px rgba(255,255,255,0.05);
+  --shadow-device-outer-rim: 0 0 0 0.5px rgba(0,0,0,0.18);
+  --shadow-device-frame-inner: inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.12);
+  --shadow-device-bezel-inner: inset 0 0 0 1px rgba(255,255,255,0.06);
+  --shadow-device-hinge-proud: 1px 0 0 rgba(0,0,0,0.08), -1px 0 0 rgba(0,0,0,0.08);
+  --shadow-device-camera-bump: 0 2px 6px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.08);
+  --shadow-device-plateau: 0 1px 0 rgba(255,255,255,0.55) inset, 0 -1px 0 rgba(0,0,0,0.10) inset, 0 0 0 0.75px rgba(0,0,0,0.16), 0 3px 8px rgba(0,0,0,0.16);
+  --shadow-device-lens-ring: 0 0 0 1px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.25);
+  --shadow-device-lens-glass: inset 0 2px 6px rgba(0,0,0,0.8), inset 0 0 0 2px rgba(0,0,0,0.6);
+  --shadow-device-button: inset 0 0.75px 0 rgba(255,255,255,0.85), inset 0 -0.75px 0 rgba(0,0,0,0.22), 0 0 0 0.5px rgba(70,68,63,0.45);
+  /* the buttons' visible lip: brushed aluminum lit from above, like the frame band */
+  --device-button-lip: linear-gradient(180deg, #A3A6AD 0%, #6A6D74 35%, #3A3D43 75%, #1C1D21 100%);
+  /* Phase 2 look-alike apps */
+  --shadow-wa-bubble: 0 1px 0.5px rgba(11,20,26,0.13);
+  --shadow-key-pop: 0 1px 1px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.12);
+  --shadow-photo-time: 0 1px 2px rgba(0,0,0,0.45);
+
+  --blur-20: 20px;
+  --blur-24: 24px;
+  --blur-30: 30px;
+  --blur-60: 60px;
+  --blur-80: 80px;
+}
+
+/* Colors and type map onto the :root vars above (and the synced --un-* colors), so bg-wa-green,
+   text-ui-blue, bg-un-bg, text-body, font-sans all resolve to the tokens. */
+@theme inline {
+  --font-sans: var(--font-system);
+
+  --color-wa-green: var(--wa-green);
+  --color-wa-accent: var(--wa-accent);
+  --color-wa-chat-bg: var(--wa-chat-bg);
+  --color-wa-bubble-out: var(--wa-bubble-out);
+  --color-wa-bubble-in: var(--wa-bubble-in);
+  --color-wa-meta: var(--wa-meta);
+  --color-wa-tick-read: var(--wa-tick-read);
+  --color-wa-tick-sent: var(--wa-tick-sent);
+  --color-wa-missed: var(--wa-missed);
+  --color-wa-nav: var(--wa-nav);
+  --color-wa-system-pill: var(--wa-system-pill);
+  --color-wa-call-bg: var(--wa-call-bg);
+  --color-wa-call-surface: var(--wa-call-surface);
+  --color-wa-call-end: var(--wa-call-end);
+  --color-wa-call-text: var(--wa-call-text);
+  --color-msg-blue: var(--msg-blue);
+  --color-msg-gray: var(--msg-gray);
+  --color-msg-green: var(--msg-green);
+  --color-msg-meta: var(--msg-meta);
+  --color-msg-failed: var(--msg-failed);
+  --color-msg-nav: var(--msg-nav);
+  --color-msg-field-stroke: var(--msg-field-stroke);
+  --color-ig-text: var(--ig-text);
+  --color-ig-muted: var(--ig-muted);
+  --color-ig-hairline: var(--ig-hairline);
+  --color-ig-blue: var(--ig-blue);
+  --color-ig-red: var(--ig-red);
+  --color-ig-dm-in: var(--ig-dm-in);
+  --color-ig-dm-out-start: var(--ig-dm-out-start);
+  --color-ig-dm-out-end: var(--ig-dm-out-end);
+  --color-ig-reels-bg: var(--ig-reels-bg);
+  --color-fb-blue: var(--fb-blue);
+  --color-fb-bg: var(--fb-bg);
+  --color-fb-card: var(--fb-card);
+  --color-fb-text: var(--fb-text);
+  --color-fb-secondary: var(--fb-secondary);
+  --color-fb-divider: var(--fb-divider);
+  --color-meta-ai-blue: var(--meta-ai-blue);
+  --color-meta-ai-text: var(--meta-ai-text);
+  --color-meta-ai-surface: var(--meta-ai-surface);
+  --color-ui-blue: var(--ui-blue);
+  --color-ui-red: var(--ui-red);
+  --color-ui-green: var(--ui-green);
+  --color-ui-gray: var(--ui-gray);
+  --color-ui-gray4: var(--ui-gray4);
+  --color-ui-gray5: var(--ui-gray5);
+  --color-ui-gray6: var(--ui-gray6);
+  --color-ui-kb-bg: var(--ui-kb-bg);
+  --color-ui-kb-key: var(--ui-kb-key);
+  --color-ui-kb-key-special: var(--ui-kb-key-special);
+  --color-ui-banner: var(--ui-banner);
+  --color-device-frame-base: var(--device-frame-base);
+  --color-device-frame-highlight: var(--device-frame-highlight);
+  --color-device-frame-mid: var(--device-frame-mid);
+  --color-device-frame-shadow: var(--device-frame-shadow);
+  --color-device-frame-seam: var(--device-frame-seam);
+  --color-device-bezel: var(--device-bezel);
+  --color-device-hinge-seam: var(--device-hinge-seam);
+  --color-device-back-glass: var(--device-back-glass);
+  --color-device-ti-highlight: var(--device-ti-highlight);
+  --color-device-ti-light: var(--device-ti-light);
+  --color-device-ti-base: var(--device-ti-base);
+  --color-device-ti-mid: var(--device-ti-mid);
+  --color-device-ti-shadow: var(--device-ti-shadow);
+  --color-device-ti-deep: var(--device-ti-deep);
+  --color-device-back-glass-ti: var(--device-back-glass-ti);
+  --color-stage-black: var(--stage-black);
+  --color-stage-white: var(--stage-white);
+  --color-stage-studio: var(--stage-studio);
+  --color-ui-wallpaper-base: var(--ui-wallpaper-base);
+  --color-ui-label: var(--ui-label);
+  --color-ui-label-secondary: var(--ui-label-secondary);
+  --color-ui-separator: var(--ui-separator);
+  --color-ui-bg: var(--ui-bg);
+  --color-label-on-dark: var(--label-on-dark);
+  --color-ui-dark-elevated: var(--ui-dark-elevated);
+  --color-ui-dark-grouped: var(--ui-dark-grouped);
+  --color-ui-dark-fill: var(--ui-dark-fill);
+  --color-ui-dark-separator: var(--ui-dark-separator);
+  --color-ui-dark-label: var(--ui-dark-label);
+  --color-ui-dark-label-2: var(--ui-dark-label-2);
+  --color-ui-dark-label-3: var(--ui-dark-label-3);
+  --color-device-island: var(--device-island);
+  --color-device-display-off: var(--device-display-off);
+  --color-device-hinge-cap: var(--device-hinge-cap);
+  --color-device-antenna: var(--device-antenna);
+  --color-device-camera-control-ring: var(--device-camera-control-ring);
+  --color-device-bump-rim: var(--device-bump-rim);
+  --color-device-engraving: var(--device-engraving);
+  --color-device-lidar: var(--device-lidar);
+  --color-device-mic: var(--device-mic);
+  --color-device-front-camera-ring: var(--device-front-camera-ring);
+  --color-device-lens-reflection: var(--device-lens-reflection);
+  --color-device-edge-highlight: var(--device-edge-highlight);
+  --color-device-seam-highlight: var(--device-seam-highlight);
+  --color-device-contact-shadow: var(--device-contact-shadow);
+  --color-device-hinge-ripple: var(--device-hinge-ripple);
+  --color-device-test-grid: var(--device-test-grid);
+  --color-device-test-outline: var(--device-test-outline);
+  --color-device-test-label: var(--device-test-label);
+  --color-device-debug-ruler: var(--device-debug-ruler);
+  --color-device-debug-box: var(--device-debug-box);
+  --color-device-debug-box-alt: var(--device-debug-box-alt);
+  --color-device-debug-label-bg: var(--device-debug-label-bg);
+
+  --color-un-stage: var(--un-stage);
+  --color-un-bg: var(--un-bg);
+  --color-un-surface: var(--un-surface);
+  --color-un-surface-raised: var(--un-surface-raised);
+  --color-un-hairline: var(--un-hairline);
+  --color-un-text: var(--un-text);
+  --color-un-text-2: var(--un-text-2);
+  --color-un-text-3: var(--un-text-3);
+  --color-un-text-4: var(--un-text-4);
+  --color-un-violet: var(--un-violet);
+  --color-un-blue: var(--un-blue);
+  --color-un-indigo: var(--un-indigo);
+  --color-un-indigo-deep: var(--un-indigo-deep);
+  --color-un-periwinkle: var(--un-periwinkle);
+  --color-un-lilac: var(--un-lilac);
+  --color-un-violet-soft: var(--un-violet-soft);
+  --color-un-caret: var(--un-caret);
+  --color-un-letter: var(--un-letter);
+  --color-un-letter-ink: var(--un-letter-ink);
+  --color-un-letter-label: var(--un-letter-label);
+  --color-un-letter-accent: var(--un-letter-accent);
+  --color-un-icon-blue: var(--un-icon-blue);
+  --color-un-icon-periwinkle: var(--un-icon-periwinkle);
+  --color-un-icon-violet: var(--un-icon-violet);
+  --color-un-icon-orchid: var(--un-icon-orchid);
+  --color-un-icon-lavender: var(--un-icon-lavender);
+  --color-un-icon-lilac: var(--un-icon-lilac);
+  --color-un-icon-plum: var(--un-icon-plum);
+
+  --text-large-title: var(--type-large-title-size);
+  --text-large-title--line-height: var(--type-large-title-line-height);
+  --text-large-title--letter-spacing: var(--type-large-title-tracking);
+  --text-large-title--font-weight: var(--type-large-title-weight);
+  --text-title-1: var(--type-title-1-size);
+  --text-title-1--line-height: var(--type-title-1-line-height);
+  --text-title-1--letter-spacing: var(--type-title-1-tracking);
+  --text-title-1--font-weight: var(--type-title-1-weight);
+  --text-title-2: var(--type-title-2-size);
+  --text-title-2--line-height: var(--type-title-2-line-height);
+  --text-title-2--letter-spacing: var(--type-title-2-tracking);
+  --text-title-2--font-weight: var(--type-title-2-weight);
+  --text-title-3: var(--type-title-3-size);
+  --text-title-3--line-height: var(--type-title-3-line-height);
+  --text-title-3--letter-spacing: var(--type-title-3-tracking);
+  --text-title-3--font-weight: var(--type-title-3-weight);
+  --text-headline: var(--type-headline-size);
+  --text-headline--line-height: var(--type-headline-line-height);
+  --text-headline--letter-spacing: var(--type-headline-tracking);
+  --text-headline--font-weight: var(--type-headline-weight);
+  --text-body: var(--type-body-size);
+  --text-body--line-height: var(--type-body-line-height);
+  --text-body--letter-spacing: var(--type-body-tracking);
+  --text-body--font-weight: var(--type-body-weight);
+  --text-callout: var(--type-callout-size);
+  --text-callout--line-height: var(--type-callout-line-height);
+  --text-callout--letter-spacing: var(--type-callout-tracking);
+  --text-callout--font-weight: var(--type-callout-weight);
+  --text-subheadline: var(--type-subheadline-size);
+  --text-subheadline--line-height: var(--type-subheadline-line-height);
+  --text-subheadline--letter-spacing: var(--type-subheadline-tracking);
+  --text-subheadline--font-weight: var(--type-subheadline-weight);
+  --text-footnote: var(--type-footnote-size);
+  --text-footnote--line-height: var(--type-footnote-line-height);
+  --text-footnote--letter-spacing: var(--type-footnote-tracking);
+  --text-footnote--font-weight: var(--type-footnote-weight);
+  --text-caption-1: var(--type-caption-1-size);
+  --text-caption-1--line-height: var(--type-caption-1-line-height);
+  --text-caption-1--letter-spacing: var(--type-caption-1-tracking);
+  --text-caption-1--font-weight: var(--type-caption-1-weight);
+  --text-caption-2: var(--type-caption-2-size);
+  --text-caption-2--line-height: var(--type-caption-2-line-height);
+  --text-caption-2--letter-spacing: var(--type-caption-2-tracking);
+  --text-caption-2--font-weight: var(--type-caption-2-weight);
+  --text-meta-14: var(--type-meta-14-size);
+  --text-meta-14--line-height: var(--type-meta-14-line-height);
+  --text-meta-14--letter-spacing: var(--type-meta-14-tracking);
+  --text-meta-14--font-weight: var(--type-meta-14-weight);
+  --text-meta-15: var(--type-meta-15-size);
+  --text-meta-15--line-height: var(--type-meta-15-line-height);
+  --text-meta-15--letter-spacing: var(--type-meta-15-tracking);
+  --text-meta-15--font-weight: var(--type-meta-15-weight);
+  --text-meta-17: var(--type-meta-17-size);
+  --text-meta-17--line-height: var(--type-meta-17-line-height);
+  --text-meta-17--letter-spacing: var(--type-meta-17-tracking);
+  --text-meta-17--font-weight: var(--type-meta-17-weight);
+}

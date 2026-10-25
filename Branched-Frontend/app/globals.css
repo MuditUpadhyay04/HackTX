@@ -1,0 +1,50 @@
+@import "tailwindcss";
+@import "./unsaid-theme.css";
+@import "./tokens.css";
+@import "./theme-whatsapp.css";
+@import "./theme-messages.css";
+@import "./theme-instagram.css";
+@import "./theme-gallery.css";
+@import "./theme-phone.css";
+@import "./theme-keyboard.css";
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  font-family: var(--font-system);
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background: var(--stage-black);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  font: inherit;
+}
+
+[data-stage] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* The fold pill: the browser ring is replaced by an accent-blue ring that shows for keyboard focus only. */
+[data-fold-control] {
+  outline: none;
+}
+[data-fold-control]:focus-visible {
+  outline: var(--size-focus-ring) solid var(--ui-blue);
+  outline-offset: var(--size-focus-ring);
+}
+
+/* Reduced-motion fold (lib/device/fold.ts crossfade): the old pose fades out over the new one. */
+@keyframes device-crossfade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}

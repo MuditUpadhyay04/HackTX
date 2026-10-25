@@ -1,0 +1,73 @@
+PHASE 0: Retire the BF-v1 leftovers, set up the workspace, the app, the theme sync and the rules. Nothing visual yet beyond a token test page.
+
+WORKSPACE RULE (non-negotiable; it outranks every other instruction)
+1. BRANCH: all frontend work happens ONLY on the git branch `branched-frontend`. First command: git fetch origin && (git checkout branched-frontend || git checkout -b branched-frontend). If you created it, push it once with git push -u origin branched-frontend. Before EVERY commit run git branch --show-current and confirm `branched-frontend`. Never commit to, merge into, rebase onto or push to main or any other branch. Push only with: git push origin branched-frontend.
+2. FOLDER: all work happens ONLY inside the top-level folder `Branched-Frontend/` (Gurneal said "Branched Frontend"; it is hyphenated so no path contains a space). The Next.js app lives INSIDE it. Everything stays in that folder: code, assets, screenshots, logs (Branched-Frontend/BUILD_LOG.md), reviewer agents (Branched-Frontend/.claude/agents/), reports, docs, scripts. Never create, edit, move or delete anything outside it. Never touch frontend/, backend/, App-UI-Final/, ideas/, Mudit's Un-Said app, the root README or the root .gitignore. You may READ App-UI-Final/ (the Un-Said theme source), backend/ and ideas/. Stage with `git add Branched-Frontend/` only (never `git add -A` / `git add .` from the root); before committing, `git diff --cached --name-only | grep -v '^Branched-Frontend/'` must print nothing.
+3. OWNERSHIP: All design, naming, palette and user-facing decisions come from Gurneal. Mudit owns backend/ and the real Un-Said app. Never edit backend/, App-UI-Final/ or Mudit's app. The Un-Said app is NOT built here; it mounts later in components/UnsaidSlot.tsx.
+
+CONTEXT
+We're building the demo frontend for "Un-Said" (code name unsaid), a HackTX 2026 concept for the Meta track. THIS build is the phone and its apps: a white iPhone Duo (folded and unfolded), the iOS home screen and shell, notifications, fully working look-alikes of WhatsApp, Messages, Instagram and Photos, Facebook and Meta AI shells, a dev panel, a fold/unfold control, and a scripted, replayable opening storyboard. Un-Said itself appears only as its logo (home icon, notification icon, launch splash) and as a slot (components/UnsaidSlot.tsx) where Mudit's real app mounts later. It is a fully built, interactive WEB MOCK: mock data, look-alike apps, local state, no network. Read Branched-Frontend/CLAUDE_PROMPT.md in full (it is the spec for this build) and Branched-Frontend/CONTEXT.md. Read App-UI-Final/README.md, App-UI-Final/DESIGN_SPEC.md and App-UI-Final/COPY_AND_NAMES.md, and LOOK at App-UI-Final/assets/ui-reference/unsaid-ui-reference.png and Branched-Frontend/assets/brand/unsaid-app-icon.png. If App-UI-Final/ isn't at the repo root, read it from ~/Desktop/Unsaid-Claude-Context/App-UI-Final/. Branched-Frontend/reference/ holds Mudit's demo script: use it for story beats only, never for names, colors, fonts, icons or copy.
+
+STEP 0: RETIRE THE BF-v1 LEFTOVERS (only if they exist; log every removal in BUILD_LOG.md under "BF-v2 retire")
+- Delete any Un-Said screens built from the BF-v1 Phase 4 (components/unsaid/* except UnsaidSplash.tsx, app/unsaid/* routes other than the splash, Talk/Cards/Hold/Letters/You/Compose/Preview/Received/self-note/safety/faces), the LaunchPage bloom, SimplePhone and Mom's phone, lib/contract.ts, PlaceholderButton feature IDs, scripts/check-contract.ts, lib/mock/rant.ts, letters.ts and faces.ts, and the Un-Said requests in BACKEND_REQUESTS.md (keep the file with one line: "Retired in BF-v2: the Un-Said app is Mudit's and mounts in UnsaidSlot.").
+- Delete Branched-Frontend/assets/ui-reference/, assets/palettes/tokens.json and assets/palettes/palette.md if they are still in your checkout (the Un-Said theme now comes from App-UI-Final/).
+- Keep everything else that BF-v1 built (the Duo, Act 1 apps, the shell); later phases update it.
+
+STEP 1: BRANCH AND FOLDER
+- Run the branch command above. Confirm `git branch --show-current` prints branched-frontend.
+- Branched-Frontend/ already exists (it holds CLAUDE_PROMPT.md, GOAL_STATEMENT.txt, CONTEXT.md, paste/, reference/, assets/). Keep every one of those files.
+- If there is no package.json yet: create-next-app refuses a non-empty folder, so scaffold in a temp dir and copy in without overwriting:
+    npx create-next-app@latest /tmp/bf-scaffold --ts --tailwind --eslint --app --src-dir=false --import-alias "@/*" --use-npm --no-turbopack
+    rm -rf /tmp/bf-scaffold/.git && cp -Rn /tmp/bf-scaffold/. Branched-Frontend/
+    cd Branched-Frontend && npm install
+  (cp -n never overwrites, so our README.md and docs stay; `rsync -a --ignore-existing --exclude .git` does the same where rsync exists.) Every npm/npx command from now on runs from inside Branched-Frontend/.
+- Install: framer-motion (motion), sonner, zustand, clsx, @playwright/test (dev), tsx (dev). Run npx playwright install chromium. (Remotion comes in Phase 4.)
+- Add Branched-Frontend/.gitignore entries: node_modules, .next, out/, screenshots/reference/ (comparison-only screenshots of real apps; never committed).
+
+STEP 2: THEME SYNC AND TOKENS
+- scripts/sync-theme.ts (npm run sync:theme; also run by predev and prebuild): find App-UI-Final/ at ../App-UI-Final (repo root) or ~/Desktop/Unsaid-Claude-Context/App-UI-Final; copy tokens/unsaid-tokens.json → lib/unsaid-theme.json, tokens/unsaid-tokens.css → app/unsaid-theme.css, assets/brand/* → public/unsaid-theme/brand/. Prepend "GENERATED from App-UI-Final by scripts/sync-theme.ts. Do not edit." where the format allows. Never write into App-UI-Final/. If App-UI-Final/ can't be found, keep the last synced copies and print a warning (the build must still pass).
+- Copy Branched-Frontend/assets/brand/unsaid-app-icon.png → public/brand/unsaid-app-icon.png (the home and banner icon; the same art as App-UI-Final's icon). Record every copy in Branched-Frontend/assets/README.md ("where it lands").
+- lib/tokens.ts: one source of truth. Un-Said tokens (un-*) come from lib/unsaid-theme.json. Look-alike palettes, look-alike gradients and device colors come from Branched-Frontend/assets/palettes/branched-tokens.json (sections 4.2-4.3). Phone and opening motion come from section 4.4 (lib/motion.ts). Export typed objects and CSS variables (app/tokens.css), and wire them into the Tailwind theme.
+- No hard-coded hex or px in components: scripts/check-tokens.ts greps components/ and app/ for hex colors and raw px outside the token files and fails if it finds any.
+- /test/tokens renders every un-* token from the synced theme on un-bg, and every look-alike palette on its own background. Screenshot it and compare it with App-UI-Final/tokens/unsaid-palette.png and Branched-Frontend/assets/palettes/branched-frontend-palette.png.
+
+STEP 3: GLOBAL RULES (write them to Branched-Frontend/docs/RULES.md and follow them in every phase)
+1. Mock only: no network requests leave localhost (the one exception: the UnsaidSlot iframe when a real Un-Said URL is set); all data lives in lib/mock/*.ts.
+2. Story rules from CLAUDE_PROMPT.md section 1 (the hallway; no AI-written text; silence designed; keep "k."; web mock, not film; one timeline, one build; the slot is honest).
+3. Every screen has ?state= for each designed state, and every state is listed in lib/scenes.ts (the /scenes index and the screenshot script read it).
+3a. Mock messaging: each look-alike app keeps its own thread state in a zustand store (lib/store/*.ts), seeded from lib/mock/threads.ts; typing, deleting and sending work locally and are callable from code (the opening drives them); ?reset=1 restores the seed.
+4. Placeholders: a control that would do something real outside this demo (search, settings, a feature of a shell app) is still a pressable control with the iOS press state, carries data-placeholder="<app>:<control>", and on tap shows a small sonner toast "concept only". No feature IDs, no NOT YET CONNECTED badges. Navigation taps carry data-nav. Nothing in the build is dead to the touch.
+5. Concept label "concept mock · not affiliated with Apple or Meta" on every page (hidden by ?labels=off for clean shots).
+6. Look-alikes only: never download or embed official logo files, app icons, screenshots or fonts from Apple or Meta. Icons are drawn in SVG/CSS from the look-alike gradients.
+7. Ask before deviating from CLAUDE_PROMPT.md. Gurneal's reference and App-UI-Final beat every other source.
+8. All user-facing copy comes from CLAUDE_PROMPT.md and App-UI-Final/COPY_AND_NAMES.md (Gurneal's). If a screen needs a string that isn't written there, mark it in BUILD_LOG.md as "COPY NEEDED" and use the closest written string; never invent names, and never take copy from reference/.
+9. Stop at the end of each phase and wait for Gurneal.
+10. Read backend/ and App-UI-Final/ (never edit them). Never build Un-Said screens: Un-Said is the icon, the banner, the splash and the slot.
+11. Theme sync: at the start of each phase, run npm run sync:theme and note in BUILD_LOG.md whether App-UI-Final changed.
+12. BUILD LOG, COMMIT, PUSH after EVERY change: append a timestamped entry to Branched-Frontend/BUILD_LOG.md (time in America/Chicago, what changed, files, why, screenshots taken), then: git branch --show-current (must be branched-frontend) && git add Branched-Frontend/ && git commit -m "branched-frontend: <summary>" && git pull --rebase origin branched-frontend && git push origin branched-frontend. Never force-push. Never stage anything outside Branched-Frontend/.
+13. REVIEW: after each phase and every meaningful change, launch all 10 Haiku reviewer subagents (Branched-Frontend/.claude/agents/) in parallel. Log every finding in Branched-Frontend/REVIEW_FINDINGS.md (ID, reviewer, severity, file/route, issue, fix, status OPEN/FIXED/VERIFIED), fix it, re-run the affected reviewers, and repeat until all 10 report CLEAN in the same round. If the agents aren't loaded natively, run each as a general-purpose haiku subagent with its file body as the prompt.
+14. PRODUCTION QUALITY BAR (CLAUDE_PROMPT.md section 5): it outranks speed.
+15. Pixel-accurate iOS: follow Apple's HIG (status bar, Dynamic Island, safe areas, 44 pt targets, text styles, materials, banners, keyboard). Use the Apple skills you installed.
+16. Motion: everything interactive moves only when touched (shell springs, keyboard, bubbles, typing dots, sheets, the fold control). The ONE scripted, auto-playing sequence is the opening at /opening (Phases 4-5); it drives the real build and never re-implements a screen. No other timed tours or auto-play.
+
+STEP 4: PLACEHOLDER SYSTEM, DEV PANEL SKELETON, SCRIPTS
+- components/Placeholder.tsx: wraps any control; sets data-placeholder, gives it the platform's press state, and fires the "concept only" toast (styled per host app, un-surface inside the slot placeholder). Prove the variants on /test/placeholder.
+- scripts/check-placeholders.ts (npm run check:placeholders): crawls every route + state in lib/scenes.ts; fails on (a) any visible button/link with no data-nav, data-placeholder or real handler, (b) any data-feature-id attribute (must be zero), (c) any network request leaving localhost (the slot iframe excepted when a URL is set). Writes docs/PLACEHOLDERS.md (per app: every data-placeholder, plus the slot status).
+- scripts/shoot.ts: Playwright Chromium, 1920x1080, deviceScaleFactor 1 (and 2 with --hi), waits for fonts and network idle, --clean adds ?labels=off&badges=off&dev=off; saves Branched-Frontend/screenshots/<route>__<state>.png. npm scripts: dev, build, lint, sync:theme, shoot, shoot:clean, check:placeholders, check:tokens.
+- components/stage/Stage.tsx: a fixed 1920x1080 artboard scaled to fit the window, backgrounds black | un-stage | wallpaper | white.
+- components/dev/DevPanel.tsx (toggle with the ` key or ?dev=1): a floating panel OUTSIDE the phone with: a screen/route jump list (from lib/scenes.ts), the story clock (?clock=HH:MM, frozen), "fire banner" buttons (Phase 2 fills them), "fire reply" buttons (Phase 6), fold/unfold, reset state, and toggles for labels and badges.
+
+STEP 5: LOGS AND REVIEWERS
+- Branched-Frontend/BUILD_LOG.md ("# Un-Said Branched-Frontend build log"; backfill Phase 0 steps, then append after every change).
+- Branched-Frontend/REVIEW_FINDINGS.md (title + table header from rule 13).
+- The 10 reviewer files: write them word for word from CLAUDE_PROMPT.md section 9 into Branched-Frontend/.claude/agents/ (replace any BF-v1 reviewer files).
+
+ACCEPTANCE (Phase 0)
+1. git branch --show-current prints branched-frontend; git log shows commits only on that branch; git diff main --name-only lists only paths under Branched-Frontend/.
+2. npm run sync:theme, build, lint, check:tokens and check:placeholders pass from inside Branched-Frontend/. App-UI-Final/ is unchanged (git status shows nothing there).
+3. /test/tokens and /test/placeholder screenshots exist and match the palette PNGs and token tables.
+4. BUILD_LOG.md (with the "BF-v2 retire" entry), REVIEW_FINDINGS.md and docs/RULES.md exist inside Branched-Frontend/. No lib/contract.ts and no data-feature-id anywhere.
+5. All 10 reviewers report CLEAN in the same round.
+6. Final commit "branched-frontend: phase 0: retire v1, workspace, theme sync, tokens, rules, reviewers" pushed to origin branched-frontend only.
+
+STOP AND LET ME REVIEW. Show me: git branch --show-current, git diff main --name-only (every path must start with Branched-Frontend/), the folder tree of Branched-Frontend/ (depth 2), what Step 0 removed, the screenshot paths, the BUILD_LOG entries and the REVIEW_FINDINGS summary. Remind me to restart Claude Code from inside Branched-Frontend/ (cd Branched-Frontend && claude --add-dir ..) so the 10 reviewers load natively (check with /agents). Do not start Phase 1 until I say go.

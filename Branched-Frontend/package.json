@@ -1,0 +1,41 @@
+{
+  "name": "unsaid-branched-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "predev": "npm run sync:theme",
+    "dev": "next dev",
+    "prebuild": "npm run sync:theme",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "sync:theme": "tsx scripts/sync-theme.ts",
+    "shoot": "tsx scripts/shoot.ts",
+    "shoot:clean": "tsx scripts/shoot.ts --clean",
+    "check:tokens": "tsx scripts/check-tokens.ts",
+    "check:placeholders": "tsx scripts/check-placeholders.ts",
+    "demo": "bash scripts/demo.sh",
+    "check:duplicates": "node scripts/check-fold-duplicates.mjs"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "framer-motion": "^14.6.0",
+    "next": "16.4.3",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "sonner": "^2.0.8",
+    "zustand": "^5.0.16"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.3",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5"
+  }
+}

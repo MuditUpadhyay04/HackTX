@@ -1,0 +1,57 @@
+PHASE 4: Build the scripted, replayable OPENING: a timeline engine that performs the evening on the REAL build (the Duo, the shell, the messaging stores, notify()), plus /opening with Replay and seeking. This phase covers beats B01–B26 (from the black screen to the press on the Un-Said banner). Phase 5 adds the unfold (B27) and the splash → slot (B28).
+
+WORKSPACE RULE (still in force): branch `branched-frontend` only; folder `Branched-Frontend/` only; everything stays in that folder; never touch frontend/, backend/, App-UI-Final/, ideas/, Mudit's Un-Said app or anything else (App-UI-Final/ is the read-only theme source); stage with git add Branched-Frontend/ and push only with git push origin branched-frontend; run git branch --show-current before every commit. All design, naming, palette and user-facing decisions come from Gurneal. Mudit owns backend/ and the real Un-Said app; it is NOT built here (it mounts in components/UnsaidSlot.tsx). Phase 0 global rules apply (docs/RULES.md), including rule 12 (BUILD_LOG + commit + push after every change), rule 13 (10 Haiku reviewers until CLEAN), rule 14 (PRODUCTION QUALITY BAR) and rule 16 (motion: interactive springs plus the one scripted opening).
+
+INSTALL FIRST
+- The Remotion Claude Code plugin (CLAUDE_PROMPT.md section 6), then, inside Branched-Frontend/: npm i remotion @remotion/player @remotion/cli
+
+THE ENGINE (lib/opening/)
+- lib/opening/beats.ts: the beat table below as data (id, start, end, what, the state it drives, easing/spring). One source of truth: the player, the driven mode, the checklist and the reviewers all read it.
+- lib/opening/getOpeningFrame.ts: getOpeningFrame(t: seconds) -> a pure, deterministic description of the whole stage at time t: { camera: {scale, x, y}, device: {openAngle, screenOn, tilt, specular}, shell: {app, placement}, threads: {mom: {typed, keyboard, seen}, sarah: {...}, michael: {...}}, banner: {app, y, pressed} | null, overlay: {coldOpen opacity, splash, slot} }. Build it on remotion's interpolate() and spring() with the springs and easings from section 4.4. No Date.now(), no randomness: the same t always gives the same frame.
+- components/opening/OpeningStage.tsx renders a frame: it sets the stores and the shell into the exact state the frame describes (driven mode; below) and renders the real components. It never re-implements a thread, a banner or the device.
+- DRIVEN MODE: every transition in the shell, the banners, the keyboard, the bubbles and the Duo is already a pure function of a progress value (Phase 3). Add a driven flag (?clock=frozen, and always on inside the opening) where the opening supplies that progress per frame instead of the live spring, and the clock is pinned to 9:41 PM. Typing, deleting and sending go through the same store actions the keyboard uses (type(char), backspace(), send()); banners go through notify(); app opens go through window.__unsaidShell; the hinge goes through window.__unsaidDevice. Seeking backwards re-derives state from t (no accumulated side effects).
+- remotion/Root.tsx registers the composition "Opening": 1920 x 1080, 60 fps, 38 s = 2280 frames, component OpeningStage, using useCurrentFrame()/fps as t.
+- /opening: @remotion/player playing "Opening" at 1920 x 1080 scaled to fit, with on-stage controls outside the artboard (hidden with ?frame=bare): Replay (restart from t=0 and play), Play/Pause (space), a scrubber with beat ticks and labels (B01…), and the current t. URL: ?t=<seconds> (seek and hold), ?autoplay=1, ?loop=1, ?scene=opening|cold|duo|mom|type|sarah|michael|unsaid|unfold|launch (jumps to that section's first beat and plays it alone), ?cold=off (skip B02; the opening then starts at the pull-back), and the clean-shot flags ?frame=bare&badges=off&labels=off&dev=off.
+- Reduced motion (prefers-reduced-motion or ?motion=reduced): the camera holds still and every scale/rotate/blur move becomes a 400 ms crossfade between the same key states; typing still types (it's content, not motion).
+- Fonts: the system stack with Inter as the fallback only. No handwriting faces.
+
+THE BEATS (t in seconds; adapted from Gurneal's ideas/gurneal/Demo_Script.md, read-only; Gurneal's names and copy)
+| Beat | t | What happens | Motion |
+| B01 | 0.00–1.00 | Black. The camera starts at scale 5.2 on the folded Duo's black cover display (folded-off) | hold |
+| B02 | 1.00–4.20 | Cold-open card (on by default; ?cold=off skips): "The last thing my kid ever texted me was 'k.'" centered, 54 px, weight 600, #F5F5F7; the 'k.' in the same #F5F5F7, weight 700. Fade in 600 ms, hold, fade out 500 ms | ease-soft |
+| B03 | 4.20–6.20 | Pull back from scale 5.2 to 1 until the whole folded white Duo is centered on black (the rim light shows) | spring-pullback {75, 20, 1.2} |
+| B04 | 6.20–6.60 | The cover display wakes straight into Mom's WhatsApp thread (state=read) | 400 ms brightness 0 → 1, ease-ios |
+| B05 | 6.60–9.60 | Reading down Mom's thread: the missed calls, "did you eat?", his "k" | camera drift scale 1 → 1.06 toward the thread, ease-breath |
+| B06 | 9.60–11.20 | Hold on "I love you beta" + gray "Seen" | hold (silence is designed) |
+| B07 | 11.20–11.50 | The keyboard rises | 300 ms ease-ios |
+| B08 | 11.50–11.90 | "love you too" appears at typed=10, 11, 12 (t = 11.50, 11.70, 11.90) | per-character, caret blinking |
+| B09 | 12.10–13.10 | Stall: the caret blinks at the end of "love you too" | hold |
+| B10 | 13.10–14.10 | He deletes it, accelerating like a held delete key: characters removed at 130 ms, then 70 ms, then 45 ms intervals | backspace() through the store |
+| B11 | 14.10–14.70 | The empty field (typed=0), the mic glyph back | hold |
+| B12 | 14.70–15.30 | Sarah's banner drops: "Sarah ❤️🤍" · "please just say something" | spring-banner {420, 34, 1}, a 2 px horizontal shake on settle |
+| B13 | 15.30–15.70 | The banner is tapped (press 0.97) and Messages opens from the banner on Sarah's thread | spring-open-banner {320, 32, 1} |
+| B14 | 15.70–18.10 | Reading Sarah's honey-bun paragraph and "please just say something" | camera drift, ease-breath |
+| B15 | 18.10–18.40 | The keyboard rises | 300 ms ease-ios |
+| B16 | 18.40–20.40 | "i just don't feel like talking rn" types in (33 characters, evenly spaced with ±15 ms deterministic jitter from a fixed table) | per-character |
+| B17 | 20.40–20.90 | Send: the blue bubble rises from the composer, "Delivered" | spring-send {500, 36, 0.8} |
+| B18 | 20.90–22.60 | "Read 9:41 PM" replaces Delivered at 20.90; her typing dots appear at 21.30 and vanish at 22.00 (she stops typing) | 200 ms crossfades |
+| B19 | 22.60–23.20 | Michael's banner drops: "Michael (Best Friend)" · "hey bro I miss you, haven't talked in a while… is everything ok?" | spring-banner |
+| B20 | 23.20–23.60 | Tapped; Instagram opens on Michael's DM | spring-open-banner |
+| B21 | 23.60–25.60 | Reading the DM: the reels piling up, his question | camera drift, ease-breath |
+| B22 | 25.60–25.90 | The keyboard rises | 300 ms ease-ios |
+| B23 | 25.90–27.70 | "im good bro" types (25.90–26.70), a 350 ms pause, then " just tired" (27.05–27.70) | per-character |
+| B24 | 27.70–28.80 | Send: the gradient bubble "im good bro just tired". No Seen. Stillness | spring-send, then hold |
+| B25 | 28.80–31.30 | The Un-Said banner drops (its icon is the first blue-violet on screen): "Un-Said" · "We noticed you've been quieter with the people closest to you lately. Want to say what you haven't?" (copy A; B and C selectable with ?copy=b|c from Phase 2's notes). Held | spring-banner, then hold |
+| B26 | 31.30–31.60 | The banner is pressed (scale 0.97, 15% darken) | ease-ios 120 ms |
+| B27 | 31.60–33.60 | The Apple-style unfold (Phase 5) | spring-unfold |
+| B28 | 33.60–38.00 | The splash, then the slot (Phase 5) | ease-soft |
+
+ACCEPTANCE CRITERIA (Phase 4)
+1. /opening plays B01–B26 at 60 fps on the real components (Playwright frameStats p95 under 20 ms over the whole run, scripts/opening-check.ts); Replay restarts cleanly with every store reset; ?t= lands on the exact frame for any t, forward or backward.
+2. Determinism: scripts/opening-check.ts screenshots t = 0.50, 2.60, 5.20, 8.00, 10.40, 11.70, 12.60, 13.60, 14.40, 15.00, 16.90, 19.40, 20.60, 21.60, 22.90, 24.60, 26.30, 27.40, 28.20, 30.00 and 31.45 twice and the pairs are pixel-identical.
+3. Every on-screen copy matches Phase 2's THE SCRIPTS and this table word for word; Mom's "k" is visible during B05; "love you too" is never sent.
+4. The opening drives the real build: grep shows no thread, banner or device markup inside components/opening/ (it only renders the existing components and sets their state).
+5. Reduced motion works; ?scene= jumps work; ?cold=off skips B02.
+6. npm run build, lint, check:tokens and check:placeholders pass. Commit "branched-frontend: phase 4: opening engine, driven mode, beats B01-B26" and push per rule 12. All 10 reviewers CLEAN in one round (opening-storyboard-reviewer included).
+
+STOP AND LET ME REVIEW. Report: git branch --show-current, git diff main --name-only (only Branched-Frontend/ paths), the checklist screenshots, a screen recording of /opening from Replay to B26, every COPY NEEDED, the reviewer round results, and any timing you changed and why. Do not start Phase 5.

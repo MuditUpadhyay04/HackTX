@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <!-- Branched-Frontend: Michael (Best Friend), illustrated avatar (our own art; no real person). -->
+  <defs>
+    <radialGradient id="bg" cx="0.7" cy="0.25" r="1"><stop offset="0" stop-color="#D2EFE3"/><stop offset="1" stop-color="#A9D8C6"/></radialGradient>
+  </defs>
+  <rect width="240" height="240" fill="url(#bg)"/>
+  <!-- hoodie -->
+  <path d="M36 240c4-46 38-72 84-72s80 26 84 72z" fill="#2F3D62"/>
+  <path d="M78 176c10 14 24 20 42 20s32-6 42-20c-8-6-18-9-26-9h-32c-8 0-18 3-26 9z" fill="#3B4C78"/>
+  <path d="M108 194v26M132 194v26" stroke="#E8E2D6" stroke-width="3" stroke-linecap="round"/>
+  <!-- neck -->
+  <path d="M104 148h32v24c0 9-7 14-16 14s-16-5-16-14z" fill="#B27852"/>
+  <!-- face -->
+  <ellipse cx="120" cy="112" rx="40" ry="45" fill="#C78E66"/>
+  <ellipse cx="80" cy="116" rx="6" ry="9" fill="#B27852"/>
+  <ellipse cx="160" cy="116" rx="6" ry="9" fill="#B27852"/>
+  <!-- curly hair -->
+  <g fill="#231915">
+    <circle cx="90" cy="80" r="16"/><circle cx="108" cy="68" r="17"/><circle cx="128" cy="66" r="17"/><circle cx="147" cy="74" r="16"/><circle cx="158" cy="90" r="12"/><circle cx="82" cy="96" r="11"/>
+    <path d="M80 100c4-14 18-22 40-22s36 8 40 22c-12-6-26-8-40-8s-28 2-40 8z"/>
+  </g>
+  <!-- features -->
+  <ellipse cx="105" cy="116" rx="3.6" ry="4.2" fill="#231915"/>
+  <ellipse cx="135" cy="116" rx="3.6" ry="4.2" fill="#231915"/>
+  <path d="M97 105c5-3 11-3 15-1M128 104c4-2 10-2 15 1" fill="none" stroke="#231915" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M120 120c-1 6-3 10-6 12 3 1 6 1 8 0" fill="none" stroke="#9A6542" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M107 139c8 7 18 7 26 0" fill="none" stroke="#6E3B2A" stroke-width="3.2" stroke-linecap="round"/>
+</svg>

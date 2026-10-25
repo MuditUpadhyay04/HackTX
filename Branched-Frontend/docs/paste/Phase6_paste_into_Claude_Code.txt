@@ -1,0 +1,37 @@
+PHASE 6: Fill in the remaining apps (Facebook and Meta AI as look-alike shells, the rest of Instagram's and WhatsApp's tabs), make every control on every screen either work or toast "concept only", run the full click-through, write docs/PLACEHOLDERS.md, and hand over a build that is READY FOR ANIMATION WORK.
+
+WORKSPACE RULE (still in force): branch `branched-frontend` only; folder `Branched-Frontend/` only; everything stays in that folder; never touch frontend/, backend/, App-UI-Final/, ideas/, Mudit's Un-Said app or anything else (App-UI-Final/ is the read-only theme source); stage with git add Branched-Frontend/ and push only with git push origin branched-frontend; run git branch --show-current before every commit. All design, naming, palette and user-facing decisions come from Gurneal. Mudit owns backend/ and the real Un-Said app; it is NOT built here (it mounts in components/UnsaidSlot.tsx). Phase 0 global rules apply (docs/RULES.md), including rule 12 (BUILD_LOG + commit + push after every change), rule 13 (10 Haiku reviewers until CLEAN), rule 14 (PRODUCTION QUALITY BAR) and rule 16 (motion: interactive springs plus the one scripted opening).
+
+FACEBOOK (look-alike shell; placement "right" folded, "span" unfolded)
+- iOS Facebook look-alike: the top bar (our drawn "facebook"-style wordmark is NOT used; the bar shows a plain "Home" title in the system font, plus create / search / Messenger glyphs), the "What's on your mind?" row with Riley's avatar, a stories strip (illustrated), and a feed of 4 posts from lib/mock/facebook.ts (Mom sharing a recipe photo, a campus page, a friend's lake photo, a group post), each with like / comment / share counts. Tab bar: Home, Video, Friends, Marketplace, Notifications, Menu.
+- Interactive: scroll, tap a post to open it, like toggles locally. Everything else is a placeholder (data-placeholder="facebook:<control>", "concept only"). Colors from section 4.2 (fb-*).
+
+META AI (the Ray-Ban Meta glasses companion; look-alike shell)
+- Home: the glasses card ("Ray-Ban Meta" · 62% · connected, an illustrated pair of glasses), a "Recent" media grid (illustrated stills), and an "Ask Meta AI" prompt pill with the meta-ai-gradient ring glyph. Tab bar: Home, Gallery, Settings (look-alike labels).
+- No AI conversation is shown and nothing generates text (story rule 2). Tapping the prompt pill opens an empty chat with the composer only; sending is a placeholder (data-placeholder="meta-ai:send"). Everything else is a placeholder.
+
+COMPLETENESS
+- Instagram: Home feed (illustrated posts, stories row), Search grid, Reels tab (reuses the Reels viewer), Profile (Riley's, illustrated grid). DMs inbox and Michael's thread stay as built.
+- WhatsApp: Updates, Communities and Settings tabs as look-alike screens; the chat list complete (Mom, Fam, Roommates, Marfa Trip).
+- Messages: the conversation list (Sarah ❤️🤍 at the top).
+- Apple stubs: every Apple icon on the home screen opens its stub (Phase 3).
+- Replies (dev panel only, never in the opening): "fire reply" buttons for Sarah and Michael append a seeded reply from lib/mock/threads.ts (Sarah: COPY NEEDED; Michael: COPY NEEDED); log both as COPY NEEDED until Gurneal writes them.
+
+CLICK-THROUGH (scripts/clickthrough.ts, Playwright)
+- From /phone, open every registered app from its icon, tap every visible control on its default screen, and check that each one navigates (data-nav), works, or toasts "concept only" (data-placeholder). Then: fold, unfold (button and F), fire every banner, tap each, run the Un-Said path (banner -> unfold -> splash -> slot), open the switcher, kill an app, swipe between apps. Screenshot every step. It fails on any dead control, any console error, any data-feature-id and any network request leaving localhost.
+- npm run check:placeholders regenerates docs/PLACEHOLDERS.md: per app, every data-placeholder with its route, plus the UnsaidSlot status (mode, URL or none) and a short "how to swap in Mudit's app" pointer to docs/UNSAID_SLOT.md.
+
+THE HANDOVER (docs/READY_FOR_ANIMATION.md)
+- What exists: every route and ?state= (from lib/scenes.ts), the opening's beat table, the driven-mode API (window.__unsaidShell, window.__unsaidDevice, notify(), the store actions), the Remotion composition, the fold control, the slot.
+- How to add a new scene later: a new beat range in lib/opening/beats.ts driving existing states; never re-implementing a screen.
+- Known gaps: every COPY NEEDED and THEME NEEDED still open, every placeholder, anything Gurneal deferred.
+- The last line reads: "Status: ready for animation work."
+
+ACCEPTANCE CRITERIA (Phase 6)
+1. Facebook and Meta AI open from their icons and pass as real look-alike screenshots side by side with the real apps (rule 14); no official logos.
+2. clickthrough.ts passes with zero dead controls, zero console errors, zero data-feature-id and zero external requests.
+3. docs/PLACEHOLDERS.md, docs/UNSAID_SLOT.md and docs/READY_FOR_ANIMATION.md exist and are accurate.
+4. /opening still plays B01–B28 identically (the Phase 5 frame checklist re-run is pixel-identical).
+5. npm run build, lint, check:tokens and check:placeholders pass. Commit "branched-frontend: phase 6: Meta shells, completeness, click-through, ready for animation work" and push per rule 12. All 10 reviewers CLEAN in one round.
+
+STOP AND LET ME REVIEW. Report: git branch --show-current, git diff main --name-only (only Branched-Frontend/ paths), the click-through screenshots, docs/PLACEHOLDERS.md, docs/READY_FOR_ANIMATION.md, every COPY NEEDED / THEME NEEDED, and the reviewer round results. The build is done: ready for animation work.

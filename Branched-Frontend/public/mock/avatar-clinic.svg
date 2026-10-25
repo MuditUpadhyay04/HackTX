@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <!-- Branched-Frontend: UT Health Austin, illustrated avatar (our own art; no real person). -->
+  <defs>
+    <radialGradient id="bg-clinic" cx="0.3" cy="0.25" r="0.95"><stop offset="0" stop-color="#D8DCE2"/><stop offset="1" stop-color="#A9AFB9"/></radialGradient>
+  </defs>
+  <rect width="240" height="240" fill="url(#bg-clinic)"/>
+  <text x="120" y="142" text-anchor="middle" font-family="-apple-system, Helvetica, Arial, sans-serif" font-size="72" font-weight="600" fill="#FFFFFF">UH</text>
+</svg>

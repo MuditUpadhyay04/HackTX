@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <!-- Branched-Frontend: IM Soccer, illustrated avatar (our own art; no real person). -->
+  <defs>
+    <radialGradient id="bg-soccer" cx="0.3" cy="0.25" r="0.95"><stop offset="0" stop-color="#DDF2D0"/><stop offset="1" stop-color="#9CCF7E"/></radialGradient>
+  </defs>
+  <rect width="240" height="240" fill="url(#bg-soccer)"/>
+  <circle cx="120" cy="120" r="70" fill="#FFFFFF" stroke="#1F2A1C" stroke-width="5"/><path d="M120 92l26 19-10 31h-32l-10-31z" fill="#1F2A1C"/><path d="M120 92V52M146 111l36-14M136 142l22 32M104 142l-22 32M94 111l-36-14" stroke="#1F2A1C" stroke-width="5"/><path d="M104 52l16-2 16 2-16 10zM182 97l2 18-8 14-4-18zM158 174l-14 10-18 2 12-14zM82 174l14 10 18 2-12-14zM58 97l-2 18 8 14 4-18z" fill="#1F2A1C"/>
+</svg>
