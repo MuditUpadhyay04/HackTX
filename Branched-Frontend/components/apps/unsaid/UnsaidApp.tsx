@@ -1,24 +1,38 @@
 "use client";
 
 /**
- * Un-Said on the phone: the real app (HackTX repo `main`, `mobile/`, Expo web build) running live
- * inside the display, talking to its own FastAPI backend (`backend/`). Nothing is re-implemented
- * here; this is a window onto that app, sized to the display (cover 402 x 573, inner 822.5 x 573),
- * with the phone's status bar above it and the home indicator's safe area below it.
- *
- * Where it runs: NEXT_PUBLIC_UNSAID_URL (default http://localhost:8081, `npx expo start --web
- * --port 8081` in mobile/). See APPS_PROGRESS.md "Un-Said" for the full run steps.
+ * Un-Said on the phone: the real app (HackTX repo `main`, `mobile/`), not a re-implementation.
+ * scripts/build-unsaid.sh exports its web build into public/unsaid, so it runs same-origin at
+ * /unsaid/ inside the display and talks to its own FastAPI backend (`backend/`; the API address is
+ * baked into the build, UNSAID_API in the script). Because it is same-origin the phone can:
+ *   - dress its window like a native app: no web scrollbars, no browser focus rings;
+ *   - remember which Un-Said screen you are on (shared app stack), so a fold/unfold keeps it;
+ *   - launch it like iOS: Un-Said's splash rides the icon zoom, the app appears once it is up and
+ *     the zoom has landed, and on close the splash comes back before the window shrinks, so the
+ *     animation never drags a live web page through the clip.
  */
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { STATUS } from "@/components/lookalike/metrics";
 import { usePane } from "@/components/lookalike/shared/pane";
 import type { AppScreenProps } from "@/lib/apps/registry";
-import { AppFrame } from "../kit";
+import { useAppStore } from "@/lib/apps/store";
+import { AppFrame, useStack } from "../kit";
 
-export const UNSAID_URL = process.env.NEXT_PUBLIC_UNSAID_URL ?? "http://localhost:8081";
+/** Where the Un-Said web build is served (same-origin by default). */
+const BASE = process.env.NEXT_PUBLIC_UNSAID_URL ?? "/unsaid";
 
 /** The home indicator's strip under the app (iOS bottom safe area). */
 const SAFE_BOTTOM = 20;
+
+/** Keep the splash up at least this long (ms): the launch zoom lands at about 0.5 s. */
+const SPLASH_MIN = 480;
+
+/** Native-app dressing injected into Un-Said's document (same-origin only). */
+const DRESSING = `
+  *, *::before, *::after { scrollbar-width: none !important; -webkit-tap-highlight-color: transparent; }
+  *::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+  *:focus, *:focus-visible { outline: none !important; box-shadow: none; }
+`;
 
 export function UnsaidApp({ display }: AppScreenProps) {
   return (
@@ -30,13 +44,61 @@ export function UnsaidApp({ display }: AppScreenProps) {
 
 function UnsaidWindow() {
   const { width, height } = usePane();
-  const [state, setState] = useState<"loading" | "ready">("loading");
+  // the Un-Said route you are on, shared by both displays' copies (lib/apps/store routes)
+  const stack = useStack<{ path: string }>("unsaid", { path: "" });
+  const path = stack.top.path;
+  const reset = stack.reset;
+  // the first route is fixed at mount: changing `src` later would reload the app
+  const [src] = useState(() => `${BASE}${path || "/"}`);
+  const closing = useAppStore((s) => s.open?.target !== "unsaid");
+  const frame = useRef<HTMLIFrameElement>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [settled, setSettled] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setSettled(true), SPLASH_MIN);
+    return () => clearTimeout(t);
+  }, []);
+
+  // follow Un-Said's own navigation so a fold/unfold reopens the same screen
+  useEffect(() => {
+    if (!loaded) return;
+    const id = setInterval(() => {
+      try {
+        const loc = frame.current?.contentWindow?.location;
+        if (!loc) return;
+        const p = loc.pathname.replace(/^\/unsaid/, "") + loc.search;
+        if (p && p !== path) reset([{ path: p }]);
+      } catch {
+        // cross-origin (NEXT_PUBLIC_UNSAID_URL elsewhere): the route can't be read; nothing to keep
+      }
+    }, 300);
+    return () => clearInterval(id);
+  }, [loaded, path, reset]);
+
+  const onLoad = () => {
+    try {
+      const doc = frame.current?.contentDocument;
+      if (doc && !doc.getElementById("phone-dressing")) {
+        const style = doc.createElement("style");
+        style.id = "phone-dressing";
+        style.textContent = DRESSING;
+        doc.head.appendChild(style);
+      }
+    } catch {
+      // cross-origin: leave its styling alone
+    }
+    setLoaded(true);
+  };
+
+  const live = loaded && settled && !closing;
   return (
     <>
       <iframe
+        ref={frame}
         title="Un-Said"
-        src={UNSAID_URL}
-        onLoad={() => setState("ready")}
+        src={src}
+        onLoad={onLoad}
         allow="microphone; camera; clipboard-write; autoplay"
         style={{
           position: "absolute",
@@ -46,16 +108,19 @@ function UnsaidWindow() {
           height: height - STATUS.height - SAFE_BOTTOM,
           border: 0,
           background: "#FFFFFF",
-          opacity: state === "ready" ? 1 : 0,
-          transition: "opacity 0.25s ease-out",
+          // hidden (not just transparent) while the splash shows, so the launch/close zoom never
+          // repaints a live web page through the moving clip
+          visibility: live ? "visible" : "hidden",
+          opacity: live ? 1 : 0,
+          transition: live ? "opacity 0.2s ease-out" : "none",
         }}
       />
-      {state === "loading" ? <Splash /> : null}
+      {live ? null : <Splash />}
     </>
   );
 }
 
-/** Un-Said's launch splash (its app icon on white, like the Expo splash) while the app loads. */
+/** Un-Said's launch screen: its app icon on white, like its Expo splash. */
 function Splash() {
   return (
     <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "#FFFFFF" }}>
