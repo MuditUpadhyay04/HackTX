@@ -13,6 +13,7 @@ Linked (open a look-alike app on either display):
 - `instagram`: `InstagramApp`
 - `messages`: `MessagesApp`
 - `photos`: `PhotosApp`
+- `unsaid`: `UnsaidApp`
 - `whatsapp`: `WhatsAppApp`
 
 Every other app icon, widget, Search and hardware button is empty (`null`): the tap does nothing.
@@ -30,10 +31,12 @@ Non-app targets: `widget-weather`, `widget-calendar`, `widget-photos`, `widget-m
 
 ## Messages (`messages:`)
 
+- `messages:dictation`: `/scene/threads/sarah?state=compose&typed=0`, `/scene/threads/sarah?state=compose&typed=33`, `/scene/threads/sarah?state=read-receipt`, `/scene/threads/sarah?state=read-receipt&banner=michael`, `/scene/threads/sarah?state=sent`, `/scene/threads/sarah?state=typing`
 - `messages:plus`: `/test/placeholder`
 
 ## Instagram (`instagram:`)
 
+- `instagram:dictation`: `/scene/threads/michael?state=compose&typed=0`, `/scene/threads/michael?state=compose&typed=11`, `/scene/threads/michael?state=compose&typed=22`, `/scene/threads/michael?state=sent`, `/scene/threads/michael?state=sent&banner=unsaid`
 - `instagram:share`: `/test/placeholder`
 
 ## Photos (`photos:`)

@@ -282,6 +282,11 @@ function igAge(at: string, now: Parameters<typeof minutesBetween>[1]): string {
 // Thread
 // ---------------------------------------------------------------------------
 
+/** Michael's thread on its own (the /scene/threads/michael frames). */
+export function InstagramThread(props: { id: ThreadId; onBack?: () => void }) {
+  return <Thread {...props} onReel={() => {}} />;
+}
+
 function Thread({ id, onBack, onReel }: { id: ThreadId; onBack?: () => void; onReel: (r: ReelId) => void }) {
   const t = useMessaging((st) => st.threads[id]);
   const fresh = useMessaging((st) => st.fresh);

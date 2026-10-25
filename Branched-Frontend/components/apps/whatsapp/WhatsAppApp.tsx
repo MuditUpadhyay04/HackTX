@@ -127,6 +127,12 @@ function routeView(r: Route, stack: Stack<Route>, home: ReactNode, startCall: (p
 // Home: the tab bar and its five tabs
 // ---------------------------------------------------------------------------
 
+/** The Chats tab with its tab bar on its own (the /scene/threads/whatsapp-chats frame). */
+export function WhatsAppChats({ onOpen }: { onOpen: (id: ThreadId) => void }) {
+  const [tab, setTab] = useState<Tab>("chats");
+  return <Home tab={tab} setTab={setTab} onOpen={onOpen} onCall={() => {}} selected={null} />;
+}
+
 function Home({
   tab,
   setTab,

@@ -206,6 +206,9 @@ export function Tap({
     <button
       type="button"
       aria-label={label}
+      // project rule 4 (docs/RULES.md): every control says what it is. A wired tap is an action;
+      // a decorative one (no handler) is marked "static" so it reads as intentional, not forgotten.
+      data-action={onPress ? (label ? `tap:${label}` : "tap") : "static"}
       onPointerDown={() => setDown(true)}
       onPointerUp={() => setDown(false)}
       onPointerLeave={() => setDown(false)}

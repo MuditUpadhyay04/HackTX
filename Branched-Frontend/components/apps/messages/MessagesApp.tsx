@@ -159,6 +159,11 @@ function ComposeGlyph() {
 // Thread
 // ---------------------------------------------------------------------------
 
+/** Sarah's thread on its own (the /scene/threads/sarah frames). */
+export function MessagesThread(props: { id: ThreadId; onBack?: () => void }) {
+  return <Thread {...props} />;
+}
+
 function Thread({ id, onBack }: { id: ThreadId; onBack?: () => void }) {
   const t = useMessaging((s) => s.threads[id]);
   const fresh = useMessaging((s) => s.fresh);
