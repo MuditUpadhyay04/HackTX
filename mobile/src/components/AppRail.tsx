@@ -26,19 +26,31 @@ export function AppGlyph({ app, size = 44 }: { app: App; size?: number }) {
   );
 }
 
-export function AppRail() {
+/**
+ * The apps his words can leave through. `row` is the compact tool row Talk uses above its dock
+ * hairline (no labels, so it never crowds the transcript); the column keeps its labels.
+ */
+export function AppRail({ row = false }: { row?: boolean }) {
   const insets = useSafeAreaInsets();
   const [open, setOpen] = useState<App | null>(null);
   return (
     <>
-      <View style={styles.rail}>
+      <View style={row ? styles.row : styles.rail}>
         {RAIL_APPS.map((app) => (
-          <Pressable key={app} testID={`rail-${app}`} onPress={() => setOpen(app)} style={{ alignItems: "center", gap: space.s4 }}>
+          <Pressable
+            key={app}
+            testID={`rail-${app}`}
+            accessibilityRole="button"
+            accessibilityLabel={`${APP_LABEL[app]}, connected`}
+            hitSlop={row ? 6 : 0}
+            onPress={() => setOpen(app)}
+            style={{ alignItems: "center", gap: space.s4 }}
+          >
             <View>
-              <AppGlyph app={app} />
-              <View style={styles.dot} />
+              <AppGlyph app={app} size={row ? 32 : 44} />
+              <View style={[styles.dot, row && styles.dotSmall]} />
             </View>
-            <T v="tab" style={{ color: color.text3 }}>{APP_LABEL[app]}</T>
+            {row ? null : <T v="tab" style={{ color: color.text3 }}>{APP_LABEL[app]}</T>}
           </Pressable>
         ))}
       </View>
@@ -70,6 +82,8 @@ export function AppRail() {
 
 const styles = StyleSheet.create({
   rail: { gap: space.s16, alignItems: "center" },
+  row: { flexDirection: "row", gap: space.s12, alignItems: "center" },
+  dotSmall: { width: 10, height: 10, borderRadius: 5, right: -3, top: -3 },
   glyph: { backgroundColor: color.surfaceRaised, alignItems: "center", justifyContent: "center" },
   dot: { position: "absolute", right: -2, top: -2, width: 12, height: 12, borderRadius: 6, backgroundColor: color.violet, borderWidth: 2, borderColor: color.bg },
   backdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)" },

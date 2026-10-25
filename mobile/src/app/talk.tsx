@@ -2,7 +2,7 @@
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { type ReactNode, useEffect, useState } from "react";
-import { ActionSheetIOS, Alert, Animated, Platform, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { ActionSheetIOS, Alert, Animated, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppRail } from "../components/AppRail";
@@ -155,17 +155,18 @@ export default function Talk() {
 
   // ------------------------------------------------------------------ recording / typing
 
+  const showPhoto = Boolean(photo) && !recording && !spoken && !typing;
+
   return (
-    <View style={ui.screen}>
+    <KeyboardAvoidingView style={ui.screen} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <NavBar title={title} />
-      <ScrollView contentContainerStyle={{ paddingBottom: 280 }} keyboardShouldPersistTaps="handled">
-        {photo && !recording && !spoken ? (
-          <Image source={{ uri: photo }} style={styles.photo} contentFit="cover" transition={150} />
-        ) : null}
-        <View style={{ paddingLeft: inset.text, paddingRight: 92, marginTop: space.s24 }}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: space.s24 }} keyboardShouldPersistTaps="handled">
+        {showPhoto ? <Image source={{ uri: photo }} style={styles.photo} contentFit="cover" transition={150} /> : null}
+        {/* Full-width column: the app rail lives in the dock's tool row, so nothing sits on the transcript. */}
+        <View style={styles.column}>
           {/* Data wiring: his own words from earlier visits to this photo, before he starts. */}
           {memory && memory.previous.length > 0 && !recording && !spoken && !typing ? (
-            <View style={{ marginBottom: space.s24, gap: space.s12 }}>
+            <View style={styles.memory}>
               <Overline>Said here before</Overline>
               {memory.previous.slice(0, 3).map((p) => (
                 <View key={p.id} style={{ flexDirection: "row", alignItems: "center", gap: space.s12 }}>
@@ -194,12 +195,14 @@ export default function Talk() {
               multiline
               autoFocus
               selectionColor={color.caret}
-              style={[type.compose, { marginTop: space.s16, padding: 0, minHeight: 168 }]}
+              cursorColor={color.caret}
+              scrollEnabled={false}
+              style={[type.compose, styles.compose, { padding: 0 }, Platform.OS === "web" ? ({ outlineStyle: "none" } as object) : null]}
             />
           ) : (
-            <T v="compose" style={{ marginTop: space.s16, minHeight: 168 }}>
+            <T v="compose" style={styles.compose}>
               {spoken}
-              {recording ? <T v="compose" style={{ color: color.caret }}>|</T> : null}
+              {recording || !spoken ? <T v="compose" style={{ color: color.caret, fontWeight: "400" }}>|</T> : null}
             </T>
           )}
           {sorting ? (
@@ -211,18 +214,25 @@ export default function Talk() {
           <T v="caption" style={{ marginTop: space.s16 }}>Nothing leaves without you.</T>
           {live.provider === "mock" ? <T v="meta" style={{ marginTop: space.s8, color: color.text4 }}>mock transcription (no Muse key on the server)</T> : null}
         </View>
-        <View style={{ position: "absolute", right: space.s16, top: photo && !recording && !spoken ? 248 : space.s24 }}>
-          <AppRail />
-        </View>
       </ScrollView>
 
-      <View style={[styles.dock, { paddingBottom: insets.bottom + space.s16 }]}>
+      {/* The dock is in the column flow (not absolute), so the transcript can never run under it
+          and the keyboard lifts it on iOS. */}
+      <View style={[styles.dock, { paddingBottom: insets.bottom + space.s12 }]}>
+        <View style={styles.tools}>
+          <AppRail row />
+          <View style={{ flex: 1 }} />
+          <TextButton featureId="rant-type" label={typing ? "Talk instead" : "Type instead"} onPress={() => { live.cancel(); setTyping((t) => !t); }} />
+        </View>
         {typing ? (
-          <View style={{ alignSelf: "stretch" }}>
+          <View style={{ alignSelf: "stretch", gap: space.s4 }}>
             <PrimaryPill label="Done" disabled={!typed.trim() || sorting} onPress={submitTyped} />
+            <View style={{ alignItems: "center" }}>
+              <TextButton featureId="rant-discard" label="Start over" onPress={startOver} />
+            </View>
           </View>
         ) : (
-          <>
+          <View style={styles.micColumn}>
             <Waveform levels={live.levels} live={recording} />
             <View style={[styles.micRing, recording && styles.micRingOn]}>
               <Press featureId={recording ? "rant-stop" : "rant-record"} onPress={toggleMic} disabled={live.state === "finishing" || sorting} style={[styles.mic, shadow.pill]}>
@@ -231,14 +241,11 @@ export default function Talk() {
               </Press>
             </View>
             <T v="caption">{live.state === "finishing" || sorting ? "sorting it by person…" : recording ? "Tap to stop" : "Tap to talk"}</T>
-          </>
+            <TextButton featureId="rant-discard" label="Start over" tone="text3" onPress={startOver} />
+          </View>
         )}
-        <View style={{ flexDirection: "row", gap: space.s24 }}>
-          <TextButton featureId="rant-type" label={typing ? "Talk instead" : "Type instead"} onPress={() => { live.cancel(); setTyping((t) => !t); }} />
-          <TextButton featureId="rant-discard" label="Start over" onPress={startOver} />
-        </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -275,9 +282,14 @@ function SelfNoteCard() {
 }
 
 const styles = StyleSheet.create({
-  photo: { marginHorizontal: inset.card, marginTop: space.s8, height: 224, borderRadius: radius.hero },
+  photo: { marginHorizontal: inset.card, marginTop: space.s8, height: 224, borderRadius: radius.hero, backgroundColor: color.surface },
+  column: { paddingHorizontal: inset.text, marginTop: space.s24 },
+  memory: { marginBottom: space.s24, gap: space.s12, backgroundColor: color.surface, borderRadius: radius.row, padding: space.s16 },
+  compose: { marginTop: space.s16, minHeight: 168 },
+  tools: { alignSelf: "stretch", flexDirection: "row", alignItems: "center", paddingHorizontal: inset.text, paddingBottom: space.s12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: color.hairline },
+  micColumn: { alignItems: "center", gap: space.s8 },
   personCard: { backgroundColor: color.surface, borderRadius: radius.row, padding: space.s16 },
-  dock: { position: "absolute", left: 0, right: 0, bottom: 0, alignItems: "center", gap: space.s12, paddingTop: space.s16, backgroundColor: color.bg },
+  dock: { alignItems: "center", gap: space.s12, paddingTop: space.s12, backgroundColor: color.bg },
   micRing: { width: 104, height: 104, borderRadius: 52, alignItems: "center", justifyContent: "center" },
   micRingOn: { borderWidth: 2, borderColor: "rgba(168,144,246,0.4)" },
   mic: { width: 88, height: 88, borderRadius: 44, overflow: "hidden", alignItems: "center", justifyContent: "center" },

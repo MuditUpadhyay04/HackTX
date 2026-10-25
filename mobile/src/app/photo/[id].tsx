@@ -6,11 +6,13 @@ import { useEffect, useState } from "react";
 import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { LinearGradient } from "expo-linear-gradient";
+
 import { AppIcon } from "../../components/ui";
 import { useKnock } from "../../lib/attention";
 import { haptics } from "../../lib/haptics";
 import { photoDate } from "../../lib/photos";
-import { color, space, spring, type } from "../../theme/tokens";
+import { color, shadow, space, spring, type } from "../../theme/tokens";
 
 export default function PhotoViewer() {
   const insets = useSafeAreaInsets();
@@ -65,11 +67,18 @@ export default function PhotoViewer() {
 
       {chrome ? (
         <View style={[styles.top, { paddingTop: insets.top + space.s4 }]}>
-          <Pressable hitSlop={12} onPress={() => router.back()} style={styles.round}>
+          <LinearGradient pointerEvents="none" colors={["rgba(0,0,0,0.55)", "rgba(0,0,0,0)"]} style={StyleSheet.absoluteFill} />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Back"
+            hitSlop={12}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace("/gallery"))}
+            style={styles.round}
+          >
             <Ionicons name="chevron-back" size={24} color="#fff" />
           </Pressable>
-          <Text style={styles.date}>{photoDate(Number(t))}</Text>
-          <Pressable testID="overlay-open-talk" hitSlop={12} onPress={talk}>
+          <Text style={styles.date} numberOfLines={1}>{photoDate(Number(t))}</Text>
+          <Pressable testID="overlay-open-talk" accessibilityLabel="Say it out loud" hitSlop={12} onPress={talk}>
             <Animated.View style={{ transform: [{ scale: pulse }] }}>
               <AppIcon size={40} />
             </Animated.View>
@@ -78,14 +87,14 @@ export default function PhotoViewer() {
       ) : null}
 
       <Animated.View style={[styles.knockWrap, { paddingTop: insets.top + space.s8, transform: [{ translateY: knockY }] }]}>
-        <Pressable testID="drift-nudge-open" onPress={() => { open(); hideKnock(); talk(); }} style={styles.knock}>
-          <AppIcon size={38} />
+        <Pressable testID="drift-nudge-open" onPress={() => { open(); hideKnock(); talk(); }} style={[styles.knock, shadow.letter]}>
+          <AppIcon size={40} />
           <View style={{ flex: 1 }}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-              <Text style={[type.rowName, { fontSize: 15 }]}>{knock?.title ?? "Un-Said"}</Text>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>
+              <Text style={type.rowName}>{knock?.title ?? "Un-Said"}</Text>
               <Text style={type.meta}>now</Text>
             </View>
-            <Text style={[type.rowPreview, { marginTop: 2 }]}>{knock?.body ?? ""}</Text>
+            <Text style={[type.rowPreview, { marginTop: 2 }]} numberOfLines={3}>{knock?.body ?? ""}</Text>
           </View>
         </Pressable>
         <Pressable onPress={dismissKnock} hitSlop={8} style={styles.grabber} />
@@ -96,10 +105,10 @@ export default function PhotoViewer() {
 
 const styles = StyleSheet.create({
   black: { flex: 1, backgroundColor: "#000" },
-  top: { position: "absolute", top: 0, left: 0, right: 0, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: space.s16 },
+  top: { position: "absolute", top: 0, left: 0, right: 0, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: space.s12, paddingHorizontal: space.s16, paddingBottom: space.s24 },
   round: { width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(0,0,0,0.45)", alignItems: "center", justifyContent: "center" },
-  date: { color: "#fff", fontSize: 15, fontWeight: "600" },
+  date: { ...type.navTitle, flex: 1, textAlign: "center", fontSize: 15 },
   knockWrap: { position: "absolute", top: 0, left: space.s8, right: space.s8 },
-  knock: { flexDirection: "row", gap: space.s12, alignItems: "center", backgroundColor: color.surface, borderRadius: 24, padding: space.s12 },
+  knock: { flexDirection: "row", gap: space.s12, alignItems: "center", backgroundColor: color.surface, borderRadius: 24, padding: space.s12, borderWidth: StyleSheet.hairlineWidth, borderColor: color.hairline },
   grabber: { alignSelf: "center", width: 36, height: 5, borderRadius: 3, backgroundColor: color.text4, marginTop: space.s8 },
 });

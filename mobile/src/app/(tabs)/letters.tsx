@@ -1,4 +1,5 @@
 // Letters (DESIGN_SPEC 3.6). A gradient ring means unread.
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -7,7 +8,7 @@ import { Skeleton } from "../../components/motion";
 import { Avatar, Press, Row, styles as ui, T } from "../../components/ui";
 import { haptics } from "../../lib/haptics";
 import { useHome } from "../../lib/useHome";
-import { color, inset, space } from "../../theme/tokens";
+import { color, inset, radius, space } from "../../theme/tokens";
 
 export default function Letters() {
   const insets = useSafeAreaInsets();
@@ -47,9 +48,14 @@ export default function Letters() {
         ) : null}
 
         {home && senders.length === 0 ? (
-          <T v="rowPreview" style={{ marginHorizontal: inset.text, marginTop: space.s24 }}>
-            When someone writes back, it lands here.
-          </T>
+          <View style={styles.empty}>
+            <View style={styles.emptyWell}>
+              <Ionicons name="mail-open-outline" size={30} color={color.violet} />
+            </View>
+            <T v="rowPreview" style={{ textAlign: "center", color: color.text2 }}>
+              When someone writes back, it lands here.
+            </T>
+          </View>
         ) : null}
 
         {senders.length ? (
@@ -86,4 +92,6 @@ export default function Letters() {
 
 const styles = StyleSheet.create({
   rings: { gap: space.s16, paddingHorizontal: inset.text, paddingTop: space.s24 },
+  empty: { marginHorizontal: inset.card, marginTop: space.s32, paddingVertical: space.s48, paddingHorizontal: space.s24, alignItems: "center", gap: space.s16, borderRadius: radius.hero, borderWidth: 1, borderStyle: "dashed", borderColor: color.hairline },
+  emptyWell: { width: 64, height: 64, borderRadius: 32, backgroundColor: color.surfaceRaised, alignItems: "center", justifyContent: "center" },
 });

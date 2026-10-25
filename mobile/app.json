@@ -19,7 +19,8 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#0F0D15",
-        "foregroundImage": "./assets/brand/unsaid-app-icon.png",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false

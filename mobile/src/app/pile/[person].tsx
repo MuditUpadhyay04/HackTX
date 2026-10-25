@@ -88,26 +88,27 @@ export default function Pile() {
   return (
     <View style={ui.screen}>
       <NavBar title={person ? `For ${person.name}` : ""} />
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 140 }}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: space.s24 }}>
         {person ? (
           <View style={styles.header}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: space.s12 }}>
               <Avatar name={person.name} />
               <View style={{ flex: 1 }}>
                 <T v="rowName">{person.name}</T>
-                <View style={{ flexDirection: "row", gap: space.s4 }}>
-                  <T v="rowPreview">{`Goes to ${person.name} on ${APP_LABEL[channelApp]}`}</T>
-                  <TextButton featureId="delivery-channel-pick" label="Change" onPress={() => setPicking(true)} />
-                </View>
+                <T v="rowPreview" lines={1}>{`Goes to ${person.name} on ${APP_LABEL[channelApp]}`}</T>
               </View>
+              <TextButton featureId="delivery-channel-pick" tone="text" label="Change" onPress={() => setPicking(true)} />
             </View>
-            <Pressable testID="recipient-timezone-set" onPress={() => setZones(true)} style={{ marginTop: space.s12, alignSelf: "flex-start" }}>
+            <View style={styles.headerRule} />
+            <Pressable testID="recipient-timezone-set" onPress={() => setZones(true)} hitSlop={8} style={{ alignSelf: "flex-start" }}>
               <Chip icon={person.is_asleep ? "moon" : "time-outline"} label={`${person.local_time} for ${person.name}`} />
             </Pressable>
           </View>
-        ) : null}
+        ) : (
+          <Skeleton height={112} style={{ marginHorizontal: inset.card, marginTop: space.s8 }} />
+        )}
 
-        <Overline style={{ marginHorizontal: inset.text, marginTop: space.s24, marginBottom: space.s8 }}>In your words</Overline>
+        <Overline style={{ marginHorizontal: inset.text, marginTop: space.s32, marginBottom: space.s8 }}>In your words</Overline>
         {pieces === null ? (
           <View style={{ marginHorizontal: inset.card, gap: space.s8 }}>
             <Skeleton height={64} />
@@ -115,18 +116,25 @@ export default function Pile() {
           </View>
         ) : null}
         {pieces?.length === 0 ? (
-          <View style={{ marginHorizontal: inset.text, gap: space.s8 }}>
+          <View style={styles.empty}>
             <T v="rowPreview">Nothing in your words for them yet.</T>
-            <TextButton label="Say it out loud" onPress={() => router.push({ pathname: "/talk", params: { toName: person?.name ?? "", channel: person?.channel ?? "" } })} />
+            <TextButton tone="text" label="Say it out loud" onPress={() => router.push({ pathname: "/talk", params: { toName: person?.name ?? "", channel: person?.channel ?? "" } })} />
           </View>
         ) : null}
-        {pieces?.map((p) => {
+        {pieces?.map((p, i) => {
           const active = on.has(p.id);
           return (
-            <Pressable key={p.id} testID="pile-line-toggle" onPress={() => { haptics.select(); toggle(p.id); }} style={styles.line}>
+            <Pressable
+              key={p.id}
+              testID="pile-line-toggle"
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: active }}
+              onPress={() => { haptics.select(); toggle(p.id); }}
+              style={[styles.line, i > 0 && styles.lineRule]}
+            >
               <View style={{ flex: 1 }}>
                 <T v="words" style={{ color: active ? color.text : color.text4 }}>{p.text}</T>
-                <T v="meta" style={{ marginTop: space.s4 }}>{`${new Date(p.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })} · ${p.tone}`}</T>
+                <T v="meta" style={{ marginTop: space.s8 }}>{`${new Date(p.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })} · ${p.tone}`}</T>
               </View>
               {active ? (
                 <LinearGradient colors={pillGradient.colors} locations={pillGradient.locations} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.toggle}>
@@ -140,8 +148,11 @@ export default function Pile() {
         })}
       </ScrollView>
 
-      <View style={[styles.dock, { paddingBottom: insets.bottom + space.s16 }]}>
+      <View style={[styles.dock, { paddingBottom: insets.bottom + space.s12 }]}>
         <PrimaryPill featureId="letter-preview" label="Preview letter" disabled={!pieces || on.size === 0} onPress={preview} />
+        <T v="caption" style={{ textAlign: "center" }}>
+          You decide when it leaves.
+        </T>
       </View>
 
       <Sheet visible={picking} onClose={() => setPicking(false)}>
@@ -168,9 +179,12 @@ export default function Pile() {
 }
 
 const styles = StyleSheet.create({
-  header: { marginHorizontal: inset.card, marginTop: space.s8, backgroundColor: color.surface, borderRadius: radius.row, padding: space.s16 },
-  line: { flexDirection: "row", alignItems: "center", gap: space.s16, paddingHorizontal: inset.text, paddingVertical: space.s12 },
+  header: { marginHorizontal: inset.card, marginTop: space.s8, backgroundColor: color.surface, borderRadius: radius.row, padding: space.s16, gap: space.s12 },
+  headerRule: { height: StyleSheet.hairlineWidth, backgroundColor: color.hairline },
+  empty: { marginHorizontal: inset.card, backgroundColor: color.surface, borderRadius: radius.row, padding: space.s16, gap: space.s4, alignItems: "flex-start" },
+  line: { flexDirection: "row", alignItems: "center", gap: space.s16, marginHorizontal: inset.text, paddingVertical: space.s16 },
+  lineRule: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.hairline },
   toggle: { width: 28, height: 28, borderRadius: 14, alignItems: "center", justifyContent: "center" },
-  dock: { position: "absolute", left: 0, right: 0, bottom: 0, paddingTop: space.s16, backgroundColor: color.bg },
+  dock: { gap: space.s12, paddingTop: space.s16, backgroundColor: color.bg, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.hairline },
   sheetRow: { flexDirection: "row", alignItems: "center", gap: space.s12, paddingVertical: space.s12 },
 });

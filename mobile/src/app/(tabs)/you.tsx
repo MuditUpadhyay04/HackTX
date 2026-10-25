@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Skeleton } from "../../components/motion";
 import { Avatar, Press, Row, styles as ui, T } from "../../components/ui";
 import { useHome } from "../../lib/useHome";
-import { color, inset, space } from "../../theme/tokens";
+import { color, inset, radius, space } from "../../theme/tokens";
 
 export default function You() {
   const insets = useSafeAreaInsets();
@@ -15,8 +15,8 @@ export default function You() {
   const loading = !home && !error;
   const notes = home?.self_notes.length ?? 0;
 
-  const link = (icon: keyof typeof Ionicons.glyphMap, label: string, onPress: () => void, featureId?: string, meta?: string) => (
-    <Row featureId={featureId} onPress={onPress}>
+  const link = (icon: keyof typeof Ionicons.glyphMap, label: string, onPress: () => void, featureId?: string, meta?: string, first?: boolean) => (
+    <Row featureId={featureId} onPress={onPress} style={[styles.groupRow, !first && styles.rule]}>
       <View style={styles.well}>
         <Ionicons name={icon} size={22} color={color.text} />
       </View>
@@ -31,9 +31,11 @@ export default function You() {
   return (
     <View style={ui.screen}>
       <ScrollView contentContainerStyle={{ paddingTop: insets.top + space.s24, paddingBottom: space.s48 }}>
-        <View style={{ marginHorizontal: inset.text, gap: space.s12 }}>
-          <Avatar name={home?.me.name ?? "Riley"} size={72} />
-          <T v="display">{home?.me.name || (loading ? " " : "Riley")}</T>
+        <View style={{ marginHorizontal: inset.text, flexDirection: "row", alignItems: "center", gap: space.s16 }}>
+          <Avatar name={home?.me.name ?? "Riley"} size={72} ring />
+          <View style={{ flex: 1 }}>
+            <T v="display">{home?.me.name || (loading ? " " : "Riley")}</T>
+          </View>
         </View>
 
         {loading ? (
@@ -56,18 +58,18 @@ export default function You() {
         {home ? (
           <>
             <View style={styles.group}>
-              {link("albums-outline", "Notes to yourself", () => router.push("/notes"), undefined, notes ? `${notes}` : undefined)}
+              {link("albums-outline", "Notes to yourself", () => router.push("/notes"), undefined, notes ? `${notes}` : undefined, true)}
               {link("images-outline", "Connect photos", () => router.push("/connect"), "photo-connectors-open")}
               {link("shield-checkmark-outline", "Safety and support", () => router.push("/safety"))}
               {link("options-outline", "Settings", () => router.push("/settings"))}
             </View>
 
-            <T v="section" style={{ marginHorizontal: inset.text, marginTop: space.s24 }}>
+            <T v="section" style={{ marginHorizontal: inset.text, marginTop: space.s32 }}>
               Your people
             </T>
             <View style={styles.group}>
-              {home.people.map((p) => (
-                <Row key={p.id} onPress={() => router.push({ pathname: "/pile/[person]", params: { person: p.id } })}>
+              {home.people.map((p, i) => (
+                <Row key={p.id} style={[styles.groupRow, i > 0 && styles.rule]} onPress={() => router.push({ pathname: "/pile/[person]", params: { person: p.id } })}>
                   <Avatar name={p.name} />
                   <View style={{ flex: 1 }}>
                     <T v="rowName">{p.name}</T>
@@ -89,6 +91,9 @@ export default function You() {
 }
 
 const styles = StyleSheet.create({
-  group: { marginHorizontal: inset.card, gap: space.s8, marginTop: space.s16 },
+  // One grouped un-surface block with hairline dividers (DESIGN_SPEC 3.12).
+  group: { marginHorizontal: inset.card, marginTop: space.s16, backgroundColor: color.surface, borderRadius: radius.row, overflow: "hidden" },
+  groupRow: { borderRadius: 0, backgroundColor: "transparent", minHeight: 64 },
+  rule: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.hairline },
   well: { width: 44, height: 44, borderRadius: 22, backgroundColor: color.surfaceRaised, alignItems: "center", justifyContent: "center" },
 });

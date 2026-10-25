@@ -3,7 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppGlyph } from "../../components/AppRail";
@@ -29,6 +29,9 @@ function holdProgress(card: Card, now?: string) {
 
 export default function Home() {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  // Spec: 370×288 at 402 pt. Keep that ratio on narrower phones without letting the title crowd the "+".
+  const heroHeight = Math.round(Math.max(248, Math.min(288, (width - inset.card * 2) * 0.78)));
   const { home, error, refresh } = useHome();
   const [drafts, setDrafts] = useState<{ personId: string; latest: Piece }[] | null>(null);
   const [pulling, setPulling] = useState(false);
@@ -116,7 +119,7 @@ export default function Home() {
         </Rise>
 
         <Rise delay={80}>
-          <Press featureId="draft-new" onPress={openNew} style={[styles.hero, shadow.hero]}>
+          <Press featureId="draft-new" onPress={openNew} style={[styles.hero, shadow.hero, { height: heroHeight }]}>
             <CardGradient />
             <Text style={styles.quote}>{"“"}</Text>
             <T v="cardTitle" style={{ marginTop: space.s8, marginRight: space.s64 }}>

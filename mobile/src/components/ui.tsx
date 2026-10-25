@@ -209,7 +209,8 @@ export function LetterCard({ lines, signature, footer, minHeight = 420 }: { line
       {first ? (
         <View style={{ marginTop: space.s16, alignSelf: "stretch" }}>
           <Text style={[type.letterHero, { color: color.letterInk, fontSize: heroSize, lineHeight: heroSize * 1.125 }]}>{first}</Text>
-          <View style={{ alignSelf: "flex-end", marginTop: -4, marginRight: space.s8 }}>
+          {/* Under the last line, from its start, as in the reference ("you too."). */}
+          <View style={{ alignSelf: "flex-start", marginTop: -2, marginLeft: space.s4 }}>
             <Svg width={arcWidth(first)} height={14}>
               <Path
                 d={`M2 10 Q ${arcWidth(first) / 2} 1 ${arcWidth(first) - 2} 8`}

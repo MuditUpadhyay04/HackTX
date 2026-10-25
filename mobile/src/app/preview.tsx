@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Skeleton } from "../components/motion";
 import { Chip, LetterCard, NavBar, PrimaryPill, styles as ui, T, TextButton } from "../components/ui";
 import { api, type Piece } from "../lib/api";
 import { haptics } from "../lib/haptics";
@@ -27,6 +28,7 @@ export default function Preview() {
   const { home } = useHome(30000);
   const person = home?.people.find((p) => p.id === params.person);
   const [pieces, setPieces] = useState<Piece[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const [hold, setHold] = useState<boolean | null>(null);
   const [sending, setSending] = useState(false);
   const [held, setHeld] = useState<string | null>(null);
@@ -35,10 +37,20 @@ export default function Preview() {
 
   const ids = useMemo(() => (params.pieces ?? "").split(",").filter(Boolean), [params.pieces]);
   useEffect(() => {
-    api.pieces(params.person).then((all) => setPieces(all.filter((p) => ids.includes(p.id)))).catch(() => {});
+    api.pieces(params.person)
+      .then((all) => setPieces(all.filter((p) => ids.includes(p.id))))
+      .catch(() => {})
+      .finally(() => setLoaded(true));
   }, [params.person, ids]);
 
-  if (!person || !home) return <View style={ui.screen}><NavBar backLabel="Edit" /></View>;
+  if (!person || !home) {
+    return (
+      <View style={ui.screen}>
+        <NavBar backLabel="Edit" />
+        <Skeleton height={420} r={radius.hero} style={{ marginHorizontal: inset.card, marginTop: space.s16 }} />
+      </View>
+    );
+  }
 
   const holdable = person.channel === "whatsapp";
   const holding = holdable && (hold ?? person.is_asleep);
@@ -79,26 +91,39 @@ export default function Preview() {
   return (
     <View style={ui.screen}>
       <NavBar backLabel="Edit" title={`To ${person.name}`} />
-      <ScrollView contentContainerStyle={{ paddingTop: space.s16, paddingBottom: insets.bottom + 160 }}>
-        <LetterCard lines={pieces.map((p) => p.text)} signature={home.me.name} />
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingTop: space.s16, paddingBottom: space.s32 }}>
+        {pieces.length || loaded ? (
+          <LetterCard lines={pieces.map((p) => p.text)} signature={home.me.name} />
+        ) : (
+          <Skeleton height={420} r={radius.hero} style={{ marginHorizontal: inset.card }} />
+        )}
         <T v="caption" style={{ textAlign: "center", marginTop: space.s16 }}>{`This is how ${person.name} will see it.`}</T>
 
-        {holdable ? (
+        {holdable && !held ? (
           <View style={styles.delivery}>
-            <T v="rowName">{`${person.name}'s morning`}</T>
-            <T v="rowPreview">{`Arrives ${morningLabel(person.morning)} ${pos} time`}</T>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: space.s12 }}>
+              <View style={styles.well}>
+                <Ionicons name="moon" size={18} color={color.violet} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <T v="rowName">{`${person.name}'s morning`}</T>
+                <T v="rowPreview">{`Arrives ${morningLabel(person.morning)} ${pos} time`}</T>
+              </View>
+            </View>
+            <View style={styles.rule} />
             <Choice featureId="unsend-hold-until-morning" label={`Hold until ${pos} morning`} on={holding} onPress={() => setHold(true)} />
             <Choice label="Send now" on={!holding} onPress={() => setHold(false)} />
           </View>
         ) : null}
 
         {held ? (
-          <View style={{ alignItems: "center", gap: space.s8, marginTop: space.s24 }}>
-            <T v="rowName">{`Held for ${person.name}'s morning.`}</T>
+          <View style={styles.held}>
+            <Ionicons name="checkmark-circle" size={28} color={color.violet} />
+            <T v="section" style={{ textAlign: "center" }}>{`Held for ${person.name}'s morning.`}</T>
             <Chip icon="moon" label={`arrives ${held}`} />
             {headsUp.question ? (
               // Wiring for the one permission ask (lib/push.ts). Copy is proposed; styling is Gurneal's.
-              <View style={{ alignItems: "center", marginTop: space.s16 }}>
+              <View style={{ alignItems: "center", marginTop: space.s8 }}>
                 <T v="caption" style={{ textAlign: "center" }}>{headsUp.question}</T>
                 <View style={{ flexDirection: "row", gap: space.s24 }}>
                   <TextButton label="Yes" tone="text" onPress={() => headsUp.answer(true).finally(() => router.dismissTo("/home"))} />
@@ -133,6 +158,9 @@ function Choice({ label, on, onPress, featureId }: { label: string; on: boolean;
 
 const styles = StyleSheet.create({
   delivery: { marginHorizontal: inset.card, marginTop: space.s24, backgroundColor: color.surface, borderRadius: radius.row, padding: space.s16, gap: space.s4 },
-  choice: { flexDirection: "row", alignItems: "center", gap: space.s12, paddingVertical: space.s8, marginTop: space.s4 },
-  dock: { position: "absolute", left: 0, right: 0, bottom: 0, paddingTop: space.s16, backgroundColor: color.bg },
+  well: { width: 36, height: 36, borderRadius: 18, backgroundColor: color.surfaceRaised, alignItems: "center", justifyContent: "center" },
+  rule: { height: StyleSheet.hairlineWidth, backgroundColor: color.hairline, marginVertical: space.s8 },
+  choice: { flexDirection: "row", alignItems: "center", gap: space.s12, paddingVertical: space.s8, minHeight: 44 },
+  held: { marginHorizontal: inset.card, marginTop: space.s24, alignItems: "center", gap: space.s8, backgroundColor: color.surface, borderRadius: radius.row, padding: space.s24 },
+  dock: { paddingTop: space.s16, backgroundColor: color.bg, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.hairline },
 });
