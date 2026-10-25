@@ -26,7 +26,7 @@ services:
       - key: WHATSAPP_TEMPLATE
         value: unsaid_left_you_something
       - key: SEED_ME_NAME
-        value: Arjun
+        value: Riley
       - key: SEED_ME_PHONE
         sync: false
       - key: SEED_MOM_PHONE

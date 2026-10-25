@@ -68,9 +68,9 @@ def test_the_one_evening(client):
     assert result["safety"] == "ok"
     groups = {g["person"]["id"]: g for g in result["groups"]}
     assert list(groups) == ["mom", "jordan", "priya"]
-    assert groups["mom"]["pieces"][0]["text"].startswith("Mumma called three times today")
+    assert groups["mom"]["pieces"][0]["text"].startswith("mom keeps calling")
     assert groups["mom"]["pieces"][0]["has_audio"] is True
-    assert groups["jordan"]["kept_total"] == 3  # tonight's line plus Oct 11 and Sep 30
+    assert groups["jordan"]["kept_total"] == 3  # Sarah: tonight's line plus Oct 11 and Sep 30
     assert groups["mom"]["reflection"] == "you still want her to know."
     for g in result["groups"]:
         for p in g["pieces"]:
@@ -104,23 +104,24 @@ def test_the_one_evening(client):
 
     # Shot 12: Mom's page. No app, no account.
     page = client.get(f"/api/public/cards/{card_token}").json()
-    assert page["sender_name"] == "Arjun"
-    assert page["lines"][0]["text"].startswith("Mumma called")
+    assert page["sender_name"] == "Riley"
+    assert page["lines"][0]["text"].startswith("mom keeps calling")
     assert page["audio_url"] and page["photo_url"]
     assert page["call_url"] == "https://wa.me/15125550199"
     assert client.get(f"/c/{card_token}").status_code == 200
 
-    # Shot 15: Jordan's stack, unchecked by default; he sends the two older lines.
+    # Shot 15: Sarah's stack (id jordan), unchecked by default; he sends the two older lines.
     stack = client.get("/api/people/jordan/pieces").json()
     assert [p["created_at"][:10] for p in stack][:2] == ["2026-09-30", "2026-10-11"]
     older = [p["id"] for p in stack if p["rant_id"] is None]
     jcard = client.post("/api/cards", json={"recipient_id": "jordan", "piece_ids": older, "when": "now"}).json()
     assert jcard["status"] == "ready"
-    assert jcard["share"]["sms_ios"].startswith("sms:+15125550142&body=I%20miss%20how%20we%20used%20to%20talk")
+    assert jcard["share"]["sms_ios"].startswith("sms:+15125550142&body=I%20miss%20the%20way%20we%20used%20to%20talk")
     assert len(client.get("/api/people/jordan/pieces").json()) == 1  # tonight's stays kept
 
-    # Shot 18: Priya's reminder hands off to Instagram.
+    # Shot 18: Michael's reminder (id priya) hands off to Instagram.
     reminder = home["reminders"][0]
+    assert (reminder["person_name"], reminder["text"]) == ("Michael", "3 reels this week")
     assert reminder["handoff"] == "https://ig.me/m/priya.k"
 
 
@@ -133,7 +134,7 @@ def test_a_hopeless_rant_gets_resources_not_cards(client):
 
 
 def test_cards_only_carry_that_persons_pieces(client):
-    rant = client.post("/api/rants/text", json={"text": "Priya keeps sending reels. Mumma called again."}).json()
+    rant = client.post("/api/rants/text", json={"text": "Michael keeps sending reels. Mumma called again."}).json()
     groups = {g["person"]["id"]: g for g in client.post(f"/api/rants/{rant['id']}/sort").json()["groups"]}
     resp = client.post("/api/cards", json={"recipient_id": "mom", "piece_ids": [groups["priya"]["pieces"][0]["id"]]})
     assert resp.status_code == 400

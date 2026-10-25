@@ -9,7 +9,7 @@ This is the working product for [`docs/demo/Demo_Script_v2.md`](../docs/demo/Dem
 | URL | What it is |
 |---|---|
 | `/app/` | The student's app (mobile web; add it to the iPhone home screen for full-screen recording). Shots 6–10, 15, 17, 18. |
-| `/c/<token>` | The page Mom (or Jordan) opens from the link. No app, no account. Shot 12. |
+| `/c/<token>` | The page Mom (or Sarah) opens from the link. No app, no account. Shot 12. |
 | `/api/...` | JSON + one WebSocket, for the app above and for Gurneal's frontend later. |
 
 Without keys it runs end to end on **clearly labeled mock AI** (a "mock ai" pill shows in the app), so you can build and rehearse before the Muse key arrives.
@@ -46,18 +46,18 @@ Keys go in `backend/.env` (copy [`.env.example`](.env.example)). Everything is o
 
 | Shot | Do this |
 |---|---|
-| Before | Demo panel → **people**: set real numbers for you, Mom, and Jordan, and Priya's Instagram. Home → **+ add a photo**: the real kitchen photo, tagged Mom. |
+| Before | Demo panel → **people**: set real numbers for you, Mom, Dad and Sarah, and Michael's Instagram. Home → **+ add a photo**: the real kitchen photo, tagged Mom. |
 | Sat 9:30 PM Austin | Demo panel → **mom's voice note** → copy the link → send it to Mom. She opens it and holds the mic: *"Beta, koi emergency nahi hai…"*. Then tap **make latest reply tuesday** so the knock says *"on tuesday"*. |
 | 6 | Demo panel → clock **set** to `2026-10-24 18:32` (Mom shows 🌙 5:02 AM). Open home: the knock slides down: *"Mom left you a voice note on tuesday."* |
 | 7 | Tap it → her photo opens and her note plays, with the English caption under it. |
 | 8 | Hold the mic and say the rant from §4. The transcript writes itself live (Muse Voice Transcribe). |
-| 9 | Let go → three cards: Mom, Jordan (*+2 from before*), Priya. Every word is a slice of his transcript. |
+| 9 | Let go → three cards: Mom, Sarah (*+2 from before*), Michael. Every word is a slice of his transcript. |
 | 10 | Tap Mom → *"…hold this until her 8 AM?"* → **send when it's her morning** → *Mom · waiting · 8:00 AM her time*. |
 | 11 | Demo panel → **+3 hours**. The scheduler releases the card exactly as it would at her real 8 AM. |
-| 12 | With the WhatsApp keys, Mom's phone gets *"hi. Arjun left you something…"*. Without them, tap the *"send it now?"* nudge. She opens the link: photo, his voice (her turn only), his words, the Hindi caption, **hold to reply**, **call Arjun**. |
-| 15 | Back in the app: rant again or open Jordan's card → *"3 things you never told her."* Nothing is pre-checked. Pick the two older lines → **send to Jordan in messages** → Messages opens with the note. |
+| 12 | With the WhatsApp keys, Mom's phone gets *"hi. Riley left you something…"*. Without them, tap the *"send it now?"* nudge. She opens the link: photo, his voice (her turn only), his words, the Hindi caption, **hold to reply**, **call Riley**. |
+| 15 | Back in the app: rant again or open Sarah's card → *"3 things you never told her."* Nothing is pre-checked. Pick the two older lines → **send to Sarah in messages** → Messages opens with the note. |
 | 17 | Home → **for the next hard day** → record → saved *to: me*. It comes back above the cards the next time a rant sounds tired or lonely. |
-| 18 | Home → *waiting on you: Priya asked twice.* → **open instagram**. |
+| 18 | Home → *Michael · waiting on you: 3 reels this week* → **open instagram**. |
 | Reset | Demo panel → **reset activity** clears rants, cards, replies, and notes, but keeps people, photos, the clock, and Mom's link. **real time** puts the clock back. |
 
 ## WhatsApp Cloud API (Mom's 8 AM)
@@ -75,7 +75,7 @@ Keys go in `backend/.env` (copy [`.env.example`](.env.example)). Everything is o
 |---|---|
 | Live transcript, Hindi + English in one breath | Muse Voice Transcribe realtime (`wss://api.meta.ai/v1/asr/realtime`), `ENDPOINTING` mode, `languageBias: ["English", "Hindi"]`. The browser streams 24 kHz PCM to our server, which relays it; the key never reaches the browser. If the socket fails, the browser uploads its own WAV to the file endpoint. |
 | Sorting one rant by person | The **server** numbers the sentences. **Muse Spark** (`muse-spark-1.3`, schema-constrained JSON, `reasoning_effort: low`) only returns `{person, sentence ids, tone}`. The server slices the text from his transcript, so **Spark can't write a word on any card.** Bad ids, unknown people, and reused sentences are dropped. |
-| His voice for Mom, her turn only | Audio is cut on Voice Transcribe's turn timestamps. A turn plays only if every sentence in it is Mom's (or a few words of filler). If Jordan's line shared that breath, Mom gets text only. |
+| His voice for Mom, her turn only | Audio is cut on Voice Transcribe's turn timestamps. A turn plays only if every sentence in it is Mom's (or a few words of filler). If Sarah's line shared that breath, Mom gets text only. |
 | Safety gate | Runs before any card forms: Spark's classification **plus** a phrase list (including transliterated Hindi). The stricter layer wins; unknown output counts as a concern. A concern means no cards, only 988 / 1-800-799-7233 / 911. |
 | Her language | Spark translates the words he approved, on Mom's card. Her reply is transcribed and captioned in English for him. |
 | Unsaid's one line | Spark writes one short lowercase line restating what he said ("you still want her to know."), prompted to 12 words and capped at 90 characters. The question after it ("hold this until her 8 AM?") is code. |
@@ -118,6 +118,6 @@ Today, with the phrase layer only (no key): **9/10 concerning rants routed to re
 ## Honest limits
 
 - The demo's knock appears **inside Unsaid**. A notification on top of the Photos app is the film's composite and the Round 2 ask.
-- Jordan's and Priya's replies happen in Messages and Instagram, where Unsaid can't see them.
+- Sarah's and Michael's replies happen in Messages and Instagram, where Unsaid can't see them.
 - One user per deploy (the demo cast). Card links are unguessable tokens that expire in 30 days and can be revoked; they aren't identity checks.
 - Audio is sliced on turn boundaries (Voice Transcribe has no word timestamps), so pause between people when you talk.

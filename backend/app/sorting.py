@@ -87,7 +87,7 @@ def audio_window(piece: dict, pieces: list[dict], segments: list[Segment], turns
 
     Audio is cut on turn boundaries (the model gives turn-level timestamps only),
     so a turn qualifies only if every sentence in it belongs to this person or is
-    a few words of filler. Mom never hears the sentence he said about Jordan.
+    a few words of filler. Mom never hears the sentence he said about Sarah.
     """
     owner: dict[int, str] = {}
     for p in pieces:
@@ -131,13 +131,16 @@ def merge_windows(windows: list[tuple[int, int]]) -> list[tuple[int, int]]:
 _TONE_HINTS = [
     ("lonely", r"\b(alone|lonely)\b"),
     ("sorry", r"\b(sorry|my fault)\b"),
-    ("missing", r"\b(miss|missing|yaad)\b"),
+    ("missing", r"\b(miss|missing|yaad|think about)\b"),
     ("tired", r"\b(tired|exhausted|can't even|cant even)\b"),
     ("proud", r"\bproud\b"),
     ("grateful", r"\b(thank|thanks|grateful)\b"),
     ("loving", r"\blove\b"),
     ("worried", r"\b(worried|worry|scared)\b"),
 ]
+
+
+_LEAD_IN_FILLER = re.compile(r"\b(and|so|then|also|oh|um|uh|but|or|like|okay|ok)\b", re.IGNORECASE)
 
 
 def mock_sort(segments: list[Segment], people: list[dict]) -> dict:
@@ -156,7 +159,9 @@ def mock_sort(segments: list[Segment], people: list[dict]) -> dict:
         elif seg.turn != current_turn:
             current = None
         current_turn = seg.turn
-        assigned.append((seg, current))
+        # "and sarah." only says who comes next; like other filler, it belongs to nobody.
+        lead_in = named is not None and not _LEAD_IN_FILLER.sub("", patterns[named].sub("", seg.text)).strip(" .,!?…")
+        assigned.append((seg, None if lead_in else current))
 
     pieces: list[dict] = []
     for seg, person in assigned:

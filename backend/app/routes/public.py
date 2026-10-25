@@ -1,4 +1,4 @@
-"""The page Mom (or Jordan) opens from the link. No app, no account: the token is the key.
+"""The page Mom (or Sarah) opens from the link. No app, no account: the token is the key.
 
 Only cards that have actually been handed over (ready or released) open. Held
 cards stay sealed until her morning; revoked or expired ones are gone.

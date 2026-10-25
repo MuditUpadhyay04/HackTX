@@ -151,13 +151,19 @@ async def transcribe_wav(wav: bytes, language_bias: list[str]) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
-# Mock transcription: the demo rant from Demo_Script_v2.md, so the whole loop runs
-# without a key. Every mock result is labeled provider "mock" all the way to the UI.
+# Mock transcription: Riley's rant from design/DESIGN_SPEC.md 3.7, one turn per person,
+# so the whole loop runs without a key. Every mock result is labeled provider "mock"
+# all the way to the UI.
 
 MOCK_RANT = [
-    "I don't know, man. Jordan said I don't get her, and maybe she's right.",
-    "Mumma called three times today and I said I'm busy. I'm not busy. Mujhe bas ghar ki yaad aa rahi hai.",
-    "And Priya keeps sending reels and I can't even laugh right now.",
+    "i don't know. mom keeps calling and i keep letting it ring and then i send her one letter back. "
+    "she made dal on sunday and i didn't even say thank you. i miss her. "
+    "i just don't know how to call when it's been this long.",
+    "and sarah. she said please just say something and i said i don't feel like talking. that's not true. "
+    "i miss the way we used to talk. i'm sorry i bailed on barton springs. "
+    "i'm not mad at her, i'm just tired all the time.",
+    "and michael keeps sending me reels and i haven't sent one back in like two weeks. "
+    "i still think about the sunrise on 290. i want to do that again.",
 ]
 
 MOCK_REPLY = "Beta, koi emergency nahi hai. Bas teri awaaz sunni thi."

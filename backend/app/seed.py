@@ -1,8 +1,13 @@
-"""The demo cast and history from docs/demo/Demo_Script_v2.md.
+"""The demo cast and history: Gurneal's cast (design/COPY_AND_NAMES.md) in the
+one-evening story (docs/demo/Demo_Script_v2.md).
 
 People come from SEED_* env vars on first boot and can be edited later with
-PATCH /api/people/{id}. Fixtures (Jordan's older lines, the Tuesday card Mom
-replies to, Priya's reminder) are reseeded by POST /api/demo/reset.
+PATCH /api/people/{id}. The ids predate the cast names (jordan is Sarah, priya
+is Michael) and stay as they are. ensure_cast() runs on every start and only
+adds people who are missing, so a database edited through the API keeps its
+edits. Fixtures (Sarah's older lines, Dad's draft, the Tuesday card Mom replies
+to, Michael's reminder) are insert-if-missing too, and POST /api/demo/reset
+reseeds them.
 """
 
 import json
@@ -16,39 +21,56 @@ CDT = ZoneInfo("America/Chicago")
 TUESDAY_CARD_ID = "card_tuesday"
 
 
-def _env(name: str, default: str) -> str:
-    return os.environ.get(name, default).strip() or default
+def _env(*names: str, default: str = "") -> str:
+    """The first non-empty env var among names (new name first, then the older one)."""
+    for name in names:
+        value = os.environ.get(name, "").strip()
+        if value:
+            return value
+    return default
 
 
 def seed_if_empty() -> None:
     with db.tx() as c:
-        has_people = c.execute("SELECT COUNT(*) FROM people").fetchone()[0]
-    if not has_people:
-        seed_people()
+        fresh = c.execute("SELECT COUNT(*) FROM people").fetchone()[0] == 0
+    ensure_cast()
+    if fresh:
         seed_photos()
-        seed_fixtures()
+    seed_fixtures()
 
 
-def seed_people() -> None:
-    home_language = _env("SEED_HOME_LANGUAGE", "Hindi")
-    people = [
+def _cast() -> list[tuple]:
+    home_language = _env("SEED_HOME_LANGUAGE", default="Hindi")
+    my_tz = _env("SEED_ME_TZ", default="America/Chicago")
+    home_tz = _env("SEED_MOM_TZ", default="Asia/Kolkata")
+    return [
         # id, name, relation, pronoun, aliases, channel, handle, timezone, language, sort
-        ("me", _env("SEED_ME_NAME", "Arjun"), "self", "them", [], "self",
-         os.environ.get("SEED_ME_PHONE", ""), _env("SEED_ME_TZ", "America/Chicago"), home_language, 0),
+        ("me", _env("SEED_ME_NAME", default="Riley"), "self", "them", [], "self",
+         _env("SEED_ME_PHONE"), my_tz, home_language, 0),
         ("mom", "Mom", "mother", "her", ["Mom", "Mumma", "Mummy", "Mum", "Ma", "Maa", "Mother", "Amma"], "whatsapp",
-         os.environ.get("SEED_MOM_PHONE", ""), _env("SEED_MOM_TZ", "Asia/Kolkata"), home_language, 1),
-        ("jordan", "Jordan", "girlfriend", "her", ["Jordan"], "imessage",
-         os.environ.get("SEED_JORDAN_PHONE", ""), _env("SEED_ME_TZ", "America/Chicago"), "English", 2),
-        ("priya", "Priya", "best friend", "her", ["Priya"], "instagram",
-         os.environ.get("SEED_PRIYA_INSTAGRAM", ""), _env("SEED_ME_TZ", "America/Chicago"), "English", 3),
+         _env("SEED_MOM_PHONE"), home_tz, home_language, 1),
+        ("dad", "Dad", "father", "him", ["Dad", "Papa", "Pa"], "whatsapp",
+         _env("SEED_DAD_PHONE"), _env("SEED_DAD_TZ", default=home_tz), home_language, 2),
+        ("jordan", "Sarah", "girlfriend", "her", ["Sarah"], "imessage",
+         _env("SEED_SARAH_PHONE", "SEED_JORDAN_PHONE"), my_tz, "English", 3),
+        ("priya", "Michael", "best friend", "him", ["Michael", "Mike"], "instagram",
+         _env("SEED_MICHAEL_INSTAGRAM", "SEED_PRIYA_INSTAGRAM"), my_tz, "English", 4),
     ]
+
+
+def ensure_cast() -> list[str]:
+    """Adds any cast member who isn't in the database yet. Never overwrites an edited person."""
+    added = []
     with db.tx() as c:
-        for pid, name, relation, pronoun, aliases, channel, handle, tz, language, sort in people:
-            c.execute(
-                "INSERT INTO people (id, name, relation, pronoun, aliases, channel, handle, timezone, language, sort) "
+        for pid, name, relation, pronoun, aliases, channel, handle, tz, language, sort in _cast():
+            inserted = c.execute(
+                "INSERT OR IGNORE INTO people (id, name, relation, pronoun, aliases, channel, handle, timezone, language, sort) "
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (pid, name, relation, pronoun, json.dumps(aliases), channel, handle, tz, language, sort),
-            )
+            ).rowcount
+            if inserted:
+                added.append(pid)
+    return added
 
 
 _PLACEHOLDER = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200">
@@ -63,8 +85,8 @@ def seed_photos() -> None:
     photos = [
         ("photo_kitchen", "mom", "kitchen, with mom", "#E9B7B4", "#F6C9A4", "2025-12-28T10:00:00+05:30"),
         ("photo_airport", "mom", "the airport, the day I left", "#F6C9A4", "#FBF5EC", "2025-08-09T06:00:00+05:30"),
-        ("photo_lake", "jordan", "lake trip, june", "#F6D3AE", "#FBF5EC", "2026-06-14T17:00:00-05:00"),
-        ("photo_marfa", "priya", "marfa sunset", "#E8A15A", "#F6D3AE", "2026-03-21T19:30:00-05:00"),
+        ("photo_lake", "jordan", "barton springs, june", "#F6D3AE", "#FBF5EC", "2026-06-14T17:00:00-05:00"),
+        ("photo_sunrise", "priya", "sunrise on 290", "#E8A15A", "#F6D3AE", "2026-03-21T07:10:00-05:00"),
     ]
     with db.tx() as c:
         for pid, person, caption, a, b, taken in photos:
@@ -76,7 +98,10 @@ def seed_photos() -> None:
 
 
 def seed_fixtures() -> None:
-    """Jordan's older lines, the Tuesday card Mom can reply to, Priya's reminder."""
+    """Sarah's older lines, Dad's draft, the Tuesday card Mom can reply to, Michael's reminder.
+
+    Insert-if-missing, so it's safe on every start.
+    """
 
     def at(y, m, d, hh, mm):
         return db.iso(datetime(y, m, d, hh, mm, tzinfo=CDT))
@@ -86,14 +111,15 @@ def seed_fixtures() -> None:
     db.kv_set("tuesday_token", tuesday_token)
 
     with db.tx() as c:
-        for pid, text, tone, when in [
-            ("piece_jordan_sep30", "I miss how we used to talk too.", "missing", at(2026, 9, 30, 1, 14)),
-            ("piece_jordan_oct11", "I didn't text back because I didn't want you to hear me like this.",
+        for pid, person, text, tone, when in [
+            ("piece_jordan_sep30", "jordan", "I miss the way we used to talk.", "missing", at(2026, 9, 30, 1, 14)),
+            ("piece_jordan_oct11", "jordan", "I didn't text back because I didn't want you to hear me like this.",
              "overwhelmed", at(2026, 10, 11, 2, 41)),
+            ("piece_dad_oct18", "dad", "I never said thank you.", "grateful", at(2026, 10, 18, 23, 52)),
         ]:
             c.execute(
-                "INSERT OR IGNORE INTO pieces (id, rant_id, person_id, text, tone, created_at) VALUES (?, NULL, 'jordan', ?, ?, ?)",
-                (pid, text, tone, when),
+                "INSERT OR IGNORE INTO pieces (id, rant_id, person_id, text, tone, created_at) VALUES (?, NULL, ?, ?, ?, ?)",
+                (pid, person, text, tone, when),
             )
 
         # The card Mom opens to leave her voice note ("Mom left you a voice note on tuesday").
@@ -109,9 +135,10 @@ def seed_fixtures() -> None:
                 db.iso(sent), db.iso(sent), db.iso(sent + timedelta(days=60)),
             ),
         )
+        # Michael (Best Friend) · waiting on you. The id predates the cast names.
         c.execute(
             "INSERT OR IGNORE INTO reminders (id, person_id, text, created_at) VALUES ('rem_priya', 'priya', ?, ?)",
-            ("Priya asked twice.", at(2026, 10, 24, 18, 20)),
+            ("3 reels this week", at(2026, 10, 24, 18, 20)),
         )
 
 
