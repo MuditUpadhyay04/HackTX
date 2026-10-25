@@ -1,6 +1,7 @@
 // The connected apps down the side of Talk: where his words can leave from.
-// Generic look-alike glyphs only (no official logos), each marked connected.
-import { Ionicons } from "@expo/vector-icons";
+// Each app shows its real home-screen icon (assets/apps: the official App Store icons for the Meta
+// apps, the iOS Messages icon as drawn for the phone demo).
+import { Image } from "expo-image";
 import { useState } from "react";
 import { Modal, Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -9,11 +10,11 @@ import { type App, APP_LABEL } from "../lib/handoff";
 import { color, space } from "../theme/tokens";
 import { ALL_ORIENTATIONS, T, TextButton } from "./ui";
 
-const GLYPH: Record<App, keyof typeof Ionicons.glyphMap> = {
-  messages: "chatbubble",
-  whatsapp: "call",
-  instagram: "camera-outline",
-  facebook: "people",
+const ICON: Record<App, number> = {
+  messages: require("../../assets/apps/messages.png"),
+  whatsapp: require("../../assets/apps/whatsapp.png"),
+  instagram: require("../../assets/apps/instagram.png"),
+  facebook: require("../../assets/apps/facebook.png"),
 };
 
 export const RAIL_APPS: App[] = ["messages", "whatsapp", "instagram", "facebook"];
@@ -21,7 +22,7 @@ export const RAIL_APPS: App[] = ["messages", "whatsapp", "instagram", "facebook"
 export function AppGlyph({ app, size = 44 }: { app: App; size?: number }) {
   return (
     <View style={[styles.glyph, { width: size, height: size, borderRadius: size * 0.2237 }]}>
-      <Ionicons name={GLYPH[app]} size={size * 0.5} color={color.accent} />
+      <Image source={ICON[app]} style={{ width: size, height: size }} contentFit="cover" accessibilityIgnoresInvertColors />
     </View>
   );
 }
@@ -46,10 +47,7 @@ export function AppRail({ row = false }: { row?: boolean }) {
             onPress={() => setOpen(app)}
             style={{ alignItems: "center", gap: space.s4 }}
           >
-            <View>
-              <AppGlyph app={app} size={row ? 32 : 44} />
-              <View style={[styles.dot, row && styles.dotSmall]} />
-            </View>
+            <AppGlyph app={app} size={row ? 32 : 44} />
             {row ? null : <T v="tab" style={{ color: color.text3 }}>{APP_LABEL[app]}</T>}
           </Pressable>
         ))}
@@ -83,9 +81,7 @@ export function AppRail({ row = false }: { row?: boolean }) {
 const styles = StyleSheet.create({
   rail: { gap: space.s16, alignItems: "center" },
   row: { flexDirection: "row", gap: space.s12, alignItems: "center" },
-  dotSmall: { width: 10, height: 10, borderRadius: 5, right: -3, top: -3 },
-  glyph: { backgroundColor: color.tint, alignItems: "center", justifyContent: "center" },
-  dot: { position: "absolute", right: -2, top: -2, width: 12, height: 12, borderRadius: 6, backgroundColor: color.violet, borderWidth: 2, borderColor: color.bg },
+  glyph: { overflow: "hidden", backgroundColor: color.surface },
   backdrop: { flex: 1, backgroundColor: color.scrim },
   sheet: { backgroundColor: color.bg, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: space.s24, paddingTop: space.s12, width: "100%", maxWidth: 560, alignSelf: "center" },
   grabber: { alignSelf: "center", width: 36, height: 5, borderRadius: 3, backgroundColor: color.hairline, marginBottom: space.s16 },
