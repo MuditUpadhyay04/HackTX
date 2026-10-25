@@ -97,22 +97,22 @@ def test_a_dismiss_buys_that_person_three_days_of_quiet():
     assert decide_knock(ask(), ctx(knocks=dismissed), NOW).reason == "person_cooldown"
     assert decide_knock(ask(), ctx(knocks=dismissed), NOW + timedelta(hours=2)).knock
     # Someone else on the same photo can still be the one it's about.
-    other = decide_knock(ask(), ctx(linked=["mom", "dad"], knocks=dismissed), NOW)
-    assert other.knock and other.person_id == "dad"
+    other = decide_knock(ask(), ctx(linked=["mom", "priya"], knocks=dismissed), NOW)
+    assert other.knock and other.person_id == "priya"
 
 
 def test_two_dismisses_in_a_row_pause_knocks_for_a_week():
     two = [
-        knock(timedelta(days=6), person="dad", outcome="dismissed"),
-        knock(timedelta(days=5, hours=12), person="dad", outcome="dismissed"),
+        knock(timedelta(days=6), person="priya", outcome="dismissed"),
+        knock(timedelta(days=5, hours=12), person="priya", outcome="dismissed"),
     ]
     assert decide_knock(ask(), ctx(knocks=two), NOW).reason == "paused"
     assert decide_knock(ask(), ctx(knocks=two), NOW + timedelta(days=2)).knock
     # A knock he never answered doesn't break the run...
-    with_silence = [two[0], knock(timedelta(days=5, hours=20), person="dad"), two[1]]
+    with_silence = [two[0], knock(timedelta(days=5, hours=20), person="priya"), two[1]]
     assert decide_knock(ask(), ctx(knocks=with_silence), NOW).reason == "paused"
     # ...but opening one resets it.
-    reset = two + [knock(timedelta(days=5), person="dad", outcome="opened")]
+    reset = two + [knock(timedelta(days=5), person="priya", outcome="opened")]
     assert decide_knock(ask(), ctx(knocks=reset), NOW).knock
 
 
@@ -127,8 +127,8 @@ def test_body_b_when_people_reached_out_this_week():
 
 
 def test_a_reply_from_someone_not_in_this_photo_does_not_knock_here():
-    other = decide_knock(ask(), ctx(linked=["dad"], unheard_replies=[("mom", "Mom left you a voice note.")]), NOW)
-    assert other.detail == "linked" and other.person_id == "dad" and other.body == KNOCK_A
+    other = decide_knock(ask(), ctx(linked=["priya"], unheard_replies=[("mom", "Mom left you a voice note.")]), NOW)
+    assert other.detail == "linked" and other.person_id == "priya" and other.body == KNOCK_A
 
 
 def test_demo_mode_knocks_fast_and_ignores_caps_but_not_safety():

@@ -90,6 +90,7 @@ def photo_out(row) -> dict:
         "url": media_url(row["path"]),
         "caption": row["caption"],
         "taken_at": row["taken_at"],
+        "source": row["source"] if "source" in row.keys() else "app",
     }
 
 
@@ -147,7 +148,7 @@ def card_out(row, now: datetime, with_share: bool = True) -> dict:
         "status": card["status"],
         "release_at": card["release_at"],
         "release_label": (
-            f"{timeutil.clock_label(timeutil.local(release_at, recipient['timezone']))} her time"
+            f"{timeutil.clock_label(timeutil.local(release_at, recipient['timezone']))} {POSSESSIVE.get(recipient['pronoun'], 'their')} time"
             if release_at and recipient
             else None
         ),
@@ -160,6 +161,9 @@ def card_out(row, now: datetime, with_share: bool = True) -> dict:
     if with_share and recipient:
         out["share"] = share_links(card, recipient, me())
     return out
+
+
+POSSESSIVE = {"her": "her", "him": "his", "them": "their"}
 
 
 def reply_out(row, now: datetime) -> dict:
@@ -177,6 +181,7 @@ def reply_out(row, now: datetime) -> dict:
         "created_at": row["created_at"],
         "day": timeutil.day_phrase(created, now, listener["timezone"]),
         "heard_at": row["heard_at"],
+        "kept_at": row["kept_at"] if "kept_at" in row.keys() else None,
     }
 
 
@@ -197,7 +202,8 @@ def ready_line(person: dict, at: datetime) -> str:
 
 
 def self_note_out(row) -> dict:
-    return {"id": row["id"], "url": media_url(row["path"]), "mime": row["mime"], "label": row["label"], "created_at": row["created_at"]}
+    duration = row["duration_ms"] if "duration_ms" in row.keys() else None
+    return {"id": row["id"], "url": media_url(row["path"]), "mime": row["mime"], "label": row["label"], "created_at": row["created_at"], "duration_ms": duration}
 
 
 def reminder_out(row) -> dict:

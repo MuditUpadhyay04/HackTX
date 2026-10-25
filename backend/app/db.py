@@ -137,6 +137,11 @@ CREATE TABLE IF NOT EXISTS push_tokens (
     disabled_at TEXT,                        -- set for good after DeviceNotRegistered
     disabled_reason TEXT
 );
+CREATE TABLE IF NOT EXISTS drafts (          -- Compose "ONLY A DRAFT": one private draft per person, his own typing
+    person_id TEXT PRIMARY KEY,
+    text TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS pushes (          -- queued so they can wait for his morning
     id TEXT PRIMARY KEY,
     kind TEXT NOT NULL,                      -- reply | ready | drift
@@ -156,6 +161,10 @@ CREATE TABLE IF NOT EXISTS pushes (          -- queued so they can wait for his 
 MIGRATIONS = {
     "rants": {"asset_id": "TEXT", "encourage_person": "TEXT"},
     "cards": {"video_path": "TEXT"},  # a video he attached to the letter
+    "replies": {"kept_at": "TEXT"},   # "Keep this moment": kept in his private vault
+    "self_notes": {"duration_ms": "INTEGER"},
+    # Connect photos (demo import): where a photo came from, the face group it was put in, and "not them".
+    "photos": {"source": "TEXT NOT NULL DEFAULT 'app'", "cluster": "TEXT", "removed": "INTEGER NOT NULL DEFAULT 0"},
 }
 
 INDEXES = """

@@ -1,10 +1,12 @@
-// Notes to yourself. The list comes from /api/home. Recording a new one needs a video upload the phone doesn't capture yet.
+// Notes to yourself. The list comes from /api/home; recording a new one is the Self note screen (/note).
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { Linking, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { NavBar, Press, Row, styles as ui, T } from "../components/ui";
 import { mediaUrl } from "../lib/api";
+import { clock } from "../components/video";
 import { useHome } from "../lib/useHome";
 import { color, inset, space } from "../theme/tokens";
 import { useLayout } from "../lib/useLayout";
@@ -40,6 +42,15 @@ export default function Notes() {
         ) : null}
 
         <View style={{ marginHorizontal: inset.card, gap: space.s8 }}>
+          <Row featureId="self-note-record" onPress={() => router.push("/note")}>
+            <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: color.tint, alignItems: "center", justifyContent: "center" }}>
+              <Ionicons name="videocam" size={20} color={color.accent} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <T v="rowName">For you, later</T>
+              <T v="rowPreview">for the next hard day</T>
+            </View>
+          </Row>
           {notes.map((note) => {
             const url = mediaUrl(note.url);
             return (
@@ -56,7 +67,7 @@ export default function Notes() {
                   <T v="rowName">{note.label || "For you, later"}</T>
                   <T v="rowPreview">{when(note.created_at)}</T>
                 </View>
-                <T v="meta">Watch</T>
+                <T v="meta">{note.duration_ms ? clock(note.duration_ms / 1000) : "Watch"}</T>
               </Row>
             );
           })}

@@ -16,7 +16,7 @@ import { color, shadow, space, spring, type } from "../../theme/tokens";
 
 export default function PhotoViewer() {
   const insets = useSafeAreaInsets();
-  const { id, t } = useLocalSearchParams<{ id: string; t?: string }>();
+  const { id, t, person, toName, channel } = useLocalSearchParams<{ id: string; t?: string; person?: string; toName?: string; channel?: string }>();
   const [chrome, setChrome] = useState(true);
   // While the knock banner is down, the top bar steps aside so the two never overlap.
   const [knockGone, setKnockGone] = useState(false);
@@ -27,7 +27,11 @@ export default function PhotoViewer() {
   const { knock, onZoom, open, dismiss } = useKnock(id);
   const knockShown = Boolean(knock) && !knockGone;
 
-  const talk = () => router.push({ pathname: "/talk", params: { photo: id } });
+  // From a person's gallery the words are for them; otherwise the knock's person, if it named one.
+  const forPerson = person || (knock && "person_id" in knock ? knock.person_id ?? "" : "");
+  const forName = person ? toName : knock && "person_name" in knock ? knock.person_name ?? "" : "";
+  const talk = () =>
+    router.push({ pathname: "/talk", params: { photo: id, person: forPerson ?? "", toName: forName ?? "", channel: person ? channel ?? "" : "" } });
 
   useEffect(() => {
     // The icon breathes once when the photo opens, so it's noticed without nagging.

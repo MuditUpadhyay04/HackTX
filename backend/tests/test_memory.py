@@ -134,10 +134,10 @@ def test_a_letter_that_carried_the_photo_links_it(client):
     client.post(
         "/api/photos",
         files={"file": ("p.jpg", jpeg, "image/jpeg")},
-        data={"person_id": "dad", "asset_id": "ph://dad-photo"},
+        data={"person_id": "priya", "asset_id": "ph://michael-photo"},
     )
-    memory = client.get("/api/memory/photo", params={"asset_id": "ph://dad-photo"}).json()
-    assert [(p["person"]["id"], p["times"], p["letters"]) for p in memory["people"]] == [("dad", 0, 1)]
+    memory = client.get("/api/memory/photo", params={"asset_id": "ph://michael-photo"}).json()
+    assert [(p["person"]["id"], p["times"], p["letters"]) for p in memory["people"]] == [("priya", 0, 1)]
 
 
 def test_an_older_database_gets_the_new_columns():

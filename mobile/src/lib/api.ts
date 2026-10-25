@@ -109,6 +109,8 @@ export type Card = {
   remind_at?: string;
   remind_body?: string;
   release_at?: string | null;
+  /** When it went out (demo clock); Home shows a short "Delivered" beat right after. */
+  released_at?: string | null;
   created_at?: string;
 };
 
@@ -122,6 +124,8 @@ export type Reply = {
   day: string;
   created_at: string;
   heard_at: string | null;
+  /** "Keep this moment": kept in his private vault. */
+  kept_at?: string | null;
 };
 
 export type Reminder = { id: string; person_id: string; person_name: string; channel: Channel; text: string; handoff: string | null };
@@ -135,7 +139,22 @@ export type PeopleGroups = { groups: PeopleGroup[]; has_family: boolean; people:
 
 export type Nudge = { kind: "reply" | "ready"; id: string; person_id: string; title: string; body: string };
 
-export type SelfNote = { id: string; url: string; created_at: string; mime?: string; label?: string };
+export type SelfNote = { id: string; url: string; created_at: string; mime?: string; label?: string; duration_ms?: number | null };
+
+/** Compose "ONLY A DRAFT": one private draft per person. */
+export type Draft = { person_id: string; text: string; updated_at: string };
+
+export type PhotoSource = "photos" | "instagram" | "facebook";
+/** Connect photos, demo build: imported photos arrive already put into groups; nothing is linked until he says. */
+export type FaceCluster = {
+  id: string;
+  suggested: Person | null;
+  linked_person_id: string | null;
+  count: number;
+  sources: string[];
+  photos: LanePhoto[];
+};
+export type Faces = { clusters: FaceCluster[]; pending: string[]; dismissed: boolean };
 
 export type Home = {
   me: Person;
@@ -203,7 +222,10 @@ const file = (uri: string, name: string, type: string) => ({ uri, name, type }) 
 export const api = {
   home: () => call<Home>("/api/home"),
   safetyResources: () => call<Resource[]>("/api/safety/resources"),
-  patchPerson: (personId: string, changes: { timezone?: string; morning?: string; language?: string }) =>
+  patchPerson: (
+    personId: string,
+    changes: { timezone?: string; morning?: string; language?: string; channel?: Exclude<Channel, "self"> },
+  ) =>
     call<Person>(`/api/people/${personId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -218,7 +240,9 @@ export const api = {
     return call<Rant>("/api/rants/audio", { method: "POST", body: form });
   },
   typedRant: (text: string, assetId?: string | null) => call<Rant>("/api/rants/text", post({ text, asset_id: assetId ?? null })),
-  sortRant: (rantId: string) => call<SortResult>(`/api/rants/${rantId}/sort`, post()),
+  // personId: Talk was opened from this person's page; words that name nobody are filed under them.
+  sortRant: (rantId: string, personId?: string | null) =>
+    call<SortResult>(`/api/rants/${rantId}/sort`, personId ? post({ person_id: personId }) : post()),
 
   peopleGroups: () => call<PeopleGroups>("/api/people/groups"),
   pieces: (personId: string) => call<Piece[]>(`/api/people/${personId}/pieces`),
@@ -252,6 +276,38 @@ export const api = {
   revoke: (cardId: string) => call<Card>(`/api/cards/${cardId}/revoke`, post()),
 
   heard: (replyId: string) => call<Reply>(`/api/replies/${replyId}/heard`, post()),
+  keepReply: (replyId: string) => call<Reply>(`/api/replies/${replyId}/keep`, post()),
+
+  // Compose
+  drafts: () => call<Draft[]>("/api/drafts"),
+  saveDraft: (personId: string, text: string) =>
+    call<Draft>(`/api/drafts/${personId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) }),
+  writePieces: (personId: string, text: string, replaces: string[] = []) =>
+    call<Piece[]>(`/api/people/${personId}/pieces`, post({ text, replaces })),
+
+  // Self note (a short video to himself, "for the next hard day")
+  uploadSelfNote: async (uri: string, mime: string, durationMs?: number | null) => {
+    const ext = mime === "video/quicktime" ? "mov" : mime === "video/webm" ? "webm" : "mp4";
+    const form = new FormData();
+    if (Platform.OS === "web") {
+      const blob = await (await fetch(uri)).blob();
+      form.append("file", new Blob([blob], { type: mime }), `note.${ext}`);
+    } else {
+      form.append("file", file(uri, `note.${ext}`, mime));
+    }
+    if (durationMs) form.append("duration_ms", String(Math.round(durationMs)));
+    return call<SelfNote>("/api/self-notes", { method: "POST", body: form });
+  },
+
+  // Connect photos (demo import) and the face groups
+  connectState: () => call<{ connected: Record<PhotoSource, boolean> }>("/api/connect"),
+  connect: (source: PhotoSource) =>
+    call<{ connected: Record<PhotoSource, boolean>; added: number; pending: FaceCluster[] }>(`/api/connect/${source}`, post()),
+  faces: () => call<Faces>("/api/faces"),
+  linkFaces: (clusterId: string, personId: string) =>
+    call<{ linked: number }>(`/api/faces/${clusterId}/link`, post({ person_id: personId })),
+  notThem: (photoId: string) => call<{ ok: boolean }>(`/api/faces/photos/${photoId}/not-them`, post()),
+  dismissFaces: () => call<{ ok: boolean }>("/api/faces/dismiss", post()),
   reminderDone: (id: string) => call<{ ok: boolean }>(`/api/reminders/${id}/done`, post()),
 
   // The attention budget (backend/app/attention.py decides; the app only asks).

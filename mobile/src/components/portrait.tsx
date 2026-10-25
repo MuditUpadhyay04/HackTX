@@ -1,4 +1,6 @@
-// Illustrated people, drawn from the icon palette. Never a photo, never a letter.
+// The demo cast (Riley, Mom, Sarah, Michael) wear their fictional headshots (demo-photos/headshots,
+// 256 px in assets/people). Anyone else is illustrated from the icon palette. Never a letter.
+import { Image } from "expo-image";
 import Svg, { Circle, Ellipse, Path } from "react-native-svg";
 
 type Kind = "riley" | "mom" | "dad" | "sarah" | "michael" | "other";
@@ -31,8 +33,19 @@ function kindOf(name: string): Kind {
   return "other";
 }
 
+const HEADSHOT: Partial<Record<Kind, number>> = {
+  riley: require("../../assets/people/son.jpg"),
+  mom: require("../../assets/people/mom.jpg"),
+  sarah: require("../../assets/people/sarah.jpg"),
+  michael: require("../../assets/people/michael.jpg"),
+};
+
 export function Portrait({ name, size }: { name: string; size: number }) {
   const kind = kindOf(name);
+  const shot = HEADSHOT[kind];
+  if (shot) {
+    return <Image source={shot} style={{ width: size, height: size, borderRadius: size / 2 }} contentFit="cover" accessibilityIgnoresInvertColors />;
+  }
   const hair = HAIR[kind];
   const shoulder = SHOULDER[kind];
   const long = kind === "sarah" || kind === "mom";

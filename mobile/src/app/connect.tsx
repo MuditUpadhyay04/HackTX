@@ -1,14 +1,19 @@
 // Connect photos (DESIGN_SPEC 3.13).
-// Photos is a real permission. Instagram and Facebook import aren't built in the backend yet,
-// so those two rows are demo toggles held in memory: they connect nothing.
+// Photos asks the real permission first. Demo build: each Connect imports a small set of demo photos
+// on the backend (POST /api/connect/{source}), already grouped, no Meta Graph API and no face
+// recognition. Then the faces popup asks who they are; nothing is linked until he confirms.
 import { Ionicons } from "@expo/vector-icons";
 import { usePermissions } from "expo-media-library";
-import { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
+import { Alert, Platform, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppGlyph } from "../components/AppRail";
-import { NavBar, PillGradientFill, Press, styles as ui, T } from "../components/ui";
+import { FacesSheet } from "../components/faces";
+import { NavBar, PillGradientFill, Press, styles as ui, T, TextButton } from "../components/ui";
+import { api, type FaceCluster, type PhotoSource } from "../lib/api";
+import { haptics } from "../lib/haptics";
 import { color, inset, radius, space } from "../theme/tokens";
 import { useLayout } from "../lib/useLayout";
 
@@ -16,12 +21,44 @@ export default function Connect() {
   const insets = useSafeAreaInsets();
   const layout = useLayout();
   const [permission, requestPermission] = usePermissions();
-  const [demo, setDemo] = useState({ instagram: false, facebook: false });
+  const [connected, setConnected] = useState<Record<PhotoSource, boolean>>({ photos: false, instagram: false, facebook: false });
+  const [pending, setPending] = useState<FaceCluster[]>([]);
+  const [total, setTotal] = useState(0);
+  const [sheet, setSheet] = useState(false);
+
+  const reload = useCallback(async (open = false) => {
+    const [state, faces] = await Promise.all([api.connectState(), api.faces()]);
+    setConnected(state.connected);
+    const waiting = faces.clusters.filter((c) => faces.pending.includes(c.id));
+    setPending(waiting);
+    setTotal(faces.clusters.length);
+    if (open && waiting.length) setSheet(true);
+    if (!waiting.length) setSheet(false);
+  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      reload().catch(() => {});
+    }, [reload]),
+  );
+
+  const connect = async (source: PhotoSource) => {
+    try {
+      if (source === "photos" && Platform.OS !== "web" && !permission?.granted) {
+        const res = await requestPermission();
+        if (!res.granted) return;
+      }
+      await api.connect(source);
+      haptics.success();
+      await reload(true);
+    } catch (e) {
+      Alert.alert("That didn't connect", (e as Error).message);
+    }
+  };
 
   const rows = [
-    { key: "photos", title: "Photos", sub: "on this iPhone", on: !!permission?.granted, connect: requestPermission, id: "camera-roll-scan", glyph: null },
-    { key: "instagram", title: "Instagram photos", sub: "your posts and tagged photos", on: demo.instagram, connect: () => setDemo((d) => ({ ...d, instagram: true })), id: "graph-api-photo-import", glyph: "instagram" as const },
-    { key: "facebook", title: "Facebook photos", sub: "albums and tagged photos", on: demo.facebook, connect: () => setDemo((d) => ({ ...d, facebook: true })), id: "graph-api-photo-import", glyph: "facebook" as const },
+    { key: "photos" as const, title: "Photos", sub: "on this iPhone", id: "camera-roll-scan", glyph: null },
+    { key: "instagram" as const, title: "Instagram photos", sub: "your posts and tagged photos", id: "graph-api-photo-import", glyph: "instagram" as const },
+    { key: "facebook" as const, title: "Facebook photos", sub: "albums and tagged photos", id: "graph-api-photo-import", glyph: "facebook" as const },
   ];
 
   return (
@@ -42,10 +79,10 @@ export default function Connect() {
                 <T v="rowName">{r.title}</T>
                 <T v="rowPreview">{r.sub}</T>
               </View>
-              {r.on ? (
+              {connected[r.key] ? (
                 <Ionicons name="checkmark-circle" size={28} color={color.accent} />
               ) : (
-                <Press featureId={r.id} onPress={r.connect} style={styles.connect}>
+                <Press featureId={r.id} onPress={() => connect(r.key)} style={styles.connect}>
                   <PillGradientFill />
                   <T v="meta" style={{ color: color.onAccent, fontWeight: "600" }}>Connect</T>
                 </Press>
@@ -53,6 +90,11 @@ export default function Connect() {
             </View>
           ))}
         </View>
+        {total ? (
+          <View style={{ marginHorizontal: inset.text, marginTop: space.s16, alignItems: "flex-start" }}>
+            <TextButton featureId="face-clusters-list" tone="text" label="see who" onPress={() => (pending.length ? setSheet(true) : router.push("/faces"))} />
+          </View>
+        ) : null}
         <View style={{ marginHorizontal: inset.text, marginTop: space.s24, gap: space.s8 }}>
           <T v="caption">grouped on your phone. only you can see this.</T>
           <T v="caption">faces never leave your phone</T>
@@ -60,6 +102,7 @@ export default function Connect() {
           <T v="caption">delete face data anytime</T>
         </View>
       </ScrollView>
+      <FacesSheet visible={sheet} clusters={pending} onClose={() => setSheet(false)} onChanged={() => reload().catch(() => {})} />
     </View>
   );
 }

@@ -9,7 +9,7 @@ import { AppRail } from "../components/AppRail";
 import { Skeleton } from "../components/motion";
 import { Avatar, Chip, NavBar, Overline, PillGradientFill, Press, PrimaryPill, styles as ui, T, TextButton } from "../components/ui";
 import { Ionicons } from "@expo/vector-icons";
-import { api, type Channel, type SortResult } from "../lib/api";
+import { api, type Channel, mediaUrl, type SortResult } from "../lib/api";
 import { APP_LABEL, CHANNEL_APP } from "../lib/handoff";
 import { usePhotoMemory, useVoiceBack } from "../lib/memory";
 import { toast } from "../lib/toast";
@@ -23,7 +23,9 @@ export default function Talk() {
   // Wide (unfolded, landscape): transcript on the left, the mic and tools in a side panel.
   const wide = layout.expanded;
   // typing=1: opened as "Write" from a person page; starts in the typed mode (same flow).
-  const { photo, toName, channel, typing: startTyping } = useLocalSearchParams<{ photo?: string; toName?: string; channel?: string; typing?: string }>();
+  // person: opened from that person's page (Talk, Write, a photo of theirs); what names nobody is filed under them.
+  // seenPhoto: a photo of them from the People tab (a server URL), shown above the words.
+  const { photo, toName, channel, typing: startTyping, person, seenPhoto } = useLocalSearchParams<{ photo?: string; toName?: string; channel?: string; typing?: string; person?: string; seenPhoto?: string }>();
   const title = toName ? `To ${toName}` : "Say it out loud";
   const channelLine = (() => {
     if (!toName || !channel || channel === "self") return null;
@@ -49,7 +51,7 @@ export default function Talk() {
   const sort = async (rantId: string) => {
     setSorting(true);
     try {
-      const res = await api.sortRant(rantId);
+      const res = await api.sortRant(rantId, person || null);
       setTranscript(res.rant.transcript);
       if (res.safety !== "ok") {
         router.replace({ pathname: "/safety", params: { resources: JSON.stringify(res.resources) } });
@@ -176,7 +178,8 @@ export default function Talk() {
 
   // ------------------------------------------------------------------ recording / typing
 
-  const showPhoto = Boolean(photo) && !recording && !spoken && !typing;
+  const photoUri = photo || (seenPhoto ? mediaUrl(seenPhoto) : null);
+  const showPhoto = Boolean(photoUri) && !recording && !spoken && !typing;
 
   const dock = (
     <>
@@ -214,7 +217,7 @@ export default function Talk() {
       <View style={wide ? [styles.wideRow, layout.column(1080)] : { flex: 1 }}>
         <ScrollView style={{ flex: 1 }} contentContainerStyle={[wide ? null : layout.column(), { paddingBottom: space.s24 }]} keyboardShouldPersistTaps="handled">
           {showPhoto ? (
-            <Image source={{ uri: photo }} style={[styles.photo, { height: Math.min(224, Math.round(layout.height * 0.36)) }]} contentFit="cover" transition={150} />
+            <Image source={{ uri: photoUri ?? undefined }} style={[styles.photo, { height: Math.min(224, Math.round(layout.height * 0.36)) }]} contentFit="cover" transition={150} />
           ) : null}
           {/* Full-width column: the app rail lives in the dock's tool row, so nothing sits on the transcript. */}
           <View style={styles.column}>
@@ -251,7 +254,10 @@ export default function Talk() {
                 selectionColor={color.caret}
                 cursorColor={color.caret}
                 scrollEnabled={false}
-                style={[type.compose, styles.compose, { padding: 0 }, Platform.OS === "web" ? ({ outlineStyle: "none" } as object) : null]}
+                // Reuses Home's hero question as the placeholder (no new copy).
+                placeholder="What have you been meaning to say?"
+                placeholderTextColor={color.text4}
+                style={[type.compose, styles.typeBox, Platform.OS === "web" ? ({ outlineStyle: "none" } as object) : null]}
               />
             ) : (
               <T v="compose" style={styles.compose}>
@@ -321,6 +327,19 @@ function SelfNoteCard() {
 }
 
 const styles = StyleSheet.create({
+  // Typed mode: a visible box (tinted surface, rounded, a soft accent edge), not bare text on the page.
+  typeBox: {
+    marginTop: space.s16,
+    minHeight: 168,
+    fontSize: 24,
+    lineHeight: 32,
+    padding: space.s16,
+    borderRadius: radius.row,
+    backgroundColor: color.surface,
+    borderWidth: 1.5,
+    borderColor: color.violet,
+    textAlignVertical: "top",
+  },
   photo: { marginHorizontal: inset.card, marginTop: space.s8, height: 224, borderRadius: radius.hero, backgroundColor: color.surface },
   column: { paddingHorizontal: inset.text, marginTop: space.s24 },
   memory: { marginBottom: space.s24, gap: space.s12, backgroundColor: color.surface, borderRadius: radius.row, padding: space.s16 },

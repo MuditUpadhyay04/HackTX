@@ -29,7 +29,8 @@ export default function Preview() {
   const insets = useSafeAreaInsets();
   const layout = useLayout();
   const split = layout.expanded;
-  const params = useLocalSearchParams<{ person: string; pieces: string; app: App; photo?: string }>();
+  // photo: a gallery asset id; photoUri: a photo attached in Compose (the paperclip) when there's no asset id.
+  const params = useLocalSearchParams<{ person: string; pieces: string; app: App; photo?: string; photoUri?: string }>();
   const { home } = useHome(30000);
   const person = home?.people.find((p) => p.id === params.person);
   const [pieces, setPieces] = useState<Piece[]>([]);
@@ -72,9 +73,11 @@ export default function Preview() {
     setSending(true);
     try {
       let photoId: string | null = null;
-      if (params.photo) {
+      if (params.photo || params.photoUri) {
         try {
-          photoId = await uploadGalleryPhoto(params.photo, person.id);
+          photoId = params.photo
+            ? await uploadGalleryPhoto(params.photo, person.id)
+            : (await api.uploadPhoto(params.photoUri!, person.id)).id;
         } catch {
           photoId = null; // the letter still goes without the photo
         }

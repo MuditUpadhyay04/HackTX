@@ -1,7 +1,7 @@
 // The phone's gallery, as a Photos look-alike (no Apple assets). Un-Said lives on top of it.
 import { Image } from "expo-image";
 import { usePermissions } from "expo-media-library";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 
@@ -22,6 +22,8 @@ const PAGE = 90;
 const dedupe = (list: GalleryPhoto[]) => [...new Map(list.map((p) => [p.id, p])).values()];
 
 export default function Gallery() {
+  // Opened from a person's page ("Photo or video"): Talk on a photo is for them.
+  const { person, toName, channel } = useLocalSearchParams<{ person?: string; toName?: string; channel?: string }>();
   const { insets, usableWidth } = useLayout();
   const columns = Math.max(MIN_COLUMNS, Math.floor(usableWidth / TARGET_TILE));
   const tile = Math.floor((usableWidth - GAP * (columns - 1)) / columns);
@@ -70,10 +72,7 @@ export default function Gallery() {
       >
         <Ionicons name="chevron-back" size={24} color={color.text} />
       </Pressable>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.title}>Library</Text>
-        <Text style={styles.sub}>{photos.length ? `${photos.length}${done ? "" : "+"} photos` : " "}</Text>
-      </View>
+      <Text style={[styles.title, { flex: 1 }]}>Library</Text>
       <Pressable
         testID="overlay-open-home"
         accessibilityLabel="Open Un-Said"
@@ -85,6 +84,7 @@ export default function Gallery() {
       >
         <AppIcon size={36} />
       </Pressable>
+      <Text style={[styles.sub, styles.count]}>{photos.length ? `${photos.length}${done ? "" : "+"} photos` : " "}</Text>
     </View>
   );
 
@@ -125,7 +125,7 @@ export default function Gallery() {
         renderItem={({ item }) => (
           <Pressable
             accessibilityRole="imagebutton"
-            onPress={() => router.push({ pathname: "/photo/[id]", params: { id: item.id, w: item.width ?? 0, h: item.height ?? 0, t: item.creationTime ?? 0 } })}
+            onPress={() => router.push({ pathname: "/photo/[id]", params: { id: item.id, w: item.width ?? 0, h: item.height ?? 0, t: item.creationTime ?? 0, person: person ?? "", toName: toName ?? "", channel: channel ?? "" } })}
           >
             <Image source={{ uri: item.id }} style={{ width: tile, height: tile, backgroundColor: color.surface }} contentFit="cover" recyclingKey={item.id} transition={120} />
           </Pressable>
@@ -137,7 +137,9 @@ export default function Gallery() {
 
 const styles = StyleSheet.create({
   black: { flex: 1, backgroundColor: color.bg },
-  header: { flexDirection: "row", alignItems: "flex-end", gap: space.s8, paddingHorizontal: space.s16, paddingBottom: space.s12 },
+  // The back arrow, "Library" and the icon share one row; the count sits under the title.
+  header: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: space.s8, paddingHorizontal: space.s16, paddingBottom: space.s12 },
+  count: { width: "100%", paddingLeft: 36 - space.s8 + space.s8 },
   back: { width: 36, height: 41, justifyContent: "center", marginLeft: -space.s8 },
   ask: { flex: 1, width: "100%", maxWidth: 440, alignSelf: "center", justifyContent: "center", alignItems: "center", gap: space.s16, paddingBottom: space.s64 },
   askWell: { width: 80, height: 80, borderRadius: 24, backgroundColor: color.tint, alignItems: "center", justifyContent: "center" },

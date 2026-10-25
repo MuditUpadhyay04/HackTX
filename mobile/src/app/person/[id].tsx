@@ -30,11 +30,12 @@ export default function PersonPage() {
     haptics.tap();
     fn();
   };
-  const talkParams = { toName: person?.name ?? "", channel: person?.channel ?? "" };
+  const talkParams = { toName: person?.name ?? "", channel: person?.channel ?? "", person: id };
   const actions: { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void; featureId: string }[] = [
     { icon: "mic", label: "Talk", featureId: "person-talk", onPress: go(() => router.push({ pathname: "/talk", params: talkParams })) },
-    { icon: "create", label: "Write", featureId: "person-write", onPress: go(() => router.push({ pathname: "/talk", params: { ...talkParams, typing: "1" } })) },
-    { icon: "images", label: "Photo or video", featureId: "person-media", onPress: go(() => router.push("/gallery")) },
+    // Write opens Compose for them (DESIGN_SPEC 3.3); their draft, if any, is waiting there.
+    { icon: "create", label: "Write", featureId: "person-write", onPress: go(() => router.push({ pathname: "/compose", params: { person: id } })) },
+    { icon: "images", label: "Photo or video", featureId: "person-media", onPress: go(() => router.push({ pathname: "/gallery", params: talkParams })) },
     { icon: "albums", label: "Your words", featureId: "person-pile", onPress: go(() => router.push({ pathname: "/pile/[person]", params: { person: id } })) },
   ];
 
@@ -70,10 +71,10 @@ export default function PersonPage() {
   const grid = photos.length ? (
     <View style={[styles.photos, split ? { width: photoWidth } : null]}>
       {photos.map((p) => (
-        <View key={p.id} style={{ width: tile }}>
+        <Press key={p.id} featureId="person-photo-talk" onPress={() => router.push({ pathname: "/talk", params: { ...talkParams, seenPhoto: p.url } })} style={{ width: tile }}>
           <Image source={{ uri: mediaUrl(p.url) ?? undefined }} style={[styles.tile, { width: tile, height: tile * 1.25 }]} contentFit="cover" transition={150} />
           {p.caption ? <T v="caption" lines={1} style={{ marginTop: space.s4 }}>{p.caption}</T> : null}
-        </View>
+        </Press>
       ))}
     </View>
   ) : null;

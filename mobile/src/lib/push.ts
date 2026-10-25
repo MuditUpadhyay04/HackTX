@@ -39,7 +39,7 @@ export const needsHisTap = (person: Person, providers: Home["providers"]) =>
 function ensureChannel() {
   if (Platform.OS !== "android") return Promise.resolve();
   channel ??= Notifications.setNotificationChannelAsync(CHANNEL, {
-    name: "Letters",
+    name: "Un-said",
     importance: AndroidImportance.DEFAULT,
   }).catch(() => (channel = null));
   return channel;

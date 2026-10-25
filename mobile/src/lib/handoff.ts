@@ -19,6 +19,13 @@ export const CHANNEL_APP: Record<Exclude<Channel, "self">, App> = {
   instagram: "instagram",
 };
 
+/** The other way: the app he picked in "Change" -> the person's channel, so the pick sticks (PATCH /api/people/{id}). */
+export const APP_CHANNEL: Partial<Record<App, Exclude<Channel, "self">>> = {
+  whatsapp: "whatsapp",
+  messages: "imessage",
+  instagram: "instagram",
+};
+
 async function open(primary: string, fallback?: string) {
   try {
     await Linking.openURL(primary);

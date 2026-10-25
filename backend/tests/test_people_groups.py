@@ -22,19 +22,19 @@ def test_groups_endpoint_groups_the_cast_with_their_photos():
     assert res.status_code == 200
     body = res.json()
     by_id = {e["person"]["id"]: e for e in body["people"]}
-    assert set(by_id) == {"mom", "dad", "jordan", "priya"}  # never "me"
-    assert (by_id["mom"]["group"], by_id["dad"]["group"]) == ("mom", "dad")
+    assert set(by_id) == {"mom", "jordan", "priya"}  # never "me"; no Dad in the demo cast
+    assert by_id["mom"]["group"] == "mom"
     assert by_id["jordan"]["group"] == "partner"       # Sarah is his girlfriend in the seed
     assert by_id["priya"]["group"] == "best_friend"    # Michael is his best friend in the seed
     assert by_id["mom"]["family"] and not by_id["priya"]["family"]
-    assert body["groups"] == ["mom", "dad", "best_friend", "partner"]
+    assert body["groups"] == ["mom", "best_friend", "partner"]
     assert body["has_family"] is True
     for entry in body["people"]:
         jpgs = [p for p in entry["photos"] if p["url"].endswith(".jpg")]
         assert len(jpgs) >= 2, entry["person"]["name"]
         assert all(p["person_id"] == entry["person"]["id"] for p in entry["photos"])
     # the files are real and served
-    assert client.get(by_id["dad"]["photos"][0]["url"]).status_code == 200
+    assert client.get(by_id["mom"]["photos"][0]["url"]).status_code == 200
 
 
 def test_gallery_links_ride_along_and_seeding_is_idempotent():
@@ -65,3 +65,23 @@ def test_a_brother_gets_his_own_group_inside_family():
         with db.tx() as c:
             c.execute("DELETE FROM people WHERE id = 'bro'")
     assert store.get_person("bro") is None
+
+
+def test_old_drawn_placeholders_are_swapped_for_the_real_demo_photos():
+    rel = store.save_media("photos", "seed_mom_chai.jpg", b"\xff\xd8drawn")
+    with db.tx() as c:  # what a database from the drawn-photo build still has
+        c.execute("INSERT OR IGNORE INTO photos (id, person_id, path, caption, created_at) VALUES "
+                  "('photo_seed_mom_chai', 'mom', ?, 'chai, sunday', '2026-10-25T00:00:00+00:00')", (rel,))
+    court = store.save_media("photos", "seed_michael_court.jpg", b"\xff\xd8drawn court")  # same name, old file
+    with db.tx() as c:
+        c.execute("UPDATE photos SET caption = 'old' WHERE id = 'photo_seed_michael_court'")
+    seed.ensure_people_photos()
+    with db.tx() as c:
+        assert c.execute("SELECT 1 FROM photos WHERE id = 'photo_seed_mom_chai'").fetchone() is None
+        assert c.execute("SELECT caption FROM photos WHERE id = 'photo_seed_michael_court'").fetchone()["caption"] == "the court"
+    assert store.media_path(court).stat().st_size == (seed.SEED_MEDIA / "seed_michael_court.jpg").stat().st_size
+    assert not store.media_path(rel).exists()
+    mom = next(e for e in client.get("/api/people/groups").json()["people"] if e["person"]["id"] == "mom")
+    captions = {p["caption"] for p in mom["photos"]}
+    assert {"graduation day", "her tomatoes"} <= captions
+    assert all(p["caption"] for p in mom["photos"] if p["url"].endswith(".jpg"))

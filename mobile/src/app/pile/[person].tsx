@@ -11,7 +11,7 @@ import { Skeleton } from "../../components/motion";
 import { Avatar, Chip, NavBar, Overline, PrimaryPill, Sheet, styles as ui, T, TextButton } from "../../components/ui";
 import { api, type Piece } from "../../lib/api";
 import { haptics } from "../../lib/haptics";
-import { type App, APP_LABEL, CHANNEL_APP } from "../../lib/handoff";
+import { type App, APP_CHANNEL, APP_LABEL, CHANNEL_APP } from "../../lib/handoff";
 import { useHome } from "../../lib/useHome";
 import { SPLIT_MAX, useLayout } from "../../lib/useLayout";
 import { color, inset, pillGradient, radius, space } from "../../theme/tokens";
@@ -165,6 +165,17 @@ export default function Pile() {
       <T v="caption" style={{ textAlign: "center" }}>
         You decide when it leaves.
       </T>
+      {/* Secondary (DESIGN_SPEC 3.8): opens Compose pre-filled with the lines that are on. */}
+      <View style={{ alignItems: "center" }}>
+        <TextButton
+          featureId="draft-edit"
+          label="Edit as a draft"
+          onPress={() => {
+            const ids = (pieces ?? []).filter((p) => on.has(p.id)).map((p) => p.id);
+            if (ids.length) router.push({ pathname: "/compose", params: { person: personId, pieces: ids.join(",") } });
+          }}
+        />
+      </View>
     </>
   );
 
@@ -194,7 +205,17 @@ export default function Pile() {
 
       <Sheet visible={picking} onClose={() => setPicking(false)}>
         {SHEET_APPS.map((a) => (
-          <Pressable key={a} onPress={() => { setApp(a); setPicking(false); }} style={styles.sheetRow}>
+          <Pressable
+            key={a}
+            onPress={() => {
+              setApp(a);
+              setPicking(false);
+              // The pick sticks: it becomes their channel (PATCH /api/people/{id} channel).
+              const next = APP_CHANNEL[a];
+              if (person && next && next !== person.channel) api.patchPerson(person.id, { channel: next }).then(() => refresh()).catch(() => {});
+            }}
+            style={styles.sheetRow}
+          >
             <AppGlyph app={a} size={36} />
             <T v="rowName" style={{ flex: 1 }}>{APP_LABEL[a]}</T>
             {a === channelApp ? <Ionicons name="checkmark" size={20} color={color.accent} /> : null}

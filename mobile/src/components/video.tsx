@@ -23,8 +23,9 @@ function mimeOf(asset: ImagePicker.ImagePickerAsset) {
   return "video/mp4";
 }
 
-export async function pickVideo(source: "camera" | "library"): Promise<PickedVideo | null> {
+export async function pickVideo(source: "camera" | "library", front = false): Promise<PickedVideo | null> {
   const options: ImagePicker.ImagePickerOptions = {
+    ...(front ? { cameraType: ImagePicker.CameraType.front } : {}),
     mediaTypes: ["videos"],
     videoMaxDuration: MAX_VIDEO_SECONDS,
     videoQuality: ImagePicker.UIImagePickerControllerQualityType.Medium,
@@ -49,7 +50,7 @@ export async function pickVideo(source: "camera" | "library"): Promise<PickedVid
   return { uri: asset.uri, mime: mimeOf(asset), duration: seconds };
 }
 
-function clock(seconds: number | null) {
+export function clock(seconds: number | null) {
   if (seconds == null) return "";
   const s = Math.round(seconds);
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;

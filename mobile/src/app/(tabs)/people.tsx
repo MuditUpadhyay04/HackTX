@@ -57,6 +57,7 @@ export default function People() {
                   key={f}
                   accessibilityRole="tab"
                   accessibilityState={{ selected: on }}
+                  aria-selected={on}
                   onPress={() => {
                     haptics.select();
                     setFilter(f);

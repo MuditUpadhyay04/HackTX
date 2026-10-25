@@ -5,7 +5,7 @@ People come from SEED_* env vars on first boot and can be edited later with
 PATCH /api/people/{id}. The ids predate the cast names (jordan is Sarah, priya
 is Michael) and stay as they are. ensure_cast() runs on every start and only
 adds people who are missing, so a database edited through the API keeps its
-edits. Fixtures (Sarah's older lines, Dad's draft, the Tuesday card Mom replies
+edits. Fixtures (Sarah's older lines, the Tuesday card Mom replies
 to, Michael's reminder) are insert-if-missing too, and POST /api/demo/reset
 reseeds them.
 """
@@ -34,10 +34,14 @@ def _env(*names: str, default: str = "") -> str:
 def seed_if_empty() -> None:
     with db.tx() as c:
         fresh = c.execute("SELECT COUNT(*) FROM people").fetchone()[0] == 0
+    retire_people()
     ensure_cast()
     if fresh:
         seed_photos()
     ensure_people_photos()
+    from . import connect
+
+    connect.refresh_imports()
     seed_fixtures()
 
 
@@ -51,13 +55,41 @@ def _cast() -> list[tuple]:
          _env("SEED_ME_PHONE"), my_tz, home_language, 0),
         ("mom", "Mom", "mother", "her", ["Mom", "Mumma", "Mummy", "Mum", "Ma", "Maa", "Mother", "Amma"], "whatsapp",
          _env("SEED_MOM_PHONE"), home_tz, home_language, 1),
-        ("dad", "Dad", "father", "him", ["Dad", "Papa", "Pa"], "whatsapp",
-         _env("SEED_DAD_PHONE"), _env("SEED_DAD_TZ", default=home_tz), home_language, 2),
         ("jordan", "Sarah", "girlfriend", "her", ["Sarah"], "imessage",
          _env("SEED_SARAH_PHONE", "SEED_JORDAN_PHONE"), my_tz, "English", 3),
         ("priya", "Michael", "best friend", "him", ["Michael", "Mike"], "instagram",
          _env("SEED_MICHAEL_INSTAGRAM", "SEED_PRIYA_INSTAGRAM"), my_tz, "English", 4),
     ]
+
+
+# Nick, Oct 25 2026: the demo cast is Mom, Sarah and Michael. Dad is gone, from fresh and existing databases.
+RETIRED = ["dad"]
+
+
+def retire_people() -> list[str]:
+    """Drops retired cast members and everything that hangs off them. Runs on every start and on reset."""
+    removed = []
+    with db.tx() as c:
+        for pid in RETIRED:
+            if not c.execute("SELECT 1 FROM people WHERE id = ?", (pid,)).fetchone():
+                continue
+            cards = [r[0] for r in c.execute("SELECT id FROM cards WHERE recipient_id = ?", (pid,))]
+            for card_id in cards:
+                c.execute("DELETE FROM replies WHERE card_id = ?", (card_id,))
+            c.execute("DELETE FROM cards WHERE recipient_id = ?", (pid,))
+            c.execute("DELETE FROM replies WHERE from_person_id = ?", (pid,))
+            paths = [r[0] for r in c.execute("SELECT path FROM photos WHERE person_id = ?", (pid,))]
+            c.execute("DELETE FROM photos WHERE person_id = ?", (pid,))
+            for table, col in (("pieces", "person_id"), ("reminders", "person_id"), ("photo_links", "person_id"),
+                               ("attention", "person_id"), ("pushes", "person_id"), ("drafts", "person_id")):
+                cols = {r[1] for r in c.execute(f"PRAGMA table_info({table})")}
+                if col in cols:
+                    c.execute(f"DELETE FROM {table} WHERE {col} = ?", (pid,))
+            c.execute("DELETE FROM people WHERE id = ?", (pid,))
+            for rel in paths:
+                store.media_path(rel).unlink(missing_ok=True)
+            removed.append(pid)
+    return removed
 
 
 def ensure_cast() -> list[str]:
@@ -101,31 +133,60 @@ def seed_photos() -> None:
 
 SEED_MEDIA = Path(__file__).parent / "seed_media"
 
-# A few photos of each person for the People tab: simple drawn JPEGs from app/seed_media
-# (no real photos, no faces). Insert-if-missing on every start, like the cast.
+# Photos of each person for the People tab and Home's lane: fictional, generated demo photos
+# (Nick, Oct 25 2026; /workspace/demo-photos, resized to 1280 px, JPEG q80) in app/seed_media.
+# Insert-if-missing on every start, like the cast; older drawn placeholders are swapped out.
+# Captions are demo copy for Gurneal to review.
 PEOPLE_PHOTOS = [
-    ("photo_seed_mom_garden", "mom", "seed_mom_garden.jpg", "her garden", "2026-04-12T09:30:00+05:30"),
-    ("photo_seed_mom_chai", "mom", "seed_mom_chai.jpg", "chai, sunday", "2026-01-04T08:00:00+05:30"),
-    ("photo_seed_dad_porch", "dad", "seed_dad_porch.jpg", "dad on the porch", "2026-05-02T18:00:00+05:30"),
-    ("photo_seed_dad_cricket", "dad", "seed_dad_cricket.jpg", "his old bat", "2025-12-30T16:00:00+05:30"),
-    ("photo_seed_dad_tea", "dad", "seed_dad_tea.jpg", "two cups", "2025-08-08T07:00:00+05:30"),
-    ("photo_seed_sarah_cafe", "jordan", "seed_sarah_cafe.jpg", "our cafe", "2026-09-06T10:00:00-05:00"),
-    ("photo_seed_sarah_lights", "jordan", "seed_sarah_lights.jpg", "acl, night two", "2026-10-11T21:00:00-05:00"),
-    ("photo_seed_michael_court", "priya", "seed_michael_court.jpg", "the court", "2026-08-15T19:00:00-05:00"),
-    ("photo_seed_michael_road", "priya", "seed_michael_road.jpg", "road trip", "2026-07-03T12:00:00-05:00"),
+    ("photo_seed_mom_12", "mom", "seed_mom_12.jpg", "the old porch", "2018-06-10T18:30:00-05:00"),
+    ("photo_seed_mom_14", "mom", "seed_mom_14.jpg", "after the game", "2020-02-22T20:00:00-06:00"),
+    ("photo_seed_mom_16", "mom", "seed_mom_16.jpg", "the keys", "2022-04-03T16:00:00-05:00"),
+    ("photo_seed_mom_17_kitchen", "mom", "seed_mom_17_kitchen.jpg", "chapati lessons", "2023-01-15T12:00:00-06:00"),
+    ("photo_seed_mom_18", "mom", "seed_mom_18.jpg", "graduation day", "2024-05-25T11:00:00-05:00"),
+    ("photo_seed_mom_19_diwali", "mom", "seed_mom_19_diwali.jpg", "diwali, home", "2025-10-20T20:00:00-05:00"),
+    ("photo_seed_mom_20", "mom", "seed_mom_20.jpg", "she brought tiffin", "2026-03-08T13:00:00-05:00"),
+    ("photo_seed_mom_20_garden", "mom", "seed_mom_20_garden.jpg", "her tomatoes", "2026-07-12T09:30:00-05:00"),
+    ("photo_seed_sarah_coffee", "jordan", "seed_sarah_coffee.jpg", "our cafe", "2025-09-06T10:00:00-05:00"),
+    ("photo_seed_sarah_campus", "jordan", "seed_sarah_campus.jpg", "between classes", "2025-10-14T13:00:00-05:00"),
+    ("photo_seed_sarah_study", "jordan", "seed_sarah_study.jpg", "finals week", "2025-12-09T22:00:00-06:00"),
+    ("photo_seed_sarah_rain", "jordan", "seed_sarah_rain.jpg", "caught in the rain", "2026-04-18T17:00:00-05:00"),
+    ("photo_seed_sarah_picnic", "jordan", "seed_sarah_picnic.jpg", "zilker, sunday", "2026-05-31T15:00:00-05:00"),
+    ("photo_seed_sarah_sunset", "jordan", "seed_sarah_sunset.jpg", "the lake at sunset", "2026-08-22T19:45:00-05:00"),
+    ("photo_seed_michael_court", "priya", "seed_michael_court.jpg", "the court", "2024-08-15T19:00:00-05:00"),
+    ("photo_seed_michael_gradhug", "priya", "seed_michael_gradhug.jpg", "we made it", "2024-05-25T13:00:00-05:00"),
+    ("photo_seed_michael_gaming", "priya", "seed_michael_gaming.jpg", "one more game", "2025-11-29T23:30:00-06:00"),
+    ("photo_seed_michael_latenight", "priya", "seed_michael_latenight.jpg", "2am tacos", "2026-02-14T02:00:00-06:00"),
+    ("photo_seed_michael_roadtrip", "priya", "seed_michael_roadtrip.jpg", "road trip", "2026-07-03T12:00:00-05:00"),
+    ("photo_seed_michael_lake", "priya", "seed_michael_lake.jpg", "lake day", "2026-08-09T16:00:00-05:00"),
 ]
+
+
+def _drop_stale_seed_photos(c) -> None:
+    """Older databases still have the drawn placeholders (photo_seed_* rows that aren't in the list)."""
+    keep = {pid for pid, *_ in PEOPLE_PHOTOS}
+    for row in c.execute("SELECT id, path FROM photos WHERE id LIKE 'photo_seed_%'").fetchall():
+        if row["id"] not in keep:
+            c.execute("DELETE FROM photos WHERE id = ?", (row["id"],))
+            store.media_path(row["path"]).unlink(missing_ok=True)
 
 
 def ensure_people_photos() -> list[str]:
     """Adds the People-tab demo photos that are missing (row or file). Never touches his own photos."""
     added = []
     with db.tx() as c:
+        _drop_stale_seed_photos(c)
         for pid, person, filename, caption, taken in PEOPLE_PHOTOS:
             if not c.execute("SELECT 1 FROM people WHERE id = ?", (person,)).fetchone():
                 continue
             rel = f"photos/{filename}"
-            if not store.media_path(rel).exists():
-                store.save_media("photos", filename, (SEED_MEDIA / filename).read_bytes())
+            src = (SEED_MEDIA / filename).read_bytes()
+            dest = store.media_path(rel)
+            if not dest.exists() or dest.stat().st_size != len(src):  # missing, or an older drawn version
+                store.save_media("photos", filename, src)
+            c.execute(
+                "UPDATE photos SET path = ?, caption = ?, taken_at = ? WHERE id = ? AND person_id = ?",
+                (rel, caption, taken, pid, person),
+            )
             inserted = c.execute(
                 "INSERT OR IGNORE INTO photos (id, person_id, path, caption, taken_at, created_at) VALUES (?, ?, ?, ?, ?, ?)",
                 (pid, person, rel, caption, taken, db.iso(datetime.now(CDT))),
@@ -136,7 +197,7 @@ def ensure_people_photos() -> list[str]:
 
 
 def seed_fixtures() -> None:
-    """Sarah's older lines, Dad's draft, the Tuesday card Mom can reply to, Michael's reminder.
+    """Sarah's older lines, the Tuesday card Mom can reply to, Michael's reminder.
 
     Insert-if-missing, so it's safe on every start.
     """
@@ -153,7 +214,6 @@ def seed_fixtures() -> None:
             ("piece_jordan_sep30", "jordan", "I miss the way we used to talk.", "missing", at(2026, 9, 30, 1, 14)),
             ("piece_jordan_oct11", "jordan", "I didn't text back because I didn't want you to hear me like this.",
              "overwhelmed", at(2026, 10, 11, 2, 41)),
-            ("piece_dad_oct18", "dad", "I never said thank you.", "grateful", at(2026, 10, 18, 23, 52)),
         ]:
             c.execute(
                 "INSERT OR IGNORE INTO pieces (id, rant_id, person_id, text, tone, created_at) VALUES (?, NULL, ?, ?, ?, ?)",
@@ -183,10 +243,11 @@ def seed_fixtures() -> None:
 
 def reset_activity() -> None:
     """Clears everything he did, keeps people, photos and registered phones, reseeds the fixtures."""
+    retire_people()
     with db.tx() as c:
         for table in (
             "pieces", "reflections", "cards", "replies", "rants", "self_notes", "reminders",
-            "photo_links", "attention", "pushes",
+            "photo_links", "attention", "pushes", "drafts",
         ):
             c.execute(f"DELETE FROM {table}")
     seed_fixtures()
