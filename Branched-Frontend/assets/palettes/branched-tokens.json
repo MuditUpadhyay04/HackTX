@@ -1,0 +1,88 @@
+{
+  "note": "BF-v2: Un-Said tokens (un-*) are NOT kept here. They come only from App-UI-Final (unsaid-tokens.json / unsaid-tokens.css), copied into lib/unsaid-theme.json by scripts/sync-theme.ts. This file holds the look-alike palettes, look-alike gradients and device colors (CLAUDE_PROMPT.md sections 4.2-4.3); motion is section 4.4 / lib/motion.ts.",
+  "source": "Look-alike values sampled by eye from the real apps (Oct 24, 2026); approximate. Un-Said values: see note (App-UI-Final).",
+  "lookalike": {
+    "WhatsApp (iOS, light)": {
+      "wa-green": "#25D366",
+      "wa-accent": "#1DAA61",
+      "wa-chat-bg": "#EFEAE2",
+      "wa-bubble-out": "#D9FDD3",
+      "wa-bubble-in": "#FFFFFF",
+      "wa-meta": "#667781",
+      "wa-tick-read": "#53BDEB",
+      "wa-tick-sent": "#8696A0",
+      "wa-missed": "#F15C6D",
+      "wa-nav": "#F6F6F6",
+      "wa-system-pill": "#FFF5C4"
+    },
+    "WhatsApp calls (dark call screen)": {
+      "wa-call-bg": "#0B141A",
+      "wa-call-surface": "#1F2C34",
+      "wa-call-end": "#F15C6D",
+      "wa-call-text": "#E9EDEF"
+    },
+    "Messages / iMessage (iOS, light)": {
+      "imsg-blue": "#007AFF",
+      "imsg-gray": "#E9E9EB",
+      "imsg-green": "#34C759",
+      "imsg-meta": "#8E8E93",
+      "imsg-failed": "#FF3B30",
+      "imsg-nav": "#F9F9F9",
+      "imsg-field-stroke": "#C7C7CC"
+    },
+    "Instagram (light DMs, dark Reels)": {
+      "ig-text": "#000000",
+      "ig-muted": "#737373",
+      "ig-hairline": "#DBDBDB",
+      "ig-blue": "#0095F6",
+      "ig-red": "#FF3040",
+      "ig-dm-in": "#EFEFEF",
+      "ig-dm-out-start": "#7B2FF7",
+      "ig-dm-out-end": "#3B5BFE",
+      "ig-reels-bg": "#000000"
+    },
+    "Facebook (light)": {
+      "fb-blue": "#0866FF",
+      "fb-bg": "#F0F2F5",
+      "fb-card": "#FFFFFF",
+      "fb-text": "#050505",
+      "fb-secondary": "#65676B",
+      "fb-divider": "#CED0D4"
+    },
+    "Meta AI (light)": {
+      "meta-ai-blue": "#0064E0",
+      "meta-ai-text": "#1C2B33",
+      "meta-ai-surface": "#F1F4F7"
+    },
+    "iOS system (light, plus dark where used)": {
+      "ios-blue": "#007AFF",
+      "ios-red": "#FF3B30",
+      "ios-green": "#34C759",
+      "ios-gray": "#8E8E93",
+      "ios-gray4": "#D1D1D6",
+      "ios-gray5": "#E5E5EA",
+      "ios-gray6": "#F2F2F7",
+      "ios-kb-bg": "#D1D4DA",
+      "ios-kb-key": "#FFFFFF",
+      "ios-kb-key-special": "#ABB0BA",
+      "ios-banner": "#F5F5F5"
+    }
+  },
+  "lookalike_gradient": {
+    "ig-gradient": "linear-gradient(45deg, #FEDA75 0%, #FA7E1E 25%, #D62976 50%, #962FBF 75%, #4F5BD5 100%)",
+    "ig-dm-out": "linear-gradient(90deg, #7B2FF7 0%, #3B5BFE 100%)",
+    "messenger-gradient": "linear-gradient(45deg, #0099FF 0%, #A033FF 60%, #FF5280 90%, #FF7061 100%)",
+    "meta-ai-gradient": "conic-gradient(from 200deg, #0064E0, #7B3FF2, #D63BC4, #FF6A3D, #0064E0)",
+    "ios-wallpaper": "radial blobs #677FEF / #A166B7 / #8776DF / #607CF2 on #0B0B12, blur 80 px (colors sampled from Gurneal's app icon)"
+  },
+  "device": {
+    "frame-base": "#E9E8E4",
+    "frame-highlight": "#FFFFFF",
+    "frame-mid": "#D8D7D2",
+    "frame-shadow": "#B7B6B0",
+    "frame-seam": "#C4C3BD",
+    "bezel": "#050506",
+    "hinge-seam": "#BEBFC3",
+    "back-glass": "#FBFBF9"
+  }
+}

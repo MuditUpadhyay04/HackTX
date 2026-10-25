@@ -1,0 +1,123 @@
+"use client";
+
+import type { CSSProperties } from "react";
+import { Toaster, toast } from "sonner";
+import { useFlags } from "@/lib/flags";
+
+/** The app part of a placeholder id (spec 8.1). */
+export const PLACEHOLDER_PLATFORMS = [
+  "whatsapp",
+  "messages",
+  "instagram",
+  "photos",
+  "facebook",
+  "meta-ai",
+  "ios",
+  "unsaid",
+] as const;
+
+export type PlaceholderPlatform = (typeof PLACEHOLDER_PLATFORMS)[number];
+
+/** Spec 8.1: the only toast text. */
+export const CONCEPT_ONLY = "concept only";
+/** Spec 8.1: 1.6 s. */
+export const CONCEPT_ONLY_DURATION = 1600;
+
+const PILL_BASE: CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  paddingBlock: "var(--space-12)",
+  paddingInline: "var(--space-20)",
+  whiteSpace: "nowrap",
+  pointerEvents: "none",
+};
+
+/**
+ * Host apps get an iOS HUD: a compact pill in the light banner material
+ * (ios-banner at 78% + blur 30 + saturate 1.8, spec 4.2), system font 15 semibold.
+ */
+const PILL_HOST: CSSProperties = {
+  ...PILL_BASE,
+  borderRadius: "var(--radius-pill)",
+  background: "var(--material-light)",
+  WebkitBackdropFilter: "var(--material-light-filter)",
+  backdropFilter: "var(--material-light-filter)",
+  boxShadow: "var(--shadow-hud)",
+  color: "var(--ios-label)",
+  font: "var(--type-subhead-semibold)",
+};
+
+/**
+ * Inside Un-Said (the slot placeholder): App-UI-Final's toast (DESIGN_SPEC 2.7):
+ * un-surface-raised, radius 16, un-caption in un-text. No material, no shadow.
+ */
+const PILL_UNSAID: CSSProperties = {
+  ...PILL_BASE,
+  borderRadius: "var(--un-r-row)",
+  background: "var(--un-surface-raised)",
+  color: "var(--un-text)",
+  font: "var(--un-caption)",
+  letterSpacing: "var(--un-caption-tracking)",
+};
+
+/** The "concept only" pill itself (also used statically on /test/placeholder). */
+export function ConceptOnlyPill({ platform = "ios" }: { platform?: PlaceholderPlatform }) {
+  return (
+    <div
+      data-concept-toast={platform === "unsaid" ? "unsaid" : "host"}
+      role="status"
+      style={platform === "unsaid" ? PILL_UNSAID : PILL_HOST}
+    >
+      {CONCEPT_ONLY}
+    </div>
+  );
+}
+
+/** Sonner's list item: centered across the toaster column, soft ease instead of sonner's `ease`. */
+const TOAST_ITEM: CSSProperties = {
+  left: 0,
+  right: 0,
+  display: "flex",
+  justifyContent: "center",
+  pointerEvents: "none",
+  transitionTimingFunction: "var(--ease-soft)",
+};
+
+let seq = 0;
+
+/**
+ * Shows the shared "concept only" toast. Never stacks: any toast on screen is
+ * dismissed first. The platform picks the styling (iOS HUD or Un-Said toast).
+ */
+export function toastConceptOnly(platform: PlaceholderPlatform = "ios"): void {
+  toast.dismiss();
+  seq += 1;
+  toast.custom(() => <ConceptOnlyPill platform={platform} />, {
+    id: `concept-only-${seq}`,
+    duration: CONCEPT_ONLY_DURATION,
+    unstyled: true,
+    dismissible: false,
+    style: TOAST_ITEM,
+  });
+}
+
+/**
+ * The one sonner Toaster (mounted once, in app/layout.tsx, inside <Suspense>).
+ * Renders nothing with ?toasts=off.
+ */
+export function PlaceholderToaster() {
+  const { toasts } = useFlags();
+  if (!toasts) return null;
+  return (
+    <Toaster
+      position="top-center"
+      offset={{ top: "var(--space-24)" }}
+      mobileOffset={{ top: "var(--space-16)" }}
+      visibleToasts={1}
+      gap={0}
+      duration={CONCEPT_ONLY_DURATION}
+      swipeDirections={[]}
+      toastOptions={{ unstyled: true }}
+    />
+  );
+}

@@ -1,0 +1,29 @@
+@import "tailwindcss";
+@import "./unsaid-theme.css";
+@import "./tokens.css";
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  font-family: var(--font-system);
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background: var(--stage-black);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  font: inherit;
+}
+
+[data-stage] {
+  -webkit-user-select: none;
+  user-select: none;
+}

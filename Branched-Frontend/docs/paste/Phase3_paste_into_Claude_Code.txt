@@ -1,0 +1,157 @@
+PHASE 3: Build (A) the iOS home screen on the UNFOLDED white iPhone Duo, spanning both panels, with exact ?state= frames, and (B) the interactive iOS NAVIGATION SHELL (open from an icon, close to the icon, the app switcher, swipe between apps, banners, the unfold) that every app plugs into: WhatsApp (chats + calls), Messages, Instagram (DMs + Reels) and Photos now; Facebook and Meta AI in Phase 6. Plus (C) components/UnsaidSlot.tsx, where Mudit's real Un-Said app mounts (a polished, honest placeholder until then), and the interactive unfold: Un-Said banner -> unfold -> splash -> slot. The shell, the fold control and each app's own micro-interactions are the only interactive motion; the scripted opening (Phase 4) drives them.
+
+WORKSPACE RULE (still in force): branch `branched-frontend` only; folder `Branched-Frontend/` only; everything stays in that folder; never touch frontend/, backend/, App-UI-Final/, ideas/, Mudit's Un-Said app or anything else (App-UI-Final/ is the read-only theme source); stage with git add Branched-Frontend/ and push only with git push origin branched-frontend; run git branch --show-current before every commit. All design, naming, palette and user-facing decisions come from Gurneal. Mudit owns backend/ and the real Un-Said app; it is NOT built here (it mounts in components/UnsaidSlot.tsx). Phase 0 global rules apply (docs/RULES.md), including rule 12 (BUILD_LOG + commit + push after every change), rule 13 (10 Haiku reviewers until CLEAN), rule 14 (PRODUCTION QUALITY BAR) and rule 16 (motion: interactive springs plus the one scripted opening).
+
+USE the Apple/iOS skills now: apple-design-skill (home-screen grid, widgets, dock), heyimjames:interaction-primitives (widget anatomy, Dynamic Island), apple-hig (status bar, materials, SF type), liquid-glass if installed. Cross-check against the Apple Design Resources iOS UI kit; don't copy its assets.
+
+ROUTE
+/scene/home?state=<state>&wallpaper=unsaid|apple   (state: default | close-target | tap-unsaid | pressed-unsaid | dimmed)
+
+WALLPAPER (each display, continuous across the hinge as if one image split in two)
+- "unsaid" (default): the Phase 1 blurred Apple-style gradient but brighter for a home screen: radial blobs #677FEF (top-left), #AD78D4 (top-right), #8776DF (bottom-center), #C6A9F4 (bottom-left), on #0F0D15 (all from Gurneal's app icon); blur 60px; 4% noise. Left display shows the left half, right display the right half (offset the background by the display's artboard x so it's continuous behind the hinge).
+
+iOS HOME GRID (per display, in pt inside 402x874; verify with the skills)
+- Status bar 54 pt. Left display: time "9:41" in its left ear (white, SF Pro Text semibold 17 pt); no island (it has the pinhole camera). Right display: Dynamic Island, right ear shows cellular, Wi-Fi, battery (white).
+- Icon: 64 x 64 pt, continuous-corner squircle (superellipse; approximate with border-radius 22.37% plus an SVG mask, or a CSS clip-path generated from a superellipse with n=5), subtle 0.5 pt inner stroke rgba(255,255,255,0.12). Label below: 12 pt SF Pro Text, white, 1 line, text-shadow 0 1px 2px rgba(0,0,0,0.3), 5 pt gap.
+- 4 columns, 6 rows max. Side margins 27 pt, column pitch 87 pt (64 icon + 23 gap), row pitch 100 pt, first row top at 74 pt (below the status bar).
+- Widgets: small 164x164 pt (2x2 slots), medium 346x164 pt (4x2 slots), radius 26 pt, material: rgba(255,255,255,0.22) + backdrop-filter blur(30px) saturate(1.6) + 0.5 pt rgba(255,255,255,0.35) stroke (Liquid Glass feel), labels under widgets 12 pt white.
+- Search pill above the dock: 92x30 pt, "🔍 Search" 13 pt, glass material, centered, 12 pt above the dock (left display has the search pill; right display has page dots instead).
+- Dock (right display only): 378x96 pt, radius 34 pt, 12 pt from the bottom, 4 icons, same glass material.
+- Page dots (right display): 2 dots 7 pt, active white, inactive rgba(255,255,255,0.4), centered 14 pt above the dock.
+- Home indicator: 134x5 pt white bar on each display, 8 pt from the bottom.
+
+LAYOUT
+LEFT display (Apple apps + widgets):
+- Row 1-2: Weather medium widget: "Austin" + location arrow, "78°", "Sunny", "H:84° L:66°", and a 5-hour strip (10AM 79° ... 2PM 83°) on a blue-sky gradient (#3C8CE7 -> #7EC3F8); white text.
+- Row 3-4: Calendar small widget ("SATURDAY" in red #FF3B30, big "24", then "HackTX demo · 11 AM" and "call Mom?" in lowercase, a tiny Un-Said nod) + Photos small widget ("Memories", "lake trip, june", illustrated lake photo, soft vignette).
+- Row 5: Clock, Notes, Maps, Photos
+- Row 6: Mail, Reminders, Health, Settings
+- Search pill.
+RIGHT display (Meta apps prominent, then Apple):
+- Row 1: Instagram, WhatsApp, Facebook, Messenger
+- Row 2: Meta AI, Threads, Edits, Un-Said   <- Un-Said sits here, row 2 col 4
+- Row 3-4: Batteries medium widget: four rings with icons and %: "iPhone Duo 84%", "Ray-Ban Meta 62%" (glasses glyph), "AirPods Pro 100%", "Watch 71%". (The Ray-Ban glasses tie to the Meta AI app.)
+- Row 5: App Store, Music, Camera, Wallet
+- Page dots; Dock: Phone, Messages, Safari, Calendar.  (The home screen is not part of the opening, which enters Un-Said from a notification banner and the unfold. It is the live home for /phone and Phase 6.)
+Export from the home screen component a function getIconRect(appId) that returns the icon's artboard-pixel rect for the unfolded Duo at scale 1 (the navigation shell uses it for the open/close morphs).
+
+ICONS: LOOK-ALIKES ONLY (SVG/CSS; never download official icons or logo files)
+Meta family (approximate colors; recognizable at a glance, drawn from simple shapes):
+- Instagram: radial-gradient(circle at 30% 107%, #FDF497 0%, #FDF497 5%, #FD5949 45%, #D6249F 60%, #285AEB 90%); glyph: white rounded-square outline (stroke 5 pt, radius 14 pt) + centered circle outline + small dot top-right.
+- WhatsApp: #25D366 tile; glyph: white speech-bubble outline with a small tail at bottom-left containing a white handset.
+- Facebook: #0866FF tile; glyph: a white lowercase "f" built from rectangles/paths (do not use a font or logo file).
+- Messenger: messenger-gradient tile; glyph: white rounded speech bubble with a zig-zag "bolt" cutout.
+- Threads: #000 tile; glyph: white "@"-like spiral drawn as a single stroked path.
+- Meta AI: #FFFFFF tile (dark-mode #0B0B0F), glyph: a thick ring stroked with the meta-ai-gradient (conic). Label "Meta AI". (This is the Ray-Ban Meta glasses companion app: formerly "Meta View", renamed to Meta AI on Apr 29, 2025; App Store title "Meta AI - Assistant & Glasses".)
+- Edits (by Instagram, video editor): #000 tile with a white stylized film-strip/scissor-cut glyph and a thin ig-gradient underline. (Approximate; Edits' real icon was not copied.)
+- Un-Said: Gurneal's own icon, public/brand/unsaid-app-icon.png via UnsaidLogo (masked to the iOS squircle; fallback the white “ on un-icon-gradient). Label "Un-Said". A blue notification dot is NOT used; instead state=tap-unsaid adds a soft un-violet #A890F6 glow ring (static).
+Apple apps (look-alikes): Weather (blue gradient + sun/cloud), Calendar (white, red day name, date number), Photos (white, 8-petal color pinwheel), Clock (black, white face, hands at 9:41), Notes (white with yellow header band + lines), Maps (map tile pastel + blue route), Settings (gray, gear), Mail (blue gradient, white envelope), Reminders (white, three colored dots + lines), Health (white, pink heart), App Store (blue gradient, a white "A" built from three rounded strokes), Music (red-pink gradient, white note), Camera (gray, lens circle), Wallet (black, stacked colored cards), Phone (green, white handset), Messages (green, white speech bubble), Safari (white/blue compass).
+
+
+B) iOS NAVIGATION SHELL (interactive; real in the built web app, not scripted)
+Goal: Gurneal can open any app from its icon, close it, open the next one, use the app switcher, and swipe between apps, live, and it feels like iOS. Every app registers with the shell, so every transition is identical and system-level. Use the Motion AI Kit + heyimjames:the-final-5-percent + apple-design-skill (motion) for the feel. Framer Motion only (already installed; ask before adding any other dependency).
+
+Files: components/shell/ShellProvider.tsx (state + API), AppHost.tsx (the morphing app "window"), AppSwitcher.tsx, HomeIndicatorGesture.tsx, appRegistry.ts, rubberband.ts. Route: /phone (the live phone: unfolded Duo + home + shell). Also wrap the app routes in a route group app/(phone)/layout.tsx so the Duo, home, and shell PERSIST across navigation (Next layouts don't remount), and the UnsaidSlot and /apps/* routes render inside AppHost.
+
+APP REGISTRY
+registerApp({ id, name, Icon, route, placement: "span" | "left" | "right", Screen })
+- Register now: whatsapp (opens on the Phase 2 Mom thread; placement "right"), messages (the Phase 2 Sarah thread; "right"), instagram (the Phase 2 Michael DM, state read; "right"), unsaid (Screen = components/UnsaidSlot.tsx, shown after the splash; "span" unfolded, "right" folded), meta-ai, facebook, messenger, threads, edits (simple look-alike stubs until Phase 6: the app's icon large, its name, on the app's own background; Phase 6 fills Facebook and Meta AI), and every Apple look-alike icon (a generic stub: the app's icon large, its name, and "concept · look-alike stub"), so EVERY icon on the home screen is tappable.
+- Each registered app gets the same open/close/switcher behavior. No app implements its own transition.
+
+STATE AND API
+- Shell state: openApps (most recent first), foreground per placement: { span } or { left, right } (two single-panel apps can sit side by side, one per display; opening a span app replaces both), phase: home | opening | app | closing | switcher | switching.
+- URL sync: ?app=<id>&placement=span|left|right (and the app's own route + ?state=). Loading a URL with an app open shows it already open with NO animation (so ?state= screenshots stay exact).
+- Programmatic API (the Phase 4 opening drives the shell through this, so build it cleanly): shell.open(appId, {placement?, from?: "icon"}), shell.close(placement?), shell.openSwitcher(), shell.resume(appId), shell.kill(appId), shell.switchTo("prev" | "next"). Each returns a Promise that resolves when its transition settles. Expose it as window.__unsaidShell in dev and test builds (for Playwright). Keep every transition a pure function of a progress value (0..1) fed by the spring, so Phase 4 can add a "driven" mode where the opening timeline supplies the progress frame by frame. Don't build that mode now.
+- Shell controls are navigation, not features: data-nav, no toast.
+
+OPEN (tap an icon): Apple's zoom from the icon's exact rect
+- Press: icon scale 1 -> 0.9 + 15% black overlay while pressed (120 ms ease-ios), release back to 1.
+- The app window starts at getIconRect(appId) (converted to the current Stage scale) and springs to its placement rect: the right display, the left display, or both displays (span; the content is clipped by both display masks with the hinge between them, as in the Phase 1 spanning slot).
+- The corner radius morphs from the icon's radius (64 pt x 0.95 x 22.37% = 13.6 px) to the display's radius (52 px; 4 px on hinge-side corners).
+- Crossfade: the icon artwork fades out over progress 0-0.35 while the app content fades and scales in (opacity 0 -> 1 over 0.15-0.6, content scale 0.96 -> 1).
+- Behind it, the wallpaper and the other icons dim and recede: home layer scale 1 -> 0.92, brightness 1 -> 0.7 (crossfade to a pre-blurred copy rather than animating filter: blur on every icon).
+- Spring: spring-open {stiffness 340, damping 32, mass 1} (about 450 ms to settle, little to no overshoot).
+- Animate with transform (translate + scale) and opacity only. Use Framer Motion's layout/borderRadius correction (or counter-scale the content) so corners stay crisp. Don't animate width/height, and keep backdrop-filter off the moving window. 60 fps is the target.
+
+CLOSE: swipe up on the home indicator
+- Hit area: a 34 pt-tall strip over each display's home indicator. Drag with Framer Motion drag/pan gestures (pointer events; works with a mouse and with touch).
+- While dragging, the window follows the finger: translateY = dy, scale = 1 - min(|dy| / 900, 0.4), and the corner radius grows toward the icon radius ratio. Dragging DOWN rubber-bands: offset = (1 - 1 / (x * 0.55 / 200 + 1)) * 200 (rubberband.ts, the iOS-style constant 0.55).
+- Release: if velocityY < -500 px/s or progress > 0.25, the app springs back INTO ITS ICON's rect: spring-close {stiffness 300, damping 30, mass 1}, the radius returns to 13.6 px, the icon artwork crosses back in (progress 0.55-0.85), and the home un-dims (scale 0.92 -> 1, brightness 0.7 -> 1). Otherwise it springs back open: spring-snapback {stiffness 400, damping 35}.
+- Also close with: the keyboard (Escape or Cmd/Ctrl+Shift+H = home) and a "Home" button in a small dev control bar outside the artboard (Home · Switcher · ◀ Prev · Next ▶ · span/single toggle; hidden with ?frame=bare) for clean screen recording.
+
+APP SWITCHER: swipe up and hold
+- Trigger: during a home-indicator drag, if the finger rests (velocity < 50 px/s for 250 ms) after rising more than 120 px; also the keyboard (Cmd/Ctrl+Shift+A or "\") and the dev bar.
+- Layout: the open apps as cards in a horizontal carousel spread across both displays, most recent at the right: each card is the live app (render the Screen scaled, pointer-events none) at scale 0.62, radius 40 px, gap 24 px, the app's icon (28 pt) and name (13 pt white) above it; the home layer blurred and dimmed (pre-blurred copy, brightness 0.6). Horizontal drag scrolls the carousel with rubber-band at the ends.
+- Swipe a card UP (dy < -120 px or velocityY < -600 px/s): it flies off upward (y -> -1.2 x height, opacity -> 0, spring-close) and the app is removed from openApps (killed); remaining cards close the gap with spring-snapback.
+- Tap a card: it springs back to its placement rect (spring-open) and resumes in the exact state it was left in. Tap empty space: go home.
+
+SWITCH BETWEEN APPS: swipe along the home indicator
+- A horizontal drag on the home indicator (|dx| > |dy|) moves the current app sideways with the finger, and the previous/next recent app slides in beside it, edge-to-edge with a 16 px gap and both slightly scaled to 0.96 while dragging. Past the ends of the list it rubber-bands.
+- Release past 30% of the display width (or |velocityX| > 400 px/s) to commit with spring-snapback; otherwise it springs back. Keyboard: [ and ] (or Cmd/Ctrl+Shift+Left/Right); dev bar Prev/Next.
+
+DUO PANELS
+- An app opens in its registered placement. Hold Alt/Option while tapping (or use the dev bar's span/single toggle) to open it on the icon's own panel instead. Two single-panel apps can run side by side (one per display); each display's home indicator controls the app on that display; for a span app, either indicator works.
+- Apps that span lay out using the Duo's left/right slots (list on the left, detail on the right).
+
+REDUCED MOTION AND PERFORMANCE
+- prefers-reduced-motion (and ?motion=reduced): open/close/switch become a 200 ms crossfade with a scale of 0.98; switcher cards appear without flying; the gestures still work.
+- 60 fps: will-change only on the window and cards while they move; no layout-thrashing reads during a gesture; pre-render the blurred home and wallpaper once.
+- In dev, record frame times during every transition (requestAnimationFrame deltas) and expose them as window.__unsaidShell.frameStats.
+
+HOME STATES (static, for screenshots and the opening)
+- default: as above.
+- close-target: identical, plus a debug outline (only with ?debug=1) on the Instagram icon and the Un-Said icon showing their getIconRect values.
+- tap-unsaid: a touch indicator (44 pt circle, rgba(255,255,255,0.35), 1 pt white stroke at 50%) centered on the Un-Said icon; the icon has an un-violet glow 0 0 24px rgba(168,144,246,0.6).
+- pressed-unsaid: the Un-Said icon at scale 0.9, darkened by a 15% black overlay (the iOS press state).
+- dimmed: the whole home screen at blur 12px, scale 0.94, opacity 0.6 (what sits behind an app opening).
+Footer label (outside the device, with the concept label): "hackathon concept mock · not affiliated with Apple or Meta · icons are look-alikes".
+
+NOTIFICATION BANNERS (iOS-level, so allowed for every app)
+- shell.notify(appId, {title, body, threadId}) (wired to lib/notify.ts, so the Phase 2 dev panel and ?notify= go through it) drops the Phase 2 NotificationBanner from under the Dynamic Island with an iOS spring (spring-banner {stiffness 420, damping 34}, from y -120% with a slight overshoot settle, about 350 ms), on the display of the foreground app (the cover display when folded).
+- Tap: the banner's rect becomes the app's launch rect: the app opens FROM THE BANNER on the banner's thread (threadId), with the messaging store intact, (same zoom as the icon open, with the banner as the source rect). Swipe up: it dismisses. Untouched: it auto-dismisses after 5 s (?banner-hold=on keeps it up).
+- Un-Said's banner: when folded, tapping it plays the banner-to-app-card morph, then unfolds the Duo through useFold() (openAngle 0 -> 180 with spring-unfold {stiffness 120, damping 22, mass 1.3}, about 2.0 s, the Phase 1 snapshots as the keyframe reference), shows the UnsaidSplash (state=ready, 900 ms hold) and crossfades into the UnsaidSlot. Apart from the fold control, this is the only place the shell unfolds the device.
+- Banner states for screenshots come from Phase 2 (&banner=...&banner-state=...).
+
+C) UNSAID SLOT (where Mudit's real app mounts; a polished, honest placeholder until then)
+- components/UnsaidSlot.tsx is the ONLY place Un-Said's app appears. It is registered with the shell as appId "unsaid" (placement "span" when unfolded, "right" when folded) and is what the Un-Said banner, the home icon and the splash hand off to.
+- Props: src?: string | null (default process.env.NEXT_PUBLIC_UNSAID_APP_URL ?? null), mode?: "auto" | "placeholder" | "frame" (default "auto": frame when src is set, placeholder otherwise), placement?: "span" | "left" | "right", onReady?.
+- URL override for demos and tests: ?unsaid=placeholder forces the placeholder; ?unsaid=<url-encoded https or localhost URL> mounts that URL.
+- FRAME mode: an <iframe title="Un-Said" src={src} allow="microphone; camera; autoplay" data-slot="unsaid">, sized to the display(s): 402 x 874 pt per display (804 + hinge across both when spanning; the iframe gets ?display=span|single so Mudit's app can lay out). The UnsaidSplash stays on top until the iframe fires onLoad, then crossfades out (200 ms). If onLoad hasn't fired after 8 s, show the placeholder instead and log a console warning (never a broken frame on screen).
+- PLACEHOLDER mode (data-slot="unsaid" data-slot-mode="placeholder"): a STATIC Un-Said Home in Gurneal's App-UI-Final theme, built only from the synced tokens and App-UI-Final/DESIGN_SPEC.md "Home" and assets/ui-reference/unsaid-ui-reference.png. Unfolded: the left display holds the header (wordmark), the headline and the hero card; the right display holds the "Your words" rows, the "Say it out loud" card and the tab bar. Folded: the same as one scrolling column on the cover display. Every string comes from lib/mock/unsaid-placeholder.ts, copied from App-UI-Final/COPY_AND_NAMES.md (log any missing string as COPY NEEDED; never invent features).
+- The placeholder is honest: nothing in it works. Each control has only the iOS press state and carries data-placeholder="unsaid:<control>" with the "concept only" toast (rule 4). No fake recording, no fake transcript, no fake letters, no AI text.
+- Dev tag: with ?dev=on only, a small tag at the bottom of the right display reads "placeholder · Mudit's app mounts here". It never shows in recordings.
+- docs/UNSAID_SLOT.md (for Mudit): how to point the slot at his app (NEXT_PUBLIC_UNSAID_APP_URL in .env.local, or ?unsaid=<url>), the size contract (402 x 874 pt per display, ?display=span|single), framing (his app must allow being framed by the demo origin: no X-Frame-Options DENY, and Content-Security-Policy frame-ancestors including http://localhost:3000), mic/camera (https or localhost only; the iframe's allow attribute already grants them), and that nothing in Branched-Frontend/ needs to change when he swaps it in.
+- The slot is swappable in one line: replacing the placeholder never touches the shell, the splash or the opening.
+- /scene/unsaid?mode=placeholder|frame&placement=span|right renders the slot on its own (registered in lib/scenes.ts).
+
+ACCEPTANCE CRITERIA (Phase 3)
+- Would pass as a real Meta/Apple screenshot: every new state, at 2x, side by side with a reference screenshot of the real app or device. A designer couldn't tell at a glance which is the mock (apart from the look-alike icons). Zero PRODUCTION QUALITY BAR tells (rule 14); meta-style-slop-reviewer reports CLEAN.
+- Banners: shell.notify drops, taps open the app from the banner, swipe up dismisses; the Un-Said banner tap unfolds into the splash and then the slot. Every frame of the drop, the banner open and the unfold passes as an Apple-built transition (60 fps, no linear easing, no flicker at 90 degrees).
+- /scene/home?state=default at 1920x1080 reads as a real iOS 26-era home screen spread across two panels: correct status bars, a consistent icon grid on both panels, glassy widgets and dock, page dots, search pill, home indicators.
+- Meta apps are the most prominent thing on the right panel (top two rows); Un-Said sits clearly among them; Apple apps are scattered on the left and below.
+- Every icon is recognizable at a glance, and every one is a drawn SVG/CSS look-alike. Run: grep -ri "\.png\|\.svg" for any downloaded brand asset; the only image file in an icon is Gurneal's /public/brand/unsaid-app-icon.png.
+- getIconRect returns correct artboard rects (verify with ?debug=1 overlays).
+- No placeholder buttons on the home screen (it's iOS, not Un-Said); check:placeholders passes.
+- NAVIGATION SHELL, on /phone:
+  - Every icon opens its app with the zoom from its exact rect (corner-radius morph, icon crossfade, home dims and recedes).
+  - Swiping up on the home indicator closes the app into its icon: it follows the finger, rubber-bands when dragged down, and springs back open on a weak swipe.
+  - Swipe-up-and-hold opens the switcher: cards for every open app; swipe a card up to kill it; tap a card to resume it in its exact state.
+  - A horizontal swipe on the home indicator switches between recent apps.
+  - The keyboard shortcuts and the dev bar do the same, and both placements (span, and left/right single) work.
+- Write scripts/shell-check.ts (Playwright). For EVERY registered app, it calls the shell API, then also drives a real mouse drag on the indicator:
+  - open from the icon, close, then open the next app;
+  - then open 3 apps and use the switcher to resume one and kill one;
+  - then swipe prev/next.
+  It screenshots the midpoint and the end of each transition, and it fails if frameStats shows a p95 frame time over 20 ms or any frame over 50 ms. Run it once with reduced motion emulated.
+- "No jank" is checked by eye too: record a 20-second screen capture of opening, closing, and opening the next app, and look at it.
+- Screenshots of every state at 1x and 2x, checked. Commit "branched-frontend: phase 3: home screen, navigation shell, UnsaidSlot, interactive unfold" and push per rule 12.
+- UNSAIDSLOT: the Un-Said banner (folded) and the home icon (unfolded) both reach the splash and then the slot; with no URL set the placeholder shows, matches App-UI-Final's Home side by side (layout, type, colors, radii), and every control toasts "concept only"; with ?unsaid=http://localhost:5173 (any local page) the iframe mounts at the right size and the splash fades out on load; with a dead URL the placeholder appears after 8 s. docs/UNSAID_SLOT.md exists. Nothing in the slot renders fake features or AI text.
+- All 10 reviewers report CLEAN in the same final round (rule 13); every finding is logged in REVIEW_FINDINGS.md and VERIFIED; BUILD_LOG.md is complete.
+
+ADDITIONS IN THIS BUILD
+- Register photos (the Phase 2 Photos library; placement "right" folded, "span" unfolded) and make WhatsApp open on its Chats tab with the Calls tab one tap away. The incoming WhatsApp call is a system-level overlay owned by the shell (full screen when an app is open, the compact call banner otherwise), so it can arrive on any screen.
+- The Un-Said banner tap ALWAYS runs: unfold (if folded) -> UnsaidSplash -> UnsaidSlot, through the shell's launch path, so Un-Said opens like any other app. The Un-Said home icon does the same (splash -> slot) without the unfold when already unfolded.
+- Dev panel: Apps section (open any registered app on any thread or state), the shell toggles (folded/unfolded, reduced motion), and the slot mode (placeholder / frame with a URL).
+- Home screen copy is Gurneal's from the scripts (Calendar widget "HackTX demo · 11 AM" and "call Mom?"); anything new is COPY NEEDED.
+
+STOP AND LET ME REVIEW. Report: git branch --show-current, git diff main --name-only (only Branched-Frontend/ paths), the screenshot list, every COPY NEEDED, the reviewer round results, and any value you changed and why.  Do not start Phase 4.

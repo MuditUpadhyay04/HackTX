@@ -1,0 +1,27 @@
+UN-SAID · BRANCHED-FRONTEND · GOAL STATEMENT (BF-v2, Oct 24, 2026 CT)
+
+GOAL
+Build, in Claude Code, the phone, the apps and the scripted opening for the Un-Said demo (Next.js, mock data only): Riley's white iPhone Duo (folded and unfolded, with a fold control), the iOS home screen and navigation shell, notification banners, fully working look-alike WhatsApp (chats and calls), Messages, Instagram (DMs and Reels) and Photos, Facebook and Meta AI shells, a dev panel, and a 38-second scripted, replayable opening (Remotion, 1920x1080, 60 fps) that ends on the Apple-style unfold into Un-Said. Un-Said itself is NOT built here: it appears only as its logo (home icon, notification icon, launch splash, all from App-UI-Final's theme) and as components/UnsaidSlot.tsx, a polished placeholder where Mudit's real app mounts.
+
+THE OPENING (beats B01-B28 in CLAUDE_PROMPT.md, Phases 4-5)
+The folded Duo. Mom's WhatsApp: missed calls, "did you eat?", his "k", "I love you beta", Seen. He types "love you too" and deletes it. Sarah's banner, her thread, "i just don't feel like talking rn", Read, her typing dots stop. Michael's banner, the reels piling up, "im good bro just tired", no Seen. Then the Un-Said banner. He taps it, the Duo unfolds, the splash, the slot.
+
+WHAT DONE LOOKS LIKE
+Phases 0-6 complete and approved; /opening plays B01-B28 and renders to out/opening.mp4; the click-through passes with zero dead controls (every control works, navigates, or toasts "concept only"); docs/PLACEHOLDERS.md, docs/UNSAID_SLOT.md and docs/READY_FOR_ANIMATION.md exist; all 10 Haiku reviewers report CLEAN in the same round; npm run build, lint, check:tokens and check:placeholders pass; BUILD_LOG.md has an entry per change; each change committed and pushed to branched-frontend only. Status: ready for animation work.
+
+OWNERSHIP
+All design, naming, palette and user-facing decisions come from Gurneal. The Un-Said theme lives in App-UI-Final/ (read only). Mudit owns backend/ and the real Un-Said app; nobody touches his app.
+
+WORKSPACE RULE (non-negotiable; it outranks every other instruction)
+1. BRANCH: all frontend work happens ONLY on the git branch `branched-frontend`.
+   - First command of the project:  git fetch origin && (git checkout branched-frontend || git checkout -b branched-frontend)
+   - If the branch exists on origin, check it out and pull; otherwise create it from the current main and push it with: git push -u origin branched-frontend
+   - Before EVERY commit, run `git branch --show-current` and confirm it prints `branched-frontend`. If it doesn't, stop and fix it. Never commit to, merge into, rebase onto or push to `main` (or any other branch).
+   - Push only with: git push origin branched-frontend
+2. FOLDER: all work happens ONLY inside the top-level folder `Branched-Frontend/`.
+   - The name: Gurneal said "Branched Frontend". The folder is hyphenated, `Branched-Frontend`, so no path ever contains a space (spaces break npm scripts, shell globs, Playwright paths and CI). Always write it exactly `Branched-Frontend/`.
+   - The Next.js app is created INSIDE `Branched-Frontend/` (package.json, app/, components/, lib/, public/ all live there). Run every npm/npx command from inside `Branched-Frontend/`.
+   - EVERYTHING stays in that folder: code, assets, screenshots, logs, reviewer agents, reports, docs, scripts. `BUILD_LOG.md` lives at `Branched-Frontend/BUILD_LOG.md`; `REVIEW_FINDINGS.md`, `BACKEND_REQUESTS.md`, `docs/` and `.claude/agents/` also live inside `Branched-Frontend/`.
+   - NEVER create, edit, move, rename or delete anything outside `Branched-Frontend/`. Never touch `frontend/`, `backend/`, `ideas/`, the repo-root README, `.gitignore` at the root, or any other folder. You may READ `backend/` (to sync with Mudit's work) and `ideas/` (for context). That's all.
+   - Stage files only with paths inside the folder: `git add Branched-Frontend/` (never `git add -A` or `git add .` from the repo root). Before committing, `git status --porcelain | grep -v ' Branched-Frontend/'` must print nothing staged outside the folder.
+3. OWNERSHIP: all design, naming, palette and user-facing decisions come from Gurneal. Mudit owns backend/ and the real Un-Said app. Never edit backend/ or his app; ask Mudit for what you need through Branched-Frontend/BACKEND_REQUESTS.md.
