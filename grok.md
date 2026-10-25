@@ -2,6 +2,10 @@
 
 Running log of every change Grok Bot makes. Times are America/Chicago (CDT). Newest entries are at the top. Updated after every message Gurneal sends to Grok Bot.
 
+## Oct 24, 2026, 11:10 PM CDT
+
+Gurneal clarified ownership. Grok Bot is the ONLY one building the Un-Said app itself (the overhaul of mobile/ on unsaid-overhaul). Claude Code builds everything else for the demo (iPhone Fold device, mock WhatsApp/iMessage/Instagram apps, animations) in Branched-Frontend/, where Un-Said is only an icon or placeholder.
+
 ## Oct 24, 2026, 11:09 PM CDT
 
 Gurneal asked how the frontend is going. Grok checked the unsaid-overhaul progress and the Claude Code branched-frontend build.

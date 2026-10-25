@@ -4,8 +4,8 @@ This branch is the shared context hub for Un-Said (HackTX 2026). It holds markdo
 
 ## Workstreams
 
-- `branched-frontend` — Claude Code demo frontend in `Branched-Frontend/`: the iPhone Fold device, mock apps, animations.
-- `unsaid-overhaul` — Grok Bot's overhaul of Mudit's Expo app in `mobile/`, in Gurneal's design, with the same features and no backend changes.
+- `unsaid-overhaul` is the Un-Said app, built only by Grok Bot.
+- `branched-frontend` is everything except the Un-Said app, built by Claude Code.
 - `main` — Mudit's backend in `backend/`, the Expo app in `mobile/`, and Gurneal's design handoff in `design/`.
 
 ## Ownership
