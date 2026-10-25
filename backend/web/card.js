@@ -29,7 +29,11 @@ async function load() {
 
 function render(c) {
   const local = LOCAL[(c.recipient_language || "").toLowerCase()] || null;
-  const [first, ...rest] = c.lines.map((l) => l.text);
+  // Spec 3.4: his first sentence is the hero; everything after it follows as body.
+  const [firstLine, ...more] = c.lines.map((l) => l.text);
+  const split = firstLine ? firstLine.match(/^(.+?[.!?।…]+["'”’)]*)\s+(.+)$/s) : null;
+  const first = split ? split[1] : firstLine;
+  const rest = split ? [split[2], ...more] : more;
   // The mock server returns a bracketed placeholder instead of a translation; never show that.
   const translation = c.translation && !c.translation.startsWith("[") ? c.translation : "";
   root.innerHTML = `
