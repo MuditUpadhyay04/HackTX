@@ -11,7 +11,7 @@ import json
 import logging
 from datetime import timedelta
 
-from . import audio, db, store, timeutil
+from . import audio, db, push, store, timeutil
 from .ai import spark
 from .config import settings
 from .sorting import merge_windows
@@ -115,7 +115,7 @@ async def _deliver(card_id: str) -> None:
         card = c.execute("SELECT * FROM cards WHERE id = ?", (card_id,)).fetchone()
     recipient = store.get_person(card["recipient_id"])
     now = db.iso(timeutil.now_utc())
-    if recipient["channel"] == "whatsapp" and settings.whatsapp_enabled and recipient["handle"]:
+    if not store.needs_his_tap(recipient):  # WhatsApp recipient + Cloud API configured
         url = f"{store.public_base()}/c/{card['token']}"
         try:
             message_id = await send_card(recipient["handle"], store.me()["name"], url)
@@ -144,7 +144,21 @@ async def release(card_id: str) -> bool:
         ).rowcount
     if claimed:
         await _deliver(card_id)
+        try:
+            _push_if_it_needs_him(card_id)
+        except Exception:  # a push problem must never hold up the next letter
+            log.exception("couldn't queue the ready push for %s", card_id)
     return bool(claimed)
+
+
+def _push_if_it_needs_him(card_id: str) -> None:
+    """A held letter's moment came but it needs his tap (no WhatsApp API): one push, his hours."""
+    with db.tx() as c:
+        card = c.execute("SELECT recipient_id, status FROM cards WHERE id = ?", (card_id,)).fetchone()
+    if card and card["status"] == "ready":
+        now = timeutil.now_utc()
+        person = store.get_person(card["recipient_id"])
+        push.enqueue("ready", store.ready_line(person, now), now, ref_id=card_id, person_id=person["id"])
 
 
 async def release_due() -> list[str]:
@@ -188,4 +202,10 @@ async def scheduler(interval: float = 5.0) -> None:
                 log.info("released %s", released)
         except Exception:  # keep the loop alive; one bad card must not stop Mom's 8 AM
             log.exception("scheduler tick failed")
+        try:
+            pushed = await push.tick(timeutil.now_utc())
+            if pushed:
+                log.info("pushed %s", pushed)
+        except Exception:  # a push problem must never stop letters going out
+            log.exception("push tick failed")
         await asyncio.sleep(interval)

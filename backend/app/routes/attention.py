@@ -5,7 +5,7 @@ from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from .. import attention, db, memory, store, timeutil, voice
+from .. import attention, db, memory, push, store, timeutil, voice
 from ..auth import require_key
 
 router = APIRouter(prefix="/api", dependencies=[Depends(require_key)])
@@ -78,3 +78,29 @@ def patch_settings(body: SettingsPatch) -> dict:
         return attention.patch_settings(body.model_dump(exclude_none=True))
     except ValueError as exc:
         raise HTTPException(400, str(exc))
+
+
+class PushRegisterIn(BaseModel):
+    token: str = Field(..., min_length=10, max_length=200)  # ExponentPushToken[...]
+    platform: str = Field("", max_length=20)
+
+
+@router.post("/push/register")
+def push_register(body: PushRegisterIn) -> dict:
+    try:
+        return push.register(body.token, body.platform, timeutil.now_utc())
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+
+
+class PermissionIn(BaseModel):
+    granted: bool
+
+
+@router.post("/push/permission")
+def push_permission(body: PermissionIn) -> dict:
+    """He was asked once, at a moment that mattered. Recorded so he's never asked again."""
+    attention.record(
+        "permission_ask", timeutil.now_utc(), outcome="opened" if body.granted else "dismissed"
+    )
+    return attention.get_settings()

@@ -101,6 +101,9 @@ export type Card = {
   delivered_via: string | null;
   audio_url: string | null;
   share?: Share;
+  /** /api/home, held letters that will need his tap: when the app may remind him, and what it says. */
+  remind_at?: string;
+  remind_body?: string;
 };
 
 export type Reply = {
@@ -204,4 +207,9 @@ export const api = {
   settings: () => call<Settings>("/api/settings"),
   patchSettings: (changes: Partial<Omit<Settings, "permission_asked">>) =>
     call<Settings>("/api/settings", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(changes) }),
+
+  // Push (backend/app/push.py). The token is an ExponentPushToken[...] from a development or store build.
+  pushRegister: (token: string, platform: string) =>
+    call<{ ok: boolean; active: boolean }>("/api/push/register", post({ token, platform })),
+  pushPermission: (granted: boolean) => call<Settings>("/api/push/permission", post({ granted })),
 };

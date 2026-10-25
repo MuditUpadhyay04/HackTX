@@ -2,6 +2,7 @@ import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { api, type Home } from "./api";
+import { syncHeldLetterReminders } from "./push";
 
 /** Home data from the backend, refreshed on focus and every few seconds while focused. */
 export function useHome(pollMs = 5000) {
@@ -12,6 +13,7 @@ export function useHome(pollMs = 5000) {
   const refresh = useCallback(async () => {
     try {
       const next = await api.home();
+      void syncHeldLetterReminders(next); // local reminders for held letters when there's no push (lib/push.ts)
       if (alive.current) {
         setHome(next);
         setError(null);

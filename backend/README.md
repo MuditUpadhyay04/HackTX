@@ -32,6 +32,8 @@ Keys go in `backend/.env` (copy [`.env.example`](.env.example)). Everything is o
 | `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TEMPLATE` | Mom's 8 AM arrives by itself on WhatsApp. Without them: the app asks *"it's 8:00 AM for Mom. send it now?"* and opens WhatsApp with the link. |
 | `APP_KEY` | Locks the student app and demo controls. **Set it on any public deploy.** Open the app once with `?key=<APP_KEY>`. Card links stay public by token. |
 | `SEED_*` | The cast's phone numbers and Instagram handle (or set them later in the demo panel). |
+| `PUSH_DRY_RUN` | `1` logs pushes instead of sending them to Expo (rehearsals). |
+| `EXPO_ACCESS_TOKEN` | Only if you turn on Expo's enhanced push security. |
 
 ## Deploy (Render)
 
@@ -102,14 +104,67 @@ All `/api/*` routes except `/api/public/*` and `/api/health` need the `X-App-Key
 | `call-start` | `call_url` on the public card | `wa.me/<his number>` for WhatsApp recipients. |
 | `self-note-record` | `POST /api/self-notes` | Multipart `file` (webm/mp4/mov). |
 | (waiting on you) | `GET` via home, `POST /api/reminders`, `POST /api/reminders/{id}/done` | `handoff` opens Instagram, WhatsApp, or Messages. |
-| (demo) | `/api/demo/state`, `/clock`, `/release-due`, `/cards/{id}/release-now`, `/replies/{id}/backdate`, `/mock-reply`, `/reset` | Same key. |
+| (demo) | `/api/demo/state`, `/clock`, `/release-due`, `/cards/{id}/release-now`, `/replies/{id}/backdate`, `/mock-reply`, `/reset`, `/attention/reset` | Same key. |
+| (photo memory) | `GET /api/memory/photo?asset_id=`, `GET /api/pieces/{id}/audio` | See [Memory, knocks and push](#memory-knocks-and-push). Rants take an optional `asset_id`. |
+| (the knock) | `POST /api/knock/check`, `POST /api/knock/{id}/outcome`, `GET/PATCH /api/settings` | Almost always `{knock: false, reason}`. |
+| (push) | `POST /api/push/register`, `POST /api/push/permission` | Held cards in `/api/home` carry `remind_at` and `remind_body` when they'll need his tap. |
 
 [`docs/BACKEND_REQUESTS.md`](../docs/BACKEND_REQUESTS.md) Request 1 (photo connectors and face grouping) is **not built**. Its own notes say it can stay mock for the demo, and it isn't in Demo_Script_v2.
+
+## Memory, knocks and push
+
+Un-Said speaks rarely, and less once people are talking to each other. Everything here says no by default.
+
+**Photo memory.** When he talks on a gallery photo, the rant carries the photo's `asset_id` (JSON `asset_id` on `/api/rants/text`, form field `asset_id` on `/api/rants/audio`, `asset_id` in the live socket's `start` message). Sorting links the photo to everyone he spoke about. Nothing is learned from the pixels, only from what he said while looking at it.
+
+- `GET /api/memory/photo?asset_id=` → `{people: [{person, times, letters, kept, first_at, last_at}], previous: [his earlier lines on this photo, newest first, each with person_name and day], kept_by_person}`. The app shows these as "Said here before", in his own voice.
+- `GET /api/pieces/{id}/audio` → a WAV of his voice for one line. It exists only if that whole turn was about one person.
+- Sort groups gain `history` (`earlier_count`, `first_at`, `last_spoken_at`) and `encourage`. *"Tell them how you feel. Communication helps."* appears on at most one card, and only when:
+  - he's said things to that person before;
+  - nothing to them is held, or went out in the last 7 days;
+  - it wasn't shown for them in the last 72 h;
+  - the rant was safe.
+
+  It's decided once per rant, so sorting again doesn't change it.
+
+**The knock** (`app/attention.py`, a pure policy, tested with a moving clock). The app calls `POST /api/knock/check {asset_id, dwell_ms, zoomed, revisit, session_id}` about 3, 4 and 6 seconds into a photo. The answer is almost always `{knock: false, reason}`.
+
+| Gentle mode (the default) | |
+|---|---|
+| A photo he's talked on | after 4 s, or right away on a zoom or a second visit |
+| Any other photo | only the first knock ever, after 6 s |
+| Caps | 1 per app session, 2 a day, 3 h apart. A knock about her unheard reply may skip the 3 h gap, never the caps. |
+| Backing off | dismissed: 72 h of quiet for that person. Dismissed twice in a row: no knocks for 7 days. Opening one resets it. |
+| Safety | nothing for 24 h after a safety concern |
+| What it says | her unheard reply (*"Mom left you a voice note today."*), else body B when 2+ people reached out this week, else body A |
+
+The app reports what happened with `POST /api/knock/{id}/outcome {outcome: opened | dismissed | ignored}`. `PATCH /api/settings {knock_mode}` takes `gentle`, `off` (never), or `demo` (after 3 s, no caps, for recording). `POST /api/demo/attention/reset` clears the ledger.
+
+**Push** (`app/push.py`, through the Expo Push API). Only three things can push:
+
+| Kind | When | Says |
+|---|---|---|
+| `reply` | her reply arrives | *"Mom left you a voice note today."* |
+| `ready` | a held letter's moment comes and it needs his tap (no WhatsApp Cloud API) | *"It's 8:00 AM for Mom. Send it now?"* |
+| `drift` | At most weekly, and only when all hold: words have waited 5+ days, he's been away 3+ days, it's 6–9 PM his time, and there's been no safety concern in 7 days. Each one he doesn't open doubles the wait (1, 2, 4 weeks). | body A or B, with no sound |
+
+- **Quiet hours.** Every push waits out his quiet hours (22:30–08:00 his time, in `/api/settings`).
+- **Re-checked when due.** A reply he already heard, or a letter he already sent, is dropped.
+- **Sent once.** A token Expo reports as `DeviceNotRegistered` is never used again.
+- **Off switch.** `push_enabled: false` stops all of it.
+
+`POST /api/push/register {token, platform}` takes an `ExponentPushToken[…]`. `POST /api/push/permission {granted}` records that he was asked, so he's never asked again (`settings.permission_asked`).
+
+**Expo Go can't receive remote push** (SDK 53 and later, [Expo FAQ](https://docs.expo.dev/push-notifications/faq/)). So `mobile/src/lib/push.ts`:
+
+- Never asks at launch. It asks once, right after he holds a letter, and only if it can deliver something.
+- In Expo Go, schedules a **local** notification at each held letter's `remind_at`. The time is shifted onto the phone's clock, so the demo clock works too. The notification is cancelled if he sends or cancels the letter first.
+- In a development or store build with an EAS projectId (`npx eas-cli init`, then a dev build), registers its token, and the server sends all three kinds.
 
 ## Tests and the safety eval
 
 ```bash
-uv run pytest                        # 19 tests: sorting, time zones, safety phrases, the whole evening end to end
+uv run pytest                        # 57 tests: sorting, time zones, safety, memory, knocks, push, the whole evening end to end
 uv run python scripts/eval_safety.py # 30 fixture rants through the gate
 ```
 
@@ -119,5 +174,6 @@ Today, with the phrase layer only (no key): **9/10 concerning rants routed to re
 
 - The demo's knock appears **inside Unsaid**. A notification on top of the Photos app is the film's composite and the Round 2 ask.
 - Sarah's and Michael's replies happen in Messages and Instagram, where Unsaid can't see them.
+- In Expo Go there's no remote push: only the local reminder for a held letter. Her reply and the weekly nudge need a development build with an EAS projectId.
 - One user per deploy (the demo cast). Card links are unguessable tokens that expire in 30 days and can be revoked; they aren't identity checks.
 - Audio is sliced on turn boundaries (Voice Transcribe has no word timestamps), so pause between people when you talk.

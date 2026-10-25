@@ -10,7 +10,7 @@ import logging
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
-from .. import audio, db, store, timeutil
+from .. import audio, db, push, store, timeutil
 from ..ai import spark, transcribe
 from ..config import WEB_DIR, settings
 from ..whatsapp import digits
@@ -108,10 +108,17 @@ async def public_reply(token: str, file: UploadFile | None = File(None), text: s
         else:
             translation = "no emergency. just wanted to hear your voice. [mock caption]"
 
+    now = timeutil.now_utc()
     with db.tx() as c:
         c.execute(
             "INSERT INTO replies (id, card_id, from_person_id, audio_path, transcript, translation, created_at) "
             "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (reply_id, card["id"], recipient["id"], audio_path, transcript, translation, db.iso(timeutil.now_utc())),
+            (reply_id, card["id"], recipient["id"], audio_path, transcript, translation, db.iso(now)),
         )
+        row = c.execute("SELECT * FROM replies WHERE id = ?", (reply_id,)).fetchone()
+    # Her voice is the one thing always worth a push (held for his morning if he's asleep).
+    try:
+        push.enqueue("reply", store.reply_title(store.reply_out(row, now)), now, ref_id=reply_id, person_id=recipient["id"])
+    except Exception:  # her reply is saved; a push problem must never show her an error
+        log.exception("couldn't queue the reply push for %s", reply_id)
     return {"ok": True}

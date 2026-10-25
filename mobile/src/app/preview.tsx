@@ -9,6 +9,7 @@ import { Chip, LetterCard, NavBar, PrimaryPill, styles as ui, T, TextButton } fr
 import { api, type Piece } from "../lib/api";
 import { type App, handOff } from "../lib/handoff";
 import { uploadGalleryPhoto } from "../lib/photos";
+import { needsHisTap, useHeadsUpAsk } from "../lib/push";
 import { useHome } from "../lib/useHome";
 import { color, inset, radius, space } from "../theme/tokens";
 
@@ -28,6 +29,8 @@ export default function Preview() {
   const [hold, setHold] = useState<boolean | null>(null);
   const [sending, setSending] = useState(false);
   const [held, setHeld] = useState<string | null>(null);
+  // The one notification ask, at the moment it means something: once he's held a letter (lib/push.ts).
+  const headsUp = useHeadsUpAsk(person?.name, person && home ? needsHisTap(person, home.providers) : false);
 
   const ids = useMemo(() => (params.pieces ?? "").split(",").filter(Boolean), [params.pieces]);
   useEffect(() => {
@@ -54,7 +57,7 @@ export default function Preview() {
       const card = await api.createCard(person.id, ids, holding ? "her_morning" : "now", photoId);
       if (card.status === "held") {
         setHeld(card.release_label);
-        setTimeout(() => router.dismissTo("/home"), 1800);
+        if (!headsUp.question) setTimeout(() => router.dismissTo("/home"), 1800); // else wait for his answer
         return;
       }
       if (card.status === "released") {
@@ -91,6 +94,16 @@ export default function Preview() {
           <View style={{ alignItems: "center", gap: space.s8, marginTop: space.s24 }}>
             <T v="rowName">{`Held for ${person.name}'s morning.`}</T>
             <Chip icon="moon" label={`arrives ${held}`} />
+            {headsUp.question ? (
+              // Wiring for the one permission ask (lib/push.ts). Copy is proposed; styling is Gurneal's.
+              <View style={{ alignItems: "center", marginTop: space.s16 }}>
+                <T v="caption" style={{ textAlign: "center" }}>{headsUp.question}</T>
+                <View style={{ flexDirection: "row", gap: space.s24 }}>
+                  <TextButton label="Yes" tone="text" onPress={() => headsUp.answer(true).finally(() => router.dismissTo("/home"))} />
+                  <TextButton label="Not now" onPress={() => headsUp.answer(false).finally(() => router.dismissTo("/home"))} />
+                </View>
+              </View>
+            ) : null}
           </View>
         ) : null}
       </ScrollView>

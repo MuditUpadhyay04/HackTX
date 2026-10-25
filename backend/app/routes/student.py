@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field
 
-from .. import audio, db, delivery, memory, rants, seed, store, timeutil
+from .. import attention, audio, db, delivery, memory, rants, seed, store, timeutil
 from ..ai import transcribe
 from ..auth import require_key
 from ..config import settings
@@ -57,6 +57,17 @@ def home(request: Request) -> dict:
         reminders = c.execute("SELECT * FROM reminders WHERE done_at IS NULL ORDER BY created_at DESC").fetchall()
         notes = c.execute("SELECT * FROM self_notes ORDER BY created_at DESC").fetchall()
     card_list = [store.card_out(r, now) for r in cards]
+    for card in card_list:
+        # A held letter that will need his tap: when the app may remind him (her morning, unless
+        # that's his night) and what it says. Expo Go schedules this locally; see mobile/src/lib/push.ts.
+        if card["status"] != "held" or not card["release_at"]:
+            continue
+        person = store.get_person(card["recipient_id"])
+        if person and store.needs_his_tap(person):
+            release = db.parse_iso(card["release_at"])
+            remind = attention.his_quiet(release) or release
+            card["remind_at"] = db.iso(remind)
+            card["remind_body"] = store.ready_line(person, remind)
     reply_list = [store.reply_out(r, now) for r in replies]
     return {
         "me": store.person_out(store.me(), now),

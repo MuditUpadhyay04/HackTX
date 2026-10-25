@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from urllib.parse import quote
 
-from . import db, timeutil
+from . import db, timeutil, voice
 from .config import settings
 from .whatsapp import digits
 
@@ -183,6 +183,16 @@ def reply_title(reply: dict) -> str:
     """'Mom left you a voice note on tuesday.' Used by the Home nudge, the knock and the push."""
     kind = "a voice note" if reply["audio_url"] else "a message"
     return f"{reply['from_name']} left you {kind} {reply['day']}."
+
+
+def needs_his_tap(person: dict) -> bool:
+    """A letter to this person can't go out by itself: only WhatsApp with the Cloud API (and a number) can."""
+    return not (person["channel"] == "whatsapp" and settings.whatsapp_enabled and person["handle"])
+
+
+def ready_line(person: dict, at: datetime) -> str:
+    """'It's 8:00 AM for Mom. Send it now?' as of `at`. The ready push and the app's local reminder."""
+    return voice.READY_PUSH.format(time=timeutil.clock_label(timeutil.local(at, person["timezone"])), name=person["name"])
 
 
 def self_note_out(row) -> dict:

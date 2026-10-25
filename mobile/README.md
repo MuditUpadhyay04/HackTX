@@ -54,3 +54,7 @@ For Gurneal. They are kept as-is until he writes the real ones.
 | Talk, on a photo he's spoken on before *(proposed)* | overline "Said here before" · "{name} · {day}" under each of his lines · "Listen" / "Pause" |
 | Split, on at most one card *(proposed, Mudit's line)* | "Tell them how you feel. Communication helps." |
 | The knock, when exactly two people reached out this week *(proposed variant of Gurneal's body B)* | "{A} and {B} both reached out this week. Some things are easier to say here first." |
+| Preview, held, the one notification ask *(proposed)* | "Want a quiet heads-up when it's {name}'s morning?" (the letter will need his tap) · "Want a quiet heads-up when {name} answers?" (it goes by itself; dev builds only) · "Yes" · "Not now" |
+| Notification, a held letter's moment *(proposed)* | title "Un-Said" · "It's {time} for {name}. Send it now?" |
+| Notification, her reply | "{name} left you a voice note {day}." (the knock's reply line, reused) |
+| Android notification channel *(proposed)* | "Letters" |
