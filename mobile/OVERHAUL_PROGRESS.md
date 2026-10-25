@@ -7,7 +7,8 @@ Branch: `unsaid-overhaul`, off `main` at `c32f7ee`. Mobile only. Nothing under `
 ## Commits
 
 - App overhaul: `259c00bc8e13d5fa552f7829d4841245ed852435`
-- This handoff file is the commit on top of that SHA. `git rev-parse HEAD` on `unsaid-overhaul` after the push is the last commit.
+- Handoff document: `4cf607183f6a5a4d2fd956360d363173bce6fead`
+- The tip of `unsaid-overhaul` is the commit that added this SHA line, directly on top of `4cf6071`.
 
 Draft PR: https://github.com/MuditUpadhyay04/HackTX/pull/1
 
