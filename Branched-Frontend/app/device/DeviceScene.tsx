@@ -2,13 +2,13 @@
 
 import { useSearchParams } from "next/navigation";
 import { Stage, type StageBackground } from "@/components/stage/Stage";
-import { IPhoneDuo } from "@/components/device/IPhoneDuo";
+import { GalaxyFold } from "@/components/device/GalaxyFold";
 import { AngleSlider } from "@/components/device/AngleSlider";
 import { FoldControl } from "@/components/device/FoldControl";
 import { TestPattern } from "@/components/device/TestPattern";
 import { CoverHome, InnerHome } from "@/components/home/HomeScreen";
 import { DebugOverlay } from "@/components/device/DebugOverlay";
-import { STATE_ANGLES, isDuoState, type DuoState } from "@/lib/device/angle";
+import { STATE_ANGLES, isDeviceState, type DeviceState } from "@/lib/device/angle";
 import { useDeviceAngle, useFoldCrossfade } from "@/lib/device/fold";
 
 /** D12: the studio off-white is the default; the gradient wallpaper stage is retired on /device. */
@@ -25,7 +25,7 @@ const BACKGROUNDS: StageBackground[] = ["studio", "black", "white"];
 export function DeviceScene() {
   const params = useSearchParams();
   const rawState = params.get("state");
-  const state = isDuoState(rawState) ? rawState : "folded";
+  const state = isDeviceState(rawState) ? rawState : "folded";
   const rawBg = params.get("bg") as StageBackground | null;
   const bg = rawBg && BACKGROUNDS.includes(rawBg) ? rawBg : "studio";
   const bare = params.get("frame") === "bare";
@@ -40,8 +40,8 @@ export function DeviceScene() {
 
   // No hinge "click" ring: it read as a pop at the end of the unfold (the fold should just settle).
   const device = (openAngle: typeof angle | number) => (
-    <IPhoneDuo
-      state={state as DuoState}
+    <GalaxyFold
+      state={state as DeviceState}
       openAngle={openAngle}
       scale={scale}
       reflection={reflection}

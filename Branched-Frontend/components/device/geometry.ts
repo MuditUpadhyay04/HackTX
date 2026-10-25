@@ -1,8 +1,9 @@
 /**
- * components/device/geometry.ts: every GEOMETRY number of the iPhone Fold (docs/RULES.md D10,
- * which overrides the Phase 1 Duo geometry of CLAUDE_PROMPT.md). Measured from Gurneal's reference
- * (screenshots/reference/iphone-fold-gurneal.webp): folded 0.71 W:H, unfolded 1.42 W:H, thin even
- * band (titanium frame + black bezel), large continuous corners, punch-hole top-right.
+ * components/device/geometry.ts: every GEOMETRY number of the Samsung Galaxy Z Fold 8 (launched
+ * July 22, 2026). Scaled from Samsung's published dimensions at 6.7 px per mm: folded 81.9 x 123.9 mm
+ * (0.66 W:H), unfolded 161.4 x 123.9 mm (1.30 W:H); 5.5" 10:16 cover display, 7.6" 4:3 inner display,
+ * an even band (Armor Aluminum frame + black bezel), rounded corners, a centered punch-hole on the
+ * cover and one on the inner display's right half.
  *
  * Units: artboard px at scale 1 on the 1920x1080 stage.
  *
@@ -20,9 +21,9 @@
  * This file is a token module (allowlisted in scripts/check-tokens.ts): numbers only, no styling.
  */
 
-export type DuoSide = "left" | "right";
+export type FoldSide = "left" | "right";
 /** cover = the folded outer display; inner = the unfolded display; left / right = its halves. */
-export type DisplayId = "cover" | "inner" | DuoSide;
+export type DisplayId = "cover" | "inner" | FoldSide;
 
 export type Rect = { x: number; y: number; width: number; height: number };
 
@@ -33,17 +34,17 @@ const STAGE = { width: 1920, height: 1080, cx: 960, cy: 540 } as const;
 
 /** One half of the device. */
 const PANEL = {
-  width: 590,
+  width: 549,
   height: 830,
   /** slab thickness (z) of one half; folded the device is 2x this */
   thickness: 18,
-  /** continuous-corner radius of the outer corners (hinge-side corners are square) */
-  radius: 80,
+  /** corner radius of the outer corners (hinge-side corners are square) */
+  radius: 48,
 } as const;
 
-/** The even band around every display: titanium frame + black glass bezel. */
+/** The even band around every display: aluminum frame + black glass bezel. */
 const BAND = {
-  /** titanium frame seen from the front */
+  /** aluminum frame seen from the front */
   frame: 5,
   /** dark outer rim line of the frame */
   rim: 0.75,
@@ -52,90 +53,96 @@ const BAND = {
   /** dark line where the frame meets the glass */
   seat: 1,
   /** black bezel */
-  bezel: 8,
+  bezel: 17,
   /** frame + bezel */
-  inset: 13,
+  inset: 22,
 } as const;
 
 const DISPLAY = {
   cover: {
-    width: PANEL.width - 2 * BAND.inset, // 564
-    height: PANEL.height - 2 * BAND.inset, // 804
+    width: PANEL.width - 2 * BAND.inset, // 505
+    height: PANEL.height - 2 * BAND.inset, // 786
     radiusOuter: PANEL.radius - BAND.inset,
-    /** the cover display's corners on the hinge side */
-    radiusHinge: 10,
+    /** the cover display's corners on the hinge side (Fold 8: all four corners match) */
+    radiusHinge: PANEL.radius - BAND.inset,
   },
   inner: {
-    width: 2 * PANEL.width - 2 * BAND.inset, // 1154
-    height: PANEL.height - 2 * BAND.inset, // 804
+    width: 2 * PANEL.width - 2 * BAND.inset, // 1054
+    height: PANEL.height - 2 * BAND.inset, // 786
     radius: PANEL.radius - BAND.inset,
   },
 } as const;
 
 /**
- * Logical iOS viewports (pt). The cover display is 402 pt wide (iPhone class), rendered at
- * 564 / 402 = 1.403 px per pt; the inner display uses the same density (one pt is the same size on
- * both screens), which makes it a landscape 822.5 x 573 pt viewport.
+ * Logical Android viewports (dp). The cover display is 384 dp wide (1248 px at density 3.25),
+ * rendered at 505 / 384 = 1.315 px per dp; the inner display uses the same density (one dp is the
+ * same size on both screens), which makes it a landscape 801.5 x 597.7 dp viewport.
  */
-const VIEWPORT_SCALE = DISPLAY.cover.width / 402;
+const VIEWPORT_SCALE = DISPLAY.cover.width / 384;
 const VIEWPORT = {
   scale: VIEWPORT_SCALE,
   cover: { width: 402, height: DISPLAY.cover.height / VIEWPORT_SCALE },
   inner: { width: DISPLAY.inner.width / VIEWPORT_SCALE, height: DISPLAY.inner.height / VIEWPORT_SCALE },
 } as const;
 
-/** The cover display's front camera punch-hole, center measured from its top-right corner (D11: inner has none). */
+/**
+ * Front camera punch-holes, centers measured from the display's top-right corner: centered on the
+ * cover display; on the inner display, centered over its right half.
+ */
 const PUNCH = {
-  cover: { diameter: 30, fromRight: 50, fromTop: 50 },
+  cover: { diameter: 22, fromRight: DISPLAY.cover.width / 2, fromTop: 30 },
+  inner: { diameter: 22, fromRight: (PANEL.width - BAND.inset) / 2, fromTop: 30 },
   /** glass ring around the lens */
   ring: 2,
 } as const;
 
 const GROUP = {
-  width: 2 * PANEL.width, // 1180
+  width: 2 * PANEL.width, // 1098
   height: PANEL.height, // 830
   /** group-local x of the hinge axis */
-  hinge: PANEL.width, // 590
+  hinge: PANEL.width, // 549
   /** artboard top-left of the unfolded group when centered at (960, 540) */
-  left: STAGE.cx - PANEL.width, // 370
+  left: STAGE.cx - PANEL.width, // 411
   top: STAGE.cy - PANEL.height / 2, // 125
   /** translateX folded (the right half centered on the stage); 0 unfolded */
-  foldedShift: -PANEL.width / 2, // -295
+  foldedShift: -PANEL.width / 2, // -274.5
   perspective: 4200,
 } as const;
 
 /** The hinge spine: a half cylinder of radius PANEL.thickness, built from flat facets. */
 const SPINE = { facets: 14, radius: PANEL.thickness } as const;
 
-/** Camera plateau on the right half's back (back-local coordinates: as seen from behind). */
+/**
+ * The rear cameras on the right half's back (back-local coordinates: as seen from behind): Fold 8's
+ * two "floating" lens rings stacked vertically near the outer top corner (50 MP wide over 50 MP
+ * ultra-wide), with the flash and mic beside them. The plateau box itself is not drawn.
+ */
 const PLATEAU = {
-  x: 26,
-  y: 26,
-  width: 238,
-  height: 128,
-  radius: 46,
+  x: 30,
+  y: 30,
+  width: 150,
+  height: 196,
+  radius: 0,
   raise: 3,
-  lens: { ring: 92, glass: 76, centers: [[64, 64], [174, 64]] as const },
-  lensReflection: { width: 20, height: 11 },
-  lensSpecular: 6,
-  flash: { diameter: 18, center: [218, 34] as const },
-  mic: { diameter: 5, center: [219, 98] as const },
+  lens: { ring: 84, glass: 66, centers: [[46, 46], [46, 150]] as const },
+  lensReflection: { width: 18, height: 10 },
+  lensSpecular: 5,
+  flash: { diameter: 16, center: [118, 40] as const },
+  mic: { diameter: 5, center: [118, 76] as const },
 } as const;
 
-/** Side buttons, on the right half's top edge (iPad-mini style), x from the outer edge. */
+/**
+ * Side keys, all on the right half's outer (right) edge, measured from the top: the volume rocker
+ * (drawn as one key, two hit areas) above the side key with its fingerprint sensor. Nothing else.
+ */
 const BUTTONS = {
   /** depth across the thickness and protrusion out of the edge */
   depth: 7,
   protrude: 2.4,
   radius: 3,
-  // As shipped (iPhone Duo, launched 2026-10-23): volume buttons on the top edge; the Touch ID side
-  // button and Camera Control on the right side; no Action button, nothing on the left.
-  /** top edge, measured from the right (outer) end */
-  volumeUp: { fromOuter: 96, length: 56 },
-  volumeDown: { fromOuter: 164, length: 56 },
-  /** right side edge, measured from the top */
-  power: { fromTop: 150, length: 84 },
-  camera: { fromTop: 560, length: 56 },
+  volumeUp: { fromTop: 200, length: 60 },
+  volumeDown: { fromTop: 260, length: 60 },
+  power: { fromTop: 360, length: 76 },
 } as const;
 
 /** z offsets (px) of layers that must never share a plane with a face. */
@@ -182,7 +189,7 @@ const SQUARE: CornerRadii = { tl: 0, tr: 0, br: 0, bl: 0 };
  * Outline radii of one half. `view` "front" = seen from the front (hinge on the right for the left
  * half); "back" = seen from behind (left-right mirrored: hinge on the left for the left half).
  */
-function halfRadii(side: DuoSide, view: "front" | "back", r: number, hinge = 0): CornerRadii {
+function halfRadii(side: FoldSide, view: "front" | "back", r: number, hinge = 0): CornerRadii {
   const hingeOnRight = (side === "left") === (view === "front");
   return hingeOnRight ? { tl: r, tr: hinge, br: hinge, bl: r } : { tl: hinge, tr: r, br: r, bl: hinge };
 }
@@ -304,49 +311,30 @@ export function displayRect(display: DisplayId, openAngle: number, opts: Display
 /** Artboard coordinates of the main parts (scale 1), for the ?debug=1 overlay and tests. */
 export const ARTBOARD = {
   unfolded: {
-    group: { x: 370, y: 125, width: 1180, height: 830 },
-    leftHalf: { x: 370, y: 125, width: 590, height: 830 },
-    rightHalf: { x: 960, y: 125, width: 590, height: 830 },
-    inner: { x: 383, y: 138, width: 1154, height: 804 },
+    group: { x: 411, y: 125, width: 1098, height: 830 },
+    leftHalf: { x: 411, y: 125, width: 549, height: 830 },
+    rightHalf: { x: 960, y: 125, width: 549, height: 830 },
+    inner: { x: 433, y: 147, width: 1054, height: 786 },
   },
   folded: {
-    device: { x: 665, y: 125, width: 590, height: 830 },
-    cover: { x: 678, y: 138, width: 564, height: 804 },
+    device: { x: 685.5, y: 125, width: 549, height: 830 },
+    cover: { x: 707.5, y: 147, width: 505, height: 786 },
   },
 } as const satisfies Record<string, Record<string, Rect>>;
 
 // ---------------------------------------------------------------------------
-// Continuous ("squircle") corners with per-corner radii
+// Rounded corners with per-corner radii (circular arcs, the Fold 8's corner shape)
 // ---------------------------------------------------------------------------
 
-/**
- * Apple's continuous-corner coefficients (the same curve as lib/squircle.ts, multiples of r):
- * each corner is three cubics starting 1.528 r from the corner.
- */
-const K = {
-  start: 1.52866483,
-  c1: 1.08849323,
-  c2: 0.86840689,
-  p1x: 0.66993427,
-  p1y: 0.065496,
-  p2x: 0.63149399,
-  p2y: 0.074911,
-  c3x: 0.37282392,
-  c3y: 0.16905899,
-  c4x: 0.16906013,
-  c4y: 0.37282401,
-  p3x: 0.07491176,
-  p3y: 0.63149399,
-  c5: 0.86840701,
-  c6: 1.08849299,
-} as const;
+/** Cubic control distance for a quarter circle (1 - 0.5523). */
+const CIRCLE = 1 - 0.5522847498;
 
 type Pt = { x: number; y: number };
 type Seg = { kind: "L"; to: Pt } | { kind: "C"; c1: Pt; c2: Pt; to: Pt };
 
 /** The outline as a start point and segments, clockwise on screen (top edge left -> right). */
 function outlineSegments(x: number, y: number, w: number, h: number, r: CornerRadii): { start: Pt; segs: Seg[] } {
-  const clampR = (v: number) => Math.max(0, Math.min(v, Math.min(w, h) / 2 / K.start));
+  const clampR = (v: number) => Math.max(0, Math.min(v, Math.min(w, h) / 2));
   const R = { tl: clampR(r.tl), tr: clampR(r.tr), br: clampR(r.br), bl: clampR(r.bl) };
   type Map = (a: number, b: number) => Pt;
   const segs: Seg[] = [];
@@ -356,17 +344,14 @@ function outlineSegments(x: number, y: number, w: number, h: number, r: CornerRa
       return;
     }
     const p = (a: number, b: number) => m(a * rr, b * rr);
-    segs.push({ kind: "C", c1: p(K.c1, 0), c2: p(K.c2, 0), to: p(K.p1x, K.p1y) });
-    segs.push({ kind: "L", to: p(K.p2x, K.p2y) });
-    segs.push({ kind: "C", c1: p(K.c3x, K.c3y), c2: p(K.c4x, K.c4y), to: p(K.p3x, K.p3y) });
-    segs.push({ kind: "C", c1: p(0, K.c5), c2: p(0, K.c6), to: p(0, K.start) });
+    segs.push({ kind: "C", c1: p(CIRCLE, 0), c2: p(0, CIRCLE), to: p(0, 1) });
   };
   // a = distance from the corner along the incoming edge, b = along the outgoing edge (inward)
   const topRight: Map = (a, b) => ({ x: x + w - a, y: y + b });
   const bottomRight: Map = (a, b) => ({ x: x + w - b, y: y + h - a });
   const bottomLeft: Map = (a, b) => ({ x: x + a, y: y + h - b });
   const topLeft: Map = (a, b) => ({ x: x + b, y: y + a });
-  const s = (v: number) => K.start * v;
+  const s = (v: number) => v;
   const start = { x: x + s(R.tl), y };
   segs.push({ kind: "L", to: { x: x + w - s(R.tr), y } });
   corner(R.tr, topRight);
@@ -424,9 +409,9 @@ export function circlePath(cx: number, cy: number, radius: number): string {
   return `M${f2(cx - radius)} ${f2(cy)} A${radius} ${radius} 0 1 0 ${f2(cx + radius)} ${f2(cy)} A${radius} ${radius} 0 1 0 ${f2(cx - radius)} ${f2(cy)} Z`;
 }
 
-/** Display-local center of the cover punch-hole on a display `width` wide. */
-export function punchCenter(width: number): Pt {
-  const p = PUNCH.cover;
+/** Display-local center of a display's punch-hole on a display `width` wide. */
+export function punchCenter(width: number, display: "cover" | "inner" = "cover"): Pt {
+  const p = PUNCH[display];
   return { x: width - p.fromRight, y: p.fromTop };
 }
 

@@ -142,7 +142,7 @@ function Event({ title, time, bar }: { title: string; time?: string; bar: string
       <span style={{ width: WIDGET.eventBar, borderRadius: radius[2], background: bar, flexShrink: 0 }} />
       <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
         <span style={{ ...text(t.caption1, emphasizedWeight), overflow: "hidden", textOverflow: "ellipsis" }}>{title}</span>
-        {time ? <span style={{ ...text(t.caption2), color: "var(--ios-label-secondary)" }}>{time}</span> : null}
+        {time ? <span style={{ ...text(t.caption2), color: "var(--ui-label-secondary)" }}>{time}</span> : null}
       </span>
     </span>
   );
@@ -150,8 +150,8 @@ function Event({ title, time, bar }: { title: string; time?: string; bar: string
 
 export function CalendarWidget({ rect }: { rect: Rect }) {
   return (
-    <WidgetFrame id="calendar" name="Calendar" rect={rect} background="var(--widget-calendar-bg)" color="var(--ios-label)">
-      <span style={{ ...text(t.caption2, emphasizedWeight), color: "var(--ios-red)", letterSpacing: t.caption2.size / 20 }}>SATURDAY</span>
+    <WidgetFrame id="calendar" name="Calendar" rect={rect} background="var(--widget-calendar-bg)" color="var(--ui-label)">
+      <span style={{ ...text(t.caption2, emphasizedWeight), color: "var(--ui-red)", letterSpacing: t.caption2.size / 20 }}>SATURDAY</span>
       <span style={{ ...text(t.largeTitle, 400), marginTop: -t.caption2.size / 4 }}>24</span>
       <span style={{ flex: 1 }} />
       <span style={{ display: "flex", flexDirection: "column", gap: t.caption2.size / 2 }}>
@@ -178,7 +178,7 @@ export function PhotosWidget({ rect }: { rect: Rect }) {
     >
       <span
         aria-hidden="true"
-        style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: rect.h / 2, background: "linear-gradient(180deg, transparent 0%, var(--ios-scrim) 100%)" }}
+        style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: rect.h / 2, background: "linear-gradient(180deg, transparent 0%, var(--ui-scrim) 100%)" }}
       />
       <span style={{ flex: 1 }} />
       <span style={{ position: "relative", display: "flex", flexDirection: "column" }}>
@@ -235,7 +235,7 @@ function Reminder({ title, done }: { title: string; done?: boolean }) {
 /** iOS Reminders (medium, unfolded home only): today's list. */
 export function RemindersWidget({ rect }: { rect: Rect }) {
   return (
-    <WidgetFrame id="reminders" name="Reminders" rect={rect} background="var(--widget-calendar-bg)" color="var(--ios-label)">
+    <WidgetFrame id="reminders" name="Reminders" rect={rect} background="var(--widget-calendar-bg)" color="var(--ui-label)">
       <span style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
         <span style={{ ...text(t.footnote, emphasizedWeight), color: "var(--widget-reminders-accent)" }}>Today</span>
         <span style={{ ...text(t.title2, 600), color: "var(--widget-reminders-accent)" }}>3</span>

@@ -34,11 +34,11 @@ export function KeyPop({ label, keyWidth, keyHeight }: { label: string; keyWidth
         height: ph,
         pointerEvents: "none",
         zIndex: 5,
-        filter: "drop-shadow(0 var(--hairline) 0 var(--ios-separator)) drop-shadow(0 var(--space-2) var(--space-4) var(--ios-scrim))",
+        filter: "drop-shadow(0 var(--hairline) 0 var(--ui-separator)) drop-shadow(0 var(--space-2) var(--space-4) var(--ui-scrim))",
       }}
     >
       <svg width={pw} height={ph} viewBox={`0 0 ${pw} ${ph}`} style={{ position: "absolute", inset: 0 }}>
-        <path d={d} fill="var(--ios-kb-key)" />
+        <path d={d} fill="var(--ui-kb-key)" />
       </svg>
       <span
         style={{

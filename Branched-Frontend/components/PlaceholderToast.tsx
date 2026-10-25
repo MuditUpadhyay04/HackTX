@@ -35,7 +35,7 @@ const PILL_BASE: CSSProperties = {
 
 /**
  * Host apps get an iOS HUD: a compact pill in the light banner material
- * (ios-banner at 78% + blur 30 + saturate 1.8, spec 4.2), system font 15 semibold.
+ * (ui-banner at 78% + blur 30 + saturate 1.8, spec 4.2), system font 15 semibold.
  */
 const PILL_HOST: CSSProperties = {
   ...PILL_BASE,
@@ -44,7 +44,7 @@ const PILL_HOST: CSSProperties = {
   WebkitBackdropFilter: "var(--material-light-filter)",
   backdropFilter: "var(--material-light-filter)",
   boxShadow: "var(--shadow-hud)",
-  color: "var(--ios-label)",
+  color: "var(--ui-label)",
   font: "var(--type-subheadline-semibold)",
 };
 

@@ -1,6 +1,6 @@
 /**
  * lib/keyboard/layout.ts: the iOS keyboard look-alike's layouts (Phase 2 CHROME SPECS + INTERACTIVE
- * MESSAGING: QWERTY, shift, 123, emoji). Keys are drawn by components/ios/Keyboard.tsx.
+ * MESSAGING: QWERTY, shift, 123, emoji). Keys are drawn by components/system/Keyboard.tsx.
  */
 
 export type KeyKind = "char" | "shift" | "delete" | "mode" | "space" | "return";

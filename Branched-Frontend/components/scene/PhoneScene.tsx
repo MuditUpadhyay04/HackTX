@@ -3,9 +3,9 @@
 import { useEffect, useLayoutEffect, type ReactNode } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Stage, type StageBackground } from "@/components/stage/Stage";
-import { IPhoneDuo } from "@/components/device/IPhoneDuo";
-import { PhoneScreen } from "@/components/ios/PhoneScreen";
-import type { StaticBanner } from "@/components/ios/BannerHost";
+import { GalaxyFold } from "@/components/device/GalaxyFold";
+import { PhoneScreen } from "@/components/system/PhoneScreen";
+import type { StaticBanner } from "@/components/system/BannerHost";
 import { configureClock } from "@/lib/mock/clock";
 import { useFlags } from "@/lib/flags";
 import { BANNERS, QUICK_REPLIES, type BannerId } from "@/lib/mock/threads";
@@ -75,7 +75,7 @@ export function PhoneScene({ children, statusTone = "dark", indicatorTone, indic
 
   return (
     <Stage background={bg} data-scene="phone">
-      <IPhoneDuo
+      <GalaxyFold
         state={off ? "folded-off" : "folded"}
         cover={
           off ? undefined : (

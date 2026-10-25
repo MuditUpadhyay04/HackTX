@@ -3,7 +3,7 @@
 import { useFlags } from "@/lib/flags";
 
 /** Spec Phase 0, rule 5: word for word. */
-export const CONCEPT_LABEL = "concept mock · not affiliated with Apple or Meta";
+export const CONCEPT_LABEL = "concept mock · not affiliated with Samsung, Google or Meta";
 
 /**
  * The concept label, fixed to the window's bottom-left corner (outside the
@@ -28,7 +28,7 @@ export function ConceptLabel() {
         font: "var(--type-caption-2)",
         letterSpacing: "var(--type-caption-2-tracking)",
         // Low contrast on the dark stages, still legible on the white test stage.
-        color: "var(--ios-gray)",
+        color: "var(--ui-gray)",
       }}
     >
       {CONCEPT_LABEL}

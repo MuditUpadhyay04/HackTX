@@ -89,8 +89,8 @@ function pressStyle(
   active: boolean,
   reduced: boolean,
 ): CSSProperties {
-  // Section 4.4: press is 120 ms on ease-ios (--motion-press, --ease-ios).
-  const transition = "var(--motion-press) var(--ease-ios)";
+  // Section 4.4: press is 120 ms on ease-std (--motion-press, --ease-std).
+  const transition = "var(--motion-press) var(--ease-std)";
   // Reduced motion: no scale; the press reads as the darken instead.
   if (press === "darken" || reduced) {
     return {

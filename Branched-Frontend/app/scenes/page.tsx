@@ -7,9 +7,9 @@ import { size } from "@/lib/tokens";
  */
 const color = {
   label: "var(--label-on-dark)",
-  secondary: "var(--ios-gray)",
-  cell: "var(--ios-dark-fill)",
-  separator: "var(--ios-dark-separator)",
+  secondary: "var(--ui-gray)",
+  cell: "var(--ui-dark-fill)",
+  separator: "var(--ui-dark-separator)",
 } as const;
 
 function Chevron() {

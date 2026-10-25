@@ -3,7 +3,7 @@
  *
  *   useFold()          { folded, moving, fold(), unfold(), toggle(), jump(), setAngle(a) }
  *   useDeviceAngle()   the live openAngle as a MotionValue<number>: pass it straight to
- *                      <IPhoneDuo openAngle={...}>; it animates at 60 fps without re-rendering React.
+ *                      <GalaxyFold openAngle={...}>; it animates at 60 fps without re-rendering React.
  *   useFoldCrossfade() the reduced-motion crossfade the page renders (null when none).
  *   useFoldKeys()      F toggles, Shift+F jumps (ignored in text fields and while an app's keyboard is up).
  *                      FoldControl calls it.
@@ -236,7 +236,7 @@ export function useFold(): UseFold {
 }
 
 /**
- * The live openAngle MotionValue for <IPhoneDuo openAngle={useDeviceAngle(initial)}>.
+ * The live openAngle MotionValue for <GalaxyFold openAngle={useDeviceAngle(initial)}>.
  * `initialAngle` (e.g. STATE_ANGLES[state] from ?state=) is applied on mount and whenever it changes.
  * On the server it returns a fresh MotionValue at `initialAngle` so SSR matches the first client frame.
  */
@@ -274,7 +274,7 @@ function isTextField(target: EventTarget | null): boolean {
 }
 
 /**
- * An app's iOS keyboard (components/ios/Keyboard.tsx, [data-keyboard]) is up and live: typed keys
+ * An app's iOS keyboard (components/system/Keyboard.tsx, [data-keyboard]) is up and live: typed keys
  * go to its composer, so F must type an "f" instead of folding the phone. Inert copies on the
  * moving halves and hidden hosts don't count.
  */

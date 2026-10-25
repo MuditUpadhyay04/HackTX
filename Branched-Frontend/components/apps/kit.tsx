@@ -57,7 +57,7 @@ export function AppFrame({
           overflow: "hidden",
           fontFamily: "var(--font-system)",
           WebkitFontSmoothing: "antialiased",
-          color: tone === "dark" ? "var(--ios-label)" : "var(--label-on-dark)",
+          color: tone === "dark" ? "var(--ui-label)" : "var(--label-on-dark)",
         }}
       >
         {children}
@@ -79,7 +79,7 @@ export function PaneBox({ width, left = 0, children, style }: { width: number; l
 }
 
 /** List left, detail right, a hairline between (the inner display only). */
-export function Split({ list, detail, divider = "var(--ios-separator)" }: { list: ReactNode; detail: ReactNode; divider?: string }) {
+export function Split({ list, detail, divider = "var(--ui-separator)" }: { list: ReactNode; detail: ReactNode; divider?: string }) {
   const { width } = usePane();
   return (
     <>
@@ -151,7 +151,7 @@ export function StackView<R>({ stack, keyOf, render }: { stack: Stack<R>; keyOf:
               position: "absolute",
               inset: 0,
               zIndex: i,
-              boxShadow: isTop && i > 0 ? "-6px 0 18px var(--ios-push-shadow)" : undefined,
+              boxShadow: isTop && i > 0 ? "-6px 0 18px var(--ui-push-shadow)" : undefined,
               pointerEvents: isTop ? "auto" : "none",
             }}
           >

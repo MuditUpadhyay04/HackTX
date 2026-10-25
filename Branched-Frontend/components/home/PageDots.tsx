@@ -1,6 +1,6 @@
 import { DOTS, HOME_LAYOUT, type HomeDisplay } from "./layout";
 
-/** Page dots, bottom-center (spec: 2 dots, 7 pt, active white, inactive white at 40%). */
+/** One UI page indicator, centered just above the dock: 2 dots, active white, inactive faint. */
 export function PageDots({ display, pages = 2, active = 0 }: { display: HomeDisplay; pages?: number; active?: number }) {
   const L = HOME_LAYOUT[display];
   const width = pages * DOTS.size + (pages - 1) * DOTS.gap;
@@ -11,7 +11,7 @@ export function PageDots({ display, pages = 2, active = 0 }: { display: HomeDisp
       style={{
         position: "absolute",
         left: L.dotsX - width / 2,
-        top: L.height - DOTS.bottom - DOTS.size,
+        top: L.dockY - DOTS.aboveDock - DOTS.size,
         display: "flex",
         gap: DOTS.gap,
         pointerEvents: "none",

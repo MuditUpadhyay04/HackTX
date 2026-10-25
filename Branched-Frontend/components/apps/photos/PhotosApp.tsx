@@ -63,7 +63,7 @@ export function PhotosApp({ display }: AppScreenProps) {
   const setOpen = (i: number | null) => stack.reset([{ photo: i }]);
   const [liked, setLiked] = useState<Record<string, boolean>>({ "sunrise-290": true });
   return (
-    <AppFrame display={display} background="var(--ios-bg)">
+    <AppFrame display={display} background="var(--ui-bg)">
       <Grid onOpen={setOpen} />
       <AnimatePresence>
         {open !== null ? (
@@ -100,7 +100,7 @@ function Grid({ onOpen }: { onOpen: (i: number) => void }) {
             </Tap>
           ))}
         </div>
-        <div style={{ textAlign: "center", fontSize: 13, color: "var(--ios-label-secondary)", padding: "14px 0 6px" }}>{LIBRARY.length} Photos</div>
+        <div style={{ textAlign: "center", fontSize: 13, color: "var(--ui-label-secondary)", padding: "14px 0 6px" }}>{LIBRARY.length} Photos</div>
       </div>
       {/* the frosted title area over the grid */}
       <div
@@ -117,11 +117,11 @@ function Grid({ onOpen }: { onOpen: (i: number) => void }) {
       <div style={{ position: "absolute", left: 16, right: 16, top: TOP + 6, display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
         <div>
           <div style={{ fontSize: 34, fontWeight: 700, letterSpacing: 0.37, lineHeight: "41px" }}>Photos</div>
-          <div style={{ fontSize: 15, color: "var(--ios-label-secondary)", marginTop: 2 }}>{lastDay}</div>
+          <div style={{ fontSize: 15, color: "var(--ui-label-secondary)", marginTop: 2 }}>{lastDay}</div>
         </div>
         <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
-          <Tap style={{ height: 32, paddingInline: 14, borderRadius: 16, background: "var(--ios-fill-tertiary)", fontSize: 15, fontWeight: 600, display: "flex", alignItems: "center" }}>Select</Tap>
-          <Tap label="Search" style={{ width: 32, height: 32, borderRadius: 16, background: "var(--ios-fill-tertiary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Tap style={{ height: 32, paddingInline: 14, borderRadius: 16, background: "var(--ui-fill-tertiary)", fontSize: 15, fontWeight: 600, display: "flex", alignItems: "center" }}>Select</Tap>
+          <Tap label="Search" style={{ width: 32, height: 32, borderRadius: 16, background: "var(--ui-fill-tertiary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <svg width={16} height={16} viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" strokeWidth="2.4" />
               <path d="m15.5 15.5 4.5 4.5" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
@@ -131,11 +131,11 @@ function Grid({ onOpen }: { onOpen: (i: number) => void }) {
       </div>
       {/* Years / Months / All segmented control (iOS 18) */}
       <div style={{ position: "absolute", left: 0, right: 0, bottom: 34, display: "flex", justifyContent: "center" }}>
-        <div style={{ display: "flex", padding: 3, borderRadius: 20, background: "var(--photos-segment-bg)", backdropFilter: "var(--material-light-filter)", WebkitBackdropFilter: "var(--material-light-filter)", boxShadow: "0 2px 10px var(--ios-push-shadow)" }}>
+        <div style={{ display: "flex", padding: 3, borderRadius: 20, background: "var(--photos-segment-bg)", backdropFilter: "var(--material-light-filter)", WebkitBackdropFilter: "var(--material-light-filter)", boxShadow: "0 2px 10px var(--ui-push-shadow)" }}>
           {["Years", "Months", "All"].map((s) => (
             <span
               key={s}
-              style={{ height: 30, paddingInline: 16, borderRadius: 16, display: "flex", alignItems: "center", fontSize: 14, fontWeight: 600, background: s === "All" ? "var(--ios-bg)" : undefined, boxShadow: s === "All" ? "0 1px 4px var(--ios-push-shadow)" : undefined }}
+              style={{ height: 30, paddingInline: 16, borderRadius: 16, display: "flex", alignItems: "center", fontSize: 14, fontWeight: 600, background: s === "All" ? "var(--ui-bg)" : undefined, boxShadow: s === "All" ? "0 1px 4px var(--ui-push-shadow)" : undefined }}
             >
               {s}
             </span>
@@ -162,14 +162,14 @@ function Viewer({
   const p = LIBRARY[index];
   const d = dateLabel(p.at);
   const fav = !!liked[p.id];
-  const tool = { width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--ios-blue)" } as const;
+  const tool = { width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--ui-blue)" } as const;
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      style={{ position: "absolute", inset: 0, zIndex: 20, background: "var(--ios-bg)" }}
+      style={{ position: "absolute", inset: 0, zIndex: 20, background: "var(--ui-bg)" }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src(p.id)} alt="" draggable={false} style={{ position: "absolute", left: 0, right: 0, top: TOP + 44, bottom: 88, width: "100%", height: `calc(100% - ${TOP + 44 + 88}px)`, objectFit: "contain" }} />
@@ -182,16 +182,16 @@ function Viewer({
         style={{ position: "absolute", right: 0, top: TOP + 44, bottom: 88, width: "33%", background: "none", border: 0, cursor: "pointer" }}
       />
       <div style={{ position: "absolute", left: 0, right: 0, top: TOP, height: 44, display: "flex", alignItems: "center", paddingInline: 12 }}>
-        <Tap label="Back" onPress={onClose} style={{ display: "flex", color: "var(--ios-blue)", width: 60 }}>
+        <Tap label="Back" onPress={onClose} style={{ display: "flex", color: "var(--ui-blue)", width: 60 }}>
           <svg width={12} height={21} viewBox="0 0 12 21" aria-hidden="true">
             <path d="M10 2 2 10.5 10 19" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </Tap>
         <div style={{ flex: 1, textAlign: "center", lineHeight: "17px" }}>
           <div style={{ fontSize: 15, fontWeight: 600 }}>{d.day}</div>
-          <div style={{ fontSize: 12, color: "var(--ios-label-secondary)" }}>{d.time}</div>
+          <div style={{ fontSize: 12, color: "var(--ui-label-secondary)" }}>{d.time}</div>
         </div>
-        <span style={{ width: 60, textAlign: "right", fontSize: 17, color: "var(--ios-blue)" }}>Edit</span>
+        <span style={{ width: 60, textAlign: "right", fontSize: 17, color: "var(--ui-blue)" }}>Edit</span>
       </div>
       <div style={{ position: "absolute", left: 0, right: 0, bottom: 30, height: 50, display: "flex", alignItems: "center", justifyContent: "space-around", paddingInline: 10 }}>
         <Tap label="Share" style={tool}>

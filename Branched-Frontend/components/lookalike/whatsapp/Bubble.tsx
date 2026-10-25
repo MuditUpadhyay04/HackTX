@@ -20,7 +20,7 @@ function Tail({ mine }: { mine: boolean }) {
         top: 0,
         [mine ? "right" : "left"]: -width + 0.5,
         transform: mine ? "scaleX(-1)" : undefined,
-        filter: "drop-shadow(0 var(--hairline) 0 var(--ios-separator))",
+        filter: "drop-shadow(0 var(--hairline) 0 var(--ui-separator))",
       }}
     >
       <path d="M8 0H1.6C.4 0-.3 1.3.4 2.3L8 13V0Z" fill={mine ? "var(--wa-bubble-out)" : "var(--wa-bubble-in)"} />
@@ -94,7 +94,7 @@ export function Bubble({ mine, tail, time, receipt, children, media, width }: Bu
           borderTopRightRadius: tail && mine ? 0 : WA.bubbleRadius,
           boxShadow: "var(--shadow-wa-bubble)",
           padding: media ? WA.photo.inset : `${WA.bubblePadTop}px ${WA.bubblePadX}px ${WA.bubblePadBottom}px`,
-          color: "var(--ios-label)",
+          color: "var(--ui-label)",
           fontSize: WA.bubbleText,
           lineHeight: `${WA.bubbleLine}px`,
           letterSpacing: "var(--type-body-tracking)",

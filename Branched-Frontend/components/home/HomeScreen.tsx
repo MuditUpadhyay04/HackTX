@@ -1,14 +1,13 @@
 "use client";
 
-import { AppIcon } from "@/components/ios/AppIcon";
-import { StatusBar } from "@/components/ios/StatusBar";
+import { AppIcon } from "@/components/system/AppIcon";
+import { StatusBar } from "@/components/system/StatusBar";
 import { HomeDisplayContext } from "@/lib/apps/useOpenApp";
 import { AppHost } from "./AppHost";
 import { Dock } from "./Dock";
 import { HomeWallpaper } from "./HomeWallpaper";
-import { GRID_APPS, HOME_LAYOUT, iconRectPt, type HomeAppId, type HomeDisplay } from "./layout";
+import { GRID_APPS, HOME_INDICATOR, HOME_LAYOUT, iconRectPt, type HomeAppId, type HomeDisplay } from "./layout";
 import { PageDots } from "./PageDots";
-import { SearchPill } from "./SearchPill";
 import { CalendarWidget, MusicWidget, PhotosWidget, RemindersWidget, WeatherWidget } from "./Widgets";
 
 export type HomeScreenProps = {
@@ -18,10 +17,9 @@ export type HomeScreenProps = {
 };
 
 /**
- * One iOS home screen filling a display's pt viewport (GEOM.viewport.cover / .inner):
- * wallpaper, status bar, Weather + Calendar widgets, the icon grid, the vertical dock on the right
- * edge, the Search button bottom-right and the page dots. No home indicator (iOS hides it on the home
- * screen). Layout: components/home/layout.ts.
+ * One One UI home screen filling a display's dp viewport (GEOM.viewport.cover / .inner): wallpaper,
+ * status bar, widgets, the icon grid, the page indicator, the dock along the bottom and the gesture
+ * handle. Layout: components/home/layout.ts.
  */
 export function HomeScreen({ display, pressed }: HomeScreenProps) {
   const L = HOME_LAYOUT[display];
@@ -53,21 +51,41 @@ export function HomeScreen({ display, pressed }: HomeScreenProps) {
           return r ? <AppIcon key={app} app={app} x={r.x} y={r.y} pressed={pressed === app} /> : null;
         })}
         <Dock display={display} />
-        <SearchPill display={display} />
         <PageDots display={display} />
-        <StatusBar display={display} tone="light" />
+        <StatusBar width={L.width} tone="light" />
+        <GestureHandle width={L.width} />
         <AppHost display={display} />
       </div>
     </HomeDisplayContext.Provider>
   );
 }
 
-/** The folded cover display's home (iPhone layout). */
+/** The One UI gesture handle at the bottom of the home screen. */
+function GestureHandle({ width }: { width: number }) {
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        position: "absolute",
+        left: (width - HOME_INDICATOR.width) / 2,
+        bottom: HOME_INDICATOR.bottom,
+        width: HOME_INDICATOR.width,
+        height: HOME_INDICATOR.height,
+        borderRadius: HOME_INDICATOR.radius,
+        background: "var(--label-on-dark)",
+        opacity: 0.8,
+        pointerEvents: "none",
+      }}
+    />
+  );
+}
+
+/** The folded cover display's home (the phone launcher). */
 export function CoverHome(props: Omit<HomeScreenProps, "display">) {
   return <HomeScreen display="cover" {...props} />;
 }
 
-/** The unfolded inner display's home (D8: one continuous iPadOS-style home across both halves). */
+/** The unfolded inner display's home (one home across both halves). */
 export function InnerHome(props: Omit<HomeScreenProps, "display">) {
   return <HomeScreen display="inner" {...props} />;
 }

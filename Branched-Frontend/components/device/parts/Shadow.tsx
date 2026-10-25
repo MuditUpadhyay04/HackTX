@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useTransform, type MotionValue } from "framer-motion";
-import { GEOM, cornerRadiusCss, groupShift, silhouetteLeft, type DuoSide } from "../geometry";
+import { GEOM, cornerRadiusCss, groupShift, silhouetteLeft, type FoldSide } from "../geometry";
 
 /**
  * Stage-aware selection for shadow="auto": on the black stage a rim light, on the wallpaper /
@@ -26,7 +26,7 @@ const SEAM_CLOSE_FROM = 150;
  * half, which already casts). Both hinge sides close as the device flattens, so the two shadows
  * meet at the hinge with no seam.
  */
-export function HalfShadow({ side, angle }: { side: DuoSide; angle: MotionValue<number> }) {
+export function HalfShadow({ side, angle }: { side: FoldSide; angle: MotionValue<number> }) {
   const { width, height, radius } = GEOM.panel;
   const m = GEOM.shadow.spread;
   const r = GEOM.halfRadii(side, "front", radius);
@@ -83,7 +83,7 @@ export function ContactShadow({ angle }: { angle: MotionValue<number> }) {
       <motion.div
         aria-hidden="true"
         data-duo-drop=""
-        data-duo-part="contact-shadow"
+        data-fold-part="contact-shadow"
         style={{
           position: "absolute",
           left: 0,

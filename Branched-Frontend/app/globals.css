@@ -1,6 +1,12 @@
 @import "tailwindcss";
 @import "./unsaid-theme.css";
 @import "./tokens.css";
+@import "./theme-whatsapp.css";
+@import "./theme-messages.css";
+@import "./theme-instagram.css";
+@import "./theme-gallery.css";
+@import "./theme-phone.css";
+@import "./theme-keyboard.css";
 
 * {
   -webkit-tap-highlight-color: transparent;
@@ -33,7 +39,7 @@ button {
   outline: none;
 }
 [data-fold-control]:focus-visible {
-  outline: var(--size-focus-ring) solid var(--ios-blue);
+  outline: var(--size-focus-ring) solid var(--ui-blue);
   outline-offset: var(--size-focus-ring);
 }
 

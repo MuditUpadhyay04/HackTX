@@ -68,7 +68,7 @@ export type FaceProps = {
   innerRadii?: CornerRadii;
   /** the display (or glass) contents, laid out in the display box */
   children?: ReactNode;
-  /** data-duo-part label */
+  /** data-fold-part label */
   part: string;
   style?: CSSProperties;
 };
@@ -92,7 +92,7 @@ export function Face({ width, height, radii, sides, variant, innerRadii, childre
   if (innerRadii) content.radii = innerRadii;
   return (
     <div
-      data-duo-part={part}
+      data-fold-part={part}
       style={{
         position: "absolute",
         left: 0,

@@ -1,4 +1,4 @@
-import { GEOM, continuousRectPoints, type DuoSide } from "../geometry";
+import { GEOM, continuousRectPoints, type FoldSide } from "../geometry";
 import { HIDDEN_BACKFACE } from "./Face";
 
 /** Overlap between neighbouring strips so no hairline crack shows at any angle. */
@@ -14,7 +14,7 @@ type Strip = { x: number; y: number; angle: number; length: number; shade: numbe
  * (covered by the other half flat, by the spine folded). Walked counter-clockwise on screen so each
  * strip's outward normal is (-dy, dx).
  */
-function strips(side: DuoSide): Strip[] {
+function strips(side: FoldSide): Strip[] {
   const { width, height, radius } = GEOM.panel;
   const radii = GEOM.halfRadii(side, "front", radius);
   const hingeX = side === "left" ? width : 0;
@@ -44,14 +44,14 @@ function strips(side: DuoSide): Strip[] {
   return out;
 }
 
-const STRIPS: Record<DuoSide, Strip[]> = { left: strips("left"), right: strips("right") };
+const STRIPS: Record<FoldSide, Strip[]> = { left: strips("left"), right: strips("right") };
 
 /**
  * The 18 px titanium side wall of one half: strips standing perpendicular to the front face along
  * the outline (corner curves split into facets), filled with the frame's cross-section gradient
  * (dark chamfers, bright flat), shaded top-lit. Each faces outward and hides its reverse.
  */
-export function EdgeFace({ side }: { side: DuoSide }) {
+export function EdgeFace({ side }: { side: FoldSide }) {
   const t = GEOM.panel.thickness;
   return (
     <>
@@ -59,7 +59,7 @@ export function EdgeFace({ side }: { side: DuoSide }) {
         <div
           key={i}
           aria-hidden="true"
-          data-duo-part={i === 0 ? `edge-${side}` : undefined}
+          data-fold-part={i === 0 ? `edge-${side}` : undefined}
           style={{
             position: "absolute",
             left: 0,

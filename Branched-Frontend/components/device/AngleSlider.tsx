@@ -32,7 +32,7 @@ export function AngleSlider({ y = 1052 }: { y?: number }) {
         fontSize: 15,
         fontWeight: 600,
         fontVariantNumeric: "tabular-nums",
-        color: "var(--ios-label)",
+        color: "var(--ui-label)",
       }}
     >
       <input
@@ -43,7 +43,7 @@ export function AngleSlider({ y = 1052 }: { y?: number }) {
         value={angle}
         aria-label="Hinge angle"
         onChange={(e) => foldDevice.setAngle(Number(e.target.value))}
-        style={{ flex: 1, accentColor: "var(--ios-blue)" }}
+        style={{ flex: 1, accentColor: "var(--ui-blue)" }}
       />
       <span style={{ width: 44, textAlign: "right" }}>{angle}°</span>
     </div>

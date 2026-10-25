@@ -2,12 +2,11 @@
 
 import Image from "next/image";
 import type { CSSProperties, ReactNode } from "react";
-import { iconSquircleClipPath } from "@/lib/squircle";
 import { UnsaidLogo } from "@/components/unsaid/UnsaidLogo";
 import type { HomeAppId } from "@/components/home/layout";
 import { MessagesGlyph } from "./apps/Messages";
 import { PhoneGlyph } from "./apps/Phone";
-import { PhotosGlyph } from "./apps/Photos";
+import { GalleryGlyph } from "./apps/Gallery";
 
 /** The Meta apps on the home screen (D8). */
 export type MetaAppId = Extract<
@@ -28,8 +27,8 @@ export type MetaAppId = Extract<
 
 /**
  * THE switch point for the Meta icons (D9, amended 2026-10-25 by Nick): each Meta app shows its
- * current official App Store icon (1024 px artwork from the iTunes lookup API, stored at 512 px in
- * public/brand/meta/appstore/), full bleed, unmodified, masked only by the iOS squircle.
+ * current official store artwork (stored at 512 px in public/brand/meta/appstore/), full bleed,
+ * unmodified, masked only by the One UI icon shape.
  */
 export const META_ICON_SRC: Record<MetaAppId, string> = {
   facebook: "/brand/meta/appstore/facebook.png",
@@ -52,15 +51,15 @@ export function isMetaApp(app: HomeAppId): app is MetaAppId {
   return META_APPS.has(app);
 }
 
-/**
- * Drawn Apple look-alikes in the iOS 26 style (D8: Messages, Photos, Phone; never an Apple file),
- * matched side by side to the iOS 26 icons (iosicongallery.com, 2025-10-20).
- */
-const APPLE: Partial<Record<HomeAppId, { tile: string; glyph: ReactNode }>> = {
-  messages: { tile: "var(--icon-green-fill)", glyph: <MessagesGlyph /> },
-  phone: { tile: "var(--icon-green-fill)", glyph: <PhoneGlyph /> },
-  photos: { tile: "var(--icon-photos-fill)", glyph: <PhotosGlyph /> },
+/** Drawn Android / One UI look-alikes (Phone, Messages, Gallery; never an original file). */
+const SYSTEM: Partial<Record<HomeAppId, { tile: string; glyph: ReactNode }>> = {
+  messages: { tile: "var(--icon-messages-fill)", glyph: <MessagesGlyph /> },
+  phone: { tile: "var(--icon-phone-fill)", glyph: <PhoneGlyph /> },
+  photos: { tile: "var(--icon-gallery-fill)", glyph: <GalleryGlyph /> },
 };
+
+/** One UI's icon shape: a soft squircle, about a third of the side as corner radius. */
+export const ICON_CORNER = 0.34;
 
 function FullBleed({ src, size }: { src: string; size: number }) {
   return (
@@ -88,7 +87,7 @@ function Tile({ size, background, children, style }: { size: number; background:
         flexShrink: 0,
         width: size,
         height: size,
-        clipPath: iconSquircleClipPath(size),
+        borderRadius: size * ICON_CORNER,
         background,
         overflow: "hidden",
         ...style,
@@ -100,16 +99,16 @@ function Tile({ size, background, children, style }: { size: number; background:
 }
 
 /**
- * An app's icon artwork at `size` pt, masked to the iOS squircle (22.37%, lib/squircle.ts).
- * Un-Said: Gurneal's icon (UnsaidLogo). Meta apps: the official App Store icon (META_ICON_SRC). Apple apps: drawn iOS 26 look-alikes.
+ * An app's icon artwork at `size` dp, in One UI's icon shape (ICON_CORNER).
+ * Un-Said: Gurneal's icon (UnsaidLogo). Meta apps: the official artwork (META_ICON_SRC). Phone, Messages, Gallery: drawn look-alikes.
  */
 export function AppGlyph({ app, size }: { app: HomeAppId; size: number }) {
   if (app === "unsaid") return <UnsaidLogo size={size} label="" />;
 
   if (isMetaApp(app)) return <FullBleed src={META_ICON_SRC[app]} size={size} />;
 
-  const apple = APPLE[app];
-  return <Tile size={size} background={apple?.tile ?? "var(--icon-meta-pending)"}>{apple?.glyph}</Tile>;
+  const system = SYSTEM[app];
+  return <Tile size={size} background={system?.tile ?? "var(--icon-meta-pending)"}>{system?.glyph}</Tile>;
 }
 
 export default AppGlyph;

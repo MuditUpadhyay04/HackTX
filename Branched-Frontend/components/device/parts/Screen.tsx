@@ -187,7 +187,7 @@ export function PunchHole({ display, width }: { display: "cover"; width: number 
   return (
     <div
       aria-hidden="true"
-      data-duo-part={`punch-${display}`}
+      data-fold-part={`punch-${display}`}
       style={{
         position: "absolute",
         left: c.x - d / 2,

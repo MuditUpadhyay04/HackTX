@@ -72,7 +72,7 @@ function SpineCap({ angle, y }: { angle: MotionValue<number>; y: number }) {
  */
 export function Spine({ angle }: { angle: MotionValue<number> }) {
   return (
-    <div data-duo-part="spine" style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d", pointerEvents: "none" }}>
+    <div data-fold-part="spine" style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d", pointerEvents: "none" }}>
       {FACETS.map((i) => (
         <SpineFacet key={i} index={i} angle={angle} />
       ))}

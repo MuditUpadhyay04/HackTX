@@ -28,7 +28,7 @@ export type IOSSheetProps = {
  * The iOS action sheet: a dimmed scrim, a grouped block of actions in the light material with
  * hairline separators, and a separate bold Cancel button. Slides up on the snapback spring.
  */
-export function IOSSheet({ open, onClose, actions, cancelLabel, tint = "var(--ios-blue)", title }: IOSSheetProps) {
+export function SystemSheet({ open, onClose, actions, cancelLabel, tint = "var(--ui-blue)", title }: IOSSheetProps) {
   const reduced = usePrefersReducedMotion();
   const fade = { duration: ms(durations.reducedShell), ease: easeSoft };
   const row = {
@@ -58,7 +58,7 @@ export function IOSSheet({ open, onClose, actions, cancelLabel, tint = "var(--io
           <div
             data-action="close-sheet"
             onClick={onClose}
-            style={{ position: "absolute", inset: 0, background: "var(--ios-scrim)" }}
+            style={{ position: "absolute", inset: 0, background: "var(--ui-scrim)" }}
           />
           <motion.div
             initial={reduced ? { opacity: 0 } : { y: "100%" }}
@@ -90,8 +90,8 @@ export function IOSSheet({ open, onClose, actions, cancelLabel, tint = "var(--io
                     padding: "var(--space-14) var(--space-16)",
                     textAlign: "center",
                     font: "var(--type-footnote-semibold)",
-                    color: "var(--ios-label-secondary)",
-                    boxShadow: "inset 0 calc(-1 * var(--hairline)) 0 var(--ios-separator)",
+                    color: "var(--ui-label-secondary)",
+                    boxShadow: "inset 0 calc(-1 * var(--hairline)) 0 var(--ui-separator)",
                   }}
                 >
                   {title}
@@ -106,8 +106,8 @@ export function IOSSheet({ open, onClose, actions, cancelLabel, tint = "var(--io
                     onClick={a.placeholder ? undefined : () => a.onPress?.()}
                     style={{
                       ...row,
-                      color: a.destructive ? "var(--ios-red)" : tint,
-                      boxShadow: i > 0 ? "inset 0 var(--hairline) 0 var(--ios-separator)" : undefined,
+                      color: a.destructive ? "var(--ui-red)" : tint,
+                      boxShadow: i > 0 ? "inset 0 var(--hairline) 0 var(--ui-separator)" : undefined,
                     }}
                   >
                     {a.label}
@@ -126,7 +126,7 @@ export function IOSSheet({ open, onClose, actions, cancelLabel, tint = "var(--io
               type="button"
               data-action="close-sheet"
               onClick={onClose}
-              style={{ ...row, fontWeight: 600, borderRadius: SHEET.radius, background: "var(--ios-bg)" }}
+              style={{ ...row, fontWeight: 600, borderRadius: SHEET.radius, background: "var(--ui-bg)" }}
             >
               {cancelLabel}
             </button>

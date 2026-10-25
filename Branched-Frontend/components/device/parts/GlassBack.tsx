@@ -2,12 +2,12 @@
 
 import { motion, type MotionValue } from "framer-motion";
 import { GEOM } from "../geometry";
-import { lensGlassShadow, lensRingShadow, plateauShadow } from "../materials";
+import { lensGlassShadow, lensRingShadow } from "../materials";
 import { ALL_SIDES, Face, HIDDEN_BACKFACE } from "./Face";
 
 /**
- * The right half's BACK as seen from behind: a titanium frame around matte natural-titanium glass
- * with a moving specular band (gloss), and the raised camera plateau at the top, on the outer side.
+ * The right half's BACK as seen from behind: an aluminum frame around the glass back with a moving
+ * specular band (gloss), and the two floating rear lenses at the top, on the outer side.
  * Back-local x 0 is the right half's outer edge.
  */
 export function GlassBack({ gloss }: { gloss: MotionValue<string> | string }) {
@@ -44,7 +44,7 @@ function CameraPlateau() {
   return (
     <div
       aria-hidden="true"
-      data-duo-part="camera-plateau"
+      data-fold-part="camera-plateau"
       style={{
         position: "absolute",
         left: p.x,
@@ -52,8 +52,6 @@ function CameraPlateau() {
         width: p.width,
         height: p.height,
         borderRadius: p.radius,
-        background: "var(--device-plateau-fill)",
-        boxShadow: plateauShadow,
         transform: `translateZ(${GEOM.z.plateau}px)`,
         ...HIDDEN_BACKFACE,
       }}

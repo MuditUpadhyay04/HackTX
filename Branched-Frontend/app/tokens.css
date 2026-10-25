@@ -1,7 +1,7 @@
 /*
  * app/tokens.css: this build's tokens as CSS custom properties, plus the Tailwind 4 theme mapping.
  * Mirrors lib/tokens.ts and lib/motion.ts value for value (same names); keep them in step.
- * The Un-Said theme (--un-*, and its --ease-ios / --dur-* / --stagger) comes ONLY from
+ * The Un-Said theme (--un-*, and its --ease-std / --dur-* / --stagger) comes ONLY from
  * app/unsaid-theme.css (synced from App-UI-Final); nothing here redefines it.
  * Import order (app/globals.css): tailwindcss, ./unsaid-theme.css, ./tokens.css.
  */
@@ -27,13 +27,13 @@
   --wa-call-text: #E9EDEF;
 
   /* look-alike: Messages / iMessage (iOS, light) (section 4.2) */
-  --imsg-blue: #007AFF;
-  --imsg-gray: #E9E9EB;
-  --imsg-green: #34C759;
-  --imsg-meta: #8E8E93;
-  --imsg-failed: #FF3B30;
-  --imsg-nav: #F9F9F9;
-  --imsg-field-stroke: #C7C7CC;
+  --msg-blue: #007AFF;
+  --msg-gray: #E9E9EB;
+  --msg-green: #34C759;
+  --msg-meta: #8E8E93;
+  --msg-failed: #FF3B30;
+  --msg-nav: #F9F9F9;
+  --msg-field-stroke: #C7C7CC;
 
   /* look-alike: Instagram (light DMs, dark Reels) (section 4.2) */
   --ig-text: #000000;
@@ -60,17 +60,17 @@
   --meta-ai-surface: #F1F4F7;
 
   /* look-alike: iOS system (light, plus dark where used) (section 4.2) */
-  --ios-blue: #007AFF;
-  --ios-red: #FF3B30;
-  --ios-green: #34C759;
-  --ios-gray: #8E8E93;
-  --ios-gray4: #D1D1D6;
-  --ios-gray5: #E5E5EA;
-  --ios-gray6: #F2F2F7;
-  --ios-kb-bg: #D1D4DA;
-  --ios-kb-key: #FFFFFF;
-  --ios-kb-key-special: #ABB0BA;
-  --ios-banner: #F5F5F5;
+  --ui-blue: #007AFF;
+  --ui-red: #FF3B30;
+  --ui-green: #34C759;
+  --ui-gray: #8E8E93;
+  --ui-gray4: #D1D1D6;
+  --ui-gray5: #E5E5EA;
+  --ui-gray6: #F2F2F7;
+  --ui-kb-bg: #D1D4DA;
+  --ui-kb-key: #FFFFFF;
+  --ui-kb-key-special: #ABB0BA;
+  --ui-banner: #F5F5F5;
 
   /* device: white iPhone Duo (section 4.3) */
   --device-frame-base: #E9E8E4;
@@ -81,32 +81,32 @@
   --device-bezel: #050506;
   --device-hinge-seam: #BEBFC3;
   --device-back-glass: #FBFBF9;
-  /* device: iPhone Fold, natural titanium (RULES.md D10) */
-  --device-ti-highlight: #F6F4F0;
-  --device-ti-light: #DEDAD3;
-  --device-ti-base: #C3BEB5;
-  --device-ti-mid: #A39E95;
-  --device-ti-shadow: #77736C;
-  --device-ti-deep: #46443F;
-  --device-back-glass-ti: #D5D1C9;
+  /* device: Galaxy Z Fold 8, Graphite (Armor Aluminum frame, glass back) */
+  --device-ti-highlight: #A3A6AD;
+  --device-ti-light: #6E7179;
+  --device-ti-base: #4A4D54;
+  --device-ti-mid: #373A40;
+  --device-ti-shadow: #25272B;
+  --device-ti-deep: #141518;
+  --device-back-glass-ti: #2E3035;
 
   /* stage, wallpaper base, iOS labels, device parts (sections 4.3, Phase 1) */
   --stage-black: #000000;
   --stage-white: #FFFFFF;
   --stage-studio: #F5F5F1;
-  --ios-wallpaper-base: #05050B;
-  --ios-label: #000000;
-  --ios-label-secondary: rgba(60,60,67,0.6);
-  --ios-separator: rgba(60,60,67,0.29);
-  --ios-bg: #FFFFFF;
+  --ui-wallpaper-base: #05050B;
+  --ui-label: #000000;
+  --ui-label-secondary: rgba(60,60,67,0.6);
+  --ui-separator: rgba(60,60,67,0.29);
+  --ui-bg: #FFFFFF;
   --label-on-dark: #FFFFFF;
-  --ios-dark-elevated: #1C1C1E;
-  --ios-dark-grouped: #2C2C2E;
-  --ios-dark-fill: #39393D;
-  --ios-dark-separator: rgba(84,84,88,0.65);
-  --ios-dark-label: #FFFFFF;
-  --ios-dark-label-2: rgba(235,235,245,0.6);
-  --ios-dark-label-3: rgba(235,235,245,0.3);
+  --ui-dark-elevated: #1C1C1E;
+  --ui-dark-grouped: #2C2C2E;
+  --ui-dark-fill: #39393D;
+  --ui-dark-separator: rgba(84,84,88,0.65);
+  --ui-dark-label: #FFFFFF;
+  --ui-dark-label-2: rgba(235,235,245,0.6);
+  --ui-dark-label-3: rgba(235,235,245,0.3);
   --device-island: #000000;
   --device-display-off: #000000;
   --device-hinge-cap: #DCDBD6;
@@ -130,12 +130,12 @@
   --device-debug-box-alt: #0A84FF;
   --device-debug-label-bg: rgba(0,0,0,0.72);
 
-  /* look-alike gradients (section 4.2); ios-wallpaper per the Phase 1 recipe */
+  /* look-alike gradients (section 4.2); ui-wallpaper per the Phase 1 recipe */
   --ig-gradient: linear-gradient(45deg, #FEDA75 0%, #FA7E1E 25%, #D62976 50%, #962FBF 75%, #4F5BD5 100%);
   --ig-dm-out: linear-gradient(90deg, #7B2FF7 0%, #3B5BFE 100%);
   --messenger-gradient: linear-gradient(45deg, #0099FF 0%, #A033FF 60%, #FF5280 90%, #FF7061 100%);
   --meta-ai-gradient: conic-gradient(from 200deg, #0064E0, #7B3FF2, #D63BC4, #FF6A3D, #0064E0);
-  --ios-wallpaper: radial-gradient(125% 100% at 50% 56%, transparent 52%, #05050B 100%), radial-gradient(26% 32% at 57% 50%, var(--un-icon-lilac), transparent 70%), radial-gradient(52% 66% at 82% 40%, var(--un-icon-orchid), transparent 72%), radial-gradient(56% 76% at 20% 72%, var(--un-icon-blue), transparent 72%), radial-gradient(62% 72% at 50% 62%, var(--un-icon-violet), transparent 72%), radial-gradient(40% 48% at 86% 88%, var(--un-icon-plum), transparent 70%), radial-gradient(36% 44% at 16% 22%, var(--un-icon-periwinkle), transparent 70%), linear-gradient(#05050B, #05050B);
+  --ui-wallpaper: radial-gradient(125% 100% at 50% 56%, transparent 52%, #05050B 100%), radial-gradient(26% 32% at 57% 50%, var(--un-icon-lilac), transparent 70%), radial-gradient(52% 66% at 82% 40%, var(--un-icon-orchid), transparent 72%), radial-gradient(56% 76% at 20% 72%, var(--un-icon-blue), transparent 72%), radial-gradient(62% 72% at 50% 62%, var(--un-icon-violet), transparent 72%), radial-gradient(40% 48% at 86% 88%, var(--un-icon-plum), transparent 70%), radial-gradient(36% 44% at 16% 22%, var(--un-icon-periwinkle), transparent 70%), linear-gradient(#05050B, #05050B);
   --wallpaper-filter: blur(80px) saturate(1.35);
   --wallpaper-scale: 1.2;
   --wallpaper-noise-opacity: 0.04;
@@ -158,14 +158,14 @@
   --device-flash: radial-gradient(#FFF8E7, #E9DFC8);
   --device-reflection-mask: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0) 35%);
   --device-reflection-filter: blur(1.5px);
-  --device-ti-band: linear-gradient(135deg, #ECE9E3 0%, #A9A49B 16%, #D9D5CE 34%, #8E8A82 58%, #CFCBC4 78%, #6E6A63 100%);
-  --device-ti-side: linear-gradient(180deg, #46443F 0%, #A39E95 10%, #F6F4F0 28%, #C3BEB5 50%, #DEDAD3 68%, #77736C 90%, #46443F 100%);
-  --device-ti-spine: linear-gradient(180deg, #D9D5CE 0%, #B3AEA5 30%, #D2CEC7 55%, #8E8A82 100%);
-  --device-ti-brush: repeating-linear-gradient(90deg, rgba(255,255,255,0) 0px, rgba(255,255,255,0) 2px, rgba(255,255,255,0.07) 2px, rgba(255,255,255,0.07) 3px);
-  --device-back-glass-ti-fill: linear-gradient(165deg, #E5E1DA 0%, #D5D1C9 45%, #C5C0B7 100%);
-  --device-back-glass-ti-gloss: linear-gradient(110deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.32) 48%, rgba(255,255,255,0) 62%);
-  --device-plateau-fill: linear-gradient(170deg, #DCD8D1 0%, #C9C4BB 55%, #B9B4AA 100%);
-  --device-lens-ring-ti: linear-gradient(135deg, #E6E2DC 0%, #A39E95 55%, #46443F 100%);
+  --device-ti-band: linear-gradient(135deg, #8E9198 0%, #3A3D43 16%, #6A6D74 34%, #2A2C31 58%, #5C5F66 78%, #1C1D21 100%);
+  --device-ti-side: linear-gradient(180deg, #141518 0%, #373A40 10%, #A3A6AD 28%, #4A4D54 50%, #6E7179 68%, #25272B 90%, #141518 100%);
+  --device-ti-spine: linear-gradient(180deg, #5C5F66 0%, #3A3D43 30%, #55585F 55%, #222428 100%);
+  --device-ti-brush: repeating-linear-gradient(90deg, rgba(255,255,255,0) 0px, rgba(255,255,255,0) 2px, rgba(255,255,255,0.04) 2px, rgba(255,255,255,0.04) 3px);
+  --device-back-glass-ti-fill: linear-gradient(165deg, #3A3C42 0%, #2E3035 45%, #232529 100%);
+  --device-back-glass-ti-gloss: linear-gradient(110deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.12) 48%, rgba(255,255,255,0) 62%);
+  --device-plateau-fill: transparent;
+  --device-lens-ring-ti: linear-gradient(135deg, #9A9DA4 0%, #45484E 55%, #141518 100%);
   --device-screen-wallpaper: radial-gradient(42% 46% at 62% 40%, var(--un-icon-lilac) 0%, transparent 72%), radial-gradient(62% 72% at 88% 12%, var(--un-icon-orchid) 0%, transparent 72%), radial-gradient(75% 85% at 18% 92%, var(--un-icon-blue) 0%, transparent 74%), radial-gradient(85% 95% at 48% 58%, var(--un-icon-violet) 0%, transparent 76%), radial-gradient(50% 60% at 8% 12%, var(--un-icon-periwinkle) 0%, transparent 72%), linear-gradient(160deg, #120E2A 0%, #07060F 100%);
   --device-screen-off: linear-gradient(160deg, #17181C 0%, #060607 36%, #000000 100%);
   --device-glass-sheen: linear-gradient(118deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.04) 22%, rgba(255,255,255,0) 40%);
@@ -215,7 +215,7 @@
   --size-switch-knob: 27px;
   --size-switch-inset: 2px;
   --size-focus-ring: 2px;
-  --size-imsg-apps-button: 34px;
+  --size-msg-apps-button: 34px;
   --size-meta-ai-send: 32px;
   --size-dev-panel-width: 320px;
   --size-dev-clock-field: 88px;
@@ -244,7 +244,8 @@
   --size-test-ref-palette-height: 435px;
 
   /* type: system stack + iOS text styles (HIG) + Meta sizes. --type-<style> is a font shorthand. */
-  --font-system: -apple-system, "SF Pro Text", "SF Pro Display", system-ui, BlinkMacSystemFont, Inter, sans-serif;
+  --font-system: var(--font-roboto), Roboto, "Noto Sans", system-ui, sans-serif;
+  --font-display: var(--font-roboto-flex), var(--font-roboto), Roboto, system-ui, sans-serif;
   --type-large-title-size: 34px;
   --type-large-title-line-height: 41px;
   --type-large-title-weight: 400;
@@ -326,12 +327,12 @@
   --type-meta-17-tracking: 0px;
   --type-meta-17: 600 17px/22px var(--font-system);
 
-  /* motion (section 4.4). --ease-ios also exists in app/unsaid-theme.css with the identical value; this
+  /* motion (section 4.4). --ease-std also exists in app/unsaid-theme.css with the identical value; this
      file loads after it, so the phone's section 4.4 value wins if App-UI-Final ever changes. Named
      durations are --motion-* (the reduced-motion crossfades are --motion-reduced-fold / -shell / -opening); --dur-200 / --dur-400 are
      generic 200 / 400 ms steps (never App-UI-Final's --dur-press/fade/hold). */
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-std: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-breath: cubic-bezier(0.45, 0, 0.55, 1);
   --motion-keyboard-rise: 300ms;
   --motion-press: 120ms;
@@ -360,9 +361,9 @@
   --wa-caret: #00A884;
   --wa-chip: #F0F2F5;
   --wa-chip-active-text: #15603E;
-  --imsg-nav-material: rgba(249,249,249,0.94);
-  --ios-fill-tertiary: rgba(118,118,128,0.12);
-  --ios-scrim: rgba(0,0,0,0.4);
+  --msg-nav-material: rgba(249,249,249,0.94);
+  --ui-fill-tertiary: rgba(118,118,128,0.12);
+  --ui-scrim: rgba(0,0,0,0.4);
   --banner-stroke: rgba(0,0,0,0.06);
   --kb-label: #000000;
   --kb-special-label: #000000;
@@ -371,11 +372,11 @@
   /* look-alike apps (components/apps/*): iOS system colors (HIG) and app chrome the spec leaves open */
   --on-accent: #FFFFFF;
   --on-accent-2: rgba(255,255,255,0.8);
-  --ios-indigo: #5E5CE6;
-  --ios-teal: #30B0C7;
-  --ios-yellow: #FFCC00;
-  --ios-pink: #FF2D55;
-  --ios-push-shadow: rgba(0,0,0,0.12);
+  --ui-indigo: #5E5CE6;
+  --ui-teal: #30B0C7;
+  --ui-yellow: #FFCC00;
+  --ui-pink: #FF2D55;
+  --ui-push-shadow: rgba(0,0,0,0.12);
   --meta-ai-blue: #3EC6F6;
   --meta-ai-violet: #7A5CF5;
   --meta-ai-magenta: #C04FD9;
@@ -439,6 +440,12 @@
   --home-dot-inactive: rgba(255,255,255,0.4);
   --home-glass-edge: rgba(255,255,255,0.55);
   --icon-green-fill: linear-gradient(180deg, #5DF576 0%, #0BBD29 100%);
+  --icon-phone-fill: linear-gradient(160deg, #4BD37B 0%, #1FAE57 100%);
+  --icon-messages-fill: #FFFFFF;
+  --icon-messages-bubble: #1A73E8;
+  --icon-messages-line: #AECBFA;
+  --icon-gallery-fill: linear-gradient(160deg, #FF5F7E 0%, #E8335A 100%);
+  --icon-gallery-center: #FFC2CF;
   --widget-weather-fill: linear-gradient(180deg, #3C8CE7 0%, #7EC3F8 100%);
   --home-glass-sheen: linear-gradient(160deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.10) 40%, rgba(255,255,255,0.16) 100%);
 }
@@ -495,7 +502,7 @@
   --shadow-device-lens-glass: inset 0 2px 6px rgba(0,0,0,0.8), inset 0 0 0 2px rgba(0,0,0,0.6);
   --shadow-device-button: inset 0 0.75px 0 rgba(255,255,255,0.85), inset 0 -0.75px 0 rgba(0,0,0,0.22), 0 0 0 0.5px rgba(70,68,63,0.45);
   /* the buttons' visible lip: brushed titanium lit from above, like the frame band */
-  --device-button-lip: linear-gradient(180deg, #F6F4F0 0%, #D9D5CE 35%, #A9A49B 75%, #7C786F 100%);
+  --device-button-lip: linear-gradient(180deg, #A3A6AD 0%, #6A6D74 35%, #3A3D43 75%, #1C1D21 100%);
   /* Phase 2 look-alike apps */
   --shadow-wa-bubble: 0 1px 0.5px rgba(11,20,26,0.13);
   --shadow-key-pop: 0 1px 1px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.12);
@@ -509,7 +516,7 @@
 }
 
 /* Colors and type map onto the :root vars above (and the synced --un-* colors), so bg-wa-green,
-   text-ios-blue, bg-un-bg, text-body, font-sans all resolve to the tokens. */
+   text-ui-blue, bg-un-bg, text-body, font-sans all resolve to the tokens. */
 @theme inline {
   --font-sans: var(--font-system);
 
@@ -528,13 +535,13 @@
   --color-wa-call-surface: var(--wa-call-surface);
   --color-wa-call-end: var(--wa-call-end);
   --color-wa-call-text: var(--wa-call-text);
-  --color-imsg-blue: var(--imsg-blue);
-  --color-imsg-gray: var(--imsg-gray);
-  --color-imsg-green: var(--imsg-green);
-  --color-imsg-meta: var(--imsg-meta);
-  --color-imsg-failed: var(--imsg-failed);
-  --color-imsg-nav: var(--imsg-nav);
-  --color-imsg-field-stroke: var(--imsg-field-stroke);
+  --color-msg-blue: var(--msg-blue);
+  --color-msg-gray: var(--msg-gray);
+  --color-msg-green: var(--msg-green);
+  --color-msg-meta: var(--msg-meta);
+  --color-msg-failed: var(--msg-failed);
+  --color-msg-nav: var(--msg-nav);
+  --color-msg-field-stroke: var(--msg-field-stroke);
   --color-ig-text: var(--ig-text);
   --color-ig-muted: var(--ig-muted);
   --color-ig-hairline: var(--ig-hairline);
@@ -553,17 +560,17 @@
   --color-meta-ai-blue: var(--meta-ai-blue);
   --color-meta-ai-text: var(--meta-ai-text);
   --color-meta-ai-surface: var(--meta-ai-surface);
-  --color-ios-blue: var(--ios-blue);
-  --color-ios-red: var(--ios-red);
-  --color-ios-green: var(--ios-green);
-  --color-ios-gray: var(--ios-gray);
-  --color-ios-gray4: var(--ios-gray4);
-  --color-ios-gray5: var(--ios-gray5);
-  --color-ios-gray6: var(--ios-gray6);
-  --color-ios-kb-bg: var(--ios-kb-bg);
-  --color-ios-kb-key: var(--ios-kb-key);
-  --color-ios-kb-key-special: var(--ios-kb-key-special);
-  --color-ios-banner: var(--ios-banner);
+  --color-ui-blue: var(--ui-blue);
+  --color-ui-red: var(--ui-red);
+  --color-ui-green: var(--ui-green);
+  --color-ui-gray: var(--ui-gray);
+  --color-ui-gray4: var(--ui-gray4);
+  --color-ui-gray5: var(--ui-gray5);
+  --color-ui-gray6: var(--ui-gray6);
+  --color-ui-kb-bg: var(--ui-kb-bg);
+  --color-ui-kb-key: var(--ui-kb-key);
+  --color-ui-kb-key-special: var(--ui-kb-key-special);
+  --color-ui-banner: var(--ui-banner);
   --color-device-frame-base: var(--device-frame-base);
   --color-device-frame-highlight: var(--device-frame-highlight);
   --color-device-frame-mid: var(--device-frame-mid);
@@ -582,19 +589,19 @@
   --color-stage-black: var(--stage-black);
   --color-stage-white: var(--stage-white);
   --color-stage-studio: var(--stage-studio);
-  --color-ios-wallpaper-base: var(--ios-wallpaper-base);
-  --color-ios-label: var(--ios-label);
-  --color-ios-label-secondary: var(--ios-label-secondary);
-  --color-ios-separator: var(--ios-separator);
-  --color-ios-bg: var(--ios-bg);
+  --color-ui-wallpaper-base: var(--ui-wallpaper-base);
+  --color-ui-label: var(--ui-label);
+  --color-ui-label-secondary: var(--ui-label-secondary);
+  --color-ui-separator: var(--ui-separator);
+  --color-ui-bg: var(--ui-bg);
   --color-label-on-dark: var(--label-on-dark);
-  --color-ios-dark-elevated: var(--ios-dark-elevated);
-  --color-ios-dark-grouped: var(--ios-dark-grouped);
-  --color-ios-dark-fill: var(--ios-dark-fill);
-  --color-ios-dark-separator: var(--ios-dark-separator);
-  --color-ios-dark-label: var(--ios-dark-label);
-  --color-ios-dark-label-2: var(--ios-dark-label-2);
-  --color-ios-dark-label-3: var(--ios-dark-label-3);
+  --color-ui-dark-elevated: var(--ui-dark-elevated);
+  --color-ui-dark-grouped: var(--ui-dark-grouped);
+  --color-ui-dark-fill: var(--ui-dark-fill);
+  --color-ui-dark-separator: var(--ui-dark-separator);
+  --color-ui-dark-label: var(--ui-dark-label);
+  --color-ui-dark-label-2: var(--ui-dark-label-2);
+  --color-ui-dark-label-3: var(--ui-dark-label-3);
   --color-device-island: var(--device-island);
   --color-device-display-off: var(--device-display-off);
   --color-device-hinge-cap: var(--device-hinge-cap);

@@ -75,7 +75,7 @@ export function BannerHost({ staticBanner }: { staticBanner?: StaticBanner | nul
             textAlign: "center",
             fontSize: BANNER.timeSize,
             fontWeight: 600,
-            color: "var(--ios-label-secondary)",
+            color: "var(--ui-label-secondary)",
           }}
         >
           +{more} more

@@ -143,7 +143,7 @@ export function Keyboard({ threadId, platform }: KeyboardProps) {
         position: "relative",
         width,
         height: KEYBOARD.height,
-        background: "var(--ios-kb-bg)",
+        background: "var(--ui-kb-bg)",
         color: "var(--kb-label)",
         touchAction: "manipulation",
       }}
@@ -163,7 +163,7 @@ export function Keyboard({ threadId, platform }: KeyboardProps) {
             {i > 0 ? (
               <span
                 aria-hidden="true"
-                style={{ width: "var(--hairline)", height: KEYBOARD.predictive / 2, background: "var(--ios-separator)" }}
+                style={{ width: "var(--hairline)", height: KEYBOARD.predictive / 2, background: "var(--ui-separator)" }}
               />
             ) : null}
             <button
@@ -226,11 +226,11 @@ export function Keyboard({ threadId, platform }: KeyboardProps) {
                         background:
                           special && !isShiftOn
                             ? pressed === id
-                              ? "var(--ios-kb-key)"
-                              : "var(--ios-kb-key-special)"
+                              ? "var(--ui-kb-key)"
+                              : "var(--ui-kb-key-special)"
                             : pressed === id && k.kind !== "char"
-                              ? "var(--ios-kb-key-special)"
-                              : "var(--ios-kb-key)",
+                              ? "var(--ui-kb-key-special)"
+                              : "var(--ui-kb-key)",
                         boxShadow: "var(--shadow-key)",
                         fontSize: k.kind === "char" ? KEYBOARD.letterSize : KEYBOARD.labelSize,
                         lineHeight: 1,
@@ -272,7 +272,7 @@ export function Keyboard({ threadId, platform }: KeyboardProps) {
           alignItems: "flex-start",
           justifyContent: "space-between",
           paddingInline: KEYBOARD.sideInset * 7,
-          color: "var(--ios-gray)",
+          color: "var(--ui-gray)",
         }}
       >
         <button
@@ -343,7 +343,7 @@ function EmojiPage({ threadId, onAbc }: { threadId: ThreadId; onAbc: () => void 
             width: keyWidth(2.6),
             height: KEYBOARD.keyHeight,
             borderRadius: KEYBOARD.radius,
-            background: "var(--ios-kb-key-special)",
+            background: "var(--ui-kb-key-special)",
             boxShadow: "var(--shadow-key)",
             fontSize: KEYBOARD.labelSize,
           }}
@@ -359,7 +359,7 @@ function EmojiPage({ threadId, onAbc }: { threadId: ThreadId; onAbc: () => void 
             width: keyWidth(1.3),
             height: KEYBOARD.keyHeight,
             borderRadius: KEYBOARD.radius,
-            background: "var(--ios-kb-key-special)",
+            background: "var(--ui-kb-key-special)",
             boxShadow: "var(--shadow-key)",
           }}
         >

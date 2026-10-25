@@ -37,8 +37,8 @@ const UN_CELL = size.testUnCell;
 
 type Tone = "light" | "dark" | "un";
 const TONE: Record<Tone, { label: string; secondary: string; ring: string }> = {
-  light: { label: cssVar("ios-label"), secondary: cssVar("ios-label-secondary"), ring: cssVar("ios-separator") },
-  dark: { label: cssVar("ios-dark-label"), secondary: cssVar("ios-dark-label-2"), ring: cssVar("ios-dark-separator") },
+  light: { label: cssVar("ui-label"), secondary: cssVar("ui-label-secondary"), ring: cssVar("ui-separator") },
+  dark: { label: cssVar("ui-dark-label"), secondary: cssVar("ui-dark-label-2"), ring: cssVar("ui-dark-separator") },
   un: { label: cssVar("un-text"), secondary: cssVar("un-text-3"), ring: cssVar("un-hairline") },
 };
 
@@ -147,12 +147,12 @@ function Panel({
 /** The Phase 1 wallpaper recipe as a panel background layer. */
 function WallpaperLayer({ id }: { id: string }) {
   return (
-    <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: cssVar("ios-wallpaper-base") }}>
+    <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: cssVar("ui-wallpaper-base") }}>
       <div
         style={{
           position: "absolute",
           inset: 0,
-          backgroundImage: cssVar("ios-wallpaper"),
+          backgroundImage: cssVar("ui-wallpaper"),
           filter: cssVar("wallpaper-filter"),
           transform: `scale(${cssVar("wallpaper-scale")})`,
         }}
@@ -200,8 +200,8 @@ const g = palettes as Record<string, Record<string, string>>;
 const keysOf = (group: string) => Object.keys(g[group]);
 const IG = "Instagram (light DMs, dark Reels)";
 const IOS = "iOS system (light, plus dark where used)";
-const iosExtras = Object.keys(color).filter(
-  (k) => (k.startsWith("ios-") || k === "label-on-dark") && !keysOf(IOS).includes(k) && k !== "ios-wallpaper-base",
+const uiExtras = Object.keys(color).filter(
+  (k) => (k.startsWith("ios-") || k === "label-on-dark") && !keysOf(IOS).includes(k) && k !== "ui-wallpaper-base",
 );
 
 const ROW_1: Group[] = [
@@ -214,9 +214,9 @@ const ROW_1: Group[] = [
 const ROW_2: Group[] = [
   { title: "Facebook (light)", names: keysOf("Facebook (light)"), background: cssVar("fb-bg"), tone: "light" },
   { title: "Meta AI (light)", names: keysOf("Meta AI (light)"), background: cssVar("stage-white"), tone: "light" },
-  { title: IOS, names: [...keysOf(IOS), ...iosExtras], background: cssVar("ios-gray6"), tone: "light" },
+  { title: IOS, names: [...keysOf(IOS), ...uiExtras], background: cssVar("ui-gray6"), tone: "light" },
   { title: "Look-alike gradients", names: Object.keys(gradient), background: cssVar("stage-white"), tone: "light" },
-  { title: "Stage", names: ["stage-black", "stage-white", "ios-wallpaper-base"], background: cssVar("stage-black"), tone: "dark" },
+  { title: "Stage", names: ["stage-black", "stage-white", "ui-wallpaper-base"], background: cssVar("stage-black"), tone: "dark" },
 ];
 
 function GroupPanel({ group }: { group: Group }) {
@@ -334,7 +334,7 @@ function PalettesSheet() {
 
 const deviceColors = Object.keys(color).filter((k) => k.startsWith("device-"));
 const deviceMaterials = Object.keys(material).filter((k) => k.startsWith("device-"));
-const iosMaterials = Object.keys(material).filter((k) => k.startsWith("material-") && !k.endsWith("-filter") && !k.endsWith("-stroke"));
+const uiMaterials = Object.keys(material).filter((k) => k.startsWith("material-") && !k.endsWith("-filter") && !k.endsWith("-stroke"));
 const strip = (k: string) => k.replace(/^device-/, "");
 
 function Tile({ name, value, fill, tone, extra, width = size.testSwatchTile }: { name: string; value: string; fill: string; tone: Tone; extra?: CSSProperties; width?: number }) {
@@ -347,18 +347,18 @@ function Tile({ name, value, fill, tone, extra, width = size.testSwatchTile }: {
 }
 
 function ScalesSheet() {
-  const iosType = (Object.keys(type) as TypeToken[]).filter((k) => !k.startsWith("meta"));
+  const uiType = (Object.keys(type) as TypeToken[]).filter((k) => !k.startsWith("meta"));
   const metaType = (Object.keys(type) as TypeToken[]).filter((k) => k.startsWith("meta"));
   return (
     <div style={{ padding: `${cssVar("space-32")} ${cssVar("space-40")}`, display: "flex", flexDirection: "column", gap: space[16] }}>
       <div style={{ display: "flex", gap: space[16], alignItems: "stretch" }}>
-        <Panel title="device-* · colors (section 4.3, Phase 1)" tone="dark" background={cssVar("ios-wallpaper-base")} rows={4} layer={<WallpaperLayer id="tokens-noise-a" />}>
+        <Panel title="device-* · colors (section 4.3, Phase 1)" tone="dark" background={cssVar("ui-wallpaper-base")} rows={4} layer={<WallpaperLayer id="tokens-noise-a" />}>
           {deviceColors.map((name) => (
             <ColorRow key={name} name={name} label={strip(name)} tone="dark" />
           ))}
         </Panel>
-        <Panel title="iOS materials · blur" tone="dark" background={cssVar("ios-wallpaper-base")} rows={1} layer={<WallpaperLayer id="tokens-noise-b" />} style={{ flex: 1 }}>
-          {iosMaterials.map((name) => (
+        <Panel title="iOS materials · blur" tone="dark" background={cssVar("ui-wallpaper-base")} rows={1} layer={<WallpaperLayer id="tokens-noise-b" />} style={{ flex: 1 }}>
+          {uiMaterials.map((name) => (
             <Tile
               key={name}
               name={name}
@@ -375,19 +375,19 @@ function ScalesSheet() {
           ))}
         </Panel>
       </div>
-      <Panel title="device-* · materials (Phase 1)" tone="dark" background={cssVar("ios-wallpaper-base")} rows={2} layer={<WallpaperLayer id="tokens-noise-c" />}>
+      <Panel title="device-* · materials (Phase 1)" tone="dark" background={cssVar("ui-wallpaper-base")} rows={2} layer={<WallpaperLayer id="tokens-noise-c" />}>
         {deviceMaterials.map((name) => (
           <Tile key={name} name={strip(name)} value={material[name as keyof typeof material]} fill={cssVar(name)} tone="dark" width={LIST_COL} />
         ))}
       </Panel>
       <div style={{ display: "flex", gap: space[16], alignItems: "stretch" }}>
         <Panel title="type · iOS text styles + Meta sizes" tone="light" background={cssVar("stage-white")} rows={7}>
-          {[...iosType, ...metaType].map((name) => {
+          {[...uiType, ...metaType].map((name) => {
             const t = type[name];
             const css = typeCssName(name);
             return (
               <div key={name} style={{ display: "flex", flexDirection: "column", width: TYPE_COL }}>
-                <span style={{ font: cssVar(`type-${css}`), letterSpacing: cssVar(`type-${css}-tracking`), color: cssVar("ios-label"), whiteSpace: "nowrap" }}>
+                <span style={{ font: cssVar(`type-${css}`), letterSpacing: cssVar(`type-${css}-tracking`), color: cssVar("ui-label"), whiteSpace: "nowrap" }}>
                   {name}
                 </span>
                 <span style={valueStyle("light")}>{`--type-${css} · ${t.size}/${t.lineHeight} · ${t.weight} · ${t.tracking}`}</span>
@@ -395,7 +395,7 @@ function ScalesSheet() {
             );
           })}
         </Panel>
-        <Panel title="shadow-*" tone="light" background={cssVar("ios-gray6")} rows={4}>
+        <Panel title="shadow-*" tone="light" background={cssVar("ui-gray6")} rows={4}>
           {Object.entries(shadow).map(([name, value]) => {
             const onDark = name === "device-rim-light" || name === "device-bezel-inner" || name === "icon-stroke" || name === "glass-stroke";
             return (
@@ -415,7 +415,7 @@ function ScalesSheet() {
           <Panel title="radius-*" tone="light" background={cssVar("stage-white")} rows={3}>
             {Object.entries(radius).map(([name, value]) => (
               <div key={name} style={{ display: "flex", flexDirection: "column", gap: space[4], width: space[72] }}>
-                <span style={{ width: space[44], height: space[44], borderTopLeftRadius: cssVar(`radius-${name}`), background: cssVar("ios-gray5"), boxShadow: ring("light") }} />
+                <span style={{ width: space[44], height: space[44], borderTopLeftRadius: cssVar(`radius-${name}`), background: cssVar("ui-gray5"), boxShadow: ring("light") }} />
                 <Caption name={name} value={typeof value === "number" ? String(value) : value} tone="light" width={space[72]} />
               </div>
             ))}
@@ -424,7 +424,7 @@ function ScalesSheet() {
             {Object.entries(space).map(([name, value]) => (
               <div key={name} style={{ display: "flex", alignItems: "center", gap: space[8], width: SCALE_COL }}>
                 <span style={{ ...nameStyle("light"), width: space[64] }}>{`space-${name}`}</span>
-                <span style={{ width: value, height: space[8], borderRadius: radius[2], background: cssVar("ios-blue") }} />
+                <span style={{ width: value, height: space[8], borderRadius: radius[2], background: cssVar("ui-blue") }} />
               </div>
             ))}
             {Object.entries(blur).map(([name, value]) => (
@@ -435,7 +435,7 @@ function ScalesSheet() {
             ))}
             <div style={{ display: "flex", alignItems: "center", gap: space[8], width: SCALE_COL }}>
               <span style={{ ...nameStyle("light"), width: space[64] }}>hairline</span>
-              <span style={{ width: space[64], height: cssVar("hairline"), background: cssVar("ios-separator") }} />
+              <span style={{ width: space[64], height: cssVar("hairline"), background: cssVar("ui-separator") }} />
             </div>
           </Panel>
         </div>

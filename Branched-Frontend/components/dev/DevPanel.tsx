@@ -17,7 +17,7 @@ import { sceneUrl, scenesByGroup } from "@/lib/scenes";
 import type { UnsaidDeviceApi } from "@/lib/device/fold";
 
 /**
- * The device hook Phase 1 registers on window (IPhoneDuo). Optional: the
+ * The device hook Phase 1 registers on window (GalaxyFold). Optional: the
  * Fold / Unfold buttons do nothing until a device is on screen.
  */
 declare global {
@@ -40,9 +40,9 @@ const panel: CSSProperties = {
   zIndex: 3,
   padding: "var(--space-8) var(--space-16) var(--space-16)",
   borderRadius: "var(--radius-16)",
-  background: "var(--ios-dark-elevated)",
+  background: "var(--ui-dark-elevated)",
   boxShadow: "var(--shadow-sheet)",
-  color: "var(--ios-dark-label)",
+  color: "var(--ui-dark-label)",
   font: "var(--type-subheadline)",
   letterSpacing: "var(--type-subheadline-tracking)",
   userSelect: "none",
@@ -53,7 +53,7 @@ const grabber: CSSProperties = {
   height: "var(--size-grabber-height)",
   margin: "0 auto var(--space-8)",
   borderRadius: "var(--radius-pill)",
-  background: "var(--ios-dark-fill)",
+  background: "var(--ui-dark-fill)",
 };
 
 const sectionHeader: CSSProperties = {
@@ -61,7 +61,7 @@ const sectionHeader: CSSProperties = {
   font: "var(--type-footnote)",
   letterSpacing: "var(--type-footnote-tracking)",
   textTransform: "uppercase",
-  color: "var(--ios-dark-label-2)",
+  color: "var(--ui-dark-label-2)",
 };
 
 const group: CSSProperties = {
@@ -69,7 +69,7 @@ const group: CSSProperties = {
   padding: 0,
   listStyle: "none",
   borderRadius: "var(--radius-10)",
-  background: "var(--ios-dark-grouped)",
+  background: "var(--ui-dark-grouped)",
   overflow: "hidden",
 };
 
@@ -81,7 +81,7 @@ const row: CSSProperties = {
   minHeight: "var(--size-tap-target)",
   padding: "0 var(--space-16)",
   boxShadow:
-    "inset 0 calc(-1 * var(--hairline)) 0 var(--ios-dark-separator)",
+    "inset 0 calc(-1 * var(--hairline)) 0 var(--ui-dark-separator)",
   color: "inherit",
   textDecoration: "none",
 };
@@ -90,7 +90,7 @@ const lastRow: CSSProperties = { ...row, boxShadow: "none" };
 
 const muted: CSSProperties = {
   ...lastRow,
-  color: "var(--ios-dark-label-3)",
+  color: "var(--ui-dark-label-3)",
 };
 
 const textButton: CSSProperties = {
@@ -99,7 +99,7 @@ const textButton: CSSProperties = {
   margin: 0,
   padding: 0,
   background: "none",
-  color: "var(--ios-blue)",
+  color: "var(--ui-blue)",
   font: "inherit",
   cursor: "pointer",
 };
@@ -110,7 +110,7 @@ const field: CSSProperties = {
   border: 0,
   padding: "var(--space-4) var(--space-8)",
   borderRadius: "var(--radius-8)",
-  background: "var(--ios-dark-fill)",
+  background: "var(--ui-dark-fill)",
   color: "inherit",
   font: "inherit",
   fontVariantNumeric: "tabular-nums",
@@ -118,12 +118,12 @@ const field: CSSProperties = {
   // The native ring is replaced, not removed: fieldFocused draws a blue ring (focus is keyboard
   // or tap; a text field always shows focus, so :focus-visible and :focus coincide here).
   outline: "none",
-  transition: "box-shadow var(--motion-press) var(--ease-ios)",
+  transition: "box-shadow var(--motion-press) var(--ease-std)",
 };
 
 const fieldFocused: CSSProperties = {
   ...field,
-  boxShadow: "0 0 0 var(--size-focus-ring) var(--ios-blue)",
+  boxShadow: "0 0 0 var(--size-focus-ring) var(--ui-blue)",
 };
 
 /* ---------- pieces ---------- */
@@ -156,7 +156,7 @@ function Switch({
     width: "var(--size-switch-knob)",
     height: "var(--size-switch-knob)",
     borderRadius: "var(--radius-pill)",
-    background: "var(--ios-kb-key)",
+    background: "var(--ui-kb-key)",
     boxShadow: "var(--shadow-knob)",
   };
   return (
@@ -176,8 +176,8 @@ function Switch({
         border: 0,
         padding: 0,
         borderRadius: "var(--radius-pill)",
-        background: on ? "var(--ios-green)" : "var(--ios-dark-fill)",
-        transition: "background-color var(--motion-press) var(--ease-ios)",
+        background: on ? "var(--ui-green)" : "var(--ui-dark-fill)",
+        transition: "background-color var(--motion-press) var(--ease-std)",
         cursor: "pointer",
       }}
     >
@@ -288,7 +288,7 @@ export function DevPanel() {
                   style={isLast ? lastRow : row}
                 >
                   <span>{scene.label}</span>
-                  <span style={{ color: "var(--ios-dark-label-3)" }}>{name}</span>
+                  <span style={{ color: "var(--ui-dark-label-3)" }}>{name}</span>
                 </Link>
               </li>
             );
@@ -404,7 +404,7 @@ export function DevPanel() {
               url.searchParams.set("reset", "1");
               window.location.assign(url.href);
             }}
-            style={{ ...textButton, color: "var(--ios-red)" }}
+            style={{ ...textButton, color: "var(--ui-red)" }}
           >
             Reset state
           </button>

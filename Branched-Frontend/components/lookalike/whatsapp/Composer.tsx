@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { WA } from "@/components/lookalike/metrics";
 import { Placeholder } from "@/components/Placeholder";
 import { Pressable } from "@/components/lookalike/shared/Pressable";
-import { Caret } from "@/components/ios/Caret";
+import { Caret } from "@/components/system/Caret";
 import { springSnapback } from "@/lib/motion";
 import { CameraGlyph, MicGlyph, PlusGlyph, SendArrow, StickerGlyph } from "./glyphs";
 
@@ -31,8 +31,8 @@ export function Composer({ draft, focused, onFocus, onSend }: ComposerProps) {
         gap: "var(--space-8)",
         paddingInline: c.padX,
         background: "var(--wa-nav)",
-        boxShadow: "inset 0 var(--hairline) 0 var(--ios-separator)",
-        color: "var(--ios-blue)",
+        boxShadow: "inset 0 var(--hairline) 0 var(--ui-separator)",
+        color: "var(--ui-blue)",
       }}
     >
       <Placeholder id="whatsapp:attach">
@@ -55,10 +55,10 @@ export function Composer({ draft, focused, onFocus, onSend }: ComposerProps) {
           alignItems: "center",
           borderRadius: c.fieldRadius,
           background: "var(--wa-bubble-in)",
-          boxShadow: "inset 0 0 0 var(--hairline) var(--ios-gray4)",
+          boxShadow: "inset 0 0 0 var(--hairline) var(--ui-gray4)",
           paddingLeft: "var(--space-12)",
           paddingRight: "var(--space-6)",
-          color: "var(--ios-label)",
+          color: "var(--ui-label)",
           fontSize: WA.bubbleText,
           letterSpacing: "var(--type-body-tracking)",
           cursor: "text",
@@ -71,7 +71,7 @@ export function Composer({ draft, focused, onFocus, onSend }: ComposerProps) {
           {focused ? <Caret tint="var(--wa-caret)" /> : null}
         </span>
         <Placeholder id="whatsapp:sticker">
-          <button type="button" aria-label="Sticker" style={{ ...glyphButton, color: "var(--ios-blue)" }}>
+          <button type="button" aria-label="Sticker" style={{ ...glyphButton, color: "var(--ui-blue)" }}>
             <StickerGlyph size={c.glyph - 2} />
           </button>
         </Placeholder>

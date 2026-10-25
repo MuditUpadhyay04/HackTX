@@ -83,12 +83,12 @@ export function FoldControl({ tone, hidden, x = STAGE_WIDTH / 2, y = FOLD_CONTRO
     padding: "0 var(--space-16) 0 var(--space-12)",
     margin: 0,
     appearance: "none",
-    border: `var(--hairline) solid ${dark ? "var(--material-glass-stroke)" : "var(--ios-separator)"}`,
+    border: `var(--hairline) solid ${dark ? "var(--material-glass-stroke)" : "var(--ui-separator)"}`,
     borderRadius: "var(--radius-pill)",
     background: dark ? "var(--material-pill-dark)" : "var(--material-pill-light)",
     backdropFilter: "var(--material-pill-filter)",
     WebkitBackdropFilter: "var(--material-pill-filter)",
-    color: dark ? "var(--label-on-dark)" : "var(--ios-label)",
+    color: dark ? "var(--label-on-dark)" : "var(--ui-label)",
     font: "var(--type-subheadline-semibold)",
     letterSpacing: "var(--type-subheadline-tracking)",
     whiteSpace: "nowrap",
@@ -100,9 +100,9 @@ export function FoldControl({ tone, hidden, x = STAGE_WIDTH / 2, y = FOLD_CONTRO
     // Reduced motion keeps the darken and drops the scale. Focus ring: [data-fold-control]:focus-visible.
     scale: down && !reduced ? String(press.scale) : "1",
     filter: down ? `brightness(${press.brightness})` : "brightness(1)",
-    transition: `scale ${down ? "var(--motion-press-in)" : "var(--motion-press)"} var(--ease-ios), filter ${
+    transition: `scale ${down ? "var(--motion-press-in)" : "var(--motion-press)"} var(--ease-std), filter ${
       down ? "var(--motion-press-in)" : "var(--motion-press)"
-    } var(--ease-ios)`,
+    } var(--ease-std)`,
   };
 
   return (

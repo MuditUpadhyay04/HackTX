@@ -31,7 +31,7 @@ export function WhatsAppNav({ name, subtitle, avatar, backCount, backHref, onBac
         background: "var(--wa-nav-material)",
         backdropFilter: "var(--material-light-filter)",
         WebkitBackdropFilter: "var(--material-light-filter)",
-        boxShadow: "inset 0 calc(-1 * var(--hairline)) 0 var(--ios-separator)",
+        boxShadow: "inset 0 calc(-1 * var(--hairline)) 0 var(--ui-separator)",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", height: WA.navHeight, paddingInline: "var(--space-8)" }}>
@@ -40,7 +40,7 @@ export function WhatsAppNav({ name, subtitle, avatar, backCount, backHref, onBac
           nav={backHref}
           onPress={() => (onBack ? onBack() : router.push(backHref))}
           label="Back"
-          style={{ display: "flex", alignItems: "center", gap: "var(--space-4)", color: "var(--ios-blue)", height: WA.navHeight, paddingRight: "var(--space-8)" }}
+          style={{ display: "flex", alignItems: "center", gap: "var(--space-4)", color: "var(--ui-blue)", height: WA.navHeight, paddingRight: "var(--space-8)" }}
         >
           <ChevronBack width={WA.backChevron.width} height={WA.backChevron.height} />
           {backCount ? <span style={{ fontSize: WA.nameSize, letterSpacing: "var(--type-body-tracking)" }}>{backCount}</span> : null}
@@ -57,7 +57,7 @@ export function WhatsAppNav({ name, subtitle, avatar, backCount, backHref, onBac
                   fontWeight: 600,
                   letterSpacing: "var(--type-headline-tracking)",
                   lineHeight: "var(--type-headline-line-height)",
-                  color: "var(--ios-label)",
+                  color: "var(--ui-label)",
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -69,7 +69,7 @@ export function WhatsAppNav({ name, subtitle, avatar, backCount, backHref, onBac
             </div>
           </div>
         </Placeholder>
-        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-20)", color: "var(--ios-blue)", paddingRight: "var(--space-8)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-20)", color: "var(--ui-blue)", paddingRight: "var(--space-8)" }}>
           <Placeholder id="whatsapp:call-start">
             <button type="button" aria-label="Video call" style={iconButton} onClick={onVideo ? (e) => (e.preventDefault(), onVideo()) : undefined}>
               <VideoGlyph size={WA.composer.glyph} />

@@ -10,8 +10,8 @@ import {
   hingeCenter,
   leftPanelTransformCss,
   specularPosition,
-  type DuoPose,
-  type DuoState,
+  type DevicePose,
+  type DeviceState,
 } from "@/lib/device/angle";
 import { ALL_SIDES, Face } from "./parts/Face";
 import { Half } from "./parts/Half";
@@ -20,11 +20,11 @@ import { GlassSheen, PunchHole } from "./parts/Screen";
 import { ContactShadow } from "./parts/Shadow";
 import { Spine } from "./parts/Spine";
 
-export type { DuoState } from "@/lib/device/angle";
+export type { DeviceState } from "@/lib/device/angle";
 
-export type IPhoneDuoProps = {
+export type GalaxyFoldProps = {
   /** a static state (folded, unfold-60, unfolded, back ...); default "folded" */
-  state?: DuoState;
+  state?: DeviceState;
   /**
    * 0 = folded, 180 = flat; overrides the state's angle. A number, or a framer-motion
    * MotionValue (the fold control / opening timeline) that updates the device every frame
@@ -65,7 +65,7 @@ export type IPhoneDuoProps = {
 };
 
 /** A MotionValue for openAngle whether the prop is a number, a MotionValue or absent. */
-function useAngle(openAngle: IPhoneDuoProps["openAngle"], fallback: number): MotionValue<number> {
+function useAngle(openAngle: GalaxyFoldProps["openAngle"], fallback: number): MotionValue<number> {
   const external = isMotionValue(openAngle) ? (openAngle as MotionValue<number>) : null;
   const target = external ? null : typeof openAngle === "number" ? openAngle : fallback;
   const local = useMotionValue(target ?? fallback);
@@ -76,7 +76,7 @@ function useAngle(openAngle: IPhoneDuoProps["openAngle"], fallback: number): Mot
 }
 
 /**
- * The iPhone Fold (docs/RULES.md D10; kept under the Phase 1 name IPhoneDuo): a pure function of
+ * The iPhone Fold (docs/RULES.md D10; kept under the Phase 1 name GalaxyFold): a pure function of
  * openAngle. Two 590 x 830 x 18 titanium halves and a hinge spine in one preserve-3d scene; the
  * left half folds inward around the hinge axis (rotateY 180 - a), the group recenters
  * (-295 * (1 - a/180)) and tilts a little mid-fold. Folded it is one short, wide slab showing the
@@ -84,7 +84,7 @@ function useAngle(openAngle: IPhoneDuoProps["openAngle"], fallback: number): Mot
  * value is a MotionValue-driven style, so a MotionValue openAngle animates at 60 fps without
  * re-rendering React.
  */
-export function IPhoneDuo({
+export function GalaxyFold({
   state = "folded",
   openAngle,
   scale = 1,
@@ -102,11 +102,11 @@ export function IPhoneDuo({
   finish = "natural",
   hingeAccessory,
   screenFill = "wallpaper",
-}: IPhoneDuoProps) {
+}: GalaxyFoldProps) {
   const config = STATE_CONFIG[state];
   const angle = useAngle(openAngle, config.openAngle);
   const on = screenOn ?? config.screenOn;
-  const extra: DuoPose = { rotateX: tilt?.rotateX ?? 0, rotateY: tilt?.rotateY ?? 0 };
+  const extra: DevicePose = { rotateX: tilt?.rotateX ?? 0, rotateY: tilt?.rotateY ?? 0 };
   const coverContent = cover ?? right;
   const innerContent = inner ?? spanning;
 
@@ -132,8 +132,8 @@ export function IPhoneDuo({
 
   return (
     <div
-      data-iphone-duo=""
-      data-device="iphone-fold"
+      data-galaxy-fold=""
+      data-device="galaxy-z-fold8"
       data-state={state}
       data-finish={finish}
       data-duo-shadow={shadow}
@@ -191,7 +191,7 @@ function DeviceCore({
       }}
     >
       <motion.div
-        data-duo-part="group"
+        data-fold-part="group"
         style={{
           position: "absolute",
           inset: 0,
@@ -247,7 +247,7 @@ function InnerContent({ angle, children }: { angle: MotionValue<number>; childre
   const d = GEOM.display.inner;
   return (
     <motion.div
-      data-duo-part="inner-content"
+      data-fold-part="inner-content"
       style={{
         position: "absolute",
         left: GEOM.band.inset,
@@ -301,7 +301,7 @@ function CoverContent({ angle, children }: { angle: MotionValue<number>; childre
   const c = GEOM.display.cover;
   return (
     <motion.div
-      data-duo-part="cover-content"
+      data-fold-part="cover-content"
       style={{
         position: "absolute",
         left: GEOM.group.hinge + GEOM.band.inset,
@@ -352,7 +352,7 @@ function HingeBacking({ angle }: { angle: MotionValue<number> }) {
   return (
     <motion.div
       aria-hidden="true"
-      data-duo-part="hinge-backing"
+      data-fold-part="hinge-backing"
       style={{
         position: "absolute",
         left: GEOM.group.hinge - w / 2,
@@ -381,7 +381,7 @@ function OnePieceFront({ angle }: { angle: MotionValue<number> }) {
   const r = GEOM.panel.radius;
   return (
     <motion.div
-      data-duo-part="front-one-piece"
+      data-fold-part="front-one-piece"
       style={{
         position: "absolute",
         inset: 0,
@@ -411,7 +411,7 @@ function HingeAccessory({ angle, children }: { angle: MotionValue<number>; child
   if (children == null) return null;
   return (
     <motion.div
-      data-duo-part="hinge-accessory"
+      data-fold-part="hinge-accessory"
       style={{ position: "absolute", left: 0, top: 0, width: 0, height: 0, transform, pointerEvents: "none" }}
     >
       {children}
@@ -419,4 +419,4 @@ function HingeAccessory({ angle, children }: { angle: MotionValue<number>; child
   );
 }
 
-export default IPhoneDuo;
+export default GalaxyFold;

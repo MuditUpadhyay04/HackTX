@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { KEYBOARD, SAFE_BOTTOM } from "@/components/lookalike/metrics";
 import { usePane } from "./pane";
-import { durations, easeIos, ms, usePrefersReducedMotion } from "@/lib/motion";
+import { durations, easeStd, ms, usePrefersReducedMotion } from "@/lib/motion";
 
 export type ThreadFrameProps = {
   /** nav bar incl. the status-bar area, drawn over the scrolling content */
@@ -29,7 +29,7 @@ export type ThreadFrameProps = {
 
 /**
  * Shared thread layout for the three messaging look-alikes. The nav sits over the content (iOS
- * translucent bars). When the keyboard rises (ease-ios, 300 ms) the messages and the composer move
+ * translucent bars). When the keyboard rises (ease-std, 300 ms) the messages and the composer move
  * up together by transform only, keeping the last message in view, exactly like iOS; the messages
  * that slide under the nav stay reachable because the scroll content gains the same inset on top.
  */
@@ -53,7 +53,7 @@ export function ThreadFrame({
   const scroller = useRef<HTMLDivElement>(null);
   const mounted = useRef(false);
   const lift = KEYBOARD.height - SAFE_BOTTOM;
-  const transition = reduced ? { duration: 0 } : { duration: ms(durations.keyboardRise), ease: easeIos };
+  const transition = reduced ? { duration: 0 } : { duration: ms(durations.keyboardRise), ease: easeStd };
 
   useLayoutEffect(() => {
     const el = scroller.current;

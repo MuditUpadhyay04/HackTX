@@ -11,7 +11,7 @@ export function Reflection({ children }: { children: ReactNode }) {
   return (
     <div
       aria-hidden="true"
-      data-duo-part="reflection"
+      data-fold-part="reflection"
       style={{
         position: "absolute",
         left: 0,

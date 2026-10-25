@@ -1,7 +1,7 @@
-// @token-source: look-alike app geometry in iOS pt, from CLAUDE_PROMPT.md Phase 2 CHROME SPECS (Apple HIG / the real apps where the spec gives none)
+// @token-source: look-alike app geometry in Android dp (One UI 9 / the real Android apps)
 /**
- * Every size, gap, radius and type size the look-alike apps use, in pt (= CSS px inside the
- * cover display's 402 x 573.1 pt viewport, GEOM.viewport.cover). Components read these by name.
+ * Every size, gap, radius and type size the look-alike apps use, in dp (= CSS px inside the
+ * cover display's 384 x 597.7 dp viewport, GEOM.viewport.cover). Components read these by name.
  * Colors are NOT here: they are CSS variables in app/tokens.css.
  */
 import { GEOM } from "@/components/device/geometry";
@@ -18,25 +18,26 @@ export const PUNCH_PT = {
   fromTop: GEOM.punch.cover.fromTop / GEOM.viewport.scale,
 } as const;
 
+/** One UI status bar (dp): the clock and icons on the punch-hole's center line. */
 export const STATUS = {
-  /** status bar height (Phase 2 CHROME SPECS: 54 pt) */
-  height: 54,
+  height: 38,
   /** items sit on the punch-hole's center line */
   center: PUNCH_PT.fromTop,
-  timeSize: 17,
-  timeLeft: 28,
-  /** gap kept between the right cluster and the punch-hole */
-  holeGap: 14,
-  clusterGap: 6,
-  cellular: { width: 18, height: 12 },
-  wifi: { width: 16, height: 12 },
-  battery: { width: 26, height: 12.5, nub: 1.5, inset: 2, radius: 4, level: 0.72 },
+  timeSize: 14,
+  /** leading / trailing inset, clear of the display's rounded corners */
+  side: 22,
+  clusterGap: 5,
+  cellular: { width: 14, height: 14 },
+  wifi: { width: 16, height: 13 },
+  battery: { width: 22, height: 11, nub: 2, inset: 2, radius: 3, level: 0.72, textSize: 12.5, textGap: 3 },
+  notif: { size: 14, gap: 4 },
 } as const;
 
-export const HOME_INDICATOR = { width: 134, height: 5, radius: 2.5, bottom: 8 } as const;
+/** The One UI gesture handle (navigation gestures on): a thin pill near the bottom edge. */
+export const HOME_INDICATOR = { width: 112, height: 4, radius: 2, bottom: 7 } as const;
 
-/** Bottom safe area (home indicator) under the composer when the keyboard is down. */
-export const SAFE_BOTTOM = 26;
+/** Bottom safe area (gesture handle) under the composer when the keyboard is down. */
+export const SAFE_BOTTOM = 18;
 
 export const KEYBOARD = {
   height: 291,

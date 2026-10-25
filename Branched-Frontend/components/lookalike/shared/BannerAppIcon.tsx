@@ -9,7 +9,7 @@ import type { BannerApp } from "@/lib/store/banners";
  * - Un-Said: Gurneal's icon (UnsaidLogo).
  * - Messages: our drawn look-alike (green tile, white speech bubble), never an Apple file.
  * - Instagram / WhatsApp: D9 says the official Meta artwork from assets/brand/meta/, which is not in
- *   the build yet; until components/ios/AppIcon.tsx serves it, the tile shows the look-alike gradient
+ *   the build yet; until components/system/AppIcon.tsx serves it, the tile shows the look-alike gradient
  *   with no logo drawn on it (never a traced Meta logo).
  */
 export function BannerAppIcon({ app, size }: { app: BannerApp; size: number }) {

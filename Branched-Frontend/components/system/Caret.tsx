@@ -22,7 +22,7 @@ export function Caret({ tint, height = CARET.height }: { tint: string; height?: 
         verticalAlign: "middle",
         borderRadius: CARET.width / 2,
         background: tint,
-        animation: caret === "static" ? undefined : "ios-caret-blink calc(var(--motion-caret-on) + var(--motion-caret-off)) steps(1, end) infinite",
+        animation: caret === "static" ? undefined : "ui-caret-blink calc(var(--motion-caret-on) + var(--motion-caret-off)) steps(1, end) infinite",
       }}
     />
   );
@@ -30,5 +30,5 @@ export function Caret({ tint, height = CARET.height }: { tint: string; height?: 
 
 /** The keyframes the caret uses (mounted once per screen). */
 export function CaretKeyframes() {
-  return <style>{`@keyframes ios-caret-blink { 0% { opacity: 1; } 50% { opacity: 0; } }`}</style>;
+  return <style>{`@keyframes ui-caret-blink { 0% { opacity: 1; } 50% { opacity: 0; } }`}</style>;
 }

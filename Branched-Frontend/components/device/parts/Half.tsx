@@ -2,7 +2,7 @@
 
 import { motion, type MotionValue } from "framer-motion";
 import type { ReactNode } from "react";
-import { GEOM, type DuoSide } from "../geometry";
+import { GEOM, type FoldSide } from "../geometry";
 import { appScreen, type HardwareTarget } from "@/lib/apps/registry";
 import { useAppStore } from "@/lib/apps/store";
 import { useFoldStore } from "@/lib/device/store";
@@ -14,7 +14,7 @@ import { FoldContent, GlassSheen, PunchHole, ScreenSurface, coverSwing, innerSwi
 import { HalfShadow } from "./Shadow";
 
 export type HalfProps = {
-  side: DuoSide;
+  side: FoldSide;
   /** left half only: its swing around the hinge axis, as a CSS transform */
   transform?: MotionValue<string>;
   screenOn: boolean;
@@ -40,7 +40,7 @@ export function Half({ side, transform, screenOn, gloss, angle, shadow, cover, i
   const { width, height, thickness } = GEOM.panel;
   return (
     <motion.div
-      data-duo-part={`half-${side}`}
+      data-fold-part={`half-${side}`}
       style={{
         position: "absolute",
         left: side === "left" ? 0 : GEOM.group.hinge,
@@ -89,9 +89,9 @@ type FaceContentProps = {
  * This half's slice of the inner display: frame on three sides, open at the hinge. The content is
  * the ONE inner viewport shifted by the half's offset, so both slices read as one continuous screen
  * through the whole fold (D12). The swinging left half softens with the fold blur; the right half
- * stays sharp. Slices are inert copies: the flat, interactive layer is IPhoneDuo's InnerContent.
+ * stays sharp. Slices are inert copies: the flat, interactive layer is GalaxyFold's InnerContent.
  */
-function InnerFace({ side, screenOn, angle, fill, children }: FaceContentProps & { side: DuoSide }) {
+function InnerFace({ side, screenOn, angle, fill, children }: FaceContentProps & { side: FoldSide }) {
   const { width, height, radius } = GEOM.panel;
   const inner = GEOM.display.inner;
   const vp = GEOM.viewport;
@@ -188,10 +188,10 @@ function CoverFace({ screenOn, angle, fill, children }: FaceContentProps) {
 }
 
 /**
- * The buttons on the right half (iPhone Duo as shipped): volume up/down standing on the top edge near the
- * outer end, the Touch ID side button and Camera Control on the right side edge. Each is an
- * outer surface plus front and back lips; the lips are pills shaded like the frame, overlapping the
- * edge by 1 px so they read as part of it rather than slivers floating beside it.
+ * The keys on the right half's outer edge (Galaxy Z Fold 8): the volume rocker (two hit areas) and,
+ * below it, the side key with the fingerprint sensor. Each is an outer surface plus front and back
+ * lips; the lips are pills shaded like the frame, overlapping the edge by 1 px so they read as part
+ * of it rather than slivers floating beside it.
  */
 /** Opens a hardware button's app (lib/apps/registry.tsx) on the display facing the viewer. */
 function pressHardware(target: HardwareTarget): void {
@@ -244,24 +244,17 @@ function Buttons() {
   const lip = { ...base, background: "var(--device-button-lip)" } as const;
   return (
     <>
-      {([[b.volumeUp, "hw-volume-up", "Volume up"], [b.volumeDown, "hw-volume-down", "Volume down"]] as const).map(([btn, target, label]) => {
-        const x = width - btn.fromOuter - btn.length;
-        const topLip = { ...lip, width: btn.length, height: b.protrude + 1, borderRadius: `${b.protrude}px ${b.protrude}px 0 0` };
-        return (
-          <div key={`top-${btn.fromOuter}`} aria-hidden="true" data-duo-part="button">
-            {/* top surface, in the x-z plane */}
-            <div style={{ ...base, width: btn.length, height: b.depth, transform: `translate3d(${x}px, ${-b.protrude}px, ${zFront}px) rotateX(-90deg)` }} />
-            <div style={{ ...topLip, transform: `translate3d(${x}px, ${-b.protrude}px, ${zFront}px)` }} />
-            <div style={{ ...topLip, transform: `translate3d(${x}px, ${-b.protrude}px, ${zFront - b.depth}px)` }} />
-            <HitArea target={target} label={label} x={x} y={-b.protrude - HIT} width={btn.length} height={b.protrude + HIT + 2} />
-          </div>
-        );
-      })}
-      {([[b.power, "hw-touch-id", "Touch ID button"], [b.camera, "hw-camera", "Camera Control"]] as const).map(([btn, target, label]) => {
+      {(
+        [
+          [b.volumeUp, "hw-volume-up", "Volume up"],
+          [b.volumeDown, "hw-volume-down", "Volume down"],
+          [b.power, "hw-side-key", "Side key"],
+        ] as const
+      ).map(([btn, target, label]) => {
         const y = btn.fromTop;
         const sideLip = { ...lip, width: b.protrude + 1, height: btn.length, borderRadius: `0 ${b.protrude}px ${b.protrude}px 0` };
         return (
-          <div key={`side-${btn.fromTop}`} aria-hidden="true" data-duo-part="button">
+          <div key={`side-${btn.fromTop}`} aria-hidden="true" data-fold-part="button">
             {/* outer surface, in the y-z plane */}
             <div style={{ ...base, width: b.depth, height: btn.length, transform: `translate3d(${width + b.protrude}px, ${y}px, ${zFront}px) rotateY(90deg)` }} />
             <div style={{ ...sideLip, transform: `translate3d(${width - 1}px, ${y}px, ${zFront}px)` }} />

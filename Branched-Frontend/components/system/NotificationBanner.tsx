@@ -50,9 +50,9 @@ export function NotificationBanner({ app, title, body, time = BANNER_TIME, state
         boxShadow: "var(--shadow-banner), inset 0 0 0 var(--hairline) var(--banner-stroke)",
         scale: pressed ? "0.97" : "1",
         filter: pressed ? "brightness(0.92)" : undefined,
-        transition: "scale var(--motion-press) var(--ease-ios), filter var(--motion-press) var(--ease-ios)",
+        transition: "scale var(--motion-press) var(--ease-std), filter var(--motion-press) var(--ease-std)",
         cursor: "pointer",
-        color: "var(--ios-label)",
+        color: "var(--ui-label)",
         ...style,
       } as CSSProperties}
     >
@@ -78,7 +78,7 @@ export function NotificationBanner({ app, title, body, time = BANNER_TIME, state
             style={{
               fontSize: BANNER.timeSize,
               lineHeight: `${BANNER.line}px`,
-              color: "var(--ios-label-secondary)",
+              color: "var(--ui-label-secondary)",
               flexShrink: 0,
             }}
           >

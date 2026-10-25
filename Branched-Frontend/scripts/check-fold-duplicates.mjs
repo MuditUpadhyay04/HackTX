@@ -9,13 +9,13 @@ const res = {};
 for (const app of ["whatsapp", "messages", "instagram", "photos", "unsaid"]) {
   await p.goto(`http://localhost:3000/device?state=unfolded&labels=off&toasts=off`, { waitUntil: "networkidle" });
   await p.waitForTimeout(700);
-  const r = await p.locator(`[data-duo-part="inner-content"] [data-app-icon="${app}"]`).first().boundingBox();
+  const r = await p.locator(`[data-fold-part="inner-content"] [data-app-icon="${app}"]`).first().boundingBox();
   await p.mouse.click(r.x + r.width / 2, r.y + r.height / 2); await p.waitForTimeout(app === "unsaid" ? 3000 : 1200);
   const counts = [];
   for (const a of [150, 120, 90, 60, 30]) {
     await p.evaluate((a) => window.__unsaidDevice.setAngle(a), a); await p.waitForTimeout(250);
     // any app layer actually painted (visible) inside a hidden flat layer = a duplicate over the halves
-    counts.push(await p.evaluate(() => [...document.querySelectorAll('[data-duo-part="inner-content"], [data-duo-part="cover-content"]')].filter((flat) => getComputedStyle(flat).visibility === "hidden").flatMap((flat) => [...flat.querySelectorAll("*")]).filter((e) => getComputedStyle(e).visibility === "visible" && e.getClientRects().length).length));
+    counts.push(await p.evaluate(() => [...document.querySelectorAll('[data-fold-part="inner-content"], [data-fold-part="cover-content"]')].filter((flat) => getComputedStyle(flat).visibility === "hidden").flatMap((flat) => [...flat.querySelectorAll("*")]).filter((e) => getComputedStyle(e).visibility === "visible" && e.getClientRects().length).length));
   }
   res[app] = counts.join(",");
 }

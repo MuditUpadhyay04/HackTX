@@ -46,10 +46,10 @@ const TILE_W = "var(--size-test-tile-width)";
 const TILE_H = "var(--size-test-tile-height)";
 const TAP = "var(--size-tap-target)";
 
-const hairlineBottom = "inset 0 calc(-1 * var(--hairline)) 0 var(--ios-gray4)";
-const hairlineTop = "inset 0 var(--hairline) 0 var(--ios-gray4)";
+const hairlineBottom = "inset 0 calc(-1 * var(--hairline)) 0 var(--ui-gray4)";
+const hairlineTop = "inset 0 var(--hairline) 0 var(--ui-gray4)";
 const WHITE = "var(--stage-white)";
-const ON_DARK = "var(--ios-bg)";
+const ON_DARK = "var(--ui-bg)";
 
 const glyphButton: CSSProperties = {
   appearance: "none",
@@ -219,7 +219,7 @@ function Tile({
           alignItems: "stretch",
           borderRadius: "var(--radius-16)",
           background,
-          boxShadow: "inset 0 0 0 var(--hairline) var(--ios-gray4)",
+          boxShadow: "inset 0 0 0 var(--hairline) var(--ui-gray4)",
         }}
       >
         {children}
@@ -232,8 +232,8 @@ function Tile({
           ...textStyle("footnote"),
         }}
       >
-        <span style={{ color: "var(--ios-label)", fontWeight: emphasizedWeight }}>{name}</span>
-        <span style={{ color: "var(--ios-gray)" }}>{id}</span>
+        <span style={{ color: "var(--ui-label)", fontWeight: emphasizedWeight }}>{name}</span>
+        <span style={{ color: "var(--ui-gray)" }}>{id}</span>
       </figcaption>
     </figure>
   );
@@ -252,7 +252,7 @@ function Board({ pressed }: { pressed: boolean }) {
       }}
     >
       <header style={{ marginBottom: "var(--space-32)", ...textStyle("footnote") }}>
-        <span style={{ color: "var(--ios-gray)" }}>
+        <span style={{ color: "var(--ui-gray)" }}>
           /test/placeholder{pressed ? "?state=pressed" : ""}
         </span>
       </header>
@@ -266,10 +266,10 @@ function Board({ pressed }: { pressed: boolean }) {
         }}
       >
         {/* iOS: a search glyph button on the grouped background */}
-        <Tile name="iOS" id="ios:search" background="var(--ios-gray6)">
+        <Tile name="iOS" id="ios:search" background="var(--ui-gray6)">
           <div style={{ display: "flex", justifyContent: "flex-end", paddingInline: "var(--space-8)" }}>
             <Placeholder id="ios:search" pressed={pressed}>
-              <button type="button" aria-label="Search" style={{ ...glyphButton, color: "var(--ios-blue)" }}>
+              <button type="button" aria-label="Search" style={{ ...glyphButton, color: "var(--ui-blue)" }}>
                 <SearchGlyph />
               </button>
             </Placeholder>
@@ -290,7 +290,7 @@ function Board({ pressed }: { pressed: boolean }) {
             }}
           >
             <Placeholder id="whatsapp:camera" pressed={pressed}>
-              <button type="button" aria-label="Camera" style={{ ...glyphButton, color: "var(--ios-label)" }}>
+              <button type="button" aria-label="Camera" style={{ ...glyphButton, color: "var(--ui-label)" }}>
                 <CameraGlyph />
               </button>
             </Placeholder>
@@ -307,11 +307,11 @@ function Board({ pressed }: { pressed: boolean }) {
                     display: "inline-flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    width: "var(--size-imsg-apps-button)",
-                    height: "var(--size-imsg-apps-button)",
+                    width: "var(--size-msg-apps-button)",
+                    height: "var(--size-msg-apps-button)",
                     borderRadius: "var(--radius-pill)",
-                    background: "var(--imsg-gray)",
-                    color: "var(--imsg-meta)",
+                    background: "var(--msg-gray)",
+                    color: "var(--msg-meta)",
                   }}
                 >
                   <PlusGlyph />
@@ -429,7 +429,7 @@ function Board({ pressed }: { pressed: boolean }) {
         </Tile>
 
         {/* The host toast, shown statically (tap any control above for the live one) */}
-        <Tile name="Toast" id="host apps" background="var(--ios-wallpaper-base)">
+        <Tile name="Toast" id="host apps" background="var(--ui-wallpaper-base)">
           <Wallpaper variant="stage" />
           <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
             <ConceptOnlyPill platform="ios" />

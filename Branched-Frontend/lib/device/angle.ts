@@ -14,7 +14,7 @@
  */
 import { GEOM, clampAngle, groupShift } from "@/components/device/geometry";
 
-export type DuoState =
+export type DeviceState =
   | "folded"
   | "folded-off"
   | "folded-angled"
@@ -28,7 +28,7 @@ export type DuoState =
   | "back";
 
 /** openAngle of every static state (spec STATIC STATES table). */
-export const STATE_ANGLES: Record<DuoState, number> = {
+export const STATE_ANGLES: Record<DeviceState, number> = {
   folded: 0,
   "folded-off": 0,
   "folded-angled": 0,
@@ -42,9 +42,9 @@ export const STATE_ANGLES: Record<DuoState, number> = {
   back: 0,
 };
 
-export const DUO_STATES = Object.keys(STATE_ANGLES) as DuoState[];
+export const DEVICE_STATES = Object.keys(STATE_ANGLES) as DeviceState[];
 
-export type DuoPose = {
+export type DevicePose = {
   /** extra whole-device tilt on top of the openAngle tilt (deg) */
   rotateY: number;
   rotateX: number;
@@ -54,13 +54,13 @@ export type DuoStateConfig = {
   openAngle: number;
   /** default for the screenOn prop in this state (D10: lit unless it is an -off state) */
   screenOn: boolean;
-  pose: DuoPose;
+  pose: DevicePose;
 };
 
-const NO_POSE: DuoPose = { rotateY: 0, rotateX: 0 };
+const NO_POSE: DevicePose = { rotateY: 0, rotateX: 0 };
 
 /** Everything a static state sets (openAngle, screenOn, pose). */
-export const STATE_CONFIG: Record<DuoState, DuoStateConfig> = {
+export const STATE_CONFIG: Record<DeviceState, DuoStateConfig> = {
   folded: { openAngle: 0, screenOn: true, pose: NO_POSE },
   "folded-off": { openAngle: 0, screenOn: false, pose: NO_POSE },
   "folded-angled": { openAngle: 0, screenOn: true, pose: { rotateY: -24, rotateX: 6 } },
@@ -74,7 +74,7 @@ export const STATE_CONFIG: Record<DuoState, DuoStateConfig> = {
   back: { openAngle: 0, screenOn: true, pose: { rotateY: 180, rotateX: 0 } },
 };
 
-export function isDuoState(value: unknown): value is DuoState {
+export function isDeviceState(value: unknown): value is DeviceState {
   return typeof value === "string" && value in STATE_ANGLES;
 }
 
@@ -101,7 +101,7 @@ const smoothRamp = (a: number, from: number, to: number) => {
 };
 
 /** The device at `openAngle`, plus the pose of `state` (folded-angled, back) when given. */
-export function deviceTransform(openAngle: number, state?: DuoState): DeviceTransform {
+export function deviceTransform(openAngle: number, state?: DeviceState): DeviceTransform {
   const a = clampAngle(openAngle);
   const wave = Math.sin((Math.PI * a) / 180);
   const pose = state ? STATE_CONFIG[state].pose : NO_POSE;
@@ -119,13 +119,13 @@ export function deviceTransform(openAngle: number, state?: DuoState): DeviceTran
 }
 
 // ---------------------------------------------------------------------------
-// CSS transform strings (used per frame by components/device/IPhoneDuo.tsx)
+// CSS transform strings (used per frame by components/device/GalaxyFold.tsx)
 // ---------------------------------------------------------------------------
 
 const r3 = (n: number) => Math.round(n * 1000) / 1000;
 
 /** The device group: tilt around its center, after the fold shift. */
-export function groupTransformCss(t: DeviceTransform, extra: DuoPose = NO_POSE): string {
+export function groupTransformCss(t: DeviceTransform, extra: DevicePose = NO_POSE): string {
   return (
     `rotateX(${r3(t.tiltRotateX + extra.rotateX)}deg) ` +
     `rotateY(${r3(t.tiltRotateY + extra.rotateY)}deg) ` +

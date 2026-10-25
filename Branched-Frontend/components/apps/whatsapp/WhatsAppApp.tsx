@@ -71,7 +71,7 @@ export function WhatsAppApp({ display }: AppScreenProps) {
 
   if (display === "inner") {
     return (
-      <AppFrame display={display} tone={call ? "light" : "dark"} background="var(--ios-bg)">
+      <AppFrame display={display} tone={call ? "light" : "dark"} background="var(--ui-bg)">
         <Split
           list={home}
           detail={
@@ -88,7 +88,7 @@ export function WhatsAppApp({ display }: AppScreenProps) {
   }
 
   return (
-    <AppFrame display={display} tone={stack.top.kind === "call" ? "light" : "dark"} background="var(--ios-bg)">
+    <AppFrame display={display} tone={stack.top.kind === "call" ? "light" : "dark"} background="var(--ui-bg)">
       <StackView
         stack={stack}
         keyOf={(r, i) => `${r.kind}-${i}`}
@@ -147,7 +147,7 @@ function Home({
   selected: ThreadId | null;
 }) {
   return (
-    <div style={{ position: "absolute", inset: 0, background: "var(--ios-bg)" }}>
+    <div style={{ position: "absolute", inset: 0, background: "var(--ui-bg)" }}>
       {tab === "chats" ? <ChatsTab onOpen={onOpen} selected={selected} /> : null}
       {tab === "calls" ? <CallsTab onCall={onCall} /> : null}
       {tab === "updates" ? <UpdatesTab /> : null}
@@ -181,7 +181,7 @@ function TabBar({ tab, setTab }: { tab: Tab; setTab: (t: Tab) => void }) {
         background: "var(--wa-nav-material)",
         backdropFilter: "var(--material-light-filter)",
         WebkitBackdropFilter: "var(--material-light-filter)",
-        boxShadow: "inset 0 var(--hairline) 0 var(--ios-separator)",
+        boxShadow: "inset 0 var(--hairline) 0 var(--ui-separator)",
         display: "flex",
         zIndex: 5,
       }}
@@ -193,7 +193,7 @@ function TabBar({ tab, setTab }: { tab: Tab; setTab: (t: Tab) => void }) {
             key={it.id}
             label={it.label}
             onPress={() => setTab(it.id)}
-            style={{ flex: 1, height: WA.tabBar.height, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, color: active ? "var(--ios-label)" : "var(--wa-meta)" }}
+            style={{ flex: 1, height: WA.tabBar.height, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, color: active ? "var(--ui-label)" : "var(--wa-meta)" }}
           >
             <span style={{ position: "relative", display: "flex" }}>
               {it.glyph(active)}
@@ -234,7 +234,7 @@ function LargeTitleHeader({ title, actions }: { title: string; actions?: ReactNo
   return (
     <>
       <div style={{ height: 44, display: "flex", alignItems: "center", justifyContent: "space-between", paddingInline: 16 }}>
-        <Tap label="More" style={{ width: 30, height: 30, borderRadius: 15, background: "var(--wa-chip)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--ios-label)" }}>
+        <Tap label="More" style={{ width: 30, height: 30, borderRadius: 15, background: "var(--wa-chip)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--ui-label)" }}>
           <MoreGlyph size={20} />
         </Tap>
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>{actions}</div>
@@ -304,7 +304,7 @@ function ChatsTab({ onOpen, selected }: { onOpen: (id: ThreadId) => void; select
         title="Chats"
         actions={
           <>
-            <Tap label="Camera" style={{ color: "var(--ios-label)", display: "flex" }}>
+            <Tap label="Camera" style={{ color: "var(--ui-label)", display: "flex" }}>
               <CameraGlyph size={26} />
             </Tap>
             <Tap label="New chat" style={{ width: 30, height: 30, borderRadius: 15, background: "var(--wa-green)", color: "var(--on-accent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -353,11 +353,11 @@ function ChatsTab({ onOpen, selected }: { onOpen: (id: ThreadId) => void; select
           </svg>
         </Tap>
       </div>
-      <Tap highlight="var(--ios-gray5)" style={{ display: "flex", alignItems: "center", gap: 18, height: 50, paddingInline: 30, width: "100%", marginTop: 6, color: "var(--wa-meta)" }}>
+      <Tap highlight="var(--ui-gray5)" style={{ display: "flex", alignItems: "center", gap: 18, height: 50, paddingInline: 30, width: "100%", marginTop: 6, color: "var(--wa-meta)" }}>
         <svg width={22} height={22} viewBox="0 0 24 24" aria-hidden="true">
           <path d="M4 7.5h16v11.2c0 .9-.7 1.6-1.6 1.6H5.6c-.9 0-1.6-.7-1.6-1.6V7.5ZM3 4h18v3.5H3zM9.5 11.5h5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round" />
         </svg>
-        <span style={{ fontSize: 17, color: "var(--ios-label)", fontWeight: 500 }}>Archived</span>
+        <span style={{ fontSize: 17, color: "var(--ui-label)", fontWeight: 500 }}>Archived</span>
       </Tap>
       {rows.map((id) => (
         <ChatRow key={id} id={id} onOpen={onOpen} selected={selected === id} />
@@ -381,11 +381,11 @@ function ChatRow({ id, onOpen, selected }: { id: ThreadId; onOpen: (id: ThreadId
   return (
     <Tap
       onPress={() => onOpen(id)} onLongPress={() => useMessaging.getState().toggleUnread(id)}
-      highlight="var(--ios-gray5)"
+      highlight="var(--ui-gray5)"
       style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", height: WA.chatList.rowHeight, paddingLeft: 16, background: selected ? "var(--wa-chip)" : undefined }}
     >
       <Avatar src={c.avatar} size={WA.chatList.avatar} />
-      <div style={{ flex: 1, minWidth: 0, height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", boxShadow: "inset 0 calc(-1 * var(--hairline)) 0 var(--ios-separator)", paddingRight: 16 }}>
+      <div style={{ flex: 1, minWidth: 0, height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", boxShadow: "inset 0 calc(-1 * var(--hairline)) 0 var(--ui-separator)", paddingRight: 16 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
           <span style={{ ...ellipsis, flex: 1, fontSize: WA.chatList.nameSize, fontWeight: 600, letterSpacing: -0.4 }}>{c.name}</span>
           <span style={{ fontSize: WA.chatList.timeSize, color: unread ? "var(--wa-accent)" : "var(--wa-meta)", fontWeight: unread ? 500 : 400 }}>{last ? waListTime(last.at, now) : ""}</span>
@@ -451,7 +451,7 @@ function Preview({ m, group }: { m: Message; group: boolean }) {
 function EmptyDetail() {
   return (
     <div style={{ position: "absolute", inset: 0, background: "var(--wa-wallpaper)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, color: "var(--wa-meta)", textAlign: "center", padding: 40 }}>
-      <div style={{ fontSize: 22, fontWeight: 600, color: "var(--ios-label)" }}>WhatsApp</div>
+      <div style={{ fontSize: 22, fontWeight: 600, color: "var(--ui-label)" }}>WhatsApp</div>
       <div style={{ fontSize: 14, lineHeight: "20px", maxWidth: 300 }}>Send and receive messages without keeping your phone online.</div>
       <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12.5, marginTop: 18 }}>
         <LockGlyph size={12} /> Your personal messages are end-to-end encrypted
@@ -478,10 +478,10 @@ function CallsTab({ onCall }: { onCall: (p: PersonId, video: boolean) => void })
       />
       <SearchField placeholder="Search" />
       <div style={{ paddingInline: 16, marginTop: 18, fontSize: 20, fontWeight: 700 }}>Favorites</div>
-      <Tap onPress={() => onCall("mom", false)} highlight="var(--ios-gray5)" style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", height: 64, paddingInline: 16 }}>
+      <Tap onPress={() => onCall("mom", false)} highlight="var(--ui-gray5)" style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", height: 64, paddingInline: 16 }}>
         <Avatar src={person("mom").avatar} size={44} />
         <span style={{ flex: 1, fontSize: 17, fontWeight: 600 }}>Mom</span>
-        <span style={{ color: "var(--ios-label)", display: "flex", gap: 22 }}>
+        <span style={{ color: "var(--ui-label)", display: "flex", gap: 22 }}>
           <VideoGlyph size={22} />
           <PhoneGlyph size={20} />
         </span>
@@ -491,11 +491,11 @@ function CallsTab({ onCall }: { onCall: (p: PersonId, video: boolean) => void })
         const p = person(c.with);
         const missed = c.direction === "missed";
         return (
-          <Tap key={c.id} onPress={() => onCall(c.with, c.kind === "video")} highlight="var(--ios-gray5)" style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", height: 64, paddingLeft: 16 }}>
+          <Tap key={c.id} onPress={() => onCall(c.with, c.kind === "video")} highlight="var(--ui-gray5)" style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", height: 64, paddingLeft: 16 }}>
             <Avatar src={p.avatar} size={44} />
-            <div style={{ flex: 1, minWidth: 0, height: "100%", display: "flex", alignItems: "center", boxShadow: "inset 0 calc(-1 * var(--hairline)) 0 var(--ios-separator)", paddingRight: 16, gap: 10 }}>
+            <div style={{ flex: 1, minWidth: 0, height: "100%", display: "flex", alignItems: "center", boxShadow: "inset 0 calc(-1 * var(--hairline)) 0 var(--ui-separator)", paddingRight: 16, gap: 10 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 17, fontWeight: 600, color: missed ? "var(--wa-missed)" : "var(--ios-label)" }}>
+                <div style={{ fontSize: 17, fontWeight: 600, color: missed ? "var(--wa-missed)" : "var(--ui-label)" }}>
                   {p.name}
                   {c.count ? ` (${c.count})` : ""}
                 </div>
@@ -506,7 +506,7 @@ function CallsTab({ onCall }: { onCall: (p: PersonId, video: boolean) => void })
                 </div>
               </div>
               <span style={{ fontSize: 14, color: "var(--wa-meta)" }}>{waListTime(c.at, now)}</span>
-              <span style={{ color: "var(--ios-blue)", display: "flex" }}>
+              <span style={{ color: "var(--ui-blue)", display: "flex" }}>
                 <InfoGlyph size={22} />
               </span>
             </div>
@@ -584,7 +584,7 @@ function UpdatesTab() {
       <LargeTitleHeader
         title="Updates"
         actions={
-          <Tap label="Camera" style={{ color: "var(--ios-label)", display: "flex" }}>
+          <Tap label="Camera" style={{ color: "var(--ui-label)", display: "flex" }}>
             <CameraGlyph size={26} />
           </Tap>
         }
@@ -594,7 +594,7 @@ function UpdatesTab() {
       <div style={{ display: "flex", alignItems: "center", gap: 12, paddingInline: 16, height: 72 }}>
         <span style={{ position: "relative" }}>
           <Avatar src={me.avatar} size={54} />
-          <span style={{ position: "absolute", right: -2, bottom: -2, width: 22, height: 22, borderRadius: 11, background: "var(--wa-green)", border: "2px solid var(--ios-bg)", color: "var(--on-accent)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700 }}>+</span>
+          <span style={{ position: "absolute", right: -2, bottom: -2, width: 22, height: 22, borderRadius: 11, background: "var(--wa-green)", border: "2px solid var(--ui-bg)", color: "var(--on-accent)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700 }}>+</span>
         </span>
         <div>
           <div style={{ fontSize: 17, fontWeight: 600 }}>Add status</div>
@@ -636,29 +636,29 @@ function SettingsTab() {
   const me = person("riley");
   const groups: [string, string, string][][] = [
     [
-      ["Avatar", "var(--ios-indigo)", "☺"],
-      ["Lists", "var(--ios-teal)", "≡"],
-      ["Broadcast messages", "var(--ios-green)", "◉"],
-      ["Starred", "var(--ios-yellow)", "★"],
-      ["Linked devices", "var(--ios-teal)", "▭"],
+      ["Avatar", "var(--ui-indigo)", "☺"],
+      ["Lists", "var(--ui-teal)", "≡"],
+      ["Broadcast messages", "var(--ui-green)", "◉"],
+      ["Starred", "var(--ui-yellow)", "★"],
+      ["Linked devices", "var(--ui-teal)", "▭"],
     ],
     [
-      ["Account", "var(--ios-blue)", "⚿"],
-      ["Privacy", "var(--ios-teal)", "⚲"],
-      ["Chats", "var(--ios-green)", "✉"],
-      ["Notifications", "var(--ios-red)", "◔"],
-      ["Storage and data", "var(--ios-green)", "⇅"],
+      ["Account", "var(--ui-blue)", "⚿"],
+      ["Privacy", "var(--ui-teal)", "⚲"],
+      ["Chats", "var(--ui-green)", "✉"],
+      ["Notifications", "var(--ui-red)", "◔"],
+      ["Storage and data", "var(--ui-green)", "⇅"],
     ],
     [
-      ["Help", "var(--ios-blue)", "i"],
-      ["Invite a friend", "var(--ios-pink)", "♥"],
+      ["Help", "var(--ui-blue)", "i"],
+      ["Invite a friend", "var(--ui-pink)", "♥"],
     ],
   ];
   return (
-    <Scroll top={TOP} bottom={TAB_BAR_H} style={{ background: "var(--ios-gray6)" }}>
+    <Scroll top={TOP} bottom={TAB_BAR_H} style={{ background: "var(--ui-gray6)" }}>
       <div style={{ paddingInline: 16, fontSize: WA.chatList.titleSize, fontWeight: 700, letterSpacing: 0.37, lineHeight: "41px", marginTop: 46 }}>Settings</div>
       <SearchField placeholder="Search" />
-      <div style={{ margin: "18px 16px 0", borderRadius: 12, background: "var(--ios-bg)", display: "flex", alignItems: "center", gap: 12, padding: 12 }}>
+      <div style={{ margin: "18px 16px 0", borderRadius: 12, background: "var(--ui-bg)", display: "flex", alignItems: "center", gap: 12, padding: 12 }}>
         <Avatar src={me.avatar} size={58} />
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 20, fontWeight: 600 }}>{me.name}</div>
@@ -666,9 +666,9 @@ function SettingsTab() {
         </div>
       </div>
       {groups.map((rows, gi) => (
-        <div key={gi} style={{ margin: "22px 16px 0", borderRadius: 12, background: "var(--ios-bg)", overflow: "hidden" }}>
+        <div key={gi} style={{ margin: "22px 16px 0", borderRadius: 12, background: "var(--ui-bg)", overflow: "hidden" }}>
           {rows.map(([label, color, glyph], i) => (
-            <Tap key={label} highlight="var(--ios-gray5)" style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", height: 46, paddingLeft: 14 }}>
+            <Tap key={label} highlight="var(--ui-gray5)" style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", height: 46, paddingLeft: 14 }}>
               <span style={{ width: 29, height: 29, borderRadius: 7, background: color, color: "var(--on-accent)", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{glyph}</span>
               <span
                 style={{
@@ -679,12 +679,12 @@ function SettingsTab() {
                   justifyContent: "space-between",
                   paddingRight: 14,
                   fontSize: 17,
-                  boxShadow: i < rows.length - 1 ? "inset 0 calc(-1 * var(--hairline)) 0 var(--ios-separator)" : undefined,
+                  boxShadow: i < rows.length - 1 ? "inset 0 calc(-1 * var(--hairline)) 0 var(--ui-separator)" : undefined,
                 }}
               >
                 {label}
                 <svg width={8} height={14} viewBox="0 0 8 14" aria-hidden="true">
-                  <path d="M1.5 1.5 6.5 7l-5 5.5" fill="none" stroke="var(--ios-gray4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M1.5 1.5 6.5 7l-5 5.5" fill="none" stroke="var(--ui-gray4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
             </Tap>

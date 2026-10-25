@@ -3,7 +3,7 @@
  *
  * Two layers, on purpose:
  *   - `angleValue`: a framer-motion MotionValue<number> holding the LIVE openAngle (0 folded ... 180 flat).
- *     The spring writes it every frame; IPhoneDuo reads it without a React re-render per frame.
+ *     The spring writes it every frame; GalaxyFold reads it without a React re-render per frame.
  *   - `useFoldStore`: a zustand store with the React-visible state that changes a few times per move
  *     (target, folded, moving, the settled angle, the reduced-motion crossfade).
  *

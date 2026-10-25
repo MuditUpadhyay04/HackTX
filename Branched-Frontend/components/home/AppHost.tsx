@@ -157,7 +157,7 @@ export function AppHost({ display }: { display: HomeDisplay }) {
               height: HOME_INDICATOR.height,
               borderRadius: HOME_INDICATOR.radius,
               // light over an app drawn light-on-dark (Reels, the WhatsApp call screen)
-              background: tone === "light" ? "var(--label-on-dark)" : "var(--ios-label)",
+              background: tone === "light" ? "var(--label-on-dark)" : "var(--ui-label)",
               opacity: 0.85,
             }}
           />
@@ -176,7 +176,7 @@ function isMidFold(a: number): boolean {
 const KEEP_MOUNTED = new Set<AppTarget>(["unsaid"]);
 
 /** The iOS icon squircle's corner, as a share of the icon's side (lib/squircle.ts). */
-const ICON_CORNER = 0.225;
+const ICON_CORNER = 0.34;
 
 /** The display's own corner radius in pt, so the growing frame lands exactly on the glass edge. */
 const DISPLAY_RADIUS = GEOM.display.inner.radius / GEOM.viewport.scale;

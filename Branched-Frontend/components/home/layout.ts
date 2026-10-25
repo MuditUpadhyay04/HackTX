@@ -1,14 +1,14 @@
-// @token-source: Phase 3 home-screen geometry in pt (CLAUDE_PROMPT.md Phase 3 HOME GRID; D8 layout; measured from Gurneal's reference iphone-duo-tawny.vercel.app)
+// @token-source: home-screen geometry in dp (One UI 9 launcher on the Galaxy Z Fold 8)
 /**
- * components/home/layout.ts: every number of the two home screens, in the displays' logical pt
- * (GEOM.viewport: cover 402 x 573.1, inner 822.5 x 573.1), plus the app lists and getIconRect().
+ * components/home/layout.ts: every number of the two home screens, in the displays' logical dp
+ * (GEOM.viewport: cover 384 x 597.7, inner 801.5 x 597.7), plus the app lists and getIconRect().
  *
- * COVER (folded, iPhone layout like the reference's folded state): two small widgets on top, a 4-column
- * icon grid under them, a vertical dock on the right edge under the punch-hole, the search button
- * bottom-right, page dots bottom-center.
- * INNER (unfolded, D8): ONE continuous iPadOS-style home across both halves: an 8-column grid (4 per
- * half, never crossing the hinge), Weather + Calendar widgets top-left, the time + Wi-Fi and the
- * vertical dock on the right edge, the search button bottom-right, page dots bottom-center.
+ * COVER (folded): the One UI phone launcher. Weather and Calendar widgets (2 x 2 each) on top, a
+ * 4-column icon grid under them, the page indicator, and the dock (four icons, no labels) along the
+ * bottom above the gesture handle.
+ * INNER (unfolded): ONE home across both halves, as two 4-column blocks (one per half, never crossing
+ * the crease). Left: Weather + Calendar, a row of icons, the Now playing widget. Right: two rows of
+ * icons, the Gallery and Reminder widgets. Page indicator and the centered dock along the bottom.
  *
  * This file is a token module (first-line @token-source marker): numbers only, no styling.
  */
@@ -51,11 +51,11 @@ export const APP_NAMES: Record<HomeAppId, string> = {
   "messenger-kids": "Messenger Kids",
   unsaid: "Un-Said",
   messages: "Messages",
-  photos: "Photos",
+  photos: "Gallery",
   phone: "Phone",
 };
 
-/** The dock (top to bottom). */
+/** The dock (left to right). */
 export const DOCK_APPS: HomeAppId[] = ["phone", "messages", "whatsapp", "instagram"];
 
 /** The grid, in reading order: Meta apps first (most prominent), Un-Said among them. */
@@ -74,77 +74,55 @@ export const GRID_APPS: HomeAppId[] = [
   "messenger-kids",
 ];
 
-/** Shared icon metrics (pt). */
+/** Shared icon metrics (dp). */
 export const ICON = {
   /** grid icon side */
-  size: 52,
-  /** dock icon side */
-  dockSize: 46,
-  /** icon -> label gap (spec: 5 pt) */
-  labelGap: 5,
-  /** label line box (11 pt caption 2) */
-  labelHeight: 13,
+  size: 56,
+  /** dock icon side (One UI: the same as the grid) */
+  dockSize: 56,
+  /** icon -> label gap */
+  labelGap: 6,
+  /** label line box (12 sp) */
+  labelHeight: 15,
   /** column pitch (icon + gap) */
-  pitchX: 76,
+  pitchX: 86,
   /** row pitch */
-  pitchY: 84,
+  pitchY: 90,
 } as const;
 
-/** Small widget: two columns by two rows minus the label line. */
+/** Widgets: 2 x 2 cells, or 4 x 2 for the medium ones. One UI widget corners are about 26 dp. */
 export const WIDGET = {
-  size: ICON.pitchX + ICON.size, // 128
-  /** medium widget: four columns wide */
-  mediumWidth: 3 * ICON.pitchX + ICON.size, // 280
-  radius: 24,
+  size: ICON.pitchX + ICON.size, // 142
+  height: ICON.pitchY + ICON.size, // 146
+  mediumWidth: 3 * ICON.pitchX + ICON.size, // 314
+  radius: 26,
   padding: 14,
   labelGap: 5,
   /** calendar event color bar */
   eventBar: 3,
 } as const;
 
-/** Cover-display punch-hole in pt (the status bar keeps its right cluster clear of it). */
+/** Cover-display punch-hole in dp. */
 export const PUNCH = {
   diameter: GEOM.punch.cover.diameter / GEOM.viewport.scale,
   fromRight: GEOM.punch.cover.fromRight / GEOM.viewport.scale,
   fromTop: GEOM.punch.cover.fromTop / GEOM.viewport.scale,
 } as const;
 
-/** Status bar (Phase 2 CHROME SPECS: "9:41" semibold 17 pt; 4 bars, 3 Wi-Fi arcs, battery). */
-export const STATUS = {
-  height: 54,
-  timeSize: 17,
-  /** cover: time at the leading edge on the punch-hole's center line */
-  coverTimeLeft: 28,
-  coverCenter: PUNCH.fromTop,
-  /** gap between the right cluster and the punch-hole */
-  holeGap: 12,
-  clusterGap: 6,
-  cellular: { width: 18, height: 12 },
-  wifi: { width: 16, height: 12 },
-  battery: { width: 26, height: 12.5, nub: 1.5, inset: 2, radius: 4, level: 0.72 },
-  /** both displays: time, Wi-Fi button and battery stacked top-right (iPhone Duo) */
-  railTimeTop: 24,
-  railTimeSize: 15,
-  railWifiGap: 8,
-  /** the round glass button around the Wi-Fi glyph */
-  wifiButton: 28,
-} as const;
+export { STATUS, HOME_INDICATOR } from "@/components/lookalike/metrics";
 
-/** Home indicator: 134 x 5 pt, 8 pt from the bottom (apps only; iOS hides it on the home screen). */
-export const HOME_INDICATOR = { width: 134, height: 5, radius: 2.5, bottom: 8 } as const;
-
-/** Vertical dock (Liquid Glass capsule). */
-/** The iOS 26 side dock: a frosted capsule hugging a column of icons, gaps ~1/3 of an icon. */
+/** The dock: a row of icons along the bottom, no background (One UI default). */
 export const DOCK = {
-  padding: 8,
-  gap: 14,
-  width: ICON.dockSize + 2 * 8, // 62
-  height: 4 * ICON.dockSize + 3 * 14 + 2 * 8, // 242
-  radius: 26,
+  /** gap between the dock icons' bottom and the display's bottom (clears the gesture handle) */
+  bottom: 26,
+  pitch: 86,
+  innerPitch: 96,
 } as const;
 
+/** Search: not on the One UI home screen; kept as the launch origin for the "search" target. */
 export const SEARCH = { size: 36, glyph: 15, bottom: 20 } as const;
-export const DOTS = { size: 7, gap: 9, bottom: 16 } as const;
+/** Page indicator: small dots just above the dock. */
+export const DOTS = { size: 6, gap: 8, aboveDock: 14 } as const;
 
 export type Rect = { x: number; y: number; w: number; h: number };
 
@@ -158,11 +136,14 @@ type ScreenLayout = {
   /** slot (col, row) of every grid app */
   slots: Record<string, { col: number; row: number }>;
   widgets: { weather: Rect; calendar: Rect; photos?: Rect; music?: Rect; reminders?: Rect };
-  /** center x of the right rail (dock, search, D8 status) */
-  railX: number;
-  dockTop: number;
+  /** top of the dock icons */
+  dockY: number;
+  /** left x of each dock icon */
+  dockXs: number[];
   /** center x of the page dots */
   dotsX: number;
+  /** right edge x for the trailing items (search launch origin) */
+  railX: number;
 };
 
 const cover = GEOM.viewport.cover;
@@ -182,68 +163,65 @@ function fill(cols: number, rows: number, taken: (c: number, r: number) => boole
 }
 
 const range = (n: number, start: number, step: number) => Array.from({ length: n }, (_, i) => start + i * step);
+const dockXs = (width: number, pitch: number) => range(DOCK_APPS.length, width / 2 - ((DOCK_APPS.length - 1) * pitch) / 2 - ICON.dockSize / 2, pitch);
+const dockY = (height: number) => height - DOCK.bottom - ICON.dockSize;
 
-/** Cover (402 x 573.1): grid x 28-308, rail centered under the punch-hole. */
-const COVER_TOP = 58;
-const COVER_LEFT = 28;
+/** Cover (384 x 597.7): a 4-column grid, 314 dp wide, centered. */
+const COVER_TOP = 50;
+const COVER_LEFT = (cover.width - (3 * ICON.pitchX + ICON.size)) / 2;
 const coverLayout: ScreenLayout = {
   width: cover.width,
   height: cover.height,
   cols: range(4, COVER_LEFT, ICON.pitchX),
-  rows: range(6, COVER_TOP, ICON.pitchY),
-  slots: fill(4, 6, (_c, r) => r < 2),
+  rows: range(5, COVER_TOP, ICON.pitchY),
+  slots: fill(4, 5, (_c, r) => r < 2),
   widgets: {
-    weather: { x: COVER_LEFT, y: COVER_TOP, w: WIDGET.size, h: WIDGET.size },
-    calendar: { x: COVER_LEFT + 2 * ICON.pitchX, y: COVER_TOP, w: WIDGET.size, h: WIDGET.size },
+    weather: { x: COVER_LEFT, y: COVER_TOP, w: WIDGET.size, h: WIDGET.height },
+    calendar: { x: COVER_LEFT + 2 * ICON.pitchX, y: COVER_TOP, w: WIDGET.size, h: WIDGET.height },
   },
-  railX: cover.width - 46,
-  dockTop: 206,
+  dockY: dockY(cover.height),
+  dockXs: dockXs(cover.width, DOCK.pitch),
   dotsX: cover.width / 2,
+  railX: cover.width - COVER_LEFT,
 };
 
 /**
- * Inner (822.5 x 573.1): two 4-column blocks, one per half, so no icon crosses the hinge
- * (x 411.25); the widgets fill the left block's first two rows.
+ * Inner (801.5 x 597.7): two 4-column blocks, one per half, so no icon crosses the crease
+ * (x 400.75). Left block: Weather + Calendar (rows 0-1), four apps (row 2), Now playing (rows 3-4).
+ * Right block: eight apps (rows 0-1), Gallery + Reminder widgets (rows 2-3).
  */
-const INNER_TOP = 52;
-const INNER_LEFT = 52;
-const INNER_RIGHT_BLOCK = 436;
+const INNER_TOP = 50;
+const BLOCK = 3 * ICON.pitchX + ICON.size; // 314
+const INNER_LEFT = (inner.width / 2 - BLOCK) / 2;
+const INNER_RIGHT_BLOCK = inner.width / 2 + INNER_LEFT;
 const innerLayout: ScreenLayout = {
   width: inner.width,
   height: inner.height,
   cols: [...range(4, INNER_LEFT, ICON.pitchX), ...range(4, INNER_RIGHT_BLOCK, ICON.pitchX)],
-  rows: range(6, INNER_TOP, ICON.pitchY),
-  slots: fill(8, 6, (c, r) => (c < 4 && r < 2) || (c < 2 && r >= 3 && r < 5)),
+  rows: range(5, INNER_TOP, ICON.pitchY),
+  slots: fill(8, 5, (c, r) => (c < 4 && r !== 2) || (c >= 4 && r >= 2)),
   widgets: {
-    weather: { x: INNER_LEFT, y: INNER_TOP, w: WIDGET.size, h: WIDGET.size },
-    calendar: { x: INNER_LEFT + 2 * ICON.pitchX, y: INNER_TOP, w: WIDGET.size, h: WIDGET.size },
-    // Photos (Featured Photo) widget: left block, cols 0-1, rows 3-4 (below the icon rows)
-    photos: { x: INNER_LEFT, y: INNER_TOP + 3 * ICON.pitchY, w: WIDGET.size, h: WIDGET.size },
-    // Medium (4 x 2) widgets fill the right block's empty rows 2-5
-    music: { x: INNER_RIGHT_BLOCK, y: INNER_TOP + 2 * ICON.pitchY, w: WIDGET.mediumWidth, h: WIDGET.size },
-    reminders: { x: INNER_RIGHT_BLOCK, y: INNER_TOP + 4 * ICON.pitchY, w: WIDGET.mediumWidth, h: WIDGET.size },
+    weather: { x: INNER_LEFT, y: INNER_TOP, w: WIDGET.size, h: WIDGET.height },
+    calendar: { x: INNER_LEFT + 2 * ICON.pitchX, y: INNER_TOP, w: WIDGET.size, h: WIDGET.height },
+    music: { x: INNER_LEFT, y: INNER_TOP + 3 * ICON.pitchY, w: WIDGET.mediumWidth, h: WIDGET.height },
+    photos: { x: INNER_RIGHT_BLOCK, y: INNER_TOP + 2 * ICON.pitchY, w: WIDGET.size, h: WIDGET.height },
+    reminders: { x: INNER_RIGHT_BLOCK + 2 * ICON.pitchX, y: INNER_TOP + 2 * ICON.pitchY, w: WIDGET.size, h: WIDGET.height },
   },
-  railX: inner.width - 48,
-  dockTop: 190,
-  dotsX: (INNER_LEFT + INNER_RIGHT_BLOCK + 3 * ICON.pitchX + ICON.size) / 2,
+  dockY: dockY(inner.height),
+  dockXs: dockXs(inner.width, DOCK.innerPitch),
+  dotsX: inner.width / 2,
+  railX: inner.width - INNER_LEFT,
 };
 
 export const HOME_LAYOUT: Record<HomeDisplay, ScreenLayout> = { cover: coverLayout, inner: innerLayout };
 
-/** Icon rect (pt, in the display's viewport) of a grid or dock app. */
+/** Icon rect (dp, in the display's viewport) of a grid or dock app. */
 export function iconRectPt(display: HomeDisplay, app: HomeAppId): Rect | null {
   const L = HOME_LAYOUT[display];
   const slot = L.slots[app];
   if (slot) return { x: L.cols[slot.col], y: L.rows[slot.row], w: ICON.size, h: ICON.size };
   const d = DOCK_APPS.indexOf(app);
-  if (d >= 0) {
-    return {
-      x: L.railX - ICON.dockSize / 2,
-      y: L.dockTop + DOCK.padding + d * (ICON.dockSize + DOCK.gap),
-      w: ICON.dockSize,
-      h: ICON.dockSize,
-    };
-  }
+  if (d >= 0) return { x: L.dockXs[d], y: L.dockY, w: ICON.dockSize, h: ICON.dockSize };
   return null;
 }
 

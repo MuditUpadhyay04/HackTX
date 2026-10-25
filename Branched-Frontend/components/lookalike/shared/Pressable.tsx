@@ -26,12 +26,12 @@ export function Pressable({ children, onPress, nav, action, feedback = "opacity"
   const [down, setDown] = useState(false);
   const look: CSSProperties =
     feedback === "scale"
-      ? { scale: down ? String(pressSpec.scale) : "1", transition: "scale var(--motion-press-in) var(--ease-ios)" }
+      ? { scale: down ? String(pressSpec.scale) : "1", transition: "scale var(--motion-press-in) var(--ease-std)" }
       : feedback === "darken"
-        ? { filter: down ? `brightness(${pressSpec.brightness})` : undefined, transition: "filter var(--motion-press-in) var(--ease-ios)" }
+        ? { filter: down ? `brightness(${pressSpec.brightness})` : undefined, transition: "filter var(--motion-press-in) var(--ease-std)" }
         : feedback === "highlight"
-          ? { background: down ? highlight : style?.background, transition: down ? undefined : "background var(--motion-press) var(--ease-ios)" }
-          : { opacity: down ? 0.35 : 1, transition: down ? undefined : "opacity var(--motion-press) var(--ease-ios)" };
+          ? { background: down ? highlight : style?.background, transition: down ? undefined : "background var(--motion-press) var(--ease-std)" }
+          : { opacity: down ? 0.35 : 1, transition: down ? undefined : "opacity var(--motion-press) var(--ease-std)" };
   const Tag = as;
   return (
     <Tag

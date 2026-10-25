@@ -20,7 +20,7 @@ export type StageBackground = "black" | "un-stage" | "wallpaper" | "white" | "st
 const FILL: Record<StageBackground, string> = {
   black: "var(--stage-black)",
   "un-stage": "var(--un-stage)",
-  wallpaper: "var(--ios-wallpaper-base)",
+  wallpaper: "var(--ui-wallpaper-base)",
   white: "var(--stage-white)",
   studio: "var(--stage-studio)",
 };
@@ -143,7 +143,7 @@ export function Stage({
 }
 
 /**
- * The `ios-wallpaper` token recipe (spec 4.2; Phase 1 build note): base,
+ * The `ui-wallpaper` token recipe (spec 4.2; Phase 1 build note): base,
  * four radial blobs sampled from Gurneal's icon, the whole layer blurred 80
  * and saturated 1.2, scaled 1.2 so the blur has no edges, plus a 4% noise
  * overlay against banding. Static in Phase 0; Phase 1's device builder refines it.
@@ -158,7 +158,7 @@ export function Wallpaper({ variant = "stage" }: { variant?: "stage" }) {
         position: "absolute",
         inset: 0,
         overflow: "hidden",
-        background: "var(--ios-wallpaper-base)",
+        background: "var(--ui-wallpaper-base)",
         pointerEvents: "none",
       }}
     >
@@ -166,7 +166,7 @@ export function Wallpaper({ variant = "stage" }: { variant?: "stage" }) {
         style={{
           position: "absolute",
           inset: 0,
-          backgroundImage: "var(--ios-wallpaper)",
+          backgroundImage: "var(--ui-wallpaper)",
           filter: "var(--wallpaper-filter)",
           transform: "scale(var(--wallpaper-scale))",
         }}

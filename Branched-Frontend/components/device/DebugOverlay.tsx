@@ -21,18 +21,11 @@ function punchBox(host: Rect): Rect {
 
 function buttonBoxes(rightHalfX: number): Box[] {
   const b = GEOM.buttons;
-  const top = ARTBOARD.folded.device.y - b.protrude;
-  const onTop = (["volumeUp", "volumeDown"] as const).map((name) => ({
-    label: name === "volumeUp" ? "volume up" : "volume down",
-    alt: true,
-    rect: { x: rightHalfX + GEOM.panel.width - b[name].fromOuter - b[name].length, y: top, width: b[name].length, height: b.protrude },
-  }));
-  const onSide = (["power", "camera"] as const).map((name) => ({
-    label: name,
+  return (["volumeUp", "volumeDown", "power"] as const).map((name) => ({
+    label: name === "volumeUp" ? "volume up" : name === "volumeDown" ? "volume down" : "side key",
     alt: true,
     rect: { x: rightHalfX + GEOM.panel.width, y: ARTBOARD.folded.device.y + b[name].fromTop, width: b.protrude, height: b[name].length },
   }));
-  return [...onTop, ...onSide];
 }
 
 function boxesFor(view: "folded" | "unfolded" | "back"): Box[] {

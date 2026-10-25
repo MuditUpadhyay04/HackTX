@@ -6,7 +6,7 @@
  *   - app icons (grid + dock): HomeAppId, e.g. "facebook", "messages", "unsaid"
  *   - widgets: "widget-weather", "widget-calendar", "widget-photos", "widget-music", "widget-reminders"
  *   - the home Search button: "search"
- *   - the hardware buttons: "hw-volume-up", "hw-volume-down", "hw-touch-id", "hw-camera"
+ *   - the hardware buttons: "hw-volume-up", "hw-volume-down", "hw-side-key"
  *
  * Link a button by setting its entry to your component:  facebook: MyFacebook,
  * Only if a button should do something different on one display, add it to DISPLAY_OVERRIDES.
@@ -24,7 +24,7 @@ import { MessagesApp } from "@/components/apps/messages/MessagesApp";
 import { WhatsAppApp } from "@/components/apps/whatsapp/WhatsAppApp";
 
 export type WidgetTarget = "widget-weather" | "widget-calendar" | "widget-photos" | "widget-music" | "widget-reminders";
-export type HardwareTarget = "hw-volume-up" | "hw-volume-down" | "hw-touch-id" | "hw-camera";
+export type HardwareTarget = "hw-volume-up" | "hw-volume-down" | "hw-side-key";
 export type AppTarget = HomeAppId | WidgetTarget | HardwareTarget | "search";
 
 export type AppScreenProps = {
@@ -48,8 +48,7 @@ export const TARGET_NAMES: Record<AppTarget, string> = {
   search: "Search",
   "hw-volume-up": "Volume up",
   "hw-volume-down": "Volume down",
-  "hw-touch-id": "Touch ID button",
-  "hw-camera": "Camera Control",
+  "hw-side-key": "Side key",
 };
 
 const ALL = Object.keys(TARGET_NAMES) as AppTarget[];

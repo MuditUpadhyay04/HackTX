@@ -60,7 +60,7 @@ export function MissedCallRow({ label, sub, time, tail, onPress }: { label: stri
           <MissedCallGlyph size={WA.missed.glyph * 0.6} />
         </span>
         <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-          <span style={{ fontSize: WA.missed.title, fontWeight: 600, lineHeight: "var(--type-subheadline-line-height)", color: "var(--ios-label)", letterSpacing: "var(--type-subheadline-tracking)" }}>
+          <span style={{ fontSize: WA.missed.title, fontWeight: 600, lineHeight: "var(--type-subheadline-line-height)", color: "var(--ui-label)", letterSpacing: "var(--type-subheadline-tracking)" }}>
             {label}
           </span>
           <span style={{ fontSize: WA.missed.sub, lineHeight: "var(--type-footnote-line-height)", color: "var(--wa-meta)" }}>

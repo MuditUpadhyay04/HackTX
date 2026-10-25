@@ -32,7 +32,7 @@ type DeviceColors = { [K in keyof typeof branched.device as `device-${K & string
 /** Look-alike palettes keyed by their section 4.2 group name (for swatch sheets). */
 export const palettes = branched.lookalike;
 
-/** Every look-alike color flattened by token name: wa-green ... ios-banner. */
+/** Every look-alike color flattened by token name: wa-green ... ui-banner. */
 const lookalikeColors = Object.assign({}, ...Object.values(branched.lookalike)) as LookalikeColors;
 
 /** Device colors (section 4.3), prefixed: device-frame-base ... device-back-glass. */
@@ -47,22 +47,22 @@ const extraColors = {
   "stage-white": "#FFFFFF",
   // D12: the Apple product-page studio backdrop behind the device (warm off-white)
   "stage-studio": "#F5F5F1",
-  // Phase 1 wallpaper base (the ios-wallpaper gradient sits on it)
-  "ios-wallpaper-base": "#0B0B12",
+  // Phase 1 wallpaper base (the ui-wallpaper gradient sits on it)
+  "ui-wallpaper-base": "#0B0B12",
   // iOS system label + separator colors (Apple HIG), light and dark, for iOS chrome text and hairlines
-  "ios-label": "#000000",
-  "ios-label-secondary": "rgba(60,60,67,0.6)",
-  "ios-separator": "rgba(60,60,67,0.29)",
-  "ios-bg": "#FFFFFF",
+  "ui-label": "#000000",
+  "ui-label-secondary": "rgba(60,60,67,0.6)",
+  "ui-separator": "rgba(60,60,67,0.29)",
+  "ui-bg": "#FFFFFF",
   "label-on-dark": "#FFFFFF",
   // iOS dark mode system colors (Apple HIG): elevated / grouped backgrounds, fill, separator, labels
-  "ios-dark-elevated": "#1C1C1E",
-  "ios-dark-grouped": "#2C2C2E",
-  "ios-dark-fill": "#39393D",
-  "ios-dark-separator": "rgba(84,84,88,0.65)",
-  "ios-dark-label": "#FFFFFF",
-  "ios-dark-label-2": "rgba(235,235,245,0.6)",
-  "ios-dark-label-3": "rgba(235,235,245,0.3)",
+  "ui-dark-elevated": "#1C1C1E",
+  "ui-dark-grouped": "#2C2C2E",
+  "ui-dark-fill": "#39393D",
+  "ui-dark-separator": "rgba(84,84,88,0.65)",
+  "ui-dark-label": "#FFFFFF",
+  "ui-dark-label-2": "rgba(235,235,245,0.6)",
+  "ui-dark-label-3": "rgba(235,235,245,0.3)",
   // Phase 1 device parts
   "device-island": "#000000",
   "device-display-off": "#000000",
@@ -97,9 +97,9 @@ const extraColors = {
   "wa-caret": "#00A884",
   "wa-chip": "#F0F2F5",
   "wa-chip-active-text": "#15603E",
-  "imsg-nav-material": "rgba(249,249,249,0.94)",
-  "ios-fill-tertiary": "rgba(118,118,128,0.12)",
-  "ios-scrim": "rgba(0,0,0,0.4)",
+  "msg-nav-material": "rgba(249,249,249,0.94)",
+  "ui-fill-tertiary": "rgba(118,118,128,0.12)",
+  "ui-scrim": "rgba(0,0,0,0.4)",
   "banner-stroke": "rgba(0,0,0,0.06)",
   "kb-label": "#000000",
   "kb-special-label": "#000000",
@@ -107,11 +107,11 @@ const extraColors = {
   // look-alike apps (components/apps/*): iOS system colors (HIG) and app chrome the spec leaves open
   "on-accent": "#FFFFFF",
   "on-accent-2": "rgba(255,255,255,0.8)",
-  "ios-indigo": "#5E5CE6",
-  "ios-teal": "#30B0C7",
-  "ios-yellow": "#FFCC00",
-  "ios-pink": "#FF2D55",
-  "ios-push-shadow": "rgba(0,0,0,0.12)",
+  "ui-indigo": "#5E5CE6",
+  "ui-teal": "#30B0C7",
+  "ui-yellow": "#FFCC00",
+  "ui-pink": "#FF2D55",
+  "ui-push-shadow": "rgba(0,0,0,0.12)",
   "meta-ai-blue": "#3EC6F6",
   "meta-ai-violet": "#7A5CF5",
   "meta-ai-magenta": "#C04FD9",
@@ -128,7 +128,7 @@ export const color = { ...lookalikeColors, ...deviceColors, ...extraColors };
 export type ColorToken = keyof typeof color;
 
 // ---------------------------------------------------------------------------
-// Gradients (look-alike, section 4.2; ios-wallpaper per the Phase 1 recipe)
+// Gradients (look-alike, section 4.2; ui-wallpaper per the Phase 1 recipe)
 // ---------------------------------------------------------------------------
 
 /**
@@ -137,7 +137,7 @@ export type ColorToken = keyof typeof color;
  * Render it on a layer with `wallpaper.filter` and `wallpaper.scale` (see below).
  */
 const c = unTheme.color;
-const iosWallpaper = [
+const uiWallpaper = [
   // Apple keynote look (D12): a dark vignette holding luminous blue -> violet -> orchid fields with
   // one bright lilac core, all blurred together so the colors bleed like light, not like blobs
   `radial-gradient(125% 100% at 50% 56%, transparent 52%, #05050B 100%)`,
@@ -166,13 +166,13 @@ export const gradient = {
   "ig-dm-out": branched.lookalike_gradient["ig-dm-out"],
   "messenger-gradient": branched.lookalike_gradient["messenger-gradient"],
   "meta-ai-gradient": branched.lookalike_gradient["meta-ai-gradient"],
-  "ios-wallpaper": iosWallpaper,
+  "ui-wallpaper": uiWallpaper,
 };
 export type GradientToken = keyof typeof gradient;
 
-/** How the ios-wallpaper layer is rendered (Phase 1): blurred, scaled past its edges, 4% noise. */
+/** How the ui-wallpaper layer is rendered (Phase 1): blurred, scaled past its edges, 4% noise. */
 export const wallpaper = {
-  gradient: iosWallpaper,
+  gradient: uiWallpaper,
   base: "#05050B",
   filter: "blur(80px) saturate(1.35)",
   scale: 1.2,
@@ -454,7 +454,7 @@ export const foldMotion = {
 
 /** UI font: the system stack (SF on the recording Mac); Inter is a last-resort fallback only. */
 export const font = {
-  system: '-apple-system, "SF Pro Text", "SF Pro Display", system-ui, BlinkMacSystemFont, Inter, sans-serif',
+  system: 'var(--font-roboto), Roboto, "Noto Sans", system-ui, sans-serif',
 } as const;
 
 export type TypeStyle = {

@@ -16,7 +16,7 @@ export function HomeIndicator({ width, tone = "dark" }: { width: number; tone?: 
         width: HOME_INDICATOR.width,
         height: HOME_INDICATOR.height,
         borderRadius: HOME_INDICATOR.radius,
-        background: tone === "dark" ? "var(--ios-label)" : "var(--label-on-dark)",
+        background: tone === "dark" ? "var(--ui-label)" : "var(--label-on-dark)",
         pointerEvents: "none",
       }}
     />

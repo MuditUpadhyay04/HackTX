@@ -59,17 +59,17 @@ export const springs = {
 /** Fades in, the splash, the cold-open text. */
 export const easeSoft = [0.22, 1, 0.36, 1] as const;
 /** Keyboard rise (300 ms), press (120 ms), display wake. */
-export const easeIos = [0.32, 0.72, 0, 1] as const;
+export const easeStd = [0.32, 0.72, 0, 1] as const;
 /** Camera drifts, the specular sweep. */
 export const easeBreath = [0.45, 0, 0.55, 1] as const;
 
 export const easeSoftCss = "cubic-bezier(0.22, 1, 0.36, 1)";
-export const easeIosCss = "cubic-bezier(0.32, 0.72, 0, 1)";
+export const easeStdCss = "cubic-bezier(0.32, 0.72, 0, 1)";
 export const easeBreathCss = "cubic-bezier(0.45, 0, 0.55, 1)";
 
 export const easings = {
   easeSoft: { bezier: easeSoft, css: easeSoftCss },
-  easeIos: { bezier: easeIos, css: easeIosCss },
+  easeStd: { bezier: easeStd, css: easeStdCss },
   easeBreath: { bezier: easeBreath, css: easeBreathCss },
 } as const;
 
@@ -81,13 +81,13 @@ export const easings = {
 export const caretBlink = { on: 500, off: 500 } as const;
 
 export const durations = {
-  /** keyboard rise, easeIos */
+  /** keyboard rise, easeStd */
   keyboardRise: 300,
-  /** press feedback, easeIos (release eases back over this) */
+  /** press feedback, easeStd (release eases back over this) */
   press: 120,
-  /** press-in: lands in under 100 ms (spec fold control), easeIos */
+  /** press-in: lands in under 100 ms (spec fold control), easeStd */
   pressIn: 60,
-  /** display wake, easeIos */
+  /** display wake, easeStd */
   displayWake: 400,
   /** reduced motion: crossfade between key states in the opening */
   reducedOpening: 400,
