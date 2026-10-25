@@ -75,7 +75,7 @@ We also knew what we didn't want to be. Phones already deliver about 63 notifica
   - **Gemini** for the "she'll read:" check, and as the stand-in when Muse Spark can't answer.
   - A public letter page behind unguessable tokens. Links expire in 30 days, can be revoked, and stay sealed until release.
 - **Design:** Gurneal's Un-Said system: a white, light theme with a blue → violet → lilac gradient family, heavy rounded system type, and no handwriting fonts or Meta logos anywhere.
-- **AI tools we used to build it:** Claude Code wrote much of the code from our specs. Grok reviewed the product and wrote the first Gemini echo. Every change was reviewed and tested by us.
+- **AI tools we used to build it:** Claude Code wrote much of the code from our specs. Cursor's agent made 20 commits during the UI overhaul, restyling the Expo app. Grok reviewed the product and wrote the first Gemini echo. Every change was reviewed and tested by us.
 - **Testing:**
   - 92 backend tests, including the whole evening end to end on labeled mock AI. A test asserts that every card line is a substring of what he said; others check the Gemini fallback and that each of Un-Said's own lines appears only under its rule.
   - A Playwright walk of the web client with a fake mic and camera: 15 screenshots across the whole flow, zero console errors.
@@ -149,7 +149,7 @@ We also knew what we didn't want to be. Phones already deliver about 63 notifica
 
 ## Built with
 
-`expo` · `react-native` · `expo-router` · `typescript` · `python` · `fastapi` · `uvicorn` · `websockets` · `sqlite` · `meta-model-api` · `muse-spark` · `muse-voice-transcribe` · `gemini` · `vultr` · `docker` · `caddy` · `whatsapp` · `pytest` · `playwright` · `claude-code` · `grok`
+`expo` · `react-native` · `expo-router` · `typescript` · `python` · `fastapi` · `uvicorn` · `websockets` · `sqlite` · `meta-model-api` · `muse-spark` · `muse-voice-transcribe` · `gemini` · `vultr` · `docker` · `caddy` · `whatsapp` · `pytest` · `playwright` · `claude-code` · `cursor` · `grok`
 
 ## Team
 
@@ -170,4 +170,4 @@ Meta, MLH Vultr and MLH Gemini (the three), plus Best Overall, which doesn't cou
 - **Gemini.** On the letter preview, Gemini reads Muse's Hindi translation back into English (*"she'll read: …"*). It can't edit the letter, and Send works if Gemini is down. When Muse Spark can't answer, Gemini sorts with the same schema, so it still can't write his words.
 - **Best Overall.** Design system, the live backend, the safety eval numbers, one public URL.
 
-Leave Cursor + Grok unchecked: Cursor wasn't our coding agent. Leave .tech, Snowflake, Tiger Data, Solana and the hardware tracks unchecked too.
+Cursor + Grok stays unchecked: Cursor's agent did the UI restyle (20 commits), but Claude Code wrote most of the code, so it wasn't our core agent. Leave .tech, Snowflake, Tiger Data, Solana and the hardware tracks unchecked too.
