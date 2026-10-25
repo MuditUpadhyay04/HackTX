@@ -8,7 +8,8 @@ Branch: `unsaid-overhaul`, off `main` at `c32f7ee`. Mobile only. Nothing under `
 
 - App overhaul: `259c00bc8e13d5fa552f7829d4841245ed852435`
 - Handoff document: `4cf607183f6a5a4d2fd956360d363173bce6fead`
-- The tip of `unsaid-overhaul` is the commit that added this SHA line, directly on top of `4cf6071`.
+- SHA line: `13abbe46112d9ed7b9758abc6ac69232adf916c9`
+- Last commit: the tip of `unsaid-overhaul` after this file was pushed. It is the child of `13abbe4`.
 
 Draft PR: https://github.com/MuditUpadhyay04/HackTX/pull/1
 
