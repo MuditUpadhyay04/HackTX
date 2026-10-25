@@ -13,7 +13,9 @@ import { punchRing } from "../materials";
 /** Motion blur radius (display px) at `openAngle`: 0 at 0 and 180, peak mid-fold, dropped below the floor. */
 export function foldBlurRadius(openAngle: number): number {
   const a = clampAngle(openAngle);
-  const r = foldMotion.blurPeak * Math.pow(Math.sin((Math.PI * a) / 180), foldMotion.blurCurve);
+  // Smoothstepped like the reference so the blur eases in and out with the swing, not linearly.
+  const s = Math.sin((Math.PI * a) / 180);
+  const r = foldMotion.blurPeak * Math.pow(s * s * (3 - 2 * s), foldMotion.blurCurve);
   return r < foldMotion.blurFloor ? 0 : Math.round(r * 100) / 100;
 }
 
@@ -31,6 +33,17 @@ export function innerHalfOpacity(openAngle: number): number {
   return foldMotion.innerDimFrom + (1 - foldMotion.innerDimFrom) * eased;
 }
 
+/**
+ * iphone-duo darkening: how far a moving display is into its swing (0 at rest facing the viewer,
+ * 1 edge-on), smoothstepped. The cover swings away as the hinge opens; the inner half swings in.
+ */
+const smooth = (k: number) => {
+  const c = Math.min(1, Math.max(0, k));
+  return c * c * (3 - 2 * c);
+};
+export const coverSwing = (openAngle: number) => smooth(clampAngle(openAngle) / 90);
+export const innerSwing = (openAngle: number) => smooth((180 - clampAngle(openAngle)) / 90);
+
 const blurCss = (r: number) => (r > 0 ? `blur(${r}px)` : "none");
 
 /**
@@ -45,6 +58,7 @@ export function FoldContent({
   width,
   height,
   inert,
+  shade,
   children,
 }: {
   angle: MotionValue<number>;
@@ -53,10 +67,16 @@ export function FoldContent({
   width: number;
   height: number;
   inert?: boolean;
+  /**
+   * iphone-duo darkening: a black ramp from the hinge (clear) to the far edge, strength =
+   * min(1, 2 * swing). `hinge` is the hinge's side in this layer's own coordinates.
+   */
+  shade?: { swing: (a: number) => number; hinge: "left" | "right" };
   children: ReactNode;
 }) {
   const filter = useTransform(angle, (a) => (soften ? blurCss(foldBlurRadius(a)) : "none"));
   const alpha = useTransform(angle, (a) => (opacity ? opacity(a) : 1));
+  const shadeOpacity = useTransform(angle, (a) => (shade ? Math.min(1, 2 * shade.swing(a)) : 0));
   return (
     <motion.div
       data-fold-content=""
@@ -75,6 +95,20 @@ export function FoldContent({
       }}
     >
       {children}
+      {shade ? (
+        <motion.div
+          aria-hidden="true"
+          data-fold-shade=""
+          style={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            opacity: shadeOpacity,
+            // darkenGradient^1.35 from 20% off the hinge, as in the reference shader
+            background: `linear-gradient(to ${shade.hinge === "left" ? "right" : "left"}, rgba(0,0,0,0) 20%, rgba(0,0,0,0.11) 40%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.53) 75%, rgba(0,0,0,0.8) 90%, #000 100%)`,
+          }}
+        />
+      ) : null}
     </motion.div>
   );
 }

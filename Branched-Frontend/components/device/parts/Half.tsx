@@ -7,7 +7,7 @@ import { buttonShadow } from "../materials";
 import { EdgeFace } from "./EdgeFace";
 import { ALL_SIDES, Face } from "./Face";
 import { GlassBack } from "./GlassBack";
-import { FoldContent, GlassSheen, PunchHole, ScreenSurface, coverContentOpacity, innerHalfOpacity } from "./Screen";
+import { FoldContent, GlassSheen, PunchHole, ScreenSurface, coverSwing, innerSwing } from "./Screen";
 import { HalfShadow } from "./Shadow";
 
 export type HalfProps = {
@@ -109,7 +109,7 @@ function InnerFace({ side, screenOn, angle, fill, children }: FaceContentProps &
         <FoldContent
           angle={angle}
           soften={moving}
-          opacity={moving ? innerHalfOpacity : undefined}
+          shade={moving ? { swing: innerSwing, hinge: "right" } : undefined}
           width={half}
           height={inner.height}
           inert
@@ -156,7 +156,7 @@ function CoverFace({ screenOn, angle, fill, children }: FaceContentProps) {
     >
       <ScreenSurface on={screenOn && fill === "wallpaper"} width={c.width} height={c.height} />
       {screenOn && children != null ? (
-        <FoldContent angle={angle} soften opacity={coverContentOpacity} width={c.width} height={c.height}>
+        <FoldContent angle={angle} soften shade={{ swing: coverSwing, hinge: "left" }} width={c.width} height={c.height}>
           <div
             data-duo-viewport="cover"
             style={{

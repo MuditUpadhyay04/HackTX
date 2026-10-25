@@ -9,8 +9,8 @@
  *   foldDevice         the same actions without React (the opening timeline, the dev panel).
  *   window.__unsaidDevice  the same actions + live angle, in dev/test builds (and ?dev=1).
  *
- * Motion: framer-motion animate(angleValue, target, springUnfold), interruptible: a new command
- * mid-move starts from the current angle with the current velocity (no jump, no restart).
+ * Motion: framer-motion animate(angleValue, target, hingeTween): 1.4 s smoothstep, no overshoot
+ * (the iphone-duo reference). Interruptible: a new command mid-move starts from the current angle.
  * Detent: crossing 178 while unfolding / 2 while folding bumps `ripple` (HingeRipple plays).
  * Reduced motion (prefers-reduced-motion or ?motion=reduced): the angle jumps and `crossfade`
  * is set for durations.reducedFold ms so the page can fade the old snapshot out.
@@ -20,7 +20,7 @@
 import { useEffect, useState } from "react";
 import { animate, motionValue, type AnimationPlaybackControlsWithThen, type MotionValue } from "framer-motion";
 import { useShallow } from "zustand/react/shallow";
-import { durations, prefersReducedMotion, springUnfold } from "@/lib/motion";
+import { durations, hingeTween, prefersReducedMotion } from "@/lib/motion";
 import {
   FOLDED_ANGLE,
   UNFOLDED_ANGLE,
@@ -109,12 +109,15 @@ function moveTo(target: number): void {
     return;
   }
 
-  // Read the velocity BEFORE stopping: a reversal mid-move keeps it (interruptible, no restart).
-  const velocity = angleValue.getVelocity();
   stopSpring();
   useFoldStore.setState({ target, folded: isFoldedAngle(target), moving: true, crossfade: null });
 
-  const run = animate(angleValue, target, { ...springUnfold, velocity });
+  // Smoothstep tween (iphone-duo): no overshoot; an interrupted move takes the share of 1.4 s it has left.
+  const distance = Math.abs(target - from) / (UNFOLDED_ANGLE - FOLDED_ANGLE);
+  const run = animate(angleValue, target, {
+    duration: Math.max(0.35, hingeTween.duration * distance),
+    ease: hingeTween.ease,
+  });
   controls = run;
   run.then(() => {
     if (controls !== run) return; // superseded by a newer move

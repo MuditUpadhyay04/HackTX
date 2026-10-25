@@ -33,6 +33,12 @@ export const springPullback = { type: "spring", stiffness: 75, damping: 20, mass
 /** The hinge: fold and unfold (fold control, banner tap, B27). */
 export const springUnfold = { type: "spring", stiffness: 120, damping: 22, mass: 1.3 } as const;
 
+/**
+ * The hinge tween (iphone-duo reference): a full 0 <-> 180 move takes 1.4 s on a smoothstep curve,
+ * no overshoot. A partial move (an interrupted fold) scales its duration by the distance left.
+ */
+export const hingeTween = { duration: 1.4, ease: (t: number) => t * t * (3 - 2 * t) } as const;
+
 export type SpringSpec = { readonly type: "spring"; readonly stiffness: number; readonly damping: number; readonly mass: number };
 
 export const springs = {
