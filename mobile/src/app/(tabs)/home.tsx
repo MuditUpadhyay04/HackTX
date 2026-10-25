@@ -3,14 +3,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppGlyph } from "../../components/AppRail";
 import { LoadingBlock, Rise } from "../../components/motion";
 import { Avatar, CardGradient, OutlinePill, PillGradientFill, Press, Row, Sheet, styles as ui, T, TextButton } from "../../components/ui";
 import { api, mediaUrl, type Card } from "../../lib/api";
-import { CHANNEL_APP, handOff } from "../../lib/handoff";
+import { CHANNEL_APP, handOff, openChannel, openLink } from "../../lib/handoff";
 import { haptics } from "../../lib/haptics";
 import { toast } from "../../lib/toast";
 import { useHome } from "../../lib/useHome";
@@ -78,6 +78,7 @@ export default function Home() {
   const ready = home?.cards.filter((c) => c.status === "ready") ?? [];
   const delivered = home?.cards.filter((c) => justDelivered(c, home.clock.now)) ?? [];
   const arrived = (home?.nudges ?? []).filter((n) => n.kind === "reply");
+  const elsewhere = (home?.nudges ?? []).filter((n) => n.kind === "reply_elsewhere");
   // Newest first, ten at most: his photos and the cast's demo photos (the old SVG placeholders stay out).
   const lane = (home?.photos ?? [])
     .filter((p) => !/\.svg($|\?)/i.test(p.url ?? ""))
@@ -324,6 +325,22 @@ export default function Home() {
                   </View>
                 ) : null}
 
+                {elsewhere.length ? (
+                  <View style={[styles.list, { marginTop: space.s24 }]}>
+                    {elsewhere.map((n) => {
+                      const p = home.people.find((x) => x.id === n.person_id);
+                      return (
+                        <Row key={n.id} featureId="reply-elsewhere" onPress={() => p && openChannel(p, n.url)}>
+                          <Avatar name={name(n.person_id)} ring />
+                          <View style={{ flex: 1 }}>
+                            <T v="rowName" lines={2}>{n.title}</T>
+                          </View>
+                        </Row>
+                      );
+                    })}
+                  </View>
+                ) : null}
+
                 {home.reminders.length ? (
                   <View style={[styles.list, { marginTop: space.s24 }]}>
                     {home.reminders.map((r) => (
@@ -343,7 +360,7 @@ export default function Home() {
                             onPress={async () => {
                               await api.reminderDone(r.id);
                               haptics.success();
-                              Linking.openURL(r.handoff!);
+                              if (r.channel !== "self") openLink(CHANNEL_APP[r.channel], r.handoff!);
                               refresh();
                             }}
                           />

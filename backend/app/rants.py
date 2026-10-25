@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from . import attention, audio, db, memory, safety, sorting, store, timeutil, voice
 from .ai import spark
 from .config import settings
+from .whatsapp import digits
 
 log = logging.getLogger("unsaid.rants")
 
@@ -15,6 +16,9 @@ SELF_NOTE_TONES = {"overwhelmed", "lonely", "tired", "hurt"}
 
 # "Tell them how you feel." stays quiet if he already reached out to them this recently.
 RECENTLY_SENT = timedelta(days=7)
+
+# "Take that step." comes after his second rant in a session: another sorted rant this recently.
+SESSION_WINDOW = timedelta(hours=2)
 
 
 def language_bias() -> list[str]:
@@ -127,7 +131,78 @@ async def sort_rant(rant_id: str, for_person: str | None = None) -> dict:
     memory.link(row["asset_id"], spoken_about, now_dt)
     if encourage:
         attention.record("encourage", now_dt, person_id=encourage, asset_id=row["asset_id"])
+    # The film's two lines (voice.WAITING, voice.TAKE_THAT_STEP): rules, decided once and kept.
+    waiting = _choose_waiting(spoken_about, people)
+    step = _choose_step(rant_id, spoken_about, now_dt)
+    with db.tx() as c:
+        c.execute("UPDATE rants SET waiting_person = ?, step_person = ? WHERE id = ?", (waiting, step, rant_id))
+    if step:
+        attention.record("step", now_dt, person_id=step, asset_id=row["asset_id"])
     return sort_result(rant_id)
+
+
+def _choose_waiting(spoken_about: list[str], people: list[dict]) -> str | None:
+    """Who, if anyone, gets "Mom is waiting to hear this from you." with Call on WhatsApp.
+
+    At most one person per rant: someone on WhatsApp he just said things for, whose voice note
+    is waiting unheard or who kept checking in after his last letter. Most check-ins wins.
+    """
+    by_id = {p["id"]: p for p in people}
+    best: tuple[int, str] | None = None
+    for person_id in spoken_about:
+        if by_id.get(person_id, {}).get("channel") != "whatsapp":
+            continue
+        with db.tx() as c:
+            unheard = c.execute(
+                "SELECT COUNT(*) FROM replies WHERE from_person_id = ? AND heard_at IS NULL", (person_id,)
+            ).fetchone()[0]
+        check_ins = attention.inbound_since(person_id, attention.last_letter_at(person_id), ("text", "missed_call"))
+        weight = unheard + check_ins
+        if weight and (best is None or weight > best[0]):
+            best = (weight, person_id)
+    return best[1] if best else None
+
+
+def _choose_step(rant_id: str, spoken_about: list[str], now: datetime) -> str | None:
+    """Who, if anyone, gets "Take that step. ..." after this rant.
+
+    The person he has kept the most words for, if this rant had words for them, after his second
+    rant in a session (Demo mode: after any rant). Once per person per 72 h (Demo mode: no wait).
+    """
+    if not spoken_about:
+        return None
+    demo = attention.get_settings()["knock_mode"] == "demo"
+    with db.tx() as c:
+        if not demo:
+            earlier = c.execute(
+                "SELECT COUNT(*) FROM rants WHERE id != ? AND safety = 'ok' AND sorted_at >= ?",
+                (rant_id, db.iso(now - SESSION_WINDOW)),
+            ).fetchone()[0]
+            if not earlier:
+                return None
+        kept = {
+            r["person_id"]: r["n"]
+            for r in c.execute("SELECT person_id, COUNT(*) AS n FROM pieces WHERE status = 'kept' GROUP BY person_id")
+        }
+    order = [p["id"] for p in store.list_people()]
+    top = max(spoken_about, key=lambda pid: (kept.get(pid, 0), -order.index(pid) if pid in order else -99))
+    if not kept.get(top):
+        return None
+    if not demo and attention.shown_recently("step", top, attention.STEP_COOLDOWN, now):
+        return None
+    return top
+
+
+def call_action(person: dict) -> dict:
+    """The Call on WhatsApp button. Un-Said never places the call: this opens WhatsApp."""
+    phone = digits(person["handle"])
+    return {
+        "kind": "call",
+        "channel": person["channel"],
+        "person_id": person["id"],
+        "label": voice.call_action(person["channel"]),
+        "url": f"https://wa.me/{phone}" if phone else "whatsapp://",
+    }
 
 
 def _choose_encourage(rant_id: str, asset_id: str | None, spoken_about: list[str], now: datetime) -> str | None:
@@ -182,7 +257,9 @@ def sort_result(rant_id: str) -> dict:
 
     now = timeutil.now_utc()
     with db.tx() as c:
-        row = c.execute("SELECT sorted_at, encourage_person FROM rants WHERE id = ?", (rant_id,)).fetchone()
+        row = c.execute(
+            "SELECT sorted_at, encourage_person, waiting_person, step_person FROM rants WHERE id = ?", (rant_id,)
+        ).fetchone()
         new = c.execute("SELECT * FROM pieces WHERE rant_id = ? ORDER BY rowid", (rant_id,)).fetchall()
         lines = {r["person_id"]: r["line"] for r in c.execute("SELECT * FROM reflections WHERE rant_id = ?", (rant_id,))}
         kept = {
@@ -204,6 +281,11 @@ def sort_result(rant_id: str) -> dict:
             "reflection": lines.get(person["id"], ""),
             "history": _history(person["id"], rant_id, row["sorted_at"]),
             "encourage": voice.ENCOURAGE if person["id"] == row["encourage_person"] else None,
+            "waiting": (
+                {"line": voice.waiting(person["name"]), "action": call_action(person)}
+                if person["id"] == row["waiting_person"] else None
+            ),
+            "step": voice.TAKE_THAT_STEP if person["id"] == row["step_person"] else None,
         })
     tones = {r["tone"] for r in new}
     return {

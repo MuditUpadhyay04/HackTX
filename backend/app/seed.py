@@ -81,7 +81,8 @@ def retire_people() -> list[str]:
             paths = [r[0] for r in c.execute("SELECT path FROM photos WHERE person_id = ?", (pid,))]
             c.execute("DELETE FROM photos WHERE person_id = ?", (pid,))
             for table, col in (("pieces", "person_id"), ("reminders", "person_id"), ("photo_links", "person_id"),
-                               ("attention", "person_id"), ("pushes", "person_id"), ("drafts", "person_id")):
+                               ("attention", "person_id"), ("pushes", "person_id"), ("drafts", "person_id"),
+                               ("inbound", "person_id")):
                 cols = {r[1] for r in c.execute(f"PRAGMA table_info({table})")}
                 if col in cols:
                     c.execute(f"DELETE FROM {table} WHERE {col} = ?", (pid,))
@@ -286,6 +287,34 @@ def seed_fixtures() -> None:
             "INSERT OR IGNORE INTO reminders (id, person_id, text, created_at) VALUES ('rem_priya', 'priya', ?, ?)",
             ("3 reels this week", at(2026, 10, 24, 18, 20)),
         )
+        # What they sent him in their own apps, matching the phone mock (Branched-Frontend/lib/mock/threads.ts)
+        # and the film (PLAN.md §5). Un-Said never reads his chats; this is demo data only. It backs
+        # "Mom is waiting...", the drift knock about Sarah, and "Reply to Michael on Instagram".
+        for iid, person, channel, kind, text, when in INBOUND:
+            c.execute(
+                "INSERT OR IGNORE INTO inbound (id, person_id, channel, kind, text, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+                (iid, person, channel, kind, text, at(*when)),
+            )
+
+
+# id, person, channel, kind, text, (y, m, d, hh, mm) in his time zone
+INBOUND = [
+    ("in_mom_1012_call", "mom", "whatsapp", "missed_call", "", (2026, 10, 12, 19, 30)),
+    ("in_mom_1012_eat", "mom", "whatsapp", "text", "did you eat?", (2026, 10, 12, 19, 34)),
+    ("in_mom_1016_call", "mom", "whatsapp", "missed_call", "", (2026, 10, 16, 20, 9)),
+    ("in_mom_1016_voice", "mom", "whatsapp", "text", "just wanted to hear your voice", (2026, 10, 16, 20, 11)),
+    ("in_mom_1021_call_me", "mom", "whatsapp", "text", "call me when you can ❤️", (2026, 10, 21, 21, 17)),
+    ("in_mom_1023_eat", "mom", "whatsapp", "text", "Beta, did you eat?", (2026, 10, 23, 19, 46)),
+    ("in_mom_1024_call", "mom", "whatsapp", "missed_call", "", (2026, 10, 24, 18, 4)),
+    ("in_mom_1024_free", "mom", "whatsapp", "text", "Call when free", (2026, 10, 24, 18, 5)),
+    ("in_sarah_1015", "jordan", "imessage", "text", "I miss your voice. can we video call tomorrow?", (2026, 10, 15, 23, 20)),
+    ("in_sarah_1021", "jordan", "imessage", "text", "we haven't really hung out in almost three weeks", (2026, 10, 21, 20, 15)),
+    ("in_sarah_1023", "jordan", "imessage", "text", "I really miss you", (2026, 10, 23, 1, 12)),
+    ("in_sarah_1024", "jordan", "imessage", "text", "please just say something", (2026, 10, 24, 21, 41)),
+    ("in_michael_1018_reel", "priya", "instagram", "reel", "", (2026, 10, 18, 19, 26)),
+    ("in_michael_1024_reel", "priya", "instagram", "reel", "", (2026, 10, 24, 21, 40)),
+    ("in_michael_1024_okay", "priya", "instagram", "text", "You okay?", (2026, 10, 24, 21, 41)),
+]
 
 
 def reset_activity() -> None:
@@ -294,7 +323,7 @@ def reset_activity() -> None:
     with db.tx() as c:
         for table in (
             "pieces", "reflections", "cards", "replies", "rants", "self_notes", "reminders",
-            "photo_links", "attention", "pushes", "drafts",
+            "photo_links", "attention", "pushes", "drafts", "inbound",
         ):
             c.execute(f"DELETE FROM {table}")
     seed_fixtures()

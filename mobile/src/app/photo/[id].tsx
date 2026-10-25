@@ -11,6 +11,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { AppIcon } from "../../components/ui";
 import { useKnock } from "../../lib/attention";
 import { haptics } from "../../lib/haptics";
+import { usePhotoMemory } from "../../lib/memory";
 import { photoDate } from "../../lib/photos";
 import { color, shadow, space, spring, type } from "../../theme/tokens";
 
@@ -26,6 +27,8 @@ export default function PhotoViewer() {
   // what Un-Said knocks. Most photos never knock; at most once a session, twice a day.
   const { knock, onZoom, open, dismiss } = useKnock(id);
   const knockShown = Boolean(knock) && !knockGone;
+  // "Take that step." (PLAN.md §5): shown while his latest rant chose someone this photo is about.
+  const { memory } = usePhotoMemory(id);
 
   // From a person's gallery the words are for them; otherwise the knock's person, if it named one.
   const forPerson = person || (knock && "person_id" in knock ? knock.person_id ?? "" : "");
@@ -96,6 +99,12 @@ export default function PhotoViewer() {
         </View>
       ) : null}
 
+      {memory?.step && chrome && !knockShown ? (
+        <View pointerEvents="none" style={[styles.step, shadow.letter, { bottom: insets.bottom + space.s24 }]}>
+          <Text style={type.rowPreview}>{memory.step.line}</Text>
+        </View>
+      ) : null}
+
       <Animated.View
         style={[styles.knockWrap, { paddingTop: insets.top + space.s8, left: space.s8 + insets.left, right: space.s8 + insets.right, transform: [{ translateY: knockY }] }]}
       >
@@ -120,6 +129,7 @@ const styles = StyleSheet.create({
   top: { position: "absolute", top: 0, left: 0, right: 0, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: space.s12, paddingHorizontal: space.s16, paddingBottom: space.s24 },
   round: { width: 40, height: 40, borderRadius: 20, backgroundColor: color.bg, borderWidth: StyleSheet.hairlineWidth, borderColor: color.hairline, alignItems: "center", justifyContent: "center" },
   date: { ...type.navTitle, flex: 1, textAlign: "center", fontSize: 15 },
+  step: { position: "absolute", left: space.s16, right: space.s16, maxWidth: 480, alignSelf: "center", backgroundColor: color.bg, borderRadius: 24, padding: space.s16 },
   knockWrap: { position: "absolute", top: 0, left: space.s8, right: space.s8 },
   // Notification-width on a big or sideways screen, centered, like an iOS banner.
   knock: { width: "100%", maxWidth: 480, alignSelf: "center", flexDirection: "row", gap: space.s12, alignItems: "center", backgroundColor: color.bg, borderRadius: 24, padding: space.s12, borderWidth: StyleSheet.hairlineWidth, borderColor: color.hairline },

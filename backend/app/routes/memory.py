@@ -12,7 +12,7 @@ router = APIRouter(prefix="/api", dependencies=[Depends(require_key)])
 @router.get("/memory/photo")
 def photo_memory(asset_id: str = Query(..., min_length=1, max_length=memory.ASSET_ID_MAX)) -> dict:
     """Who this photo is about (from his own words), and what he said here before, newest first."""
-    return memory.photo_memory(asset_id, timeutil.now_utc())
+    return memory.photo_memory(memory.clean_asset_id(asset_id) or asset_id, timeutil.now_utc())
 
 
 @router.get("/pieces/{piece_id}/audio")

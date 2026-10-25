@@ -13,10 +13,14 @@ Gentle mode, the default:
   - 2 dismisses in a row pause knocks for 7 days; opening one resets that
   - nothing within 24 h of a safety concern
 Demo mode: 3 s on any photo, no caps (rehearsing on stage). Off: never.
+
+What it says, in order: her unheard reply; the drift knock (someone on this photo he has
+kept words for, who keeps texting, with no letter from him in 7 days; Demo: no wait);
+then body B or A.
 """
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
 from . import db, store, timeutil, voice
@@ -35,6 +39,8 @@ PAUSE = timedelta(days=7)
 SAFETY_QUIET = timedelta(hours=24)
 ENCOURAGE_COOLDOWN = timedelta(hours=72)
 REACHED_OUT_WINDOW = timedelta(days=7)
+DRIFT_WAIT = timedelta(days=7)        # no letter to them in this long (Demo mode: 0)
+STEP_COOLDOWN = timedelta(hours=72)   # "Take that step." once per person per 72 h
 
 DEFAULT_SETTINGS = {"knock_mode": "gentle", "quiet_start": "22:30", "quiet_end": "08:00", "push_enabled": True}
 _HHMM = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
@@ -157,13 +163,14 @@ class KnockContext:
     reached_out: list[str]                    # names of people who reached out in the last 7 days
     last_concern_at: datetime | None
     knocks: list[Event]                       # every knock so far, oldest first
+    drift: dict[str, str] = field(default_factory=dict)  # person_id -> drift knock body, for linked people who qualify
 
 
 @dataclass(frozen=True)
 class KnockDecision:
     knock: bool
     reason: str
-    detail: str | None = None                 # reply | linked | first
+    detail: str | None = None                 # reply | drift | linked | first
     body: str | None = None
     person_id: str | None = None
 
@@ -211,8 +218,11 @@ def decide_knock(req: KnockRequest, ctx: KnockContext, now: datetime) -> KnockDe
             return _no("person_cooldown")
 
     reply = next(((pid, title) for pid, title in ctx.unheard_replies if pid in candidates), None)
+    drift = next(((pid, ctx.drift[pid]) for pid in candidates if pid in ctx.drift), None)
     if reply:
         detail, person_id, body = "reply", reply[0], reply[1]
+    elif drift:
+        detail, person_id, body = "drift", drift[0], drift[1]
     else:
         detail = "linked" if ctx.linked else "first"
         person_id = candidates[0] if candidates else None
@@ -261,16 +271,69 @@ def linked_people(asset_id: str) -> list[str]:
         rows = c.execute(
             "SELECT person_id FROM photo_links WHERE asset_id = ? ORDER BY last_at DESC, times DESC", (asset_id,)
         ).fetchall()
+        # A server photo of someone (demo data: the cast's photos) is about them from the start.
+        owner = None
+        if asset_id.startswith("/media/"):
+            owner = c.execute("SELECT person_id FROM photos WHERE path = ?", (asset_id[len("/media/"):],)).fetchone()
     known = {p["id"] for p in store.list_people()}
-    return [r["person_id"] for r in rows if r["person_id"] in known]
+    ids = [r["person_id"] for r in rows]
+    if owner and owner["person_id"] and owner["person_id"] not in ids:
+        ids.append(owner["person_id"])
+    return [pid for pid in ids if pid in known]
+
+
+def last_letter_at(person_id: str) -> datetime | None:
+    """When he last wrote them a letter (any letter he didn't take back)."""
+    with db.tx() as c:
+        row = c.execute(
+            "SELECT MAX(created_at) FROM cards WHERE recipient_id = ? AND status != 'revoked'", (person_id,)
+        ).fetchone()
+    return db.parse_iso(row[0]) if row and row[0] else None
+
+
+def inbound_since(person_id: str, since: datetime | None, kinds: tuple[str, ...] = ("text",)) -> int:
+    """How many times they wrote (or called) him in their app since `since` (seeded for the demo)."""
+    marks = ",".join("?" * len(kinds))
+    with db.tx() as c:
+        return c.execute(
+            f"SELECT COUNT(*) FROM inbound WHERE person_id = ? AND kind IN ({marks}) AND created_at > ?",
+            (person_id, *kinds, db.iso(since) if since else ""),
+        ).fetchone()[0]
+
+
+def drifting(person_ids: list[str], now: datetime, demo: bool) -> dict[str, str]:
+    """The drift knock, for each of these people who qualify: he has kept words for them, they kept
+    texting after his last letter, and neither a letter nor new words for them in DRIFT_WAIT
+    (a letter or kept words that old, or no letter at all). Demo mode: no wait."""
+    wait = timedelta(0) if demo else DRIFT_WAIT
+    out: dict[str, str] = {}
+    for pid in person_ids:
+        person = store.get_person(pid)
+        if not person:
+            continue
+        with db.tx() as c:
+            row = c.execute(
+                "SELECT COUNT(*) AS n, MAX(created_at) AS newest FROM pieces WHERE person_id = ? AND status = 'kept'", (pid,)
+            ).fetchone()
+        if not row["n"]:
+            continue
+        last = last_letter_at(pid)
+        quiet_since = max(t for t in (last, db.parse_iso(row["newest"])) if t)
+        if not inbound_since(pid, last) or now - quiet_since < wait:
+            continue
+        out[pid] = voice.drift_knock(person["name"], person["pronoun"])
+    return out
 
 
 def knock_context(asset_id: str, now: datetime) -> KnockContext:
+    mode = get_settings()["knock_mode"]
+    linked = linked_people(asset_id)
     return KnockContext(
-        mode=get_settings()["knock_mode"],
-        linked=linked_people(asset_id),
+        mode=mode,
+        linked=linked,
         unheard_replies=unheard_replies(now),
         reached_out=reached_out(now),
         last_concern_at=last_concern_at(),
         knocks=events("knock"),
+        drift=drifting(linked, now, mode == "demo"),
     )

@@ -45,6 +45,10 @@ export type SortGroup = {
   history?: History;
   /** "Tell them how you feel. Communication helps." on at most one card, rarely. */
   encourage?: string | null;
+  /** "Mom is waiting to hear this from you." with Call on WhatsApp (PLAN.md §5, needs Gurneal's OK). */
+  waiting?: { line: string; action: { kind: "call"; channel: Channel; person_id: string; label: string; url: string } } | null;
+  /** "Take that step. ..." on the person he has held the most for. */
+  step?: string | null;
 };
 
 export type Resource = { name: string; detail: string; links: { label: string; href: string }[] };
@@ -57,6 +61,8 @@ export type PhotoMemory = {
   people: { person: Person; times: number; letters: number; first_at: string; last_at: string; kept: number }[];
   previous: (Piece & { person_name: string; day: string })[];
   kept_by_person: Record<string, number>;
+  /** "Take that step. ..." while his latest rant chose someone this photo is about. */
+  step?: { line: string; person_id: string } | null;
 };
 
 export type SortResult = {
@@ -73,7 +79,7 @@ export type KnockDecision =
   | {
       knock: true;
       id: string;
-      kind: "reply" | "linked" | "first";
+      kind: "reply" | "drift" | "linked" | "first";
       title: string;
       body: string;
       person_id: string | null;
@@ -137,7 +143,16 @@ export type PeopleGroup = "mom" | "dad" | "brother" | "sister" | "best_friend" |
 export type PersonPhotos = { person: Person; group: PeopleGroup; family: boolean; photos: LanePhoto[]; asset_ids: string[] };
 export type PeopleGroups = { groups: PeopleGroup[]; has_family: boolean; people: PersonPhotos[] };
 
-export type Nudge = { kind: "reply" | "ready"; id: string; person_id: string; title: string; body: string };
+export type Nudge = {
+  kind: "reply" | "ready" | "reply_elsewhere";
+  id: string;
+  person_id: string;
+  title: string;
+  body: string | null;
+  /** reply_elsewhere ("Reply to Michael on Instagram"): their app, and a link to it. */
+  channel?: Channel;
+  url?: string;
+};
 
 export type SelfNote = { id: string; url: string; created_at: string; mime?: string; label?: string; duration_ms?: number | null };
 

@@ -2,16 +2,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppGlyph } from "../../components/AppRail";
 import { Skeleton } from "../../components/motion";
-import { Avatar, Chip, NavBar, Overline, PrimaryPill, Sheet, styles as ui, T, TextButton } from "../../components/ui";
-import { api, type Piece } from "../../lib/api";
+import { Avatar, Chip, NavBar, OutlinePill, Overline, PrimaryPill, Sheet, styles as ui, T, TextButton } from "../../components/ui";
+import { api, type Piece, type SortGroup } from "../../lib/api";
 import { haptics } from "../../lib/haptics";
-import { type App, APP_CHANNEL, APP_LABEL, CHANNEL_APP } from "../../lib/handoff";
+import { type App, APP_CHANNEL, APP_LABEL, callPerson, CHANNEL_APP } from "../../lib/handoff";
 import { useHome } from "../../lib/useHome";
 import { SPLIT_MAX, useLayout } from "../../lib/useLayout";
 import { color, inset, pillGradient, radius, space } from "../../theme/tokens";
@@ -22,7 +22,13 @@ export default function Pile() {
   const insets = useSafeAreaInsets();
   const layout = useLayout();
   const split = layout.expanded;
-  const { person: personId, photo } = useLocalSearchParams<{ person: string; photo?: string }>();
+  const { person: personId, photo, rant } = useLocalSearchParams<{ person: string; photo?: string; rant?: string }>();
+  // The rant he just sorted: the server's rule-chosen lines for this pile ("Mom is waiting...", "Take that step.").
+  const [lines, setLines] = useState<SortGroup | null>(null);
+  useEffect(() => {
+    if (!rant) return;
+    api.sortRant(rant).then((r) => setLines(r.groups.find((g) => g.person.id === personId) ?? null)).catch(() => {});
+  }, [rant, personId]);
   const { home, refresh } = useHome(15000);
   const person = home?.people.find((p) => p.id === personId);
   const [pieces, setPieces] = useState<Piece[] | null>(null);
@@ -96,6 +102,20 @@ export default function Pile() {
 
   const headerCard = (
     <>
+      {lines?.waiting || lines?.step ? (
+        <View style={{ marginHorizontal: inset.card, marginTop: space.s8, gap: space.s8 }}>
+          {lines.waiting ? <T v="rowPreview">{lines.waiting.line}</T> : null}
+          {lines.waiting && person ? (
+            <OutlinePill
+              featureId="call-whatsapp"
+              label={lines.waiting.action.label}
+              icon={<AppGlyph app="whatsapp" size={24} />}
+              onPress={() => callPerson(person, lines.waiting?.action.url)}
+            />
+          ) : null}
+          {lines.step ? <T v="rowPreview">{lines.step}</T> : null}
+        </View>
+      ) : null}
       {person ? (
         <View style={styles.header}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: space.s12 }}>

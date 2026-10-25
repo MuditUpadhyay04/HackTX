@@ -23,3 +23,49 @@ def knock_b(names: list[str]) -> str:
     if len(names) >= 3:
         return f"{', '.join(names[:-1])} and {names[-1]} all reached out this week. {_KNOCK_B_TAIL}"
     return f"{names[0]} and {names[1]} both reached out this week. {_KNOCK_B_TAIL}"
+
+
+# ---------------------------------------------------------------- the film's beats (PLAN.md §5)
+# Each is chosen by a rule in code (attention.py, rants.py, routes/student.py), never written by a model.
+
+_SUBJECT = {"her": "she", "him": "he", "them": "they"}
+
+# FILM (needs Gurneal's OK). The drift knock on a photo of someone he has kept words for.
+DRIFT_KNOCK = (
+    "You haven't talked to {name} in a while, and {subject} {keeps} texting. "
+    "You have un-said things for {obj}. Let {obj} know you're thinking of {obj}. Sometimes, talking is all you need."
+)
+
+# FILM (needs Gurneal's OK). On the pile of someone on WhatsApp who keeps checking in.
+WAITING = "{name} is waiting to hear this from you."
+# FILM (needs Gurneal's OK). The button under WAITING. Un-Said never places the call; WhatsApp does.
+CALL_ACTION = "Call on {app}"
+
+# FILM (needs Gurneal's OK). On the photo or pile of the person he has held the most for.
+TAKE_THAT_STEP = (
+    "Take that step. However it goes, they'll know how you feel. And there are people who love you, no matter what."
+)
+
+# FILM (needs Gurneal's OK). Home nudge when someone wrote to him elsewhere after his last letter.
+REPLY_ELSEWHERE = "Reply to {name} on {app}"
+
+APP_NAMES = {"whatsapp": "WhatsApp", "imessage": "Messages", "instagram": "Instagram"}
+
+
+def drift_knock(name: str, pronoun: str) -> str:
+    """'You haven't talked to Sarah in a while, and she keeps texting. ...' by name and pronoun."""
+    obj = pronoun if pronoun in _SUBJECT else "them"
+    subject = _SUBJECT[obj]
+    return DRIFT_KNOCK.format(name=name, subject=subject, keeps="keep" if subject == "they" else "keeps", obj=obj)
+
+
+def waiting(name: str) -> str:
+    return WAITING.format(name=name)
+
+
+def call_action(channel: str) -> str:
+    return CALL_ACTION.format(app=APP_NAMES.get(channel, "WhatsApp"))
+
+
+def reply_elsewhere(name: str, channel: str) -> str:
+    return REPLY_ELSEWHERE.format(name=name, app=APP_NAMES.get(channel, channel))

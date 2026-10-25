@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field
 
-from .. import attention, audio, db, delivery, groups, memory, rants, safety, seed, store, timeutil
+from .. import attention, audio, db, delivery, groups, memory, rants, safety, seed, store, timeutil, voice
 from ..ai import gemini, spark, transcribe
 from ..auth import require_key
 from ..config import settings
@@ -130,6 +130,39 @@ def _nudges(replies: list[dict], cards: list[dict], now) -> list[dict]:
             "title": f"it's {clock['local_time']} for {person['name']}. send it now?",
             "body": "it'll come from you.",
             "card": card,
+        })
+    out.extend(_reply_elsewhere())
+    return out
+
+
+def _reply_elsewhere() -> list[dict]:
+    """"Reply to Michael on Instagram": someone on Instagram wrote to him after his last letter to them.
+
+    Un-Said never answers for him; tapping opens Instagram. Their messages are seeded for the demo
+    (seed.py); Un-Said never reads his chats.
+    """
+    out = []
+    for person in store.list_people():
+        if person["channel"] != "instagram":
+            continue
+        last = attention.last_letter_at(person["id"])
+        with db.tx() as c:
+            row = c.execute(
+                "SELECT * FROM inbound WHERE person_id = ? AND created_at > ? ORDER BY created_at DESC LIMIT 1",
+                (person["id"], db.iso(last) if last else ""),
+            ).fetchone()
+        if not row:
+            continue
+        handle = person["handle"]
+        out.append({
+            "kind": "reply_elsewhere",
+            "id": f"elsewhere_{person['id']}",
+            "person_id": person["id"],
+            "channel": person["channel"],
+            "title": voice.reply_elsewhere(person["name"], person["channel"]),
+            "body": None,
+            "url": f"https://ig.me/m/{handle}" if handle else "instagram://direct-inbox",
+            "at": row["created_at"],
         })
     return out
 

@@ -126,7 +126,7 @@ export default function Talk() {
                 <CardIn key={g.person.id} index={i} style={wide ? styles.gridCell : undefined}>
                   <Press
                     featureId="pile-open"
-                    onPress={() => router.push({ pathname: "/pile/[person]", params: { person: g.person.id, photo: photo ?? "" } })}
+                    onPress={() => router.push({ pathname: "/pile/[person]", params: { person: g.person.id, photo: photo ?? "", rant: result.rant.id } })}
                     style={styles.personCard}
                   >
                     <View style={{ flexDirection: "row", alignItems: "center", gap: space.s12 }}>

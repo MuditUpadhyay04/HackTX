@@ -7,14 +7,17 @@ for photos of people he has words for, and his own voice played back to him.
 
 from datetime import datetime
 
-from . import audio, db, store, timeutil
+from . import audio, db, store, timeutil, voice
 
 ASSET_ID_MAX = 300
 PREVIOUS_LIMIT = 12
 
 
 def clean_asset_id(value: str | None) -> str | None:
+    """A server photo's URL (demo-data mode) is keyed by its path after /media/, so it matches on any host."""
     value = (value or "").strip()
+    if "/media/" in value and "://" in value:
+        value = "/media/" + value.split("/media/", 1)[1].split("?", 1)[0]
     return value[:ASSET_ID_MAX] or None
 
 
@@ -67,7 +70,17 @@ def photo_memory(asset_id: str, now: datetime) -> dict:
             "WHERE r.asset_id = ? AND p.status != 'discarded' ORDER BY p.created_at DESC, p.rowid DESC LIMIT ?",
             (asset_id, PREVIOUS_LIMIT),
         ).fetchall()
+        # "Take that step." shows on this photo while his latest rant chose someone this photo is about.
+        latest = c.execute(
+            "SELECT step_person FROM rants WHERE sorted_at IS NOT NULL ORDER BY sorted_at DESC, rowid DESC LIMIT 1"
+        ).fetchone()
+    step_person = latest["step_person"] if latest else None
+    linked = {r["person_id"] for r in links}
     return {
+        "step": (
+            {"line": voice.TAKE_THAT_STEP, "person_id": step_person}
+            if step_person and step_person in linked and step_person in people else None
+        ),
         "asset_id": asset_id,
         "people": [
             {

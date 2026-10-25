@@ -142,6 +142,14 @@ CREATE TABLE IF NOT EXISTS drafts (          -- Compose "ONLY A DRAFT": one priv
     text TEXT NOT NULL,
     updated_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS inbound (         -- what they sent him in their own app (seeded for the demo; Un-Said never reads his chats)
+    id TEXT PRIMARY KEY,
+    person_id TEXT NOT NULL,
+    channel TEXT NOT NULL,                   -- whatsapp | imessage | instagram
+    kind TEXT NOT NULL DEFAULT 'text',       -- text | missed_call | reel
+    text TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS pushes (          -- queued so they can wait for his morning
     id TEXT PRIMARY KEY,
     kind TEXT NOT NULL,                      -- reply | ready | drift
@@ -159,7 +167,7 @@ CREATE TABLE IF NOT EXISTS pushes (          -- queued so they can wait for his 
 
 # Columns added after the first deploy. Existing databases get them on start.
 MIGRATIONS = {
-    "rants": {"asset_id": "TEXT", "encourage_person": "TEXT"},
+    "rants": {"asset_id": "TEXT", "encourage_person": "TEXT", "waiting_person": "TEXT", "step_person": "TEXT"},
     "cards": {"video_path": "TEXT"},  # a video he attached to the letter
     "replies": {"kept_at": "TEXT"},   # "Keep this moment": kept in his private vault
     "self_notes": {"duration_ms": "INTEGER"},
