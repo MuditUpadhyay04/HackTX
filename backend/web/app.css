@@ -1,25 +1,25 @@
-/* Unsaid tokens, from Unsaid_Frontend_Build_Spec.md section 3. */
+/* The old variables, repointed at Gurneal's tokens (design/tokens/unsaid-tokens.css, linked first). */
 :root {
-  --accent: #e8a15a;
-  --accent-soft: #f6d3ae;
-  --ink: #4a1f35;
-  --ink-muted: #7a5a6a;
-  --ink-faint: #b9a3ae;
-  --cream: #fbf5ec;
-  --cream-deep: #f3e7d7;
-  --card: #fffdf9;
-  --dusk-rose: #e9b7b4;
-  --peach: #f6c9a4;
-  --line: #eadbcb;
-  --safety: #3e5c76;
-  --bg-dusk: linear-gradient(180deg, #e9b7b4 0%, #f6c9a4 45%, #fbf5ec 100%);
-  --logo-gradient: linear-gradient(135deg, #e8a15a 0%, #4a1f35 100%);
-  --shadow-card: 0 8px 24px rgba(74, 31, 53, 0.08);
-  --shadow-float: 0 20px 48px rgba(74, 31, 53, 0.14);
-  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-breath: cubic-bezier(0.45, 0, 0.55, 1);
-  --hand: "Caveat", cursive;
-  --ui: "Inter", system-ui, -apple-system, sans-serif;
+  --accent: var(--un-indigo);
+  --accent-soft: var(--un-surface-raised);
+  --ink: var(--un-text);
+  --ink-muted: var(--un-text-3);
+  --ink-faint: var(--un-text-4);
+  --cream: var(--un-bg);
+  --cream-deep: var(--un-surface);
+  --card: var(--un-surface);
+  --dusk-rose: var(--un-surface-raised);
+  --peach: var(--un-surface-raised);
+  --line: var(--un-hairline);
+  --safety: var(--un-surface-raised);
+  --bg-dusk: var(--un-bg);
+  --logo-gradient: var(--un-icon-gradient);
+  --shadow-card: none;
+  --shadow-float: none;
+  --ease-soft: var(--ease-ios);
+  --ease-breath: var(--ease-ios);
+  --hand: var(--un-sans);
+  --ui: var(--un-sans);
 }
 
 * { box-sizing: border-box; }

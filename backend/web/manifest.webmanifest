@@ -1,10 +1,13 @@
 {
-  "name": "Unsaid",
-  "short_name": "unsaid",
+  "name": "Un-Said",
+  "short_name": "Un-Said",
   "start_url": "/app/",
   "scope": "/app/",
   "display": "standalone",
-  "background_color": "#FBF5EC",
-  "theme_color": "#FBF5EC",
-  "icons": [{ "src": "/app/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+  "background_color": "#0F0D15",
+  "theme_color": "#0F0D15",
+  "icons": [
+    { "src": "/app/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/app/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
 }
