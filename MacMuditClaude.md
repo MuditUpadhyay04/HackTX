@@ -4,7 +4,7 @@ Running log of every change Claude Code makes on the `branched-frontend` workstr
 
 ## Current state: PAUSED (Oct 24, 2026, 11:18 PM CDT)
 
-Gurneal said "pause". All builders are stopped. Nothing in `Branched-Frontend/` is committed; the last pushed commit on `branched-frontend` is still `7efface` (Phase 0). The working tree compiles (`npx tsc` 0 errors).
+Gurneal said "pause". All builders are stopped. Everything is committed and pushed as `de6e65d` on `branched-frontend` (pause checkpoint, 152 files). It compiles, lints clean, and check:tokens is OK. The old purple-backdrop screenshots were left out; device shots need a re-shoot on the studio backdrop.
 
 - **Device (Phase 1), done:** the iPhone Fold, drawn in CSS 3D, at `/device`. Opens and closes with the Fold/Unfold pill or the F key (Shift+F jumps). The inner screen has no punch-hole and no crease (D11). The cover screen keeps its camera top-right. The stage is a studio off-white (D12). Checks passing: build, lint, check:tokens, check:placeholders and fold-check (26/26 at 60 fps). Review: round 1 fixed (P1-R1-*). Round 2 left a few device polish items (top-edge buttons read as hairlines, a shadow edge at 120-150°, spine shading, two hand-typed wallpaper colors), plus re-shooting the screenshots after D12.
 - **Home screen, partly built, stopped mid-way:** `components/home/{HomeScreen,HomeWallpaper,Widgets,Dock,SearchPill,PageDots,layout}`, `components/ios/{StatusBar,HomeIndicator,AppIcon}`, `components/icons/{AppGlyph,apps/Messages,Phone,Photos}`. Not wired into `/device` yet. The smooth unfold isn't started (content visible on both halves while folding, with motion blur, like https://iphone-duo-tawny.vercel.app).
@@ -15,9 +15,13 @@ Gurneal said "pause". All builders are stopped. Nothing in `Branched-Frontend/` 
 
 1. Restart the two builders on what's left. Home: wire the Meta icons, `CoverHome`/`InnerHome` into `/device`, the smooth unfold. Apps: finish WhatsApp (chat list), then Messages (Sarah), Instagram (Michael), keyboard typing, Photos.
 2. Look at every screen at 1x and 2x and fix until it reads as a real iPhone. Send Gurneal renders.
-3. Run the 10 reviewers until a round is all CLEAN. Commit Phase 1 (+2/3 work) on `branched-frontend` and push (`git pull --rebase` first; Grok also pushes there).
+3. Run the 10 reviewers until a round is all CLEAN, then commit and push the next checkpoint on `branched-frontend` (`git pull --rebase` first; Grok also pushes there).
 - **Meta icons:** official logo files for Facebook, Messenger, Instagram, WhatsApp and Threads are in `Branched-Frontend/assets/brand/meta/` (sources in its README; D9: used 1:1, never redrawn). Meta AI, Edits, Meta Horizon, WhatsApp Business, Meta Business Suite, Meta Ads Manager and Messenger Kids have no official file on the Brand Resource Center, so they stay plain grey tiles.
 - **Open questions for Gurneal:** the fold spring (spec 120/22/1.3) settles in about 0.8 s, not "about 2 s", and its overshoot is about 0.5°, so the detent reads from the ripple only.
+
+## Oct 25, 2026, 12:05 AM CDT
+
+Gurneal: "commit and push it". Committed everything in `Branched-Frontend/` as `de6e65d` ("pause checkpoint: iPhone Fold device (phase 1) + partial home screen and apps") and pushed `branched-frontend` (7efface..de6e65d). Added a BUILD_LOG entry. Left out the 8 retired purple-backdrop screenshots (~45 MB).
 
 ## Oct 24, 2026, 11:18 PM CDT
 
