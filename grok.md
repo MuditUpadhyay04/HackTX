@@ -2,6 +2,25 @@
 
 Running log of every change Grok Bot makes. Times are America/Chicago (CDT). Newest entries are at the top. Updated after every message Gurneal sends to Grok Bot.
 
+## Oct 25, 2026, 12:07 AM CDT
+
+Nick asked for no dark mode, a way to send a video with a letter, and a reminder that the goal is the new frontend running on the existing backend. Three commits are on `unsaid-overhaul`:
+
+- `14611e9` Light theme. Every screen is white or near-white, with ink #1D1742 text and the blue/violet brand as light accents. Text and accent colors pass WCAG AA. `userInterfaceStyle` is `light` and the status bar is dark. There is no dark mode.
+- `c468021` Video with a letter. On Preview, "Add a video" records or picks a clip of up to 60 seconds, shows a thumbnail, and has a Remove option (expo-image-picker 58.0.10, expo-video 58.0.12, SDK 58, works in Expo Go). The backend has a new `POST /api/cards/{id}/video`, and `video_url` is now on `GET /api/cards/{id}` and the public card. `backend/web/card.js` plays it in a `<video>`. A backend test was added.
+- `1843560` QA fixes:
+  - A shared card still hands off.
+  - Hold is on by default.
+  - The Preview card is compact.
+  - Pile ticks every line.
+  - Talk: the encourage line is gone, the transcript sits behind a tap, and "+N more" is correct.
+  - Home hides the lane when it would only show seed photos.
+  - Settings shows the debug line only in dev.
+  - The photo top bar is hidden while the knock shows.
+  - "Your people" is row 2 on You.
+
+Checks: tsc and expo lint are clean; expo export for iOS, Android and web works; backend pytest has 61 passing. Screenshots are in `/workspace/unsaid-shots/light-*.png` on the box. The recipient card page (`backend/web`) is still dark.
+
 ## Oct 24, 2026, 11:52 PM CDT
 
 Two commits on `unsaid-overhaul`, mobile only, with no backend, API, or feature changes:

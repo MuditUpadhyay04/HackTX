@@ -1,8 +1,18 @@
 # Un-Said mobile overhaul — handoff
 
-Branch: `unsaid-overhaul`, off `main` at `c32f7ee`. Mobile only. Nothing under `backend/` (or `backend/web/`) was changed.
+Branch: `unsaid-overhaul`, off `main` at `c32f7ee`. Mobile, plus a small backend addition for video (Pass 5): `POST /api/cards/{id}/video`, `video_url` on cards and the public card, a `<video>` in `backend/web/card.js`, and one test.
 
 - Pass 1 (Grok, stopped at Gurneal's request 11:19 PM CDT Oct 24): restyle of every screen. See "Done, by screen".
+- QA fixes (Grok, Oct 25, 12:07 AM CDT, `1843560`):
+  - Preview: a shared card still hands off, Hold is on by default, and the card is compact.
+  - Pile ticks every line.
+  - Talk: the encourage line is gone, the transcript sits behind a tap, and "+N more" is correct.
+  - Home: the lane is hidden while it would only show seed photos.
+  - Settings: the debug line shows only in dev.
+  - Photo: the top bar is hidden while the knock shows.
+  - You: "Your people" is row 2.
+- Pass 5 (Grok, Oct 24, `c468021`): video with a letter. On Preview, "Add a video" records or picks a clip of up to 60 seconds, with a thumbnail and Remove. It uploads after the card is made and before the handoff, so her link plays it.
+- Pass 4 (Grok, Oct 24, `14611e9`): light theme. Screens are white or near-white with ink text and light brand accents. Text passes WCAG AA, and there is no dark mode. The recipient page in `backend/web` is still dark.
 - Pass 3 (Grok, Oct 24): every screen re-lays out live for any window size and orientation (the iPhone Duo foldable's outer and inner displays, landscape, half-open, Split View). See "Pass 3".
 - Pass 2 (Grok, Oct 24): phone-portrait finish of the demo path (Talk, Gallery, Photo + knock, Pile, Preview), second pass on Home / Letters / You, Android adaptive icon, web-build fix, verification and screenshots. See "Pass 2".
 
@@ -13,6 +23,9 @@ The app is for a **local demo**, not a hosted deployment. See "Local demo" below
 - App overhaul: `259c00bc8e13d5fa552f7829d4841245ed852435`
 - Handoff document: `4cf607183f6a5a4d2fd956360d363173bce6fead`, `13abbe4`, `6703bf4`
 - Pass 2 (phone portrait): `938b7cf`
+- Pass 4 (light theme): `14611e9`
+- Pass 5 (video): `c468021`
+- QA fixes: `1843560`
 - Pass 3 (foldable / any window size): the commit that adds the "Pass 3" section (see `git log`)
 
 Draft PR: https://github.com/MuditUpadhyay04/HackTX/pull/1 (not merged).
