@@ -2,6 +2,17 @@
 
 Running log of every change Grok Bot makes. Times are America/Chicago (CDT). Newest entries are at the top. Updated after every message Gurneal sends to Grok Bot.
 
+## Oct 25, 2026, 1:05 AM CDT
+
+Nick: a People tab that groups photos of people by who they are to him, sorted with tabs, one tap to reach them; and the "Letters" tab reads "Un-said". One commit on `unsaid-overhaul`, `26a3688` (mobile + a small additive backend change):
+
+- Tabs: Home · People · Un-said · You. The `letters` route is unchanged; only its label and title read "Un-said".
+- `GET /api/people/groups` (`backend/app/groups.py`): each person with their relationship group (from the existing `people.relation`; no face recognition) and the photos he attached for them, plus gallery asset ids from `photo_links`. Test `tests/test_people_groups.py`.
+- Seed: Mom = mom, Dad = dad, Sarah = partner (girlfriend in the seed), Michael = best friend (the seed says best friend). 9 drawn demo JPEGs (`backend/app/seed_media/`), added insert-if-missing on start; Home's lane still hides seed photos.
+- People tab: All / Family / per-group chips (only groups with people), a photo card per person; two columns on wide screens.
+- Person page (`/person/[id]`): Talk, Write (Talk's typed mode), Photo or video (gallery flow), Your words (pile), and their photos.
+- New strings for Gurneal are listed in `mobile/OVERHAUL_PROGRESS.md` Pass 8.
+
 ## Oct 25, 2026, 12:41 AM CDT
 
 Nick: no lines under the paragraphs anywhere. One commit on `unsaid-overhaul`, `04b0ce9` (mobile only):
