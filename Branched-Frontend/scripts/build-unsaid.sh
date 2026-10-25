@@ -4,9 +4,11 @@
 # phone's Un-Said screen: instant loads, and the phone can style its window and remember its screen.
 # Un-Said's own files are not changed: the base path comes from a temporary app.config.js removed after.
 #
-#   UNSAID_MOBILE=~/HackTX-unsaid-main/mobile UNSAID_API=http://localhost:8000 scripts/build-unsaid.sh
+#   UNSAID_API=http://172.20.10.7:8000 UNSAID_APP_KEY=... scripts/build-unsaid.sh
+#   (UNSAID_MOBILE defaults to this repo's ../mobile, else ~/HackTX-unsaid-main/mobile)
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
+if [ -z "${UNSAID_MOBILE:-}" ] && [ -f "$HERE/../mobile/app.json" ]; then UNSAID_MOBILE="$(cd "$HERE/../mobile" && pwd)"; fi
 MOBILE="${UNSAID_MOBILE:-$HOME/HackTX-unsaid-main/mobile}"
 API="${UNSAID_API:-http://localhost:8000}"
 OUT="$HERE/public/unsaid"

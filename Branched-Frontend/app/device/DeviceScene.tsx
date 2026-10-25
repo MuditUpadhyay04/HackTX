@@ -11,16 +11,22 @@ import { DebugOverlay } from "@/components/device/DebugOverlay";
 import { STATE_ANGLES, isDeviceState, type DeviceState } from "@/lib/device/angle";
 import { useDeviceAngle, useFoldCrossfade } from "@/lib/device/fold";
 
+/** Recording mode hides the page chrome outside the stage: the concept label, the dev panel and the dev badge. */
+const REC_CSS = "[data-concept-label],[data-dev-panel],nextjs-portal{display:none !important}";
+
 /** D12: the studio off-white is the default; the gradient wallpaper stage is retired on /device. */
 const BACKGROUNDS: StageBackground[] = ["studio", "black", "white"];
 
 /**
- * /device?state=&bg=studio|black|white&scale=&reflection=1&debug=1&frame=bare&pattern=on
+ * /device?state=&bg=studio|black|white&scale=&reflection=1&debug=1&frame=bare&pattern=on&rec=1
  * The Galaxy Z Fold 8 on the Stage with the One UI home screens on its displays (D12: the cover home folded,
  * the D8 inner home unfolded; both stay visible through the fold), the fold control below it and,
  * with debug=1, the spec overlay. pattern=on swaps the homes for the Phase 1 geometry test pattern.
  * Under reduced motion the hinge jumps and the previous pose fades out over the new one
  * (durations.reducedFold).
+ * rec=1 is recording mode: the Samsung foldable alone, centred on the plain 1920 x 1080 stage, with no
+ * fold pill, no hinge slider, no debug overlay, no concept label and no Next.js dev badge (the F key
+ * still folds and unfolds).
  */
 export function DeviceScene() {
   const params = useSearchParams();
@@ -34,6 +40,7 @@ export function DeviceScene() {
   const reflection = params.get("reflection") === "1";
   const debug = params.get("debug") === "1";
   const pattern = params.get("pattern") === "on";
+  const rec = params.get("rec") === "1";
   const angle = useDeviceAngle(STATE_ANGLES[state]);
   const crossfade = useFoldCrossfade();
   const view = state === "back" ? "back" : STATE_ANGLES[state] >= 90 ? "unfolded" : "folded";
@@ -69,9 +76,10 @@ export function DeviceScene() {
           {device(crossfade.from)}
         </div>
       ) : null}
-      <FoldControl tone={bg === "black" ? "dark" : "light"} hidden={bare} />
-      {bare ? null : <AngleSlider />}
-      {debug ? <DebugOverlay view={view} /> : null}
+      <FoldControl tone={bg === "black" ? "dark" : "light"} hidden={bare || rec} />
+      {bare || rec ? null : <AngleSlider />}
+      {debug && !rec ? <DebugOverlay view={view} /> : null}
+      {rec ? <style>{REC_CSS}</style> : null}
     </Stage>
   );
 }

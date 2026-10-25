@@ -9,7 +9,8 @@ import { AppGlyph } from "@/components/icons/AppGlyph";
 import { appScreen, type AppTarget } from "@/lib/apps/registry";
 import { useAppStore } from "@/lib/apps/store";
 import { usePrefersReducedMotion } from "@/lib/motion";
-import { HOME_INDICATOR, HOME_LAYOUT, ICON, SEARCH, iconRectPt, type HomeAppId, type HomeDisplay, type Rect } from "./layout";
+import { HOME_INDICATOR, ICON, SEARCH, iconRectPt, type HomeAppId, type HomeDisplay, type HomeLayout, type Rect } from "./layout";
+import { useHomeLayout } from "./useHomeLayout";
 
 /**
  * The open app on one display, with the Android app-launch zoom: the app's frame grows out of its icon
@@ -34,7 +35,7 @@ export function AppHost({ display }: { display: HomeDisplay }) {
   const close = useAppStore((s) => s.closeApp);
   const tone = useAppStore((s) => s.tone[display]);
   const reduced = usePrefersReducedMotion();
-  const L = HOME_LAYOUT[display];
+  const L = useHomeLayout(display);
   // the open app shows on both displays (only the one facing the viewer is seen), so it carries over
   // when the phone folds or unfolds with it open
   const open = state ? state.target : null;
@@ -64,7 +65,7 @@ export function AppHost({ display }: { display: HomeDisplay }) {
     return () => run.current?.stop();
   }, [open, p, reduced]);
 
-  const icon = (target ? targetRect(display, target) : null) ?? centerRect(L.width, L.height);
+  const icon = (target ? targetRect(display, target, L) : null) ?? centerRect(L.width, L.height);
   const iconRadius = icon.w * ICON_CORNER;
   const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
@@ -196,8 +197,7 @@ function centerRect(width: number, height: number): Rect {
 const HOME_BAR_PAD = HOME_INDICATOR.height + 2;
 
 /** Where a button sits on a display (pt), for the open/close zoom. */
-function targetRect(display: HomeDisplay, target: AppTarget): Rect | null {
-  const L = HOME_LAYOUT[display];
+function targetRect(display: HomeDisplay, target: AppTarget, L: HomeLayout): Rect | null {
   if (target === "search") {
     return { x: L.railX - SEARCH.size / 2, y: L.height - SEARCH.bottom - SEARCH.size, w: SEARCH.size, h: SEARCH.size };
   }
@@ -206,5 +206,5 @@ function targetRect(display: HomeDisplay, target: AppTarget): Rect | null {
     const key = target.slice("widget-".length) as keyof typeof L.widgets;
     return L.widgets[key] ?? null;
   }
-  return iconRectPt(display, target as HomeAppId);
+  return iconRectPt(display, target as HomeAppId, L);
 }

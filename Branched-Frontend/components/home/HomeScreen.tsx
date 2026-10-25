@@ -6,7 +6,8 @@ import { HomeDisplayContext } from "@/lib/apps/useOpenApp";
 import { AppHost } from "./AppHost";
 import { Dock } from "./Dock";
 import { HomeWallpaper } from "./HomeWallpaper";
-import { GRID_APPS, HOME_INDICATOR, HOME_LAYOUT, iconRectPt, type HomeAppId, type HomeDisplay } from "./layout";
+import { GRID_APPS, HOME_INDICATOR, iconRectPt, type HomeAppId, type HomeDisplay } from "./layout";
+import { useHomeLayout } from "./useHomeLayout";
 import { PageDots } from "./PageDots";
 import { CalendarWidget, MusicWidget, PhotosWidget, RemindersWidget, WeatherWidget } from "./Widgets";
 
@@ -22,7 +23,7 @@ export type HomeScreenProps = {
  * handle. Layout: components/home/layout.ts.
  */
 export function HomeScreen({ display, pressed }: HomeScreenProps) {
-  const L = HOME_LAYOUT[display];
+  const L = useHomeLayout(display);
   // the display, for the buttons' app links (lib/apps/registry.tsx)
   return (
     <HomeDisplayContext.Provider value={display}>
@@ -47,7 +48,7 @@ export function HomeScreen({ display, pressed }: HomeScreenProps) {
         {L.widgets.music ? <MusicWidget rect={L.widgets.music} /> : null}
         {L.widgets.reminders ? <RemindersWidget rect={L.widgets.reminders} /> : null}
         {GRID_APPS.map((app) => {
-          const r = iconRectPt(display, app);
+          const r = iconRectPt(display, app, L);
           return r ? <AppIcon key={app} app={app} x={r.x} y={r.y} pressed={pressed === app} /> : null;
         })}
         <Dock display={display} />

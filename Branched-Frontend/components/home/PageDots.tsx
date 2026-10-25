@@ -1,8 +1,11 @@
-import { DOTS, HOME_LAYOUT, type HomeDisplay } from "./layout";
+"use client";
+
+import { DOTS, type HomeDisplay } from "./layout";
+import { useHomeLayout } from "./useHomeLayout";
 
 /** One UI page indicator, centered just above the dock: 2 dots, active white, inactive faint. */
 export function PageDots({ display, pages = 2, active = 0 }: { display: HomeDisplay; pages?: number; active?: number }) {
-  const L = HOME_LAYOUT[display];
+  const L = useHomeLayout(display);
   const width = pages * DOTS.size + (pages - 1) * DOTS.gap;
   return (
     <div

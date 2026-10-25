@@ -146,8 +146,9 @@ type ScreenLayout = {
   railX: number;
 };
 
-const cover = GEOM.viewport.cover;
-const inner = GEOM.viewport.inner;
+const range = (n: number, start: number, step: number) => Array.from({ length: n }, (_, i) => start + i * step);
+const dockXs = (width: number, pitch: number) => range(DOCK_APPS.length, width / 2 - ((DOCK_APPS.length - 1) * pitch) / 2 - ICON.dockSize / 2, pitch);
+const dockY = (height: number) => height - DOCK.bottom - ICON.dockSize;
 
 /** Grid apps fill free slots in reading order, skipping the widget slots. */
 function fill(cols: number, rows: number, taken: (c: number, r: number) => boolean): Record<string, { col: number; row: number }> {
@@ -162,62 +163,102 @@ function fill(cols: number, rows: number, taken: (c: number, r: number) => boole
   return out;
 }
 
-const range = (n: number, start: number, step: number) => Array.from({ length: n }, (_, i) => start + i * step);
-const dockXs = (width: number, pitch: number) => range(DOCK_APPS.length, width / 2 - ((DOCK_APPS.length - 1) * pitch) / 2 - ICON.dockSize / 2, pitch);
-const dockY = (height: number) => height - DOCK.bottom - ICON.dockSize;
-
-/** Cover (384 x 587.2): a 4-column grid, 314 dp wide, centered. */
-const COVER_TOP = 46;
-const COVER_LEFT = (cover.width - (3 * ICON.pitchX + ICON.size)) / 2;
-const coverLayout: ScreenLayout = {
-  width: cover.width,
-  height: cover.height,
-  cols: range(4, COVER_LEFT, ICON.pitchX),
-  rows: range(5, COVER_TOP, ICON.pitchY),
-  slots: fill(4, 5, (_c, r) => r < 2),
-  widgets: {
-    weather: { x: COVER_LEFT, y: COVER_TOP, w: WIDGET.size, h: WIDGET.height },
-    calendar: { x: COVER_LEFT + 2 * ICON.pitchX, y: COVER_TOP, w: WIDGET.size, h: WIDGET.height },
-  },
-  dockY: dockY(cover.height),
-  dockXs: dockXs(cover.width, DOCK.pitch),
-  dotsX: cover.width / 2,
-  railX: cover.width - COVER_LEFT,
-};
+/** Top of the first grid row on the device's displays. */
+const GRID_TOP = 46;
+/** Clear space kept between the last icon label and the page dots. */
+const GRID_DOTS_GAP = 18;
+/** The tallest row pitch a tall display spreads the grid to (One UI on a 20:9 phone). */
+const MAX_PITCH_Y = 112;
+/** Share of a tall display's spare height that goes above the grid (the rest stays above the dots). */
+const SLACK_ABOVE = 0.45;
+/** One icon plus its label, top to bottom. */
+const CELL_HEIGHT = ICON.size + ICON.labelGap + ICON.labelHeight;
 
 /**
- * Inner (781 x 587.2): two 4-column blocks, one per half, so no icon crosses the crease
- * (x 390.5). Left block: Weather + Calendar (rows 0-1), four apps (row 2), Now playing (rows 3-4).
- * Right block: eight apps (rows 0-1), Gallery + Reminder widgets (rows 2-3).
+ * The 5 grid rows for a display `height` dp tall. On the device's own displays (587.2 dp) this is
+ * exactly GRID_TOP + n x ICON.pitchY; on a taller real screen (the /phone route on a phone held in the
+ * hand) the rows spread out up to MAX_PITCH_Y and the block sits a little lower, like One UI does.
  */
-const INNER_TOP = 46;
+function gridRows(height: number): { rows: number[]; pitch: number } {
+  const bottom = dockY(height) - DOTS.aboveDock - DOTS.size - GRID_DOTS_GAP;
+  const span = bottom - GRID_TOP - CELL_HEIGHT;
+  const pitch = Math.min(MAX_PITCH_Y, Math.max(ICON.pitchY, span / 4));
+  const slack = Math.max(0, span - 4 * pitch);
+  return { rows: range(5, GRID_TOP + slack * SLACK_ABOVE, pitch), pitch };
+}
+
+/** A 2-row widget's height at a row pitch (144 at the default pitch). */
+const widgetHeight = (pitch: number) => pitch + ICON.size;
+
+/** Cover (384 x 587.2 on the device): a 4-column grid, 314 dp wide, centered. */
+function coverLayout(width: number, height: number): ScreenLayout {
+  const left = (width - (3 * ICON.pitchX + ICON.size)) / 2;
+  const { rows, pitch } = gridRows(height);
+  const top = rows[0];
+  return {
+    width,
+    height,
+    cols: range(4, left, ICON.pitchX),
+    rows,
+    slots: fill(4, 5, (_c, r) => r < 2),
+    widgets: {
+      weather: { x: left, y: top, w: WIDGET.size, h: widgetHeight(pitch) },
+      calendar: { x: left + 2 * ICON.pitchX, y: top, w: WIDGET.size, h: widgetHeight(pitch) },
+    },
+    dockY: dockY(height),
+    dockXs: dockXs(width, DOCK.pitch),
+    dotsX: width / 2,
+    railX: width - left,
+  };
+}
+
+/**
+ * Inner (781 x 587.2 on the device): two 4-column blocks, one per half, so no icon crosses the
+ * crease (x = width / 2). Left block: Weather + Calendar (rows 0-1), four apps (row 2), Now playing
+ * (rows 3-4). Right block: eight apps (rows 0-1), Gallery + Reminder widgets (rows 2-3).
+ */
 const BLOCK = 3 * ICON.pitchX + ICON.size; // 314
-const INNER_LEFT = (inner.width / 2 - BLOCK) / 2;
-const INNER_RIGHT_BLOCK = inner.width / 2 + INNER_LEFT;
-const innerLayout: ScreenLayout = {
-  width: inner.width,
-  height: inner.height,
-  cols: [...range(4, INNER_LEFT, ICON.pitchX), ...range(4, INNER_RIGHT_BLOCK, ICON.pitchX)],
-  rows: range(5, INNER_TOP, ICON.pitchY),
-  slots: fill(8, 5, (c, r) => (c < 4 && r !== 2) || (c >= 4 && r >= 2)),
-  widgets: {
-    weather: { x: INNER_LEFT, y: INNER_TOP, w: WIDGET.size, h: WIDGET.height },
-    calendar: { x: INNER_LEFT + 2 * ICON.pitchX, y: INNER_TOP, w: WIDGET.size, h: WIDGET.height },
-    music: { x: INNER_LEFT, y: INNER_TOP + 3 * ICON.pitchY, w: WIDGET.mediumWidth, h: WIDGET.height },
-    photos: { x: INNER_RIGHT_BLOCK, y: INNER_TOP + 2 * ICON.pitchY, w: WIDGET.size, h: WIDGET.height },
-    reminders: { x: INNER_RIGHT_BLOCK + 2 * ICON.pitchX, y: INNER_TOP + 2 * ICON.pitchY, w: WIDGET.size, h: WIDGET.height },
-  },
-  dockY: dockY(inner.height),
-  dockXs: dockXs(inner.width, DOCK.innerPitch),
-  dotsX: inner.width / 2,
-  railX: inner.width - INNER_LEFT,
+function innerLayout(width: number, height: number): ScreenLayout {
+  const left = (width / 2 - BLOCK) / 2;
+  const rightBlock = width / 2 + left;
+  const { rows, pitch } = gridRows(height);
+  const top = rows[0];
+  const h = widgetHeight(pitch);
+  return {
+    width,
+    height,
+    cols: [...range(4, left, ICON.pitchX), ...range(4, rightBlock, ICON.pitchX)],
+    rows,
+    slots: fill(8, 5, (c, r) => (c < 4 && r !== 2) || (c >= 4 && r >= 2)),
+    widgets: {
+      weather: { x: left, y: top, w: WIDGET.size, h },
+      calendar: { x: left + 2 * ICON.pitchX, y: top, w: WIDGET.size, h },
+      music: { x: left, y: rows[3], w: WIDGET.mediumWidth, h },
+      photos: { x: rightBlock, y: rows[2], w: WIDGET.size, h },
+      reminders: { x: rightBlock + 2 * ICON.pitchX, y: rows[2], w: WIDGET.size, h },
+    },
+    dockY: dockY(height),
+    dockXs: dockXs(width, DOCK.innerPitch),
+    dotsX: width / 2,
+    railX: width - left,
+  };
+}
+
+export type HomeLayout = ScreenLayout;
+
+/** A display's home layout at any dp size (the device's displays, or a real phone's screen on /phone). */
+export function buildHomeLayout(display: HomeDisplay, width: number, height: number): ScreenLayout {
+  return display === "cover" ? coverLayout(width, height) : innerLayout(width, height);
+}
+
+/** The device's two displays (GEOM.viewport). */
+export const HOME_LAYOUT: Record<HomeDisplay, ScreenLayout> = {
+  cover: buildHomeLayout("cover", GEOM.viewport.cover.width, GEOM.viewport.cover.height),
+  inner: buildHomeLayout("inner", GEOM.viewport.inner.width, GEOM.viewport.inner.height),
 };
 
-export const HOME_LAYOUT: Record<HomeDisplay, ScreenLayout> = { cover: coverLayout, inner: innerLayout };
-
 /** Icon rect (dp, in the display's viewport) of a grid or dock app. */
-export function iconRectPt(display: HomeDisplay, app: HomeAppId): Rect | null {
-  const L = HOME_LAYOUT[display];
+export function iconRectPt(display: HomeDisplay, app: HomeAppId, L: ScreenLayout = HOME_LAYOUT[display]): Rect | null {
   const slot = L.slots[app];
   if (slot) return { x: L.cols[slot.col], y: L.rows[slot.row], w: ICON.size, h: ICON.size };
   const d = DOCK_APPS.indexOf(app);
